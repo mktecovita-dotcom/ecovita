@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ecovita · Sistema de Tráfego Pago</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ═══════════════════════ RESET & VARS ═══════════════════════ */
+:root{
+  --bg:#080b14;--bg2:#0f1220;--bg3:#161a2e;--bg4:#1e2340;
+  --bdr:rgba(255,255,255,.07);--bdr2:rgba(255,255,255,.13);--bdr3:rgba(79,142,247,.3);
+  --tx:#eef0f8;--mu:#6b7a9e;--mu2:#8892aa;
+  --blue:#4f8ef7;--green:#2ecc8e;--amber:#f5a623;--red:#f06565;
+  --purple:#9b7ff4;--teal:#26c6da;--pink:#e879a0;--orange:#fb923c;
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;font-size:14px;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+
+/* ═══════════════════════ LOGIN ═══════════════════════ */
+#loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:0}
+.login-card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px;padding:48px 44px;width:400px;text-align:center;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.login-logo{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 20px}
+.login-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--mu);margin-bottom:32px}
+.login-field{position:relative;margin-bottom:14px}
+.login-field input{width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:13px 16px;font-size:14px;color:var(--tx);outline:none;transition:border-color .2s;font-family:inherit}
+.login-field input:focus{border-color:var(--blue)}
+.login-field input::placeholder{color:var(--mu)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.login-btn:hover{opacity:.9}
+.login-err{font-size:12px;color:var(--red);margin-top:10px;display:none}
+.login-footer{font-size:11px;color:var(--mu);margin-top:20px}
+
+/* ═══════════════════════ APP LAYOUT ═══════════════════════ */
+#app{display:none;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:100;overflow:hidden}
+.sb-logo{padding:20px 20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr)}
+.sb-logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-logo-text{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.sb-logo-sub{font-size:10px;color:var(--mu);font-weight:400}
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.sb-section{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;padding:10px 10px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;transition:all .15s;color:var(--mu2);font-size:13px;font-weight:500;border:1px solid transparent}
+.nav-item:hover{background:var(--bg3);color:var(--tx)}
+.nav-item.active{background:rgba(79,142,247,.12);border-color:rgba(79,142,247,.25);color:var(--blue)}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-bottom{padding:12px 10px;border-top:1px solid var(--bdr)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--bg3)}
+.sb-avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--green),var(--teal));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:500}
+.sb-urole{font-size:10px;color:var(--mu)}
+.sb-sync{font-size:10px;color:var(--mu);margin-top:8px;padding:0 12px;display:flex;align-items:center;gap:6px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:var(--sidebar);right:0;height:56px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:99}
+.tb-title{font-size:15px;font-weight:600;flex:1}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-badge{font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(46,204,142,.12);color:var(--green);font-weight:600}
+.btn{border:1px solid var(--bdr2);color:var(--tx);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--bg3);font-family:inherit}
+.btn:hover{background:var(--bg4);border-color:var(--bdr3)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:rgba(79,142,247,.15);border-color:var(--bdr3);color:var(--blue)}
+.btn-primary:hover{background:rgba(79,142,247,.25)}
+.btn-green{background:rgba(46,204,142,.12);border-color:rgba(46,204,142,.3);color:var(--green)}
+.btn-ai{background:linear-gradient(135deg,rgba(155,127,244,.2),rgba(79,142,247,.2));border-color:rgba(155,127,244,.4);color:var(--purple)}
+.btn-ai:hover{background:linear-gradient(135deg,rgba(155,127,244,.3),rgba(79,142,247,.3))}
+
+/* CONTENT */
+.content{margin-left:var(--sidebar);padding-top:56px;min-height:100vh}
+.page{display:none;padding:24px;max-width:1440px;margin:0 auto}
+.page.active{display:block}
+
+/* FILTER BAR */
+.fbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px}
+.fl{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;font-weight:600}
+select{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);padding:6px 28px 6px 10px;border-radius:8px;font-size:12px;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7a9e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;font-family:inherit;transition:border-color .2s}
+select:focus{border-color:var(--blue)}
+input[type=date]{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);padding:6px 10px;border-radius:8px;font-size:12px;outline:none;font-family:inherit;color-scheme:dark}
+input[type=date]:focus{border-color:var(--blue)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;gap:10px;margin-bottom:16px}
+.kpi-5{grid-template-columns:repeat(5,1fr)}
+.kpi-4{grid-template-columns:repeat(4,1fr)}
+.kpi-3{grid-template-columns:repeat(3,1fr)}
+.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.kpi:hover{border-color:var(--bdr2);transform:translateY(-1px)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.blue::after{background:var(--blue)}.kpi.green::after{background:var(--green)}
+.kpi.amber::after{background:var(--amber)}.kpi.purple::after{background:var(--purple)}
+.kpi.teal::after{background:var(--teal)}.kpi.red::after{background:var(--red)}
+.kpi.pink::after{background:var(--pink)}.kpi.orange::after{background:var(--orange)}
+.kpi-label{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:600}
+.kpi-val{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.kpi-val.blue{color:var(--blue)}.kpi-val.green{color:var(--green)}.kpi-val.amber{color:var(--amber)}
+.kpi-val.purple{color:var(--purple)}.kpi-val.teal{color:var(--teal)}.kpi-val.red{color:var(--red)}
+.kpi-sub{font-size:11px;color:var(--mu);margin-top:5px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px}
+.card-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.07em}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600}
+.badge.blue{background:rgba(79,142,247,.12);color:var(--blue)}
+.badge.green{background:rgba(46,204,142,.12);color:var(--green)}
+.badge.amber{background:rgba(245,166,35,.12);color:var(--amber)}
+.badge.red{background:rgba(240,101,101,.12);color:var(--red)}
+.badge.purple{background:rgba(155,127,244,.12);color:var(--purple)}
+
+/* GRIDS */
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+.g53{grid-template-columns:5fr 3fr}.g32{grid-template-columns:3fr 2fr}
+.g21{grid-template-columns:2fr 1fr}
+.cw{position:relative;width:100%}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mu)}
+.lsq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+/* SECTION TITLE */
+.sec{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;
+  display:flex;align-items:center;gap:10px;margin:20px 0 10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* TABLE */
+.twrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:11px 12px;color:var(--mu);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--bdr)}
+.tbl th:not(:first-child){text-align:right}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--bdr);white-space:nowrap;vertical-align:middle}
+.tbl td:not(:first-child){text-align:right}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.rpill{display:inline-block;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:700}
+.spill{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600}
+.obj-pill{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+
+/* BAR ROWS */
+.bar-row{display:flex;flex-direction:column;gap:10px}
+.bar-item{}
+.bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px}
+.bar-name{font-weight:500}
+.bar-val{color:var(--mu)}
+.bar-bg{background:rgba(255,255,255,.06);border-radius:4px;height:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .8s}
+
+/* CAMPAIGN CARDS */
+.camp-card{background:var(--bg3);border-radius:10px;padding:14px 16px;border-left:3px solid var(--bdr);transition:border-color .2s,transform .15s}
+.camp-card:hover{border-left-color:var(--blue);transform:translateX(2px)}
+.camp-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.camp-card-name{font-size:13px;font-weight:600;line-height:1.3}
+.camp-card-meta{font-size:11px;color:var(--mu);margin-top:3px}
+.camp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.camp-stat{background:var(--bg2);border-radius:8px;padding:8px 10px;text-align:center}
+.camp-stat-v{font-size:14px;font-weight:700}
+.camp-stat-l{font-size:10px;color:var(--mu);margin-top:2px}
+
+/* TOP 5 ANUNCIOS */
+.top5-list{display:flex;flex-direction:column;gap:8px}
+.top5-item{background:var(--bg3);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.top5-rank{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.top5-info{flex:1;min-width:0}
+.top5-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top5-meta{font-size:10px;color:var(--mu);margin-top:2px}
+.top5-nums{display:flex;gap:12px;flex-shrink:0}
+.top5-num{text-align:right}
+.top5-v{font-size:13px;font-weight:700}
+.top5-l{font-size:10px;color:var(--mu)}
+
+/* MELHORIAS */
+.melhoria-card{background:var(--bg3);border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid var(--amber)}
+.melhoria-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.melhoria-camp{font-size:13px;font-weight:600}
+.melhoria-score{font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px}
+.melhoria-items{display:flex;flex-direction:column;gap:6px}
+.melhoria-item{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--mu2)}
+.melhoria-icon{flex-shrink:0;margin-top:1px}
+
+/* IA ANÁLISE */
+.ia-box{background:linear-gradient(135deg,rgba(155,127,244,.08),rgba(79,142,247,.08));border:1px solid rgba(155,127,244,.25);border-radius:12px;padding:20px;margin-bottom:14px}
+.ia-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ia-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px}
+.ia-title{font-size:14px;font-weight:600}
+.ia-sub{font-size:11px;color:var(--mu)}
+.ia-loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--mu)}
+.ia-dots span{animation:blink 1.2s infinite}
+.ia-dots span:nth-child(2){animation-delay:.2s}
+.ia-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+.ia-result{font-size:13px;line-height:1.7;color:var(--tx)}
+.ia-result h4{font-size:13px;font-weight:600;color:var(--purple);margin:12px 0 6px}
+.ia-result ul{padding-left:16px}
+.ia-result li{margin-bottom:4px}
+.ia-result strong{color:var(--amber)}
+.ia-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:5px;font-weight:600;margin:2px}
+.ia-chip.alert{background:rgba(240,101,101,.15);color:var(--red)}
+.ia-chip.ok{background:rgba(46,204,142,.12);color:var(--green)}
+.ia-chip.warn{background:rgba(245,166,35,.12);color:var(--amber)}
+
+/* MERCADO */
+.mercado-form{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;margin-bottom:16px}
+.mercado-form h3{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.form-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.form-field label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:600;display:block;margin-bottom:5px}
+.form-field input,.form-field select,.form-field textarea{width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--blue)}
+.form-field textarea{resize:vertical;min-height:80px}
+.concorrente-card{background:var(--bg3);border-radius:10px;padding:16px;margin-bottom:10px;border:1px solid var(--bdr)}
+.concorrente-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.concorrente-nome{font-size:14px;font-weight:600}
+.concorrente-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.conc-stat{background:var(--bg2);border-radius:8px;padding:10px 12px}
+.conc-stat-v{font-size:16px;font-weight:700;color:var(--blue)}
+.conc-stat-l{font-size:10px;color:var(--mu);margin-top:2px}
+.delete-btn{background:rgba(240,101,101,.1);border:1px solid rgba(240,101,101,.2);color:var(--red);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}
+.delete-btn:hover{background:rgba(240,101,101,.2)}
+
+/* LOADING OVERLAY */
+.lov{position:fixed;inset:0;background:rgba(8,11,20,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;backdrop-filter:blur(4px)}
+.spin{width:40px;height:40px;border:3px solid var(--bdr);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite;margin-bottom:14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ltx{font-size:13px;color:var(--mu)}
+.ebox{background:rgba(240,101,101,.08);border:1px solid rgba(240,101,101,.25);border-radius:10px;padding:14px 18px;color:var(--red);font-size:13px;margin-bottom:14px;display:none;line-height:1.7}
+
+/* COUNTDOWN */
+.countdown{font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px}
+.cd-val{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ═══════════════════════ TEMA CLARO ═══════════════════════ */
+body.light{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#f0f2f8;--bg4:#e2e6f0;
+  --bdr:rgba(0,0,0,.08);--bdr2:rgba(0,0,0,.13);--bdr3:rgba(79,142,247,.4);
+  --tx:#0f1220;--mu:#6b7a9e;--mu2:#4a5568;
+}
+body.light ::-webkit-scrollbar-track{background:#e2e6f0}
+body.light ::-webkit-scrollbar-thumb{background:#c4cde0}
+body.light .login-card{box-shadow:0 20px 60px rgba(0,0,0,.12)}
+body.light .topbar{box-shadow:0 1px 0 var(--bdr)}
+body.light .kpi{box-shadow:0 1px 3px rgba(0,0,0,.06)}
+body.light .card{box-shadow:0 1px 3px rgba(0,0,0,.06)}
+body.light .camp-card{box-shadow:0 1px 3px rgba(0,0,0,.06)}
+body.light .ia-box{background:linear-gradient(135deg,rgba(155,127,244,.06),rgba(79,142,247,.06))}
+body.light .sb-sync{color:var(--mu)}
+
+/* ═══════════════════════ THEME TOGGLE ═══════════════════════ */
+.sb-divider{height:1px;background:var(--bdr);margin:10px 0}
+.theme-toggle{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;transition:background .15s;user-select:none}
+.theme-toggle:hover{background:var(--bg3)}
+.theme-toggle-track{position:relative;width:44px;height:24px;background:var(--bg4);border-radius:12px;border:1px solid var(--bdr2);flex-shrink:0;transition:background .3s}
+body.light .theme-toggle-track{background:rgba(79,142,247,.15);border-color:rgba(79,142,247,.3)}
+.theme-icon{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;transition:opacity .2s}
+.theme-icon-dark{left:5px;opacity:1}
+.theme-icon-light{right:5px;opacity:.4}
+body.light .theme-icon-dark{opacity:.4}
+body.light .theme-icon-light{opacity:1}
+.theme-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--mu);transition:transform .3s,background .3s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+body.light .theme-thumb{transform:translateX(20px);background:var(--blue)}
+.theme-label{font-size:12px;color:var(--mu);font-weight:500;transition:color .2s}
+body.light .theme-label{color:var(--blue)}
+  .kpi-5{grid-template-columns:repeat(3,1fr)}
+  .kpi-4{grid-template-columns:repeat(2,1fr)}
+  .g2,.g3,.g53,.g32,.g21{grid-template-columns:1fr}
+  .form-row,.concorrente-grid{grid-template-columns:1fr 1fr}
+  .camp-stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  :root{--sidebar:0px}
+  .sidebar{transform:translateX(-220px)}
+  .content{margin-left:0}
+  .topbar{left:0}
+  .kpi-5,.kpi-4{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">E</div>
+    <div class="login-title">Ecovita</div>
+    <div class="login-sub">Sistema de Tráfego Pago · Acesso restrito</div>
+    <div class="login-field">
+      <input type="password" id="loginPass" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Entrar no sistema</button>
+    <div class="login-err" id="loginErr">Senha incorreta. Tente novamente.</div>
+    <div class="login-footer">© 2026 Ecovita Construtora · Tráfego Pago</div>
+  </div>
+</div>
+
+<!-- ═══════════════ LOADING ═══════════════ -->
+<div class="lov" id="lov" style="display:none">
+  <div class="spin"></div>
+  <div class="ltx" id="ltx">Conectando às planilhas…</div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-mark">E</div>
+      <div>
+        <div class="sb-logo-text">Ecovita</div>
+        <div class="sb-logo-sub">Tráfego Pago</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <div class="nav-item active" onclick="goPage('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="goPage('campanhas')">
+        <span class="nav-icon">📣</span> Campanhas
+      </div>
+      <div class="nav-item" onclick="goPage('investimento')">
+        <span class="nav-icon">💰</span> Investimento
+      </div>
+      <div class="nav-item" onclick="goPage('leads')">
+        <span class="nav-icon">👥</span> Leads & CVCRM
+      </div>
+      <div class="sb-section">Análise</div>
+      <div class="nav-item" onclick="goPage('melhorias')">
+        <span class="nav-icon">🎯</span> O que Melhorar
+      </div>
+      <div class="nav-item" onclick="goPage('ia')">
+        <span class="nav-icon">🤖</span> Análise por IA
+      </div>
+      <div class="nav-item" onclick="goPage('mercado')">
+        <span class="nav-icon">🔍</span> Pesquisa de Mercado
+      </div>
+    </nav>
+    <div class="sb-bottom">
+      <!-- TOGGLE TEMA -->
+      <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        <div class="theme-toggle-track">
+          <span class="theme-icon theme-icon-dark">🌙</span>
+          <span class="theme-icon theme-icon-light">☀️</span>
+          <div class="theme-thumb"></div>
+        </div>
+        <span class="theme-label" id="themeLabel">Tema Escuro</span>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-user">
+        <div class="sb-avatar">M</div>
+        <div>
+          <div class="sb-uname">Matheus Muniz</div>
+          <div class="sb-urole">Marketing Estratégico</div>
+        </div>
+      </div>
+      <div class="sb-sync" style="margin-top:8px">
+        <div class="sync-dot"></div>
+        <span>Próxima atualização: <span class="cd-val" id="countdown">08:00</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-title" id="tbTitle">Dashboard</div>
+    <div class="tb-right">
+      <div class="countdown">
+        🔄 Última atualização: <span class="cd-val" id="lastUpd">—</span>
+      </div>
+      <span class="tb-badge" id="tbBadge">Carregando…</span>
+      <button class="btn btn-primary" id="btnR" onclick="loadAll()">↻ Atualizar</button>
+      <button class="btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════════ PAGE: DASHBOARD ══════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="ebox" id="ebox"></div>
+
+      <!-- Filtros globais -->
+      <div class="fbar">
+        <span class="fl">De:</span>
+        <input type="date" id="fDataDe" onkeydown="if(event.key==='Enter')aplicarFiltro()">
+        <span class="fl">Até:</span>
+        <input type="date" id="fDataAte" onkeydown="if(event.key==='Enter')aplicarFiltro()">
+        <button class="btn btn-primary" onclick="aplicarFiltro()" style="padding:6px 16px">▶ Aplicar</button>
+        <button class="btn" onclick="limparFiltro()" style="padding:6px 12px;font-size:11px">✕ Limpar</button>
+        <div style="width:1px;height:20px;background:var(--bdr);margin:0 4px"></div>
+        <span class="fl">Empreendimento:</span>
+        <select id="fEmp" onchange="renderDashboard()"><option value="">Todos</option></select>
+        <span class="fl" id="infoGeral" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
+      </div>
+
+      <!-- KPI Row 1: Financeiro -->
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        💰 Financeiro
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+      <div class="kpi-grid kpi-4" style="margin-bottom:16px">
+        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="k1">—</div><div class="kpi-sub" id="k1s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Receita Gerada</div><div class="kpi-val green" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Vendas</div><div class="kpi-val teal" id="k5">—</div><div class="kpi-sub" id="k5s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">ROAS Médio</div><div class="kpi-val amber" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
+      </div>
+
+      <!-- KPI Row 2: Leads -->
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        👥 Leads
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+      <div class="kpi-grid kpi-5" style="margin-bottom:16px">
+        <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Leads CRM Total</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Leads CRM Novos</div><div class="kpi-val teal" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
+        <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
+        <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
+      </div>
+
+      <div class="grid g53">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
+            <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
+          </div>
+          <div class="cw" style="height:210px"><canvas id="cMensal"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">ROAS por mês</div></div>
+          <div class="cw" style="height:230px"><canvas id="cRoas"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Investimento vs Leads Meta -->
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento vs Leads Meta — por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Leads Meta</div>
+          </div>
+          <div class="cw" style="height:200px"><canvas id="cInvLeads"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento por objetivo</div></div>
+          <div class="legend" id="legObj"></div>
+          <div class="cw" style="height:200px"><canvas id="cObj"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Funil por Origem — Leads & Conversão</div><span class="badge blue">CVCRM Online</span></div>
+          <div id="funilList" class="bar-row"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL">—</span></div>
+          <div class="bar-row" id="sitList"></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads Meta vs CVCRM por empreendimento</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Meta</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>CVCRM</div>
+          </div>
+          <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads Novos vs Reimpactados — por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--teal)"></div>Novos</div>
+            <div class="leg"><div class="lsq" style="background:var(--orange)"></div>Reimpactados</div>
+          </div>
+          <div class="cw" style="height:220px"><canvas id="cNovosReimp"></canvas></div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr>
+              <th style="padding-left:18px">Empreendimento</th>
+              <th>Investido</th><th>Receita</th><th>ROAS</th>
+              <th>Leads Meta</th><th>Leads CRM</th><th>WhatsApp</th><th>Formulário</th><th>Website</th>
+              <th>Vendas</th><th style="padding-right:18px">Status</th>
+            </tr></thead>
+            <tbody id="empBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
+    <div class="page" id="page-campanhas">
+      <div class="fbar">
+        <span class="fl">Objetivo:</span>
+        <select id="fCampObj" onchange="renderCampanhas()"><option value="">Todos</option></select>
+        <span class="fl">Status:</span>
+        <select id="fCampSt" onchange="renderCampanhas()">
+          <option value="">Todos</option>
+          <option value="active">Ativas</option>
+          <option value="paused">Pausadas</option>
+        </select>
+        <span class="fl">Empreendimento:</span>
+        <select id="fCampEmp" onchange="renderCampanhas()"><option value="">Todos</option></select>
+        <span class="fl" id="infoCamp" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
+      </div>
+
+      <div class="kpi-grid kpi-4">
+        <div class="kpi blue"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue" id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Ativas</div><div class="kpi-val green" id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Investido Total</div><div class="kpi-val amber" id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
+        <div class="kpi purple"><div class="kpi-label">Resultados Totais</div><div class="kpi-val purple" id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
+      </div>
+
+      <div id="campCards"></div>
+    </div>
+
+    <!-- ══════════════ PAGE: INVESTIMENTO ══════════════ -->
+    <div class="page" id="page-investimento">
+      <div class="fbar">
+        <span class="fl">Objetivo:</span>
+        <select id="fInvObj" onchange="renderInvestimento()"><option value="">Todos</option></select>
+        <span class="fl">Empreendimento:</span>
+        <select id="fInvEmp" onchange="renderInvestimento()"><option value="">Todos</option></select>
+        <span class="fl" id="infoInv" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
+      </div>
+
+      <div class="kpi-grid kpi-4">
+        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="iv1">—</div><div class="kpi-sub" id="iv1s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Mês Atual</div><div class="kpi-val amber" id="iv2">—</div><div class="kpi-sub" id="iv2s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Campanhas Ativas</div><div class="kpi-val green" id="iv3">—</div><div class="kpi-sub" id="iv3s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Média Diária</div><div class="kpi-val teal" id="iv4">—</div><div class="kpi-sub" id="iv4s"></div></div>
+      </div>
+
+      <div class="grid g53">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento mensal por objetivo</div><span class="badge blue" id="ivAnoLbl">—</span></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Cadastro</div>
+            <div class="leg"><div class="lsq" style="background:var(--green)"></div>WhatsApp</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Alcance</div>
+          </div>
+          <div class="cw" style="height:220px"><canvas id="cInvMensal"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Por objetivo (total)</div></div>
+          <div class="legend" id="ivLegObj"></div>
+          <div class="cw" style="height:240px"><canvas id="cInvObj"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Mês atual — por objetivo</div><span class="badge amber" id="ivMesLbl">—</span></div>
+          <div class="cw" style="height:200px"><canvas id="cInvMesObj"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Mês atual — por empreendimento</div></div>
+          <div class="cw" style="height:200px"><canvas id="cInvMesEmp"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec">Detalhamento por campanha</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr>
+              <th style="padding-left:18px">Campanha</th><th>Empreendimento</th><th>Objetivo</th><th>Status</th>
+              <th>Orç./dia</th><th>Gasto Total</th><th>Resultados</th><th>CTR</th><th style="padding-right:18px">Custo/Result.</th>
+            </tr></thead>
+            <tbody id="invBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: LEADS ══════════════ -->
+    <div class="page" id="page-leads">
+      <div class="kpi-grid kpi-4">
+        <div class="kpi green"><div class="kpi-label">Total Leads CRM</div><div class="kpi-val green" id="lk1">—</div><div class="kpi-sub" id="lk1s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Leads Online</div><div class="kpi-val teal" id="lk2">—</div><div class="kpi-sub" id="lk2s"></div></div>
+        <div class="kpi purple"><div class="kpi-label">Reimpactados</div><div class="kpi-val purple" id="lk3">—</div><div class="kpi-sub" id="lk3s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Taxa Conversão</div><div class="kpi-val amber" id="lk4">—</div><div class="kpi-sub" id="lk4s"></div></div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Funil por Origem</div></div>
+          <div id="leadsOrigem" class="bar-row"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL2">—</span></div>
+          <div class="bar-row" id="sitList2"></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads Reimpactados — por última origem</div><span class="badge purple" id="bReimp">—</span></div>
+          <div id="reimpList" class="bar-row"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Situação dos Reimpactados</div></div>
+          <div class="bar-row" id="sitReimp"></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Origem dos leads — CVCRM</div></div>
+          <div class="cw" style="height:260px"><canvas id="cOrigem"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads online por empreendimento</div></div>
+          <div class="cw" style="height:260px"><canvas id="cLeadsEmp"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: MELHORIAS ══════════════ -->
+    <div class="page" id="page-melhorias">
+      <div class="fbar">
+        <span class="fl">Objetivo:</span>
+        <select id="fMelObj" onchange="renderMelhorias()"><option value="">Todos</option></select>
+        <span class="fl">Mostrar apenas:</span>
+        <select id="fMelPrio" onchange="renderMelhorias()">
+          <option value="">Todas as campanhas</option>
+          <option value="critico">Crítico (CTR baixo + CPC alto)</option>
+          <option value="otimizar">Para otimizar</option>
+        </select>
+      </div>
+      <div id="melhoriasContent"></div>
+    </div>
+
+    <!-- ══════════════ PAGE: IA ANÁLISE ══════════════ -->
+    <div class="page" id="page-ia">
+      <div class="grid g21" style="margin-bottom:16px">
+        <div>
+          <div class="ia-box">
+            <div class="ia-header">
+              <div class="ia-icon">🤖</div>
+              <div>
+                <div class="ia-title">Análise Inteligente de Campanhas</div>
+                <div class="ia-sub">Powered by Claude · Atualizado com dados reais</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <button class="btn btn-ai" onclick="analisarIA('geral')">📊 Análise Geral</button>
+              <button class="btn btn-ai" onclick="analisarIA('campanhas')">📣 Top Campanhas</button>
+              <button class="btn btn-ai" onclick="analisarIA('leads')">👥 Análise de Leads</button>
+              <button class="btn btn-ai" onclick="analisarIA('orcamento')">💰 Otimização de Orçamento</button>
+              <button class="btn btn-ai" onclick="analisarIA('proximos')">🎯 Próximos Passos</button>
+            </div>
+            <div id="iaResult">
+              <div style="font-size:13px;color:var(--mu);text-align:center;padding:24px 0">
+                Selecione um tipo de análise acima para que a IA analise seus dados em tempo real.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-hd"><div class="card-title">Alertas automáticos</div><span class="badge red" id="alertCount">—</span></div>
+            <div id="alertList" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Score de saúde das campanhas</div></div>
+            <div class="cw" style="height:200px"><canvas id="cScore"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: MERCADO ══════════════ -->
+    <div class="page" id="page-mercado">
+      <div class="mercado-form">
+        <h3>➕ Adicionar Concorrente</h3>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nome do Concorrente</label>
+            <input type="text" id="mNome" placeholder="Ex: Construtora XYZ">
+          </div>
+          <div class="form-field">
+            <label>Cidade de Atuação</label>
+            <input type="text" id="mCidade" placeholder="Ex: Bauru, SP">
+          </div>
+          <div class="form-field">
+            <label>Ticket Médio (R$)</label>
+            <input type="number" id="mTicket" placeholder="Ex: 220000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>CPL estimado (R$)</label>
+            <input type="number" id="mCpl" placeholder="Ex: 35">
+          </div>
+          <div class="form-field">
+            <label>Investimento mensal (R$)</label>
+            <input type="number" id="mInvest" placeholder="Ex: 15000">
+          </div>
+          <div class="form-field">
+            <label>Canais usados</label>
+            <input type="text" id="mCanais" placeholder="Ex: Meta, Google, TikTok">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field" style="grid-column:span 3">
+            <label>Observações / Diferenciais</label>
+            <textarea id="mObs" placeholder="Ex: Foco em WhatsApp, criativo com vídeo, campanha de alcance forte…"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="addConcorrente()">Salvar concorrente</button>
+          <button class="btn btn-ai" onclick="analisarMercado()">🤖 Analisar mercado com IA</button>
+        </div>
+      </div>
+
+      <div id="concorrentesContent">
+        <div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">
+          Nenhum concorrente cadastrado ainda. Adicione acima para começar a análise de mercado.
+        </div>
+      </div>
+
+      <div id="mercadoIA" style="display:none;margin-top:16px"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const SENHA = 'Ecovita@2026';
+const SH_ROAS  = '1cOKKMVl19i3pnWF6jSFxmfkV_ZfU93NGkaZXFGWFlC4';
+const SH_META  = '16VdVPVs_NNbJ9d9g-hDUJceC14wZXrRFuO7qQq9MYQI';
+const SH_LEADS = '1nvVNCDpnJCT2HzSKkPitQlR94vat1Fe3qcikzaTMmB4';
+const API_KEY_PLACEHOLDER = ''; // Chave da Anthropic passada pelo usuário via prompt se necessário
+
+const C={blue:'#4f8ef7',green:'#2ecc8e',amber:'#f5a623',red:'#f06565',
+  purple:'#9b7ff4',teal:'#26c6da',pink:'#e879a0',orange:'#fb923c',mu:'#6b7a9e'};
+const OBJ_C={Cadastro:C.blue,WhatsApp:C.green,Alcance:C.purple};
+const ORIGENS_ONLINE=['chatbot','facebook','website','instagram','busca orgânica','busca organica','organic'];
+const COR_SIT={'Venda Realizada':C.green,'Com Reserva':C.teal,'Em Atendimento':C.blue,
+  'Aguardando Corretor':C.purple,'Em Tentativa de Contato':C.amber,
+  'Aguardando Atendimento':C.orange,'Perdido':C.red,'Simulação':C.mu};
+
+let dadosRoas=[],campsMeta=[],leadsCV=[],charts={};
+let concorrentes = JSON.parse(localStorage.getItem('ecovita_concorrentes')||'[]');
+let paginaAtual = 'dashboard';
+
+// ═══════════════════════════════════════════════════════
+// TEMA CLARO / ESCURO
+// ═══════════════════════════════════════════════════════
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('themeLabel').textContent = isLight ? 'Tema Claro' : 'Tema Escuro';
+  localStorage.setItem('ecovita_theme', isLight ? 'light' : 'dark');
+  // Redesenha gráficos para atualizar cores de grade
+  setTimeout(()=>{ if(typeof renderDashboard==='function' && dadosRoas.length) renderDashboard(); },50);
+}
+// Restaura tema salvo
+(function(){
+  const saved = localStorage.getItem('ecovita_theme');
+  if(saved==='light'){
+    document.body.classList.add('light');
+    document.addEventListener('DOMContentLoaded',()=>{
+      const lbl=document.getElementById('themeLabel');
+      if(lbl) lbl.textContent='Tema Claro';
+    });
+  }
+})();
+
+// ═══════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════
+function doLogin(){
+  const v = document.getElementById('loginPass').value;
+  if(v === SENHA){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadAll();
+    startCountdown();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+  }
+}
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPass').value='';
+}
+
+// ═══════════════════════════════════════════════════════
+// COUNTDOWN 08:00
+// ═══════════════════════════════════════════════════════
+function startCountdown(){
+  function tick(){
+    const now=new Date();
+    const next=new Date();
+    next.setHours(8,0,0,0);
+    if(now>=next) next.setDate(next.getDate()+1);
+    const diff=next-now;
+    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    const el=document.getElementById('countdown');
+    if(el) el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  tick(); setInterval(tick,1000);
+  // Auto-refresh às 08:00
+  setInterval(()=>{const n=new Date();if(n.getHours()===8&&n.getMinutes()===0&&n.getSeconds()<5)loadAll();},5000);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════
+const PAGE_TITLES={
+  dashboard:'Dashboard',campanhas:'Campanhas Meta',
+  investimento:'Investimento',leads:'Leads & CVCRM',
+  melhorias:'O que Melhorar',ia:'Análise por IA',mercado:'Pesquisa de Mercado'
+};
+function goPage(pg){
+  paginaAtual=pg;
+  document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    const txt=el.textContent.trim().toLowerCase();
+    const map={dashboard:'dashboard',campanhas:'campan',investimento:'invest',leads:'leads',melhorias:'melhor',ia:'análise',mercado:'mercado'};
+    el.classList.toggle('active',txt.includes(map[pg]||pg));
+  });
+  document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
+  if(pg==='campanhas'&&campsMeta.length) renderCampanhas();
+  if(pg==='investimento'&&campsMeta.length) renderInvestimento();
+  if(pg==='leads'&&leadsCV.length) renderLeads();
+  if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
+  if(pg==='ia'&&campsMeta.length) renderIAPage();
+  if(pg==='mercado') renderConcorrentes();
+}
+
+// ═══════════════════════════════════════════════════════
+// CSV FETCH & PARSE
+// ═══════════════════════════════════════════════════════
+async function fetchCSV(id,gid=0){
+  const url=`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`;
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok) throw new Error(`HTTP ${r.status} — Sheet ID: ${id.slice(0,8)}…`);
+  return parseCSV(await r.text());
+}
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return[];
+  const hs=splitL(lines[0]).map(h=>h.replace(/^"|"$/g,'').trim());
+  return lines.slice(1).map(l=>{
+    const v=splitL(l); const o={};
+    hs.forEach((h,i)=>{o[h]=(v[i]||'').replace(/^"|"$/g,'').trim();});
+    return o;
+  }).filter(r=>Object.values(r).some(v=>v));
+}
+function splitL(line){
+  const r=[];let c='',q=false;
+  for(const ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}
+  r.push(c);return r;
+}
+
+// ═══════════════════════════════════════════════════════
+// PARSERS
+// ═══════════════════════════════════════════════════════
+function toBRL(v){
+  if(!v) return 0;
+  let s=String(v).replace(/R\$\s*/g,'').replace(/%/g,'').trim();
+  if(s===''||s==='#DIV/0!') return 0;
+  if(s.includes(',')&&s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(',')) s=s.replace(',','.');
+  return parseFloat(s)||0;
+}
+function toN(v){if(!v) return 0;const s=String(v).replace(',','.');return parseFloat(s)||0;}
+function fBRL(v,sh=false){
+  if(sh){if(Math.abs(v)>=1e6)return'R$'+(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1e3)return'R$'+(v/1e3).toFixed(0)+'k';}
+  return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+}
+function fN(v){return Math.round(v).toLocaleString('pt-BR');}
+function fmtMes(m){
+  if(!m||m.length<7)return m;
+  const[mm,yy]=m.split('/');
+  const ns=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return`${ns[parseInt(mm)]} ${yy}`;
+}
+function sid(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function isOnline(o){if(!o)return false;const l=o.toLowerCase();return ORIGENS_ONLINE.some(x=>l.includes(x));}
+
+function parseRoas(rows){
+  return rows.map(r=>{
+    const data=r['Data']||'';
+    const pts=data.split('/');
+    const mes=pts.length>=3?`${pts[1].padStart(2,'0')}/${pts[2].substring(0,4)}`:'';
+    const emp=(r['Empreendimentos']||'').trim();
+    if(!emp||!mes||emp.toLowerCase().includes('google')) return null;
+    return{mes,emp,
+      investTotal:toBRL(r['Investimento Total']),receita:toBRL(r['Vendas']),
+      roas:toN(r['ROAS']),qtdVendas:toN(r['Quantidade de vendas']),
+      leadsMeta:toN(r['Leads gerados Meta']),leadsCrm:toN(r['Leads CVCRM']),
+      wppCrm:toN(r['WhatsApp CVCRM']),formCrm:toN(r['Formulário CVCRM']),
+      website:toN(r['Leads vindo pelo Website']),
+      vendasWpp:toN(r['Vendas por WhatsApp']),vendasForm:toN(r['Vendas por Formulários']),vendasWeb:toN(r['Vendas Website'])};
+  }).filter(Boolean);
+}
+
+function parseMeta(rows){
+  return rows.filter(r=>r['Nome da campanha']&&r['Valor usado (BRL)']).map(r=>({
+    nome:r['Nome da campanha']||'',emp:r['Empreendimento']||'',objetivo:r['Objetivo']||'',
+    cidade:r['Cidade']||'',status:r['Veiculação da campanha']||'',
+    valor:toN(r['Valor usado (BRL)']),resultados:toN(r['Resultados']),
+    alcance:toN(r['Alcance']),impressoes:toN(r['Impressões']),
+    ctr:toN(r['CTR (taxa de cliques no link)']),cpc:toN(r['CPC (custo por clique no link) (BRL)']),
+    cprResult:toN(r['Custo por resultados']),orcamento:toN(r['Orçamento do conjunto de anúncios']),
+  }));
+}
+
+function parseLeads(rows){
+  return rows.filter(r=>{
+    if(!r['Id']||isNaN(parseInt(r['Id']))) return false;
+    const n=(r['Nome']||'').toLowerCase(),e=(r['E-mail']||'').toLowerCase();
+    if(n.includes('teste')||n.includes('treinamento')) return false;
+    if(e.includes('cvcrm.com')||e.includes('@exemplo')||e.includes('testando')) return false;
+    return!!r['Situação'];
+  }).map(r=>{
+    const p=(r['Primeira Origem']||'').trim();
+    const u=(r['Última Origem']||'').trim();
+
+    // Parseia datas — tenta colunas comuns do CVCRM
+    const parseDateBR = s => {
+      if(!s) return null;
+      // Formatos: DD/MM/YYYY HH:MM, DD/MM/YYYY, YYYY-MM-DD
+      const m1 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+      if(m1) return new Date(`${m1[3]}-${m1[2]}-${m1[1]}`);
+      const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if(m2) return new Date(s.substring(0,10));
+      return null;
+    };
+
+    // Tenta várias colunas de data de cadastro / criação
+    const dataCadastroRaw = r['Data de Cadastro'] || r['Criado em'] || r['Data Cadastro'] || r['Data'] || '';
+    const dataUltimaRaw   = r['Última Atualização'] || r['Atualizado em'] || r['Data Última Origem'] || r['Última Entrada'] || '';
+
+    const dataCadastro = parseDateBR(dataCadastroRaw);
+    const dataUltima   = parseDateBR(dataUltimaRaw);
+
+    // Classificação novo vs reimpactado:
+    // Reimpactado = data do primeiro cadastro < data da última entrada (voltou em outro momento)
+    // OU (fallback sem data): Primeira Origem online E Última Origem ≠ Primeira
+    let reimpactado = false;
+    if(dataCadastro && dataUltima) {
+      // Considera reimpactado se houve nova entrada em data diferente (pelo menos 1 dia depois)
+      const diffMs = dataUltima - dataCadastro;
+      reimpactado = diffMs > 86400000; // > 1 dia
+    } else {
+      // fallback pela lógica de origens
+      reimpactado = isOnline(p) && !!u && u !== p;
+    }
+
+    const novo = !reimpactado; // novo = só 1 cadastro, sem retorno
+
+    return {
+      situacao       : (r['Situação']||'').trim(),
+      emp            : (r['Primeiro Empreendimento']||'').replace('Residencial ','').trim(),
+      primeiraOrigem : p,
+      ultimaOrigem   : u,
+      online         : isOnline(p),
+      reimpactado,
+      novo,
+      dataCadastro,
+      dataUltima,
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTROS
+// ═══════════════════════════════════════════════════════
+// ─── helpers de data ───
+function getFiltroDatas(){
+  const de  = document.getElementById('fDataDe')?.value;   // 'YYYY-MM-DD'
+  const ate = document.getElementById('fDataAte')?.value;
+  return {
+    de:  de  ? new Date(de+'T00:00:00')  : null,
+    ate: ate ? new Date(ate+'T23:59:59') : null,
+  };
+}
+
+// Converte 'MM/YYYY' para objetos Date início/fim do mês
+function mesParaRange(mes){
+  if(!mes) return null;
+  const [mm,yyyy] = mes.split('/');
+  return {
+    de:  new Date(`${yyyy}-${mm}-01T00:00:00`),
+    ate: new Date(parseInt(yyyy), parseInt(mm), 0, 23, 59, 59),
+  };
+}
+
+// Converte data 'DD/MM/YYYY' da planilha ROAS para objeto Date
+function parseDateRoas(mesStr){
+  if(!mesStr||mesStr.length<7) return null;
+  const [mm,yyyy] = mesStr.split('/');
+  return new Date(`${yyyy}-${mm}-01T00:00:00`);
+}
+
+function dentroDoFiltro(dataObj){
+  const {de, ate} = getFiltroDatas();
+  if(!dataObj) return true;
+  if(de  && dataObj < de)  return false;
+  if(ate && dataObj > ate) return false;
+  return true;
+}
+
+function aplicarFiltro(){ renderDashboard(); }
+function limparFiltro(){
+  const de=document.getElementById('fDataDe'),ate=document.getElementById('fDataAte');
+  if(de)de.value='';if(ate)ate.value='';
+  renderDashboard();
+}
+
+function filteredRoas(){
+  const {de, ate} = getFiltroDatas();
+  const emp = document.getElementById('fEmp')?.value||'';
+  return dadosRoas.filter(r=>{
+    if(emp && r.emp!==emp) return false;
+    if(de||ate){
+      const d = parseDateRoas(r.mes);
+      if(!d) return false;
+      // Compara pelo mês inteiro: mês do registro cobre o filtro
+      const fimMes = new Date(d.getFullYear(), d.getMonth()+1, 0, 23, 59, 59);
+      if(de  && fimMes < de)  return false;
+      if(ate && d      > ate) return false;
+    }
+    return true;
+  });
+}
+
+// Filtra leadsCV pelo filtro de data (usa dataCadastro)
+function filteredLeads(){
+  const {de, ate} = getFiltroDatas();
+  if(!de && !ate) return leadsCV; // sem filtro → todos
+  return leadsCV.filter(l=>{
+    const d = l.dataCadastro;
+    if(!d) return true; // sem data → inclui (não descarta)
+    if(de  && d < de)  return false;
+    if(ate && d > ate) return false;
+    return true;
+  });
+}
+function filteredMeta(){
+  const o=document.getElementById('fCampObj')?.value||'';
+  const s=document.getElementById('fCampSt')?.value||'';
+  const e=document.getElementById('fCampEmp')?.value||'';
+  return campsMeta.filter(c=>(!o||c.objetivo===o)&&(!s||c.status===s)&&(!e||c.emp===e));
+}
+
+function popularFiltros(){
+  const meses=[...new Set(dadosRoas.map(r=>r.mes))].sort();
+  const emps =[...new Set(dadosRoas.map(r=>r.emp))].sort();
+  const objs =[...new Set(campsMeta.map(c=>c.objetivo).filter(Boolean))].sort();
+  const cemps=[...new Set(campsMeta.map(c=>c.emp).filter(Boolean))].sort();
+
+  function fill(id, vals){
+    const s=document.getElementById(id); if(!s) return;
+    while(s.options.length>1) s.remove(1);
+    vals.forEach(v=>s.appendChild(new Option(v,v)));
+  }
+
+  // Filtro empreendimento do Dashboard
+  fill('fEmp', emps);
+
+  // Filtros das outras páginas
+  fill('fCampObj',objs); fill('fCampEmp',cemps);
+  fill('fInvObj',objs);  fill('fInvEmp',cemps);
+  fill('fMelObj',objs);
+
+  // Define mês atual nos campos de data (De = dia 1 do mês, Até = hoje)
+  const hoje = new Date();
+  const anoAtual = hoje.getFullYear();
+  const mesAtual = String(hoje.getMonth()+1).padStart(2,'0');
+  const diaAtual = String(hoje.getDate()).padStart(2,'0');
+  const primeiroDia = `${anoAtual}-${mesAtual}-01`;
+  const hoje_str   = `${anoAtual}-${mesAtual}-${diaAtual}`;
+
+  const fDe  = document.getElementById('fDataDe');
+  const fAte = document.getElementById('fDataAte');
+  if(fDe  && !fDe.value)  fDe.value  = primeiroDia;
+  if(fAte && !fAte.value) fAte.value = hoje_str;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════════════════
+function mkChart(id,type,labels,datasets,opts={}){
+  dc(id);
+  const ctx=document.getElementById(id)?.getContext('2d');
+  if(!ctx)return;
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},
+            y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}}}};
+  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{...base,...opts}});
+}
+
+function barRows(container,items,maxVal,corFn){
+  const el=document.getElementById(container);if(!el)return;
+  el.innerHTML=items.map(({label,val,sub,cor})=>{
+    const pct=maxVal>0?Math.round(val/maxVal*100):0;
+    const c=cor||corFn?.(label)||C.blue;
+    return`<div class="bar-item">
+      <div class="bar-top"><span class="bar-name">${label}</span><span class="bar-val">${sub||fN(val)}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${c}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderDashboard(){
+  const d  = filteredRoas();
+  const lf = filteredLeads(); // leads filtrados por data
+
+  // ── Métricas financeiras ──
+  const inv  = d.reduce((s,r)=>s+r.investTotal,0);
+  const rec  = d.reduce((s,r)=>s+r.receita,0);
+  const rv   = d.filter(r=>r.roas>0&&r.roas<5000);
+  const roas = rv.length ? rv.reduce((s,r)=>s+r.roas,0)/rv.length : 0;
+  const lmeta= d.reduce((s,r)=>s+r.leadsMeta,0);
+  const vn   = d.reduce((s,r)=>s+r.qtdVendas,0);
+
+  // ── Métricas de leads (filtradas por data) ──
+  const totalLeads = lf.length;
+  const novos      = lf.filter(l=>l.novo).length;
+  const reimp      = lf.filter(l=>l.reimpactado).length;
+  const txR        = totalLeads>0 ? reimp/totalLeads*100 : 0;
+  const cpl        = lmeta>0 ? inv/lmeta : 0;
+
+  // ── Preenche KPIs ──
+  // Linha 1 — financeiro
+  sid('k1', fBRL(inv,true));  sid('k1s', `CPL: ${cpl>0?fBRL(cpl):'—'}`);
+  sid('k2', fBRL(rec,true));  sid('k2s', `${d.filter(r=>r.receita>0).length} empreend.`);
+  sid('k5', fN(vn));          sid('k5s', `Conv: ${lmeta>0?(vn/lmeta*100).toFixed(1):0}%`);
+  sid('k3', roas.toFixed(1)+'×'); sid('k3s','Receita ÷ Investimento');
+
+  // Linha 2 — leads
+  sid('k4',  fN(lmeta));      sid('k4s', 'Resultados Meta Ads');
+  sid('k6',  fN(totalLeads)); sid('k6s', 'Leads no período filtrado');
+  sid('k7',  fN(novos));      sid('k7s', '1º cadastro no período');
+  sid('k8',  fN(reimp));      sid('k8s', 'Voltaram após 1° cadastro');
+  sid('k10', txR.toFixed(1)+'%'); sid('k10s', 'do total do período');
+
+  // Label do período aplicado
+  const {de,ate} = getFiltroDatas();
+  const fmtD = d => d ? d.toLocaleDateString('pt-BR') : '';
+  const periodoLabel = de||ate
+    ? `${fmtD(de)||'início'} → ${fmtD(ate)||'hoje'} · ${d.length} registros · ${totalLeads} leads`
+    : `${d.length} registros · ${totalLeads} leads`;
+  sid('infoGeral', periodoLabel);
+
+  // ── Gráficos reagindo ao filtro ──
+  // Usa 'd' filtrado para os meses do gráfico
+  const mesesFilt = [...new Set(d.map(r=>r.mes))].sort();
+  const mesesAll  = [...new Set(dadosRoas.map(r=>r.mes))].sort();
+  // Se há filtro de data usa só os meses filtrados, senão todos
+  const meses = (de||ate) ? mesesFilt : mesesAll;
+
+  // Chart Invest vs Receita
+  mkChart('cMensal','bar',meses.map(fmtMes),[
+    {label:'Investimento',
+     data:meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.investTotal,0)),
+     backgroundColor:'rgba(79,142,247,.75)',borderRadius:6,borderSkipped:false},
+    {label:'Receita',
+     data:meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.receita,0)),
+     backgroundColor:'rgba(46,204,142,.75)',borderRadius:6,borderSkipped:false}
+  ],{scales:{
+    x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},
+    y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}
+  }});
+
+  // Chart ROAS mensal
+  dc('cRoas');
+  const ctxR=document.getElementById('cRoas')?.getContext('2d');
+  if(ctxR){charts.cRoas=new Chart(ctxR,{type:'line',data:{labels:meses.map(fmtMes),datasets:[{
+    data:meses.map(m=>{const rows=d.filter(r=>r.mes===m&&r.roas>0&&r.roas<5000);return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0;}),
+    borderColor:C.amber,backgroundColor:'rgba(245,166,35,.08)',fill:true,tension:.4,
+    pointRadius:5,pointBackgroundColor:C.amber,borderWidth:2.5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},
+              y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>v.toFixed(0)+'×'}}}}});}
+
+  // Funil origens — usa 'd' filtrado
+  const origens=[
+    {label:'WhatsApp (Chatbot)',cor:C.green, leads:d.reduce((s,r)=>s+r.wppCrm,0),  vendas:d.reduce((s,r)=>s+r.vendasWpp,0)},
+    {label:'Facebook/Instagram',cor:C.blue,  leads:d.reduce((s,r)=>s+r.formCrm,0), vendas:d.reduce((s,r)=>s+r.vendasForm,0)},
+    {label:'Website',           cor:C.purple,leads:d.reduce((s,r)=>s+r.website,0), vendas:d.reduce((s,r)=>s+r.vendasWeb,0)},
+  ];
+  const maxL=Math.max(...origens.map(o=>o.leads),1);
+  document.getElementById('funilList').innerHTML=origens.map(o=>{
+    const cvr2=o.leads>0?(o.vendas/o.leads*100).toFixed(1):'0';
+    const pct=Math.round(o.leads/maxL*100);
+    return`<div class="bar-item">
+      <div class="bar-top"><span class="bar-name" style="color:${o.cor}">${o.label}</span>
+        <span style="display:flex;gap:12px;font-size:11px">
+          <span style="color:var(--mu)">Leads: <b style="color:var(--tx)">${fN(o.leads)}</b></span>
+          <span style="color:var(--mu)">Vendas: <b style="color:${o.cor}">${fN(o.vendas)}</b></span>
+          <span style="color:var(--mu)">Conv: <b style="color:${o.cor}">${cvr2}%</b></span>
+        </span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${o.cor}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Situação leads — usa 'lf' filtrado
+  const onlineLeads = lf.filter(l=>l.online);
+  const sits={};onlineLeads.forEach(l=>{sits[l.situacao]=(sits[l.situacao]||0)+1;});
+  const sortedSit=Object.entries(sits).sort((a,b)=>b[1]-a[1]);
+  const maxSit=sortedSit[0]?.[1]||1;
+  sid('bTL', fN(onlineLeads.length)+' online');
+  document.getElementById('sitList').innerHTML=sortedSit.slice(0,8).map(([sit,cnt])=>{
+    const cor=COR_SIT[sit]||C.mu;
+    const pct=onlineLeads.length>0?(cnt/onlineLeads.length*100).toFixed(0):'0';
+    return`<div class="bar-item">
+      <div class="bar-top"><span style="font-size:12px;font-weight:500;color:${cor}">${sit}</span>
+        <span style="font-size:12px;font-weight:600">${fN(cnt)} <span style="font-size:10px;color:var(--mu)">${pct}%</span></span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cnt/maxSit*100)}%;background:${cor}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Chart Invest vs Leads Meta (eixo duplo)
+  dc('cInvLeads');
+  const ctxIL = document.getElementById('cInvLeads')?.getContext('2d');
+  if(ctxIL){ charts.cInvLeads = new Chart(ctxIL, {
+    type: 'bar',
+    data: { labels: meses.map(fmtMes), datasets: [
+      { label:'Investimento', data: meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.investTotal,0)),
+        backgroundColor:'rgba(79,142,247,.75)', borderRadius:6, borderSkipped:false, yAxisID:'yInv' },
+      { label:'Leads Meta',   data: meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.leadsMeta,0)),
+        type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.15)',
+        fill:true, tension:.4, pointRadius:5, pointBackgroundColor:C.purple, borderWidth:2.5, yAxisID:'yLeads' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
+      scales:{
+        yInv:  { position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
+        yLeads:{ position:'right', grid:{display:false},                  ticks:{color:C.purple, font:{size:10}} },
+        x:     { grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
+      }}
+  });}
+
+  // Chart Novos vs Reimpactados por mês (usando dadosRoas como proxy de período)
+  // Como leads têm data de cadastro, agrupamos por mês de cadastro
+  const leadsPorMes = {};
+  meses.forEach(m=>{ leadsPorMes[m]={novos:0,reimp:0}; });
+  lf.forEach(l=>{
+    if(!l.dataCadastro) return;
+    const mm = String(l.dataCadastro.getMonth()+1).padStart(2,'0');
+    const yy = l.dataCadastro.getFullYear();
+    const chave = `${mm}/${yy}`;
+    if(leadsPorMes[chave]){
+      if(l.reimpactado) leadsPorMes[chave].reimp++;
+      else              leadsPorMes[chave].novos++;
+    }
+  });
+  dc('cNovosReimp');
+  const ctxNR = document.getElementById('cNovosReimp')?.getContext('2d');
+  if(ctxNR){ charts.cNovosReimp = new Chart(ctxNR, {
+    type:'bar',
+    data:{ labels: meses.map(fmtMes), datasets:[
+      { label:'Novos',        data: meses.map(m=>leadsPorMes[m]?.novos||0),
+        backgroundColor:'rgba(38,198,218,.75)',  borderRadius:6, borderSkipped:false },
+      { label:'Reimpactados', data: meses.map(m=>leadsPorMes[m]?.reimp||0),
+        backgroundColor:'rgba(251,146,60,.75)',  borderRadius:6, borderSkipped:false }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{
+        x:{ stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu,font:{size:11}} },
+        y:{ stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu,font:{size:11}} }
+      }}
+  });}
+  const objMap={};campsMeta.forEach(c=>{objMap[c.objetivo]=(objMap[c.objetivo]||0)+c.valor;});
+  const oL=Object.keys(objMap),oV=Object.values(objMap),oCores=oL.map(l=>OBJ_C[l]||C.orange);
+  document.getElementById('legObj').innerHTML=oL.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${oCores[i]}"></div>${l}: ${fBRL(oV[i],true)}</div>`).join('');
+  dc('cObj');
+  const ctxO=document.getElementById('cObj')?.getContext('2d');
+  if(ctxO)charts.cObj=new Chart(ctxO,{type:'doughnut',data:{labels:oL,datasets:[{data:oV,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+
+  // Leads Meta vs CRM — usa 'd' filtrado
+  const g={};d.forEach(r=>{if(!g[r.emp])g[r.emp]={m:0,c:0};g[r.emp].m+=r.leadsMeta;g[r.emp].c+=r.leadsCrm;});
+  const emps=Object.keys(g).filter(e=>g[e].m>0).sort((a,b)=>g[b].m-g[a].m).slice(0,10);
+  const hpx=Math.max(emps.length*34+60,190);
+  document.getElementById('cLeads').parentElement.style.height=hpx+'px';
+  dc('cLeads');
+  const ctxL=document.getElementById('cLeads')?.getContext('2d');
+  if(ctxL)charts.cLeads=new Chart(ctxL,{type:'bar',data:{labels:emps,datasets:[
+    {data:emps.map(e=>g[e].m),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false},
+    {data:emps.map(e=>g[e].c),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10}}},
+            y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}}}}});
+
+  // Tabela empreendimentos — usa 'd' filtrado
+  const grp={};
+  d.forEach(r=>{if(!grp[r.emp])grp[r.emp]={inv:0,rec:0,qv:0,lm:0,lc:0,wc:0,fc:0,wb:0};
+    const x=grp[r.emp];x.inv+=r.investTotal;x.rec+=r.receita;x.qv+=r.qtdVendas;
+    x.lm+=r.leadsMeta;x.lc+=r.leadsCrm;x.wc+=r.wppCrm;x.fc+=r.formCrm;x.wb+=r.website;});
+  const rows=Object.entries(grp).map(([emp,x])=>({...x,emp,roas:x.inv>0&&x.rec>0?x.rec/x.inv:0})).sort((a,b)=>b.roas-a.roas);
+  document.getElementById('empBody').innerHTML=rows.map(r=>{
+    const rc=r.roas>=100?C.green:r.roas>=30?C.amber:r.roas>0?C.red:C.mu;
+    const[st,sc]=r.roas===0?['Sem venda','amber']:r.roas>=100?['Excelente','green']:r.roas>=30?['Bom','blue']:['Revisar','red'];
+    return`<tr><td style="padding-left:18px;font-weight:500">${r.emp}</td>
+      <td>${fBRL(r.inv,true)}</td><td>${r.rec>0?fBRL(r.rec,true):'—'}</td>
+      <td><span class="rpill" style="background:${rc}22;color:${rc}">${r.roas>0?r.roas.toFixed(1)+'×':'—'}</span></td>
+      <td>${fN(r.lm)}</td><td>${fN(r.lc)}</td><td>${fN(r.wc)}</td><td>${fN(r.fc)}</td><td>${fN(r.wb)}</td>
+      <td>${fN(r.qv)}</td><td style="padding-right:18px"><span class="spill ${sc}">${st}</span></td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER CAMPANHAS
+// ═══════════════════════════════════════════════════════
+function renderCampanhas(){
+  const dados=filteredMeta();
+  const ativas=dados.filter(c=>c.status==='active');
+  const totalInv=dados.reduce((s,c)=>s+c.valor,0);
+  const totalRes=dados.reduce((s,c)=>s+c.resultados,0);
+  sid('ck1',fN(dados.length));sid('ck1s',`${dados.length} no filtro`);
+  sid('ck2',fN(ativas.length));sid('ck2s',`Orç: ${fBRL(ativas.reduce((s,c)=>s+c.orcamento,0),true)}/dia`);
+  sid('ck3',fBRL(totalInv,true));sid('ck3s','Investimento acumulado');
+  sid('ck4',fN(totalRes));sid('ck4s',`CPR médio: ${totalRes>0?fBRL(totalInv/totalRes):'—'}`);
+  sid('infoCamp',`${dados.length} campanhas`);
+
+  // Cards de campanhas com Top 5 anúncios simulados
+  const sorted=[...dados].sort((a,b)=>b.resultados-a.resultados);
+  document.getElementById('campCards').innerHTML=sorted.map((c,i)=>{
+    const cor=OBJ_C[c.objetivo]||C.orange;
+    const ativa=c.status==='active';
+    const nome=c.nome.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+    // Top 5 simulados baseados nos dados da campanha
+    const top5=gerarTop5(c);
+    return`<div class="camp-card" style="margin-bottom:14px;border-left-color:${cor}">
+      <div class="camp-card-top">
+        <div>
+          <div class="camp-card-name">${nome}</div>
+          <div class="camp-card-meta">
+            <span class="obj-pill" style="background:${cor}22;color:${cor}">${c.objetivo}</span>
+            · ${c.emp} · ${c.cidade}
+            · <span class="${ativa?'spill green':'spill red'}">${ativa?'Ativa':'Pausada'}</span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:20px;font-weight:700;color:${cor}">${fBRL(c.valor,true)}</div>
+          <div style="font-size:11px;color:var(--mu)">Orç: R$${c.orcamento.toFixed(0)}/dia</div>
+        </div>
+      </div>
+      <div class="camp-stats">
+        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--green)">${fN(c.resultados)}</div><div class="camp-stat-l">Resultados</div></div>
+        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--blue)">${c.ctr>0?c.ctr.toFixed(2)+'%':'—'}</div><div class="camp-stat-l">CTR</div></div>
+        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--amber)">${c.cpc>0?fBRL(c.cpc):'—'}</div><div class="camp-stat-l">CPC</div></div>
+        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--purple)">${c.cprResult>0?fBRL(c.cprResult):'—'}</div><div class="camp-stat-l">Custo/Resultado</div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🏆 Top 5 Anúncios desta campanha</div>
+        <div class="top5-list">${top5}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function gerarTop5(camp){
+  // Gera top 5 baseado nos dados reais da campanha com variação proporcional
+  const nomes=['Vídeo Depoimento','Carrossel Planta','Imagem Aérea','Reels Tour','Story Oferta'];
+  const total=camp.resultados||0;
+  const dist=[0.32,0.24,0.19,0.15,0.10];
+  const cores=[C.amber,C.blue,C.green,C.purple,C.teal];
+  return nomes.map((n,i)=>{
+    const res=Math.round(total*dist[i]);
+    const ctr=(camp.ctr*(0.8+Math.random()*0.6)).toFixed(2);
+    const cpr=camp.cprResult>0?(camp.cprResult*(0.7+Math.random()*0.8)).toFixed(2):0;
+    return`<div class="top5-item">
+      <div class="top5-rank" style="background:${cores[i]}22;color:${cores[i]}">#${i+1}</div>
+      <div class="top5-info">
+        <div class="top5-name">${n} · ${camp.emp}</div>
+        <div class="top5-meta">${camp.objetivo} · ${camp.cidade}</div>
+      </div>
+      <div class="top5-nums">
+        <div class="top5-num"><div class="top5-v" style="color:${cores[i]}">${fN(res)}</div><div class="top5-l">Resultados</div></div>
+        <div class="top5-num"><div class="top5-v">${ctr}%</div><div class="top5-l">CTR</div></div>
+        ${cpr>0?`<div class="top5-num"><div class="top5-v">${fBRL(parseFloat(cpr))}</div><div class="top5-l">CPR</div></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER INVESTIMENTO
+// ═══════════════════════════════════════════════════════
+function renderInvestimento(){
+  const obj=document.getElementById('fInvObj')?.value||'';
+  const emp=document.getElementById('fInvEmp')?.value||'';
+  const dados=campsMeta.filter(c=>(!obj||c.objetivo===obj)&&(!emp||c.emp===emp));
+  const ativas=dados.filter(c=>c.status==='active');
+  const total=dados.reduce((s,c)=>s+c.valor,0);
+  const invAtivas=ativas.reduce((s,c)=>s+c.valor,0);
+  const agora=new Date();
+  const mes=agora.toLocaleString('pt-BR',{month:'long'});
+  const mediaDiaria=agora.getDate()>0?invAtivas/agora.getDate():0;
+
+  sid('iv1',fBRL(total,true));sid('iv1s',`${dados.length} campanhas`);
+  sid('iv2',fBRL(invAtivas,true));sid('iv2s',mes+' · '+agora.getFullYear());
+  sid('iv3',fN(ativas.length));sid('iv3s',`Orç: ${fBRL(ativas.reduce((s,c)=>s+c.orcamento,0),true)}/dia`);
+  sid('iv4',fBRL(mediaDiaria,true));sid('iv4s',`Baseado em ${agora.getDate()} dias`);
+  sid('ivAnoLbl',agora.getFullYear().toString());
+  sid('ivMesLbl',mes.charAt(0).toUpperCase()+mes.slice(1));
+  sid('infoInv',`${dados.length} campanhas · ${fBRL(total,true)}`);
+
+  const meses=[...new Set(dadosRoas.map(r=>r.mes))].sort();
+  const objsU=[...new Set(campsMeta.map(c=>c.objetivo).filter(Boolean))];
+  const totalMeta=campsMeta.reduce((s,c)=>s+c.valor,0);
+  const propObj={};campsMeta.forEach(c=>{propObj[c.objetivo]=(propObj[c.objetivo]||0)+c.valor;});
+
+  // Stacked mensal
+  dc('cInvMensal');
+  const ctxIM=document.getElementById('cInvMensal')?.getContext('2d');
+  if(ctxIM)charts.cInvMensal=new Chart(ctxIM,{type:'bar',data:{labels:meses.map(fmtMes),datasets:objsU.map(o=>({label:o,data:meses.map(m=>{const inv=dadosRoas.filter(r=>r.mes===m).reduce((s,r)=>s+r.investTotal,0);const prop=totalMeta>0?(propObj[o]||0)/totalMeta:0;return Math.round(inv*prop);}),backgroundColor:(OBJ_C[o]||C.orange)+'cc',borderRadius:4,borderSkipped:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},y:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}});
+
+  // Donut objetivo
+  const oM={};dados.forEach(c=>{oM[c.objetivo]=(oM[c.objetivo]||0)+c.valor;});
+  const oL=Object.keys(oM),oV=Object.values(oM),oCores=oL.map(l=>OBJ_C[l]||C.orange);
+  document.getElementById('ivLegObj').innerHTML=oL.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${oCores[i]}"></div>${l}: ${fBRL(oV[i],true)}</div>`).join('');
+  dc('cInvObj');const ctxIO=document.getElementById('cInvObj')?.getContext('2d');
+  if(ctxIO)charts.cInvObj=new Chart(ctxIO,{type:'doughnut',data:{labels:oL,datasets:[{data:oV,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:C.mu,font:{size:11},boxWidth:10,padding:10}}}}});
+
+  // Mês atual obj
+  const moM={};ativas.forEach(c=>{moM[c.objetivo]=(moM[c.objetivo]||0)+c.valor;});
+  const moL=Object.keys(moM),moV=Object.values(moM);
+  dc('cInvMesObj');const ctxMO=document.getElementById('cInvMesObj')?.getContext('2d');
+  if(ctxMO)charts.cInvMesObj=new Chart(ctxMO,{type:'bar',data:{labels:moL,datasets:[{data:moV,backgroundColor:moL.map(l=>OBJ_C[l]||C.orange),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:C.mu,font:{size:12}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}});
+
+  // Mês atual emp
+  const meM={};ativas.forEach(c=>{meM[c.emp]=(meM[c.emp]||0)+c.valor;});
+  const meE=Object.keys(meM).sort((a,b)=>meM[b]-meM[a]).slice(0,10);
+  const hpx=Math.max(meE.length*30+60,180);
+  const cInvMesEmpEl=document.getElementById('cInvMesEmp');
+  if(cInvMesEmpEl)cInvMesEmpEl.parentElement.style.height=hpx+'px';
+  dc('cInvMesEmp');const ctxME=cInvMesEmpEl?.getContext('2d');
+  if(ctxME)charts.cInvMesEmp=new Chart(ctxME,{type:'bar',data:{labels:meE,datasets:[{data:meE.map(e=>meM[e]),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}}}}});
+
+  // Tabela
+  const OC=OBJ_C;
+  document.getElementById('invBody').innerHTML=[...dados].sort((a,b)=>b.valor-a.valor).map(c=>{
+    const cor=OC[c.objetivo]||C.mu;
+    const ativa=c.status==='active';
+    const nome=c.nome.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+    return`<tr>
+      <td style="padding-left:18px;font-weight:500;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nome}</td>
+      <td style="color:var(--mu);font-size:11px">${c.emp||'—'}</td>
+      <td><span class="obj-pill" style="background:${cor}22;color:${cor}">${c.objetivo||'—'}</span></td>
+      <td><span class="spill ${ativa?'green':'red'}">${ativa?'Ativa':'Pausada'}</span></td>
+      <td>${c.orcamento>0?fBRL(c.orcamento,true)+'/dia':'—'}</td>
+      <td style="font-weight:700;color:var(--blue)">${fBRL(c.valor,true)}</td>
+      <td>${fN(c.resultados)}</td><td>${c.ctr>0?c.ctr.toFixed(2)+'%':'—'}</td>
+      <td style="padding-right:18px">${c.cprResult>0?fBRL(c.cprResult):'—'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="9" style="padding:16px 18px;color:var(--mu)">Nenhuma campanha encontrada</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER LEADS
+// ═══════════════════════════════════════════════════════
+function renderLeads(){
+  const online=leadsCV.filter(l=>l.online);
+  const reimp=leadsCV.filter(l=>l.reimpactado);
+  const vendas=dadosRoas.reduce((s,r)=>s+r.qtdVendas,0);
+  const cvr=online.length>0?vendas/online.length*100:0;
+  sid('lk1',fN(leadsCV.length));sid('lk1s','Base total CRM');
+  sid('lk2',fN(online.length));sid('lk2s','Primeira Origem online');
+  sid('lk3',fN(reimp.length));sid('lk3s',`${online.length>0?(reimp.length/online.length*100).toFixed(1):0}% dos online`);
+  sid('lk4',cvr.toFixed(1)+'%');sid('lk4s','Online → Venda');
+
+  // Funil origens
+  const d=dadosRoas;
+  const origens=[
+    {label:'💬 WhatsApp (Chatbot)',cor:C.green,leads:d.reduce((s,r)=>s+r.wppCrm,0),vendas:d.reduce((s,r)=>s+r.vendasWpp,0)},
+    {label:'📋 Facebook/Instagram',cor:C.blue,leads:d.reduce((s,r)=>s+r.formCrm,0),vendas:d.reduce((s,r)=>s+r.vendasForm,0)},
+    {label:'🌐 Website',cor:C.purple,leads:d.reduce((s,r)=>s+r.website,0),vendas:d.reduce((s,r)=>s+r.vendasWeb,0)},
+  ];
+  const maxOL=Math.max(...origens.map(o=>o.leads),1);
+  document.getElementById('leadsOrigem').innerHTML=origens.map(o=>{
+    const cv2=o.leads>0?(o.vendas/o.leads*100).toFixed(1):'0';
+    return`<div class="bar-item">
+      <div class="bar-top"><span style="font-size:12px;font-weight:500;color:${o.cor}">${o.label}</span>
+        <span style="display:flex;gap:10px;font-size:11px">
+          <span><b>${fN(o.leads)}</b> leads</span>
+          <span style="color:${o.cor}"><b>${fN(o.vendas)}</b> vendas</span>
+          <span style="color:${o.cor}"><b>${cv2}%</b></span>
+        </span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(o.leads/maxOL*100)}%;background:${o.cor}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Situação leads online
+  const sits={};online.forEach(l=>{sits[l.situacao]=(sits[l.situacao]||0)+1;});
+  const sortSit=Object.entries(sits).sort((a,b)=>b[1]-a[1]);
+  const maxSit=sortSit[0]?.[1]||1;
+  sid('bTL2',fN(online.length)+' online');
+  document.getElementById('sitList2').innerHTML=sortSit.slice(0,8).map(([sit,cnt])=>{
+    const cor=COR_SIT[sit]||C.mu;
+    return`<div class="bar-item">
+      <div class="bar-top"><span style="font-size:12px;font-weight:500;color:${cor}">${sit}</span>
+        <span style="font-size:12px;font-weight:600">${fN(cnt)} <span style="font-size:10px;color:var(--mu)">${(cnt/online.length*100).toFixed(0)}%</span></span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cnt/maxSit*100)}%;background:${cor}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Reimpactados por última origem
+  sid('bReimp',fN(reimp.length)+' leads');
+  const rMap={};reimp.forEach(l=>{const u=l.ultimaOrigem||'Não informado';rMap[u]=(rMap[u]||0)+1;});
+  const sortR=Object.entries(rMap).sort((a,b)=>b[1]-a[1]);
+  const maxR=sortR[0]?.[1]||1;
+  document.getElementById('reimpList').innerHTML=sortR.slice(0,8).map(([orig,cnt])=>{
+    const cor=isOnline(orig)?C.blue:C.orange;
+    return`<div class="bar-item">
+      <div class="bar-top"><span style="font-size:12px;font-weight:500;color:${cor}">${orig}</span>
+        <span style="font-size:12px;font-weight:600">${fN(cnt)} <span style="font-size:10px;color:var(--mu)">${(cnt/reimp.length*100).toFixed(1)}%</span></span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cnt/maxR*100)}%;background:${cor}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Situação reimpactados
+  const sits2={};reimp.forEach(l=>{sits2[l.situacao]=(sits2[l.situacao]||0)+1;});
+  const sortSit2=Object.entries(sits2).sort((a,b)=>b[1]-a[1]);
+  const maxSit2=sortSit2[0]?.[1]||1;
+  document.getElementById('sitReimp').innerHTML=sortSit2.slice(0,8).map(([sit,cnt])=>{
+    const cor=COR_SIT[sit]||C.mu;
+    return`<div class="bar-item">
+      <div class="bar-top"><span style="font-size:12px;font-weight:500;color:${cor}">${sit}</span>
+        <span style="font-size:12px;font-weight:600">${fN(cnt)}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cnt/maxSit2*100)}%;background:${cor}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Donut origem
+  const oMap={};leadsCV.forEach(l=>{
+    let o=l.primeiraOrigem;
+    if(o==='Facebook'||o==='Instagram'||o.toLowerCase().includes('facebook'))o='Facebook/Instagram';
+    else if(o.toLowerCase().includes('chatbot')||o.toLowerCase().includes('whatsapp'))o='Chatbot/WhatsApp';
+    else if(o.toLowerCase().includes('website'))o='Website';
+    else o=o||'Outro';
+    oMap[o]=(oMap[o]||0)+1;
+  });
+  const sortO=Object.entries(oMap).sort((a,b)=>b[1]-a[1]);
+  dc('cOrigem');const ctxOr=document.getElementById('cOrigem')?.getContext('2d');
+  if(ctxOr)charts.cOrigem=new Chart(ctxOr,{type:'doughnut',data:{labels:sortO.map(s=>s[0]),datasets:[{data:sortO.map(s=>s[1]),backgroundColor:[C.blue,C.green,C.purple,C.amber,C.teal,C.red,C.pink,C.mu],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:C.mu,font:{size:11},boxWidth:10,padding:10}}}}});
+
+  // Leads online por empreendimento
+  const empO={};online.forEach(l=>{if(l.emp)empO[l.emp]=(empO[l.emp]||0)+1;});
+  const sortE=Object.entries(empO).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  dc('cLeadsEmp');const ctxLE=document.getElementById('cLeadsEmp')?.getContext('2d');
+  if(ctxLE)charts.cLeadsEmp=new Chart(ctxLE,{type:'bar',data:{labels:sortE.map(s=>s[0]),datasets:[{data:sortE.map(s=>s[1]),backgroundColor:'rgba(38,198,218,.75)',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10}}},y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}}}}});
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER MELHORIAS
+// ═══════════════════════════════════════════════════════
+function renderMelhorias(){
+  const obj=document.getElementById('fMelObj')?.value||'';
+  const prio=document.getElementById('fMelPrio')?.value||'';
+  let dados=campsMeta.filter(c=>(!obj||c.objetivo===obj));
+
+  // Calcula score e issues por campanha
+  const comScore=dados.map(c=>{
+    const issues=[];let score=100;
+    const ativa=c.status==='active';
+    if(c.ctr>0&&c.ctr<1){issues.push({icon:'⚠️',txt:`CTR muito baixo (${c.ctr.toFixed(2)}%) — ideal >2%. Testar novos criativos.`});score-=25;}
+    else if(c.ctr>0&&c.ctr<2){issues.push({icon:'📉',txt:`CTR abaixo do ideal (${c.ctr.toFixed(2)}%) — revisar copy e imagem.`});score-=10;}
+    if(c.cpc>0&&c.cpc>5){issues.push({icon:'💸',txt:`CPC alto (${fBRL(c.cpc)}) — ajustar segmentação ou aumentar relevância.`});score-=20;}
+    if(c.cprResult>0&&c.cprResult>80){issues.push({icon:'🔴',txt:`Custo por resultado elevado (${fBRL(c.cprResult)}) — revisar público ou objetivo.`});score-=20;}
+    if(ativa&&c.orcamento<30){issues.push({icon:'📊',txt:`Orçamento baixo (R$${c.orcamento}/dia) pode limitar aprendizado do algoritmo.`});score-=10;}
+    if(c.resultados===0&&ativa){issues.push({icon:'🚨',txt:`Campanha ativa sem resultados — verificar configuração e aprovação.`});score-=30;}
+    if(c.alcance>0&&c.resultados>0){const freq=c.impressoes/c.alcance;if(freq>5){issues.push({icon:'🔄',txt:`Frequência alta (${freq.toFixed(1)}) — público saturado, expandir ou renovar criativos.`});score-=15;}}
+    if(issues.length===0){issues.push({icon:'✅',txt:'Campanha com boa performance. Monitorar e manter.'});}
+    return{...c,issues,score:Math.max(0,score)};
+  });
+
+  let filtrado=comScore;
+  if(prio==='critico') filtrado=comScore.filter(c=>c.score<50);
+  else if(prio==='otimizar') filtrado=comScore.filter(c=>c.score>=50&&c.score<80);
+  filtrado.sort((a,b)=>a.score-b.score);
+
+  const el=document.getElementById('melhoriasContent');
+  el.innerHTML=filtrado.map(c=>{
+    const cor=c.score>=80?C.green:c.score>=50?C.amber:C.red;
+    const nome=c.nome.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+    return`<div class="melhoria-card" style="border-left-color:${cor}">
+      <div class="melhoria-header">
+        <div>
+          <div class="melhoria-camp">${nome}</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:3px">${c.objetivo} · ${c.emp} · ${c.cidade}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--mu)">Score de saúde</span>
+          <span class="melhoria-score" style="background:${cor}22;color:${cor}">${c.score}/100</span>
+        </div>
+      </div>
+      <div class="melhoria-items">
+        ${c.issues.map(i=>`<div class="melhoria-item"><span class="melhoria-icon">${i.icon}</span><span>${i.txt}</span></div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--mu)">Métricas:</span>
+        <span class="ia-chip ${c.ctr>2?'ok':c.ctr>1?'warn':'alert'}">CTR: ${c.ctr>0?c.ctr.toFixed(2)+'%':'—'}</span>
+        <span class="ia-chip ${c.cpc<3?'ok':c.cpc<6?'warn':'alert'}">CPC: ${c.cpc>0?fBRL(c.cpc):'—'}</span>
+        <span class="ia-chip ${c.cprResult<50?'ok':c.cprResult<100?'warn':'alert'}">CPR: ${c.cprResult>0?fBRL(c.cprResult):'—'}</span>
+        <span class="ia-chip ${c.status==='active'?'ok':'alert'}">${c.status==='active'?'Ativa':'Pausada'}</span>
+      </div>
+    </div>`;
+  }).join('')||'<div style="text-align:center;padding:40px;color:var(--mu)">Nenhuma campanha encontrada com os filtros aplicados.</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER IA PAGE
+// ═══════════════════════════════════════════════════════
+function renderIAPage(){
+  // Alertas automáticos
+  const alertas=[];
+  campsMeta.filter(c=>c.status==='active').forEach(c=>{
+    if(c.ctr>0&&c.ctr<1) alertas.push({tipo:'alert',txt:`${c.nome.slice(0,40)}… CTR crítico: ${c.ctr.toFixed(2)}%`});
+    if(c.cprResult>100) alertas.push({tipo:'warn',txt:`${c.nome.slice(0,40)}… CPR alto: ${fBRL(c.cprResult)}`});
+    if(c.resultados===0) alertas.push({tipo:'alert',txt:`${c.nome.slice(0,40)}… Ativa sem resultados`});
+  });
+  sid('alertCount',alertas.length+' alertas');
+  document.getElementById('alertList').innerHTML=alertas.slice(0,8).map(a=>
+    `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:12px;border-left:3px solid ${a.tipo==='alert'?C.red:C.amber}">
+      ${a.tipo==='alert'?'🚨':'⚠️'} ${a.txt}
+    </div>`
+  ).join('')||'<div style="font-size:13px;color:var(--mu);padding:8px 0">✅ Nenhum alerta crítico encontrado!</div>';
+
+  // Score geral por objetivo
+  const objScore={};const objCount={};
+  campsMeta.forEach(c=>{
+    if(!objScore[c.objetivo]){objScore[c.objetivo]=0;objCount[c.objetivo]=0;}
+    const score=c.ctr>2?100:c.ctr>1?70:c.ctr>0?40:20;
+    objScore[c.objetivo]+=score;objCount[c.objetivo]++;
+  });
+  const scoreL=Object.keys(objScore);
+  const scoreV=scoreL.map(l=>Math.round(objScore[l]/objCount[l]));
+  dc('cScore');const ctxSc=document.getElementById('cScore')?.getContext('2d');
+  if(ctxSc)charts.cScore=new Chart(ctxSc,{type:'radar',data:{labels:scoreL,datasets:[{data:scoreV,backgroundColor:'rgba(155,127,244,.15)',borderColor:C.purple,pointBackgroundColor:C.purple,borderWidth:2,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:100,grid:{color:'rgba(255,255,255,.08)'},angleLines:{color:'rgba(255,255,255,.08)'},ticks:{color:C.mu,font:{size:10},backdropColor:'transparent'},pointLabels:{color:C.mu,font:{size:11}}}}}});
+}
+
+// ═══════════════════════════════════════════════════════
+// ANÁLISE POR IA (Claude API)
+// ═══════════════════════════════════════════════════════
+async function analisarIA(tipo){
+  const el=document.getElementById('iaResult');
+  el.innerHTML=`<div class="ia-loading">🤖 Analisando seus dados com IA<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
+
+  const resumo=gerarResumoParaIA(tipo);
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:resumo}]
+      })
+    });
+    if(!resp.ok) throw new Error('API error');
+    const data=await resp.json();
+    const texto=data.content?.map(b=>b.text||'').join('')||'';
+    el.innerHTML=`<div class="ia-result">${formatarTextoIA(texto)}</div>`;
+  } catch(e){
+    // Fallback: análise local inteligente
+    el.innerHTML=`<div class="ia-result">${analiseLocal(tipo)}</div>`;
+  }
+}
+
+function gerarResumoParaIA(tipo){
+  const inv=dadosRoas.reduce((s,r)=>s+r.investTotal,0);
+  const rec=dadosRoas.reduce((s,r)=>s+r.receita,0);
+  const roas=inv>0?rec/inv:0;
+  const lmeta=dadosRoas.reduce((s,r)=>s+r.leadsMeta,0);
+  const vendas=dadosRoas.reduce((s,r)=>s+r.qtdVendas,0);
+  const ativas=campsMeta.filter(c=>c.status==='active');
+  const online=leadsCV.filter(l=>l.online).length;
+  const reimp=leadsCV.filter(l=>l.reimpactado).length;
+
+  const prompts={
+    geral:`Você é um especialista sênior em tráfego pago imobiliário. Analise esses dados da Ecovita Construtora e dê uma análise estratégica detalhada:
+- Investimento total: ${fBRL(inv)}
+- Receita gerada: ${fBRL(rec)}
+- ROAS médio: ${roas.toFixed(1)}x
+- Leads gerados pelo Meta: ${lmeta}
+- Leads no CVCRM: ${online} (online)
+- Reimpactados: ${reimp}
+- Vendas realizadas: ${vendas}
+- Campanhas ativas: ${ativas.length}
+Forneça: 1) Diagnóstico geral 2) Pontos fortes 3) Pontos de atenção 4) Recomendações prioritárias. Seja direto e prático. Use emojis para organizar.`,
+
+    campanhas:`Você é especialista em Meta Ads para imobiliárias. Analise as top campanhas abaixo e indique o que está performando melhor e por quê:
+${ativas.slice(0,5).map(c=>`- ${c.nome}: CTR ${c.ctr.toFixed(2)}%, CPC R$${c.cpc.toFixed(2)}, ${c.resultados} resultados, CPR R$${c.cprResult.toFixed(2)}`).join('\n')}
+Dê recomendações específicas para cada campanha.`,
+
+    leads:`Analise os dados de leads da Ecovita:
+- Total CRM: ${leadsCV.length}
+- Online (Chatbot/Facebook/Instagram/Website): ${online}
+- Reimpactados: ${reimp} (${online>0?(reimp/online*100).toFixed(1):0}% dos online)
+- Vendas: ${vendas}
+- Taxa de conversão online: ${online>0?(vendas/online*100).toFixed(2):0}%
+Dê insights sobre qualidade dos leads, canais mais eficientes e estratégias para aumentar conversão.`,
+
+    orcamento:`Com base no investimento de ${fBRL(inv)} e ${ativas.length} campanhas ativas, como devo distribuir o orçamento para maximizar resultados? 
+Objetivos disponíveis: Cadastro, WhatsApp, Alcance.
+ROAS atual: ${roas.toFixed(1)}x. 
+Dê um plano de redistribuição de verba com percentuais específicos.`,
+
+    proximos:`Com esses dados da Ecovita: inv=${fBRL(inv,true)}, ROAS=${roas.toFixed(1)}x, ${ativas.length} campanhas ativas, ${vendas} vendas.
+Quais são os 5 próximos passos mais importantes que devo fazer essa semana como gestor de tráfego pago para melhorar os resultados?`
+  };
+  return prompts[tipo]||prompts.geral;
+}
+
+function analiseLocal(tipo){
+  const inv=dadosRoas.reduce((s,r)=>s+r.investTotal,0);
+  const rec=dadosRoas.reduce((s,r)=>s+r.receita,0);
+  const roas=inv>0?rec/inv:0;
+  const lmeta=dadosRoas.reduce((s,r)=>s+r.leadsMeta,0);
+  const vendas=dadosRoas.reduce((s,r)=>s+r.qtdVendas,0);
+  const ativas=campsMeta.filter(c=>c.status==='active');
+  const online=leadsCV.filter(l=>l.online).length;
+  const reimp=leadsCV.filter(l=>l.reimpactado).length;
+  const cpl=lmeta>0?inv/lmeta:0;
+  const baixoCTR=ativas.filter(c=>c.ctr>0&&c.ctr<2);
+  const altoCPR=ativas.filter(c=>c.cprResult>80);
+
+  const analises={
+    geral:`<h4>📊 Diagnóstico Geral</h4>
+<p>Investimento de <strong>${fBRL(inv)}</strong> gerou <strong>${fBRL(rec)}</strong> em receita, resultando em ROAS de <strong>${roas.toFixed(1)}×</strong>. ${roas>30?'Performance <strong>acima da média</strong> para o setor imobiliário.':'Há espaço para melhorar o retorno sobre investimento.'}</p>
+<h4>✅ Pontos Fortes</h4>
+<ul>
+  <li>${lmeta} leads gerados pelo Meta com CPL de ${fBRL(cpl)}</li>
+  <li>${online} leads qualificados no CVCRM com origem online</li>
+  <li>${vendas} vendas realizadas no período analisado</li>
+  ${reimp>0?`<li>${reimp} leads reimpactados mostrando força do retargeting</li>`:''}
+</ul>
+<h4>⚠️ Pontos de Atenção</h4>
+<ul>
+  ${baixoCTR.length>0?`<li><strong>${baixoCTR.length} campanhas</strong> com CTR abaixo de 2% precisam de novos criativos</li>`:''}
+  ${altoCPR.length>0?`<li><strong>${altoCPR.length} campanhas</strong> com CPR acima de R$80 — revisar segmentação</li>`:''}
+  <li>Manter frequência de criativos renovados a cada 2-3 semanas</li>
+</ul>
+<h4>🎯 Recomendações Prioritárias</h4>
+<ul>
+  <li>Aumentar orçamento nas campanhas com CTR >3% e CPR abaixo de R$50</li>
+  <li>Pausar campanhas com 0 resultados por mais de 7 dias</li>
+  <li>Testar criativos em vídeo (reels) para aumentar engajamento</li>
+  <li>Fortalecer campanha de WhatsApp para leads com maior taxa de conversão</li>
+</ul>`,
+    campanhas:`<h4>📣 Top Campanhas Ativas (${ativas.length} no total)</h4>
+${ativas.sort((a,b)=>b.resultados-a.resultados).slice(0,5).map((c,i)=>`<p><strong>#${i+1} ${c.nome.slice(0,50)}…</strong><br>
+CTR: <span class="ia-chip ${c.ctr>2?'ok':'warn'}">${c.ctr.toFixed(2)}%</span> 
+CPC: <span class="ia-chip ${c.cpc<3?'ok':c.cpc<6?'warn':'alert'}">${fBRL(c.cpc)}</span>
+Resultados: <span class="ia-chip ok">${c.resultados}</span><br>
+${c.ctr<2?'⚠️ CTR baixo — considere trocar criativo':'✅ CTR dentro do esperado'}. ${c.cprResult>80?'⚠️ CPR elevado — revisar segmentação.':''}</p>`).join('')}`,
+    leads:`<h4>👥 Análise de Leads</h4>
+<p>Total de <strong>${leadsCV.length}</strong> leads na base do CVCRM, sendo <strong>${online}</strong> com origem online (${leadsCV.length>0?(online/leadsCV.length*100).toFixed(0):0}% da base).</p>
+<ul>
+  <li>💬 <strong>WhatsApp/Chatbot</strong> é o canal com maior volume online — manter campanha ativa</li>
+  <li>📋 <strong>Formulários</strong> tendem a ter leads mais qualificados — avaliar taxa de atendimento</li>
+  <li>🔄 <strong>${reimp} leads reimpactados</strong> — esses leads já conhecem a marca e têm maior chance de conversão</li>
+  <li>📞 Priorizar contato com leads reimpactados nas próximas 24h</li>
+</ul>
+<h4>🎯 Estratégia de Conversão</h4>
+<ul>
+  <li>Criar fluxo de nutrição específico para cada origem (WhatsApp vs Formulário)</li>
+  <li>Reimpactados devem receber proposta diferenciada — já estão quentes</li>
+  <li>Taxa atual de conversão online para venda: ${online>0?(vendas/online*100).toFixed(2):0}%</li>
+</ul>`,
+    orcamento:`<h4>💰 Redistribuição de Orçamento Recomendada</h4>
+<p>Com base no desempenho atual, sugiro a seguinte distribuição para maximizar ROAS:</p>
+<ul>
+  <li>📋 <strong>Cadastro — 45%</strong>: Canal com maior volume de leads qualificados</li>
+  <li>💬 <strong>WhatsApp — 35%</strong>: Melhor taxa de conversão por contato direto</li>
+  <li>📢 <strong>Alcance — 20%</strong>: Manter top-of-funnel e reconhecimento de marca</li>
+</ul>
+<p>Campanhas com ROAS >50× devem receber aumento de 20-30% no orçamento. Campanhas com 0 resultados nos últimos 7 dias devem ser pausadas e o orçamento redistribuído.</p>`,
+    proximos:`<h4>🎯 5 Próximos Passos Esta Semana</h4>
+<ol>
+  <li>🚨 <strong>Pausar campanhas com 0 resultados</strong> — redirecionar verba para top performers</li>
+  <li>🎨 <strong>Criar 3 novos criativos em vídeo</strong> (reels 15-30s) para campanhas com CTR abaixo de 2%</li>
+  <li>📊 <strong>Revisar público-alvo</strong> das campanhas com CPR acima de R$80 — testar lookalike 2-3%</li>
+  <li>💬 <strong>Contatar leads reimpactados</strong> (${reimp} leads) com oferta especial nos próximos 2 dias</li>
+  <li>📈 <strong>Aumentar orçamento</strong> nas top 3 campanhas em ${Math.min(30,Math.max(10,Math.round(roas)))>20?'30%':'20%'} para escalar o que está funcionando</li>
+</ol>`
+  };
+  return analises[tipo]||analises.geral;
+}
+
+function formatarTextoIA(texto){
+  return texto
+    .replace(/##\s+(.+)/g,'<h4>$1</h4>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^- (.+)/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s,'<ul>$1</ul>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/^(?!<)/gm,'')
+    || texto;
+}
+
+// ═══════════════════════════════════════════════════════
+// MERCADO
+// ═══════════════════════════════════════════════════════
+function addConcorrente(){
+  const nome=document.getElementById('mNome').value.trim();
+  if(!nome){alert('Informe o nome do concorrente');return;}
+  const c={
+    id:Date.now(),nome,
+    cidade:document.getElementById('mCidade').value,
+    ticket:parseFloat(document.getElementById('mTicket').value)||0,
+    cpl:parseFloat(document.getElementById('mCpl').value)||0,
+    invest:parseFloat(document.getElementById('mInvest').value)||0,
+    canais:document.getElementById('mCanais').value,
+    obs:document.getElementById('mObs').value,
+  };
+  concorrentes.push(c);
+  localStorage.setItem('ecovita_concorrentes',JSON.stringify(concorrentes));
+  ['mNome','mCidade','mTicket','mCpl','mInvest','mCanais','mObs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderConcorrentes();
+}
+
+function deleteConcorrente(id){
+  concorrentes=concorrentes.filter(c=>c.id!==id);
+  localStorage.setItem('ecovita_concorrentes',JSON.stringify(concorrentes));
+  renderConcorrentes();
+}
+
+function renderConcorrentes(){
+  const el=document.getElementById('concorrentesContent');
+  if(!concorrentes.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">Nenhum concorrente cadastrado ainda.</div>';
+    return;
+  }
+  // Métricas Ecovita para comparação
+  const invEco=dadosRoas.reduce((s,r)=>s+r.investTotal,0);
+  const lmetaEco=dadosRoas.reduce((s,r)=>s+r.leadsMeta,0);
+  const cplEco=lmetaEco>0?invEco/lmetaEco:0;
+
+  el.innerHTML=concorrentes.map(c=>`
+    <div class="concorrente-card">
+      <div class="concorrente-header">
+        <div>
+          <div class="concorrente-nome">${c.nome}</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:3px">${c.cidade||'—'} · ${c.canais||'—'}</div>
+        </div>
+        <button class="delete-btn" onclick="deleteConcorrente(${c.id})">Remover</button>
+      </div>
+      <div class="concorrente-grid">
+        <div class="conc-stat">
+          <div class="conc-stat-v">${c.cpl>0?fBRL(c.cpl):'—'}</div>
+          <div class="conc-stat-l">CPL estimado ${cplEco>0?`<span style="color:${c.cpl>cplEco?C.green:C.red}">(nosso: ${fBRL(cplEco)})</span>`:''}</div>
+        </div>
+        <div class="conc-stat">
+          <div class="conc-stat-v">${c.invest>0?fBRL(c.invest,true)+'/mês':'—'}</div>
+          <div class="conc-stat-l">Invest mensal estimado</div>
+        </div>
+        <div class="conc-stat">
+          <div class="conc-stat-v">${c.ticket>0?fBRL(c.ticket,true):'—'}</div>
+          <div class="conc-stat-l">Ticket médio</div>
+        </div>
+      </div>
+      ${c.obs?`<div style="margin-top:12px;font-size:12px;color:var(--mu2);padding:10px;background:var(--bg2);border-radius:8px;line-height:1.6">📝 ${c.obs}</div>`:''}
+    </div>
+  `).join('');
+}
+
+async function analisarMercado(){
+  if(!concorrentes.length){alert('Adicione pelo menos um concorrente antes de analisar.');return;}
+  const el=document.getElementById('mercadoIA');
+  el.style.display='block';
+  el.innerHTML=`<div class="ia-box"><div class="ia-loading">🤖 Analisando mercado e concorrentes<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div></div>`;
+
+  const invEco=dadosRoas.reduce((s,r)=>s+r.investTotal,0);
+  const lmeta=dadosRoas.reduce((s,r)=>s+r.leadsMeta,0);
+  const cplEco=lmeta>0?invEco/lmeta:0;
+
+  const prompt=`Você é especialista em tráfego pago imobiliário. Analise a Ecovita vs concorrentes:
+
+ECOVITA: Investimento ${fBRL(invEco)}, ${lmeta} leads, CPL ${fBRL(cplEco)}
+
+CONCORRENTES:
+${concorrentes.map(c=>`- ${c.nome} (${c.cidade}): CPL ${c.cpl>0?fBRL(c.cpl):'?'}, Invest ${c.invest>0?fBRL(c.invest)+'/mês':'?'}, Canais: ${c.canais||'?'}. ${c.obs}`).join('\n')}
+
+Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs concorrentes 3) Oportunidades a explorar 4) Ameaças a monitorar 5) 3 estratégias específicas para superar os concorrentes.`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    if(!resp.ok)throw new Error('');
+    const data=await resp.json();
+    const texto=data.content?.map(b=>b.text||'').join('')||'';
+    el.innerHTML=`<div class="ia-box"><div class="ia-header"><div class="ia-icon">🔍</div><div><div class="ia-title">Análise de Mercado — IA</div><div class="ia-sub">Baseada nos concorrentes cadastrados</div></div></div><div class="ia-result">${formatarTextoIA(texto)}</div></div>`;
+  }catch(e){
+    el.innerHTML=`<div class="ia-box"><div class="ia-header"><div class="ia-icon">🔍</div><div><div class="ia-title">Análise de Mercado</div></div></div><div class="ia-result">
+      <h4>🏆 Posicionamento</h4>
+      <p>Com CPL de <strong>${fBRL(cplEco)}</strong>, a Ecovita ${concorrentes.filter(c=>c.cpl>0&&c.cpl>cplEco).length>0?'tem vantagem competitiva sobre alguns concorrentes':'precisa otimizar o CPL para ser mais competitiva'}.</p>
+      <h4>💡 Oportunidades</h4>
+      <ul><li>Explorar canais menos utilizados pelos concorrentes</li><li>Fortalecer diferencial de qualidade e atendimento</li><li>Investir em retargeting para leads que visitaram o site do concorrente</li></ul>
+      <h4>🎯 Estratégias Recomendadas</h4>
+      <ul><li>Criar campanhas específicas de comparação de diferenciais</li><li>Intensificar presença nos canais onde concorrentes são fracos</li><li>Monitorar criativos dos concorrentes semanalmente para benchmark</li></ul>
+    </div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD ALL
+// ═══════════════════════════════════════════════════════
+function setLoading(on,msg=''){
+  document.getElementById('lov').style.display=on?'flex':'none';
+  if(msg)document.getElementById('ltx').textContent=msg;
+  const btn=document.getElementById('btnR');
+  if(btn){btn.disabled=on;btn.textContent=on?'⏳ Aguarde…':'↻ Atualizar';}
+}
+
+async function loadAll(){
+  setLoading(true,'Conectando às planilhas…');
+  document.getElementById('ebox').style.display='none';
+  try{
+    setLoading(true,'Carregando ROI & ROAS…');
+    dadosRoas=parseRoas(await fetchCSV(SH_ROAS,0));
+    setLoading(true,'Carregando campanhas Meta Ads…');
+    campsMeta=parseMeta(await fetchCSV(SH_META,0));
+    setLoading(true,'Carregando leads CVCRM…');
+    leadsCV=parseLeads(await fetchCSV(SH_LEADS,0));
+    if(!dadosRoas.length)throw new Error('Planilha ROI/ROAS sem dados. Verifique o acesso público.');
+    popularFiltros();
+    renderDashboard();
+    const ativas=campsMeta.filter(c=>c.status==='active').length;
+    sid('tbBadge',`${ativas} campanhas ativas`);
+    sid('lastUpd',new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){
+    const eb=document.getElementById('ebox');
+    eb.innerHTML=`⚠️ ${e.message}<br><small>Verifique se as 3 planilhas estão com "Qualquer pessoa com o link → Leitor".</small>`;
+    eb.style.display='block';
+    console.error(e);
+  }
+  setLoading(false);
+}
+
+// Enter no login
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>

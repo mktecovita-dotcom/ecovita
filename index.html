@@ -439,9 +439,6 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
       </div>
-      <div class="nav-item" onclick="goPage('leads')">
-        <span class="nav-icon">👥</span> Leads & CVCRM
-      </div>
       <div class="sb-section">Análise</div>
       <div class="nav-item" onclick="goPage('melhorias')">
         <span class="nav-icon">🎯</span> O que Melhorar
@@ -595,8 +592,9 @@ body.light .theme-label{color:var(--blue)}
           <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">Situação dos Leads Online por empreendimento</div></div>
-          <div class="cw" style="height:220px"><canvas id="cLeadsEmpDash"></canvas></div>
+          <div class="card-hd"><div class="card-title">Leads por Origem Online</div></div>
+          <div class="legend" id="legOrigemOnline"></div>
+          <div class="cw" style="height:220px"><canvas id="cOrigemOnline"></canvas></div>
         </div>
       </div>
 
@@ -780,49 +778,7 @@ body.light .theme-label{color:var(--blue)}
       </div>
     </div>
 
-        <!-- ══════════════ PAGE: LEADS ══════════════ -->
-    <div class="page" id="page-leads">
-      <div class="kpi-grid kpi-4">
-        <div class="kpi green"><div class="kpi-label">Total Leads CRM</div><div class="kpi-val green" id="lk1">—</div><div class="kpi-sub" id="lk1s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Leads Online</div><div class="kpi-val teal" id="lk2">—</div><div class="kpi-sub" id="lk2s"></div></div>
-        <div class="kpi purple"><div class="kpi-label">Reimpactados</div><div class="kpi-val purple" id="lk3">—</div><div class="kpi-sub" id="lk3s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">Taxa Conversão</div><div class="kpi-val amber" id="lk4">—</div><div class="kpi-sub" id="lk4s"></div></div>
-      </div>
-
-      <div class="grid g2">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Funil por Origem</div></div>
-          <div id="leadsOrigem" class="bar-row"></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL2">—</span></div>
-          <div class="bar-row" id="sitList2"></div>
-        </div>
-      </div>
-
-      <div class="grid g2" style="margin-top:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Leads Reimpactados — por última origem</div><span class="badge purple" id="bReimp">—</span></div>
-          <div id="reimpList" class="bar-row"></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Situação dos Reimpactados</div></div>
-          <div class="bar-row" id="sitReimp"></div>
-        </div>
-      </div>
-
-      <div class="grid g2" style="margin-top:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Origem dos leads — CVCRM</div></div>
-          <div class="cw" style="height:260px"><canvas id="cOrigem"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Leads online por empreendimento</div></div>
-          <div class="cw" style="height:260px"><canvas id="cLeadsEmp"></canvas></div>
-        </div>
-      </div>
-    </div>
-
+    
     <!-- ══════════════ PAGE: MELHORIAS ══════════════ -->
     <div class="page" id="page-melhorias">
       <div class="fbar">
@@ -1247,7 +1203,7 @@ function startCountdown(){
 // ═══════════════════════════════════════════════════════
 const PAGE_TITLES={
   dashboard:'Dashboard',campanhas:'Campanhas Meta',
-  investimento:'Investimento',leads:'Leads & CVCRM',
+  investimento:'Investimento',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
   config:'Configurações de API',meta:'Criativos Meta API'
@@ -1263,7 +1219,7 @@ function goPage(pg){
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='campanhas') initCampanhasPage();
   if(pg==='investimento') renderInvestimento();
-  if(pg==='leads'&&leadsCV.length) renderLeads();
+  
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
   if(pg==='mercado') renderConcorrentes();
@@ -1325,19 +1281,27 @@ function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function isOnline(o){if(!o)return false;const l=o.toLowerCase();return ORIGENS_ONLINE.some(x=>l.includes(x));}
 
 function parseRoas(rows){
+  // helper: tenta múltiplos nomes de coluna
+  const g=(r,...keys)=>{ for(const k of keys){ if(r[k]!==undefined&&r[k]!=='') return r[k]; } return ''; };
   return rows.map(r=>{
-    const data=r['Data']||'';
+    const data=g(r,'Data','data','DATA','Mês','Mes','MÊS');
     const pts=data.split('/');
     const mes=pts.length>=3?`${pts[1].padStart(2,'0')}/${pts[2].substring(0,4)}`:'';
-    const emp=(r['Empreendimentos']||'').trim();
-    if(!emp||!mes||emp.toLowerCase().includes('google')) return null;
+    const emp=(g(r,'Empreendimentos','Empreendimento','empreendimento','Emp')||'').trim();
+    if(!emp||!mes||emp.toLowerCase().includes('google')||emp.toLowerCase()==='total') return null;
     return{mes,emp,
-      investTotal:toBRL(r['Investimento Total']),receita:toBRL(r['Vendas']),
-      roas:toN(r['ROAS']),qtdVendas:toN(r['Quantidade de vendas']),
-      leadsMeta:toN(r['Leads gerados Meta']),leadsCrm:toN(r['Leads CVCRM']),
-      wppCrm:toN(r['WhatsApp CVCRM']),formCrm:toN(r['Formulário CVCRM']),
-      website:toN(r['Leads vindo pelo Website']),
-      vendasWpp:toN(r['Vendas por WhatsApp']),vendasForm:toN(r['Vendas por Formulários']),vendasWeb:toN(r['Vendas Website'])};
+      investTotal:toBRL(g(r,'Investimento Total','Investimento total','Invest. Total','investimento total')),
+      receita:toBRL(g(r,'Vendas','Receita','receita','vendas')),
+      roas:toN(g(r,'ROAS','Roas','roas')),
+      qtdVendas:toN(g(r,'Quantidade de vendas','Qtd Vendas','Qtd. vendas','Qtd. Vendas','qtd vendas')),
+      leadsMeta:toN(g(r,'Leads gerados Meta','Leads Meta','leads Meta','Leads Gerados Meta','leads gerados meta','Leads gerados pelo Meta')),
+      leadsCrm:toN(g(r,'Leads CVCRM','Leads CRM','leads cvcrm','leads crm','Leads Online CRM','Total Leads CRM')),
+      wppCrm:toN(g(r,'WhatsApp CVCRM','WhatsApp CRM','wpp crm','Wpp CVCRM','Leads WhatsApp')),
+      formCrm:toN(g(r,'Formulário CVCRM','Formulario CVCRM','Form CVCRM','form crm','Leads Formulário','Leads Formulario')),
+      website:toN(g(r,'Leads vindo pelo Website','Website','leads website','Leads Website','Leads pelo site')),
+      vendasWpp:toN(g(r,'Vendas por WhatsApp','Vendas WhatsApp','vendas wpp')),
+      vendasForm:toN(g(r,'Vendas por Formulários','Vendas Formulário','vendas form')),
+      vendasWeb:toN(g(r,'Vendas Website','Vendas pelo site','vendas website'))};
   }).filter(Boolean);
 }
 
@@ -1730,18 +1694,41 @@ function renderDashboard(){
       }}
   });}
 
-  // ── Chart Leads online por empreendimento (dashboard) ──
-  const empOnline = {};
-  onlineLeads.forEach(l=>{ if(l.emp) empOnline[l.emp]=(empOnline[l.emp]||0)+1; });
-  const empOL = Object.entries(empOnline).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  dc('cLeadsEmpDash');
-  const ctxLED = document.getElementById('cLeadsEmpDash')?.getContext('2d');
-  if(ctxLED) charts.cLeadsEmpDash = new Chart(ctxLED,{
-    type:'bar',
-    data:{ labels:empOL.map(e=>e[0]), datasets:[{data:empOL.map(e=>e[1]),backgroundColor:'rgba(38,198,218,.75)',borderRadius:4,borderSkipped:false}] },
-    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false}},
-      scales:{ x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10}}},
-               y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}} }}
+  // ── Chart Leads por Origem Online (chatbot / facebook / instagram / website) ──
+  const origemMap = {
+    'chatbot':    {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},
+    'whatsapp':   {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},
+    'facebook':   {label:'Facebook',  cor:'rgba(79,142,247,.85)'},
+    'instagram':  {label:'Instagram', cor:'rgba(232,121,249,.85)'},
+    'website':    {label:'Website',   cor:'rgba(251,146,60,.85)'},
+    'site':       {label:'Website',   cor:'rgba(251,146,60,.85)'},
+    'busca':      {label:'Website',   cor:'rgba(251,146,60,.85)'},
+    'organic':    {label:'Website',   cor:'rgba(251,146,60,.85)'},
+  };
+  const origemCount = {'Chatbot':0,'Facebook':0,'Instagram':0,'Website':0};
+  leadsCV.filter(l=>l.online).forEach(l=>{
+    const o = (l.primeiraOrigem||'').toLowerCase();
+    let found = false;
+    for(const [key, cfg] of Object.entries(origemMap)){
+      if(o.includes(key)){ origemCount[cfg.label]++; found=true; break; }
+    }
+    if(!found) origemCount['Website']++;
+  });
+  const origemEntries = Object.entries(origemCount).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+  const origemLabels = origemEntries.map(e=>e[0]);
+  const origemVals   = origemEntries.map(e=>e[1]);
+  const origemCores  = origemLabels.map(l=>origemMap[l.toLowerCase()]?.cor || 'rgba(139,154,176,.7)');
+  const total_o = origemVals.reduce((s,v)=>s+v,0);
+  document.getElementById('legOrigemOnline').innerHTML = origemLabels.map((l,i)=>
+    `<div class="leg"><div class="lsq" style="background:${origemCores[i]}"></div>${l}: ${origemVals[i]} (${total_o>0?(origemVals[i]/total_o*100).toFixed(1):0}%)</div>`
+  ).join('');
+  dc('cOrigemOnline');
+  const ctxOO = document.getElementById('cOrigemOnline')?.getContext('2d');
+  if(ctxOO) charts.cOrigemOnline = new Chart(ctxOO,{
+    type:'doughnut',
+    data:{ labels:origemLabels, datasets:[{data:origemVals, backgroundColor:origemCores, borderWidth:0}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{ legend:{ display:true, position:'bottom', labels:{color:'#8b9ab0',font:{size:12},boxWidth:12,padding:10} } } }
   });
 
   // ── Chart Investimento por objetivo — filtrado pelo período selecionado ──
@@ -1769,35 +1756,37 @@ function renderDashboard(){
   const ctxO=document.getElementById('cObj')?.getContext('2d');
   if(ctxO) charts.cObj=new Chart(ctxO,{type:'doughnut',data:{labels:objKeys,datasets:[{data:objVals,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
 
-  // Leads Meta vs CRM — usa 'd' filtrado
-  const g={};d.forEach(r=>{if(!g[r.emp])g[r.emp]={m:0,c:0};g[r.emp].m+=r.leadsMeta;g[r.emp].c+=r.leadsCrm;});
-  const emps=Object.keys(g).filter(e=>g[e].m>0).sort((a,b)=>g[b].m-g[a].m).slice(0,10);
-  const hpx=Math.max(emps.length*34+60,190);
-  document.getElementById('cLeads').parentElement.style.height=hpx+'px';
+  // Leads Meta vs CRM — usa dadosRoas completo (todo o período carregado)
+  const gAll={};dadosRoas.forEach(r=>{if(!gAll[r.emp])gAll[r.emp]={m:0,c:0};gAll[r.emp].m+=r.leadsMeta;gAll[r.emp].c+=r.leadsCrm;});
+  const empsL=Object.keys(gAll).filter(e=>gAll[e].m>0||gAll[e].c>0).sort((a,b)=>(gAll[b].m+gAll[b].c)-(gAll[a].m+gAll[a].c)).slice(0,10);
+  const hpxL=Math.max(empsL.length*32+60,180);
+  document.getElementById('cLeads').parentElement.style.height=hpxL+'px';
   dc('cLeads');
   const ctxL=document.getElementById('cLeads')?.getContext('2d');
-  if(ctxL)charts.cLeads=new Chart(ctxL,{type:'bar',data:{labels:emps,datasets:[
-    {data:emps.map(e=>g[e].m),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false},
-    {data:emps.map(e=>g[e].c),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}
-  ]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
-    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10}}},
-            y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}}}}});
+  if(ctxL)charts.cLeads=new Chart(ctxL,{type:'bar',data:{labels:empsL,datasets:[
+    {label:'Meta',  data:empsL.map(e=>gAll[e].m),backgroundColor:'rgba(79,142,247,.8)', borderRadius:4,borderSkipped:false,barThickness:14},
+    {label:'CVCRM', data:empsL.map(e=>gAll[e].c),backgroundColor:'rgba(155,127,244,.8)',borderRadius:4,borderSkipped:false,barThickness:14}
+  ]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    plugins:{legend:{display:true,position:'top',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b9ab0',font:{size:10}}},
+            y:{grid:{display:false},ticks:{color:'#e2e8f0',font:{size:10}}}}}});
 
-  // Tabela empreendimentos — usa 'd' filtrado
+  // Tabela performance empreendimento — usa dadosRoas completo (acumulado)
+  const srcPerf = dadosRoas.length ? dadosRoas : d;
   const grp={};
-  d.forEach(r=>{if(!grp[r.emp])grp[r.emp]={inv:0,rec:0,qv:0,lm:0,lc:0,wc:0,fc:0,wb:0};
+  srcPerf.forEach(r=>{if(!grp[r.emp])grp[r.emp]={inv:0,rec:0,qv:0,lm:0,lc:0,wc:0,fc:0,wb:0};
     const x=grp[r.emp];x.inv+=r.investTotal;x.rec+=r.receita;x.qv+=r.qtdVendas;
     x.lm+=r.leadsMeta;x.lc+=r.leadsCrm;x.wc+=r.wppCrm;x.fc+=r.formCrm;x.wb+=r.website;});
-  const rows=Object.entries(grp).map(([emp,x])=>({...x,emp,roas:x.inv>0&&x.rec>0?x.rec/x.inv:0})).sort((a,b)=>b.roas-a.roas);
-  document.getElementById('empBody').innerHTML=rows.map(r=>{
-    const rc=r.roas>=100?C.green:r.roas>=30?C.amber:r.roas>0?C.red:C.mu;
+  const perfRows=Object.entries(grp).filter(([e])=>e&&e!=='').map(([emp,x])=>({...x,emp,roas:x.inv>0&&x.rec>0?x.rec/x.inv:0})).sort((a,b)=>b.lm-a.lm);
+  document.getElementById('empBody').innerHTML=perfRows.length?perfRows.map(r=>{
+    const rc=r.roas>=100?'#34d399':r.roas>=30?'#fbbf24':r.roas>0?'#f87171':'#8b9ab0';
     const[st,sc]=r.roas===0?['Sem venda','amber']:r.roas>=100?['Excelente','green']:r.roas>=30?['Bom','blue']:['Revisar','red'];
     return`<tr><td style="padding-left:18px;font-weight:500">${r.emp}</td>
       <td>${fBRL(r.inv,true)}</td><td>${r.rec>0?fBRL(r.rec,true):'—'}</td>
       <td><span class="rpill" style="background:${rc}22;color:${rc}">${r.roas>0?r.roas.toFixed(1)+'×':'—'}</span></td>
       <td>${fN(r.lm)}</td><td>${fN(r.lc)}</td><td>${fN(r.wc)}</td><td>${fN(r.fc)}</td><td>${fN(r.wb)}</td>
       <td>${fN(r.qv)}</td><td style="padding-right:18px"><span class="spill ${sc}">${st}</span></td></tr>`;
-  }).join('');
+  }).join(''):'<tr><td colspan="11" style="padding:16px 18px;color:#8b9ab0">Sem dados — verifique conexão com a planilha ROAS</td></tr>';
 }
 
 // ═══════════════════════════════════════════════════════

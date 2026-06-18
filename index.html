@@ -6,6 +6,7 @@
 <title>Ecovita · Sistema de Tráfego Pago</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="app.js"></script>
 <style>
 /* ═══════════════════════ RESET & VARS ═══════════════════════ */
 :root{
@@ -25,7 +26,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 /* ═══════════════════════ LOGIN ═══════════════════════ */
 #loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:0}
 .login-card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px;padding:48px 44px;width:400px;text-align:center;box-shadow:0 40px 80px rgba(0,0,0,.6)}
-.login-logo{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 20px}
+.login-logo{width:180px;height:auto;margin:0 auto 24px;display:flex;align-items:center;justify-content:center}.login-logo img{width:100%;height:auto;object-fit:contain}
 .login-title{font-size:22px;font-weight:700;margin-bottom:6px}
 .login-sub{font-size:13px;color:var(--mu);margin-bottom:32px}
 .login-field{position:relative;margin-bottom:14px}
@@ -42,8 +43,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 
 /* SIDEBAR */
 .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:100;overflow:hidden}
-.sb-logo{padding:20px 20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr)}
-.sb-logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-logo{padding:18px 20px 14px;display:flex;align-items:center;justify-content:flex-start;border-bottom:1px solid var(--bdr)}
+.sb-logo-mark{width:120px;height:auto;display:flex;align-items:center;flex-shrink:0}.sb-logo-mark img{width:100%;height:auto;object-fit:contain}
 .sb-logo-text{font-size:15px;font-weight:700;letter-spacing:-.3px}
 .sb-logo-sub{font-size:10px;color:var(--mu);font-weight:400}
 .sb-nav{flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
@@ -91,6 +92,7 @@ input[type=date]:focus{border-color:var(--blue)}
 .kpi-grid{display:grid;gap:10px;margin-bottom:16px}
 .kpi-5{grid-template-columns:repeat(5,1fr)}
 .kpi-4{grid-template-columns:repeat(4,1fr)}
+.kpi-5{grid-template-columns:repeat(5,1fr)}
 .kpi-3{grid-template-columns:repeat(3,1fr)}
 .kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
 .kpi:hover{border-color:var(--bdr2);transform:translateY(-1px)}
@@ -237,7 +239,57 @@ input[type=date]:focus{border-color:var(--blue)}
 .countdown{font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px}
 .cd-val{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums}
 
-/* ═══════════════════════ TEMA CLARO ═══════════════════════ */
+/* ═══════════════════ RESPONSIVO ═══════════════════ */
+@media(max-width:1200px){
+  .kpi-grid.kpi-5{grid-template-columns:repeat(3,1fr)}
+  .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(3,1fr)!important}
+  .g53{grid-template-columns:1fr 1fr}
+}
+@media(max-width:1024px){
+  :root{--sidebar:200px}
+  .kpi-grid.kpi-4,.kpi-grid.kpi-5{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(2,1fr)!important}
+  .g2,.g3,.g53,.g32,.g21{grid-template-columns:1fr}
+  .form-row,.concorrente-grid{grid-template-columns:1fr 1fr}
+  .camp-stats{grid-template-columns:repeat(2,1fr)}
+  .grid.g21{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  :root{--sidebar:0px}
+  .sidebar{
+    position:fixed;left:-220px;width:220px;
+    transition:transform .25s ease;z-index:300;
+  }
+  .sidebar.open{transform:translateX(220px)}
+  .content{margin-left:0}
+  .topbar{left:0;padding:0 12px}
+  .tb-title{font-size:13px}
+  .page{padding:12px}
+  .fbar{padding:8px 12px;gap:8px}
+  .kpi-grid.kpi-4,.kpi-grid.kpi-5{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(2,1fr)!important}
+  .kpi-val{font-size:22px}
+  .g2,.g3,.g53,.g32,.g21{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .concorrente-grid{grid-template-columns:1fr 1fr}
+  .ia-box .btn{font-size:11px;padding:5px 10px}
+  .grid.g21{grid-template-columns:1fr}
+  /* Menu hamburger */
+  .topbar::before{
+    content:'☰';position:absolute;left:14px;font-size:18px;cursor:pointer;color:var(--mu);
+  }
+  .topbar .logo-mark{display:none}
+}
+@media(max-width:480px){
+  .kpi-grid.kpi-4,.kpi-grid.kpi-5{grid-template-columns:1fr 1fr}
+  .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(2,1fr)!important}
+  .top-right .countdown{display:none}
+  .tb-right{gap:6px}
+  .btn{padding:5px 10px;font-size:11px}
+  .kpi{padding:12px 14px}
+  .kpi-val{font-size:20px}
+  .camp-stats{grid-template-columns:repeat(2,1fr)}
+}
 body.light{
   --bg:#f0f2f8;--bg2:#ffffff;--bg3:#f0f2f8;--bg4:#e2e6f0;
   --bdr:rgba(0,0,0,.08);--bdr2:rgba(0,0,0,.13);--bdr3:rgba(79,142,247,.4);
@@ -252,6 +304,77 @@ body.light .card{box-shadow:0 1px 3px rgba(0,0,0,.06)}
 body.light .camp-card{box-shadow:0 1px 3px rgba(0,0,0,.06)}
 body.light .ia-box{background:linear-gradient(135deg,rgba(155,127,244,.06),rgba(79,142,247,.06))}
 body.light .sb-sync{color:var(--mu)}
+
+/* ═══════════════════════ META API — CREATIVE CARDS ═══════════════════════ */
+/* Grid 5 colunas responsive */
+.creative-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:1400px){.creative-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1100px){.creative-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px) {.creative-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px) {.creative-grid{grid-template-columns:1fr}}
+
+/* Card container */
+.creative-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;position:relative;transition:transform .2s,border-color .2s,box-shadow .2s}
+.creative-card:hover{transform:translateY(-4px);border-color:var(--bdr2);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+
+/* Thumbnail */
+.creative-thumb{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:var(--bg3)}
+.creative-thumb-ph{width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,var(--bg3),var(--bg4));display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--mu)}
+
+/* Badges sobre a imagem */
+.creative-rank{position:absolute;top:8px;left:8px;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.creative-st{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+/* Barra de score no topo */
+.creative-score-bar{position:absolute;top:0;left:0;right:0;height:3px;z-index:2}
+
+/* Info do criativo */
+.creative-info{padding:11px 13px 12px}
+.creative-name{font-size:12px;font-weight:600;line-height:1.35;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
+.creative-metrics{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.cm{background:var(--bg3);border-radius:7px;padding:6px 8px}
+.cm-v{font-size:13px;font-weight:700;line-height:1}
+.cm-l{font-size:9px;color:var(--mu);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.creative-foot{display:flex;justify-content:space-between;align-items:center;padding-top:7px;border-top:1px solid var(--bdr);font-size:10px;color:var(--mu)}
+.creative-foot-cpr{font-size:12px;font-weight:700}
+
+/* ── Credential card ─────────────────────────── */
+.cred-card{background:var(--bg2);border:1px solid var(--bdr3);border-radius:12px;padding:16px 20px;margin-bottom:16px}
+.cred-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.cred-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px}
+.cred-toggle{font-size:11px;color:var(--mu)}
+.cred-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:6px;font-weight:600}
+.cred-status.ok{background:rgba(46,204,142,.12);color:var(--green)}
+.cred-status.err{background:rgba(240,101,101,.1);color:var(--red)}
+.cred-body{margin-top:14px}
+.cred-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto auto;gap:10px;align-items:end}
+@media(max-width:1024px){.cred-grid{grid-template-columns:1fr 1fr;gap:8px}}
+.cred-field label{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:600;display:block;margin-bottom:4px}
+.cred-field input{width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:12px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s}
+.cred-field input:focus{border-color:var(--blue)}
+.cred-msg{font-size:12px;margin-top:10px;min-height:18px;transition:color .2s}
+
+/* ── Seção campanha + criativos ──────────────── */
+.camp-crt-section{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+.camp-crt-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.camp-crt-name{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.camp-crt-meta{font-size:11px;color:var(--mu);margin-top:3px}
+
+/* ── Empty / error states ────────────────────── */
+.meta-empty{text-align:center;padding:60px 0;color:var(--mu)}
+.meta-empty .meta-empty-icon{font-size:44px;margin-bottom:12px}
+.meta-empty .meta-empty-title{font-size:14px;font-weight:500;margin-bottom:6px;color:var(--mu2)}
+.meta-empty .meta-empty-sub{font-size:12px}
+
+/* ── All campaigns mini-cards ───────────────── */
+.meta-camp-row{display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:10px;padding:12px 16px;margin-bottom:8px;border:1px solid var(--bdr);cursor:pointer;transition:border-color .15s,transform .15s}
+.meta-camp-row:hover{border-color:var(--bdr3);transform:translateX(2px)}
+.meta-camp-row-name{font-size:13px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta-camp-stat{text-align:right;flex-shrink:0}
+.meta-camp-stat-v{font-size:13px;font-weight:700}
+.meta-camp-stat-l{font-size:10px;color:var(--mu)}
+
+/* ══════════════════════════════════════════════ */
 
 /* ═══════════════════════ THEME TOGGLE ═══════════════════════ */
 .sb-divider{height:1px;background:var(--bdr);margin:10px 0}
@@ -268,19 +391,6 @@ body.light .theme-icon-light{opacity:1}
 body.light .theme-thumb{transform:translateX(20px);background:var(--blue)}
 .theme-label{font-size:12px;color:var(--mu);font-weight:500;transition:color .2s}
 body.light .theme-label{color:var(--blue)}
-  .kpi-5{grid-template-columns:repeat(3,1fr)}
-  .kpi-4{grid-template-columns:repeat(2,1fr)}
-  .g2,.g3,.g53,.g32,.g21{grid-template-columns:1fr}
-  .form-row,.concorrente-grid{grid-template-columns:1fr 1fr}
-  .camp-stats{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:768px){
-  :root{--sidebar:0px}
-  .sidebar{transform:translateX(-220px)}
-  .content{margin-left:0}
-  .topbar{left:0}
-  .kpi-5,.kpi-4{grid-template-columns:repeat(2,1fr)}
-}
 </style>
 </head>
 <body>
@@ -288,8 +398,7 @@ body.light .theme-label{color:var(--blue)}
 <!-- ═══════════════ LOGIN ═══════════════ -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-logo">E</div>
-    <div class="login-title">Ecovita</div>
+    <div class="login-logo"><img id="loginLogo" src="Logo_Ecovita_Branco.png" alt="Ecovita"></div>
     <div class="login-sub">Sistema de Tráfego Pago · Acesso restrito</div>
     <div class="login-field">
       <input type="password" id="loginPass" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')doLogin()">
@@ -312,11 +421,7 @@ body.light .theme-label{color:var(--blue)}
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-mark">E</div>
-      <div>
-        <div class="sb-logo-text">Ecovita</div>
-        <div class="sb-logo-sub">Tráfego Pago</div>
-      </div>
+      <div class="sb-logo-mark"><img id="sidebarLogo" src="Logo_Ecovita_Branco.png" alt="Ecovita"></div>
     </div>
     <nav class="sb-nav">
       <div class="sb-section">Principal</div>
@@ -325,6 +430,9 @@ body.light .theme-label{color:var(--blue)}
       </div>
       <div class="nav-item" onclick="goPage('campanhas')">
         <span class="nav-icon">📣</span> Campanhas
+      </div>
+      <div class="nav-item" onclick="goPage('meta')">
+        <span class="nav-icon">🎨</span> Criativos Meta
       </div>
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
@@ -341,6 +449,10 @@ body.light .theme-label{color:var(--blue)}
       </div>
       <div class="nav-item" onclick="goPage('mercado')">
         <span class="nav-icon">🔍</span> Pesquisa de Mercado
+      </div>
+      <div class="sb-section">Configurações</div>
+      <div class="nav-item" onclick="goPage('config')">
+        <span class="nav-icon">⚙️</span> Config. de API
       </div>
     </nav>
     <div class="sb-bottom">
@@ -419,11 +531,12 @@ body.light .theme-label{color:var(--blue)}
         👥 Leads
         <div style="flex:1;height:1px;background:var(--bdr)"></div>
       </div>
-      <div class="kpi-grid kpi-5" style="margin-bottom:16px">
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px">
         <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Leads CRM Total</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Leads CRM Novos</div><div class="kpi-val teal" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
+        <div class="kpi blue"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
         <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
         <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
       </div>
 
@@ -480,14 +593,12 @@ body.light .theme-label{color:var(--blue)}
           <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">Leads Novos vs Reimpactados — por mês</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--teal)"></div>Novos</div>
-            <div class="leg"><div class="lsq" style="background:var(--orange)"></div>Reimpactados</div>
-          </div>
-          <div class="cw" style="height:220px"><canvas id="cNovosReimp"></canvas></div>
+          <div class="card-hd"><div class="card-title">Situação dos Leads Online por empreendimento</div></div>
+          <div class="cw" style="height:220px"><canvas id="cLeadsEmpDash"></canvas></div>
         </div>
       </div>
+
+      <div class="sec">Performance por empreendimento</div>
       <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
         <div class="twrap">
           <table class="tbl">
@@ -505,82 +616,160 @@ body.light .theme-label{color:var(--blue)}
 
     <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
     <div class="page" id="page-campanhas">
+
+      <!-- Barra de conta + status -->
+      <div id="campConnBar" style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
+        <span id="campConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
+        <span id="campConnLabel" style="color:var(--mu);flex:1">Nenhuma conta configurada</span>
+        <select id="fCampAccount" onchange="onCampAccountChange()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx);outline:none">
+          <option value="">— Selecione a conta —</option>
+        </select>
+        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 10px">⚙️ Contas</button>
+      </div>
+
+      <!-- Filtros -->
       <div class="fbar">
         <span class="fl">Objetivo:</span>
-        <select id="fCampObj" onchange="renderCampanhas()"><option value="">Todos</option></select>
-        <span class="fl">Status:</span>
-        <select id="fCampSt" onchange="renderCampanhas()">
+        <select id="fCampObj" onchange="filterCampanhasAPI()">
           <option value="">Todos</option>
-          <option value="active">Ativas</option>
-          <option value="paused">Pausadas</option>
+          <option value="Alcance">Alcance</option>
+          <option value="Cadastro">Cadastro</option>
+          <option value="WhatsApp">WhatsApp</option>
         </select>
-        <span class="fl">Empreendimento:</span>
-        <select id="fCampEmp" onchange="renderCampanhas()"><option value="">Todos</option></select>
-        <span class="fl" id="infoCamp" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
+        <span class="fl">Status:</span>
+        <select id="fCampSt" onchange="filterCampanhasAPI()">
+          <option value="">Todos</option>
+          <option value="ACTIVE">Ativas</option>
+          <option value="PAUSED">Pausadas</option>
+        </select>
+        <span class="fl">Período:</span>
+        <select id="fCampPeriod" onchange="loadCampanhasAPI()">
+          <option value="this_month">Este mês</option>
+          <option value="last_month">Mês passado</option>
+          <option value="last_30d">Últimos 30 dias</option>
+          <option value="last_90d">Últimos 90 dias</option>
+          <option value="this_quarter">Este trimestre</option>
+          <option value="maximum">Máximo histórico</option>
+        </select>
+        <button class="btn btn-primary" id="btnLoadCamp" onclick="loadCampanhasAPI()">↻ Carregar</button>
+        <button class="btn btn-ai" id="btnAnalisarCamp" style="display:none" onclick="analisarCampanhasIA()">🤖 Analisar com IA</button>
+        <span id="infoCamp" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
       </div>
 
-      <div class="kpi-grid kpi-4">
+      <!-- KPIs -->
+      <div class="kpi-grid kpi-5" style="margin-bottom:16px">
         <div class="kpi blue"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue" id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
         <div class="kpi green"><div class="kpi-label">Ativas</div><div class="kpi-val green" id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">Investido Total</div><div class="kpi-val amber" id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Gasto no Período</div><div class="kpi-val amber" id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
         <div class="kpi purple"><div class="kpi-label">Resultados Totais</div><div class="kpi-val purple" id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">CTR Médio</div><div class="kpi-val teal" id="ck5">—</div><div class="kpi-sub" id="ck5s"></div></div>
       </div>
 
-      <div id="campCards"></div>
+      <!-- Container de cards -->
+      <div id="campCards">
+        <div class="meta-empty">
+          <div class="meta-empty-icon">📣</div>
+          <div class="meta-empty-title">Nenhuma campanha carregada</div>
+          <div class="meta-empty-sub">Selecione uma conta e clique em "↻ Carregar"</div>
+        </div>
+      </div>
+
+      <!-- Box IA -->
+      <div id="campAIContainer" style="display:none;margin-top:8px">
+        <div class="ia-box">
+          <div class="ia-header">
+            <div class="ia-icon">🤖</div>
+            <div>
+              <div class="ia-title">Análise IA das Campanhas</div>
+              <div class="ia-sub">Claude analisa performance, identifica oportunidades e sugere otimizações</div>
+            </div>
+            <button class="btn btn-ai" onclick="analisarCampanhasIA()" style="margin-left:auto;flex-shrink:0">✦ Analisar</button>
+          </div>
+          <div id="campAIResult">
+            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
+              Clique em "Analisar com IA" para receber insights das campanhas carregadas.
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ══════════════ PAGE: INVESTIMENTO ══════════════ -->
     <div class="page" id="page-investimento">
       <div class="fbar">
-        <span class="fl">Objetivo:</span>
-        <select id="fInvObj" onchange="renderInvestimento()"><option value="">Todos</option></select>
+        <span class="fl">Mês:</span>
+        <select id="fInvMes" onchange="renderInvestimento()">
+          <option value="Jan">Janeiro</option>
+          <option value="Fev">Fevereiro</option>
+          <option value="Mar">Março</option>
+          <option value="Abr">Abril</option>
+          <option value="Mai">Maio</option>
+          <option value="Jun">Junho</option>
+          <option value="Jul">Julho</option>
+          <option value="Ago">Agosto</option>
+          <option value="Set">Setembro</option>
+          <option value="Out">Outubro</option>
+          <option value="Nov">Novembro</option>
+          <option value="Dez">Dezembro</option>
+        </select>
         <span class="fl">Empreendimento:</span>
         <select id="fInvEmp" onchange="renderInvestimento()"><option value="">Todos</option></select>
         <span class="fl" id="infoInv" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
       </div>
 
-      <div class="kpi-grid kpi-4">
-        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="iv1">—</div><div class="kpi-sub" id="iv1s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">Mês Atual</div><div class="kpi-val amber" id="iv2">—</div><div class="kpi-sub" id="iv2s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Campanhas Ativas</div><div class="kpi-val green" id="iv3">—</div><div class="kpi-sub" id="iv3s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Média Diária</div><div class="kpi-val teal" id="iv4">—</div><div class="kpi-sub" id="iv4s"></div></div>
+      <div class="kpi-grid kpi-5">
+        <div class="kpi blue"><div class="kpi-label">Orçamento Previsto</div><div class="kpi-val blue" id="iv1">—</div><div class="kpi-sub" id="iv1s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Inv. Patrocinado</div><div class="kpi-val teal" id="iv2">—</div><div class="kpi-sub" id="iv2s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Realizado Total</div><div class="kpi-val green" id="iv3">—</div><div class="kpi-sub" id="iv3s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">% Executado</div><div class="kpi-val amber" id="iv4">—</div><div class="kpi-sub" id="iv4s"></div></div>
+        <div class="kpi purple"><div class="kpi-label">Impostos Meta (CBS+IBF)</div><div class="kpi-val purple" id="iv5">—</div><div class="kpi-sub" id="iv5s"></div></div>
       </div>
 
       <div class="grid g53">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento mensal por objetivo</div><span class="badge blue" id="ivAnoLbl">—</span></div>
+          <div class="card-hd"><div class="card-title">Previsto vs Realizado por empreendimento</div></div>
           <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Cadastro</div>
-            <div class="leg"><div class="lsq" style="background:var(--green)"></div>WhatsApp</div>
-            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Alcance</div>
+            <div class="leg"><div class="lsq" style="background:rgba(79,142,247,.8)"></div>Previsto</div>
+            <div class="leg"><div class="lsq" style="background:rgba(52,211,153,.8)"></div>Realizado</div>
           </div>
-          <div class="cw" style="height:220px"><canvas id="cInvMensal"></canvas></div>
+          <div class="cw" style="height:240px"><canvas id="cInvPrevReal"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">Por objetivo (total)</div></div>
-          <div class="legend" id="ivLegObj"></div>
-          <div class="cw" style="height:240px"><canvas id="cInvObj"></canvas></div>
+          <div class="card-hd"><div class="card-title">Distribuição prevista</div></div>
+          <div class="legend" id="invLegDist"></div>
+          <div class="cw" style="height:260px"><canvas id="cInvDist"></canvas></div>
         </div>
       </div>
 
-      <div class="grid g2">
+      <div class="grid g2" style="margin-top:12px">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Mês atual — por objetivo</div><span class="badge amber" id="ivMesLbl">—</span></div>
-          <div class="cw" style="height:200px"><canvas id="cInvMesObj"></canvas></div>
+          <div class="card-hd"><div class="card-title">Meta vs Google — Realizado</div></div>
+          <div class="cw" style="height:200px"><canvas id="cInvMetaGoogle"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">Mês atual — por empreendimento</div></div>
-          <div class="cw" style="height:200px"><canvas id="cInvMesEmp"></canvas></div>
+          <div class="card-hd"><div class="card-title">Saldo de Segurança por empreendimento</div></div>
+          <div class="cw" style="height:200px"><canvas id="cInvSeguranca"></canvas></div>
         </div>
       </div>
 
-      <div class="sec">Detalhamento por campanha</div>
+      <div class="sec">Detalhamento por empreendimento</div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="twrap">
-          <table class="tbl">
+          <table class="tbl" id="invTbl">
             <thead><tr>
-              <th style="padding-left:18px">Campanha</th><th>Empreendimento</th><th>Objetivo</th><th>Status</th>
-              <th>Orç./dia</th><th>Gasto Total</th><th>Resultados</th><th>CTR</th><th style="padding-right:18px">Custo/Result.</th>
+              <th style="padding-left:14px">Empreendimento</th>
+              <th>Agência</th>
+              <th>Orçamento</th>
+              <th>Inv. Patrocinado</th>
+              <th>Meta Total</th>
+              <th>Google</th>
+              <th>Segurança</th>
+              <th>Imposto Meta</th>
+              <th>Real. Meta</th>
+              <th>Real. Google</th>
+              <th>Real. Total</th>
+              <th style="padding-right:14px">% Usado</th>
             </tr></thead>
             <tbody id="invBody"></tbody>
           </table>
@@ -588,7 +777,7 @@ body.light .theme-label{color:var(--blue)}
       </div>
     </div>
 
-    <!-- ══════════════ PAGE: LEADS ══════════════ -->
+        <!-- ══════════════ PAGE: LEADS ══════════════ -->
     <div class="page" id="page-leads">
       <div class="kpi-grid kpi-4">
         <div class="kpi green"><div class="kpi-label">Total Leads CRM</div><div class="kpi-val green" id="lk1">—</div><div class="kpi-sub" id="lk1s"></div></div>
@@ -738,6 +927,224 @@ body.light .theme-label{color:var(--blue)}
       <div id="mercadoIA" style="display:none;margin-top:16px"></div>
     </div>
 
+    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
+    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
+    <div class="page" id="page-config">
+
+      <!-- Status cards das integrações -->
+      <div class="kpi-grid kpi-3" style="margin-bottom:20px">
+        <div class="kpi blue" id="cfgStatusMeta">
+          <div class="kpi-label">Contas Meta Ads</div>
+          <div class="kpi-val" id="cfgMetaVal" style="font-size:20px">0</div>
+          <div class="kpi-sub" id="cfgMetaSub">Nenhuma conta cadastrada</div>
+        </div>
+        <div class="kpi purple" id="cfgStatusClaude">
+          <div class="kpi-label">Claude AI (Anthropic)</div>
+          <div class="kpi-val" id="cfgClaudeVal" style="font-size:20px">—</div>
+          <div class="kpi-sub" id="cfgClaudeSub">Não configurado</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">Planilhas Google</div>
+          <div class="kpi-val green" style="font-size:20px">✓</div>
+          <div class="kpi-sub">3 sheets conectadas via CSV público</div>
+        </div>
+      </div>
+
+      <!-- Gerenciador de Contas Meta -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">🔵 Contas Meta Marketing API</div>
+          <span class="badge" id="cfgMetaBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 contas</span>
+        </div>
+
+        <!-- Lista de contas salvas -->
+        <div id="metaAccountsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+
+        <!-- Formulário adicionar nova conta -->
+        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:10px">➕ Adicionar nova conta</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="cred-field">
+              <label>Nome da conta</label>
+              <input type="text" id="newAccName" placeholder="Ex: Ecovita Goiânia" autocomplete="off"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+            <div class="cred-field">
+              <label>Access Token</label>
+              <input type="password" id="newAccToken" placeholder="EAAxxxxxxxx…" autocomplete="new-password"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+            <div class="cred-field">
+              <label>Ad Account ID</label>
+              <input type="text" id="newAccId" placeholder="act_123456789" autocomplete="off"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" onclick="addMetaAccount()">➕ Adicionar conta</button>
+            <span id="credMsg" style="font-size:12px"></span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter o Token:</b><br>
+          1. Acesse <b>developers.facebook.com → Ferramentas → Explorador de API do Graph</b><br>
+          2. Selecione seu App e gere token com permissões: <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_read</code> e <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_management</code><br>
+          3. Para uso prolongado: use um <b>System User Token</b> (não expira) ou token de longa duração (60 dias)<br>
+          4. O Ad Account ID está em <b>Meta Ads Manager → URL da conta</b> (formato <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">act_XXXXXXXXX</code>)
+        </div>
+      </div>
+
+      <!-- Bloco Claude API -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">🤖 Claude AI — Anthropic</div>
+          <span class="badge" id="cfgClaudeBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="cred-field">
+            <label>API Key</label>
+            <input type="password" id="inputClaudeKey" placeholder="sk-ant-api03-…" autocomplete="new-password"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai"  onclick="saveClaudeKey()">💾 Salvar Claude Key</button>
+          <button class="btn"         onclick="clearClaudeKey()" style="color:var(--red)">✕ Limpar</button>
+          <span id="claudeMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter a API Key:</b><br>
+          1. Acesse <b>console.anthropic.com → API Keys</b><br>
+          2. Clique em <b>"Create Key"</b>, nomeie e copie<br>
+          3. A key começa com <code style="background:rgba(155,127,244,.12);color:var(--purple);padding:1px 5px;border-radius:4px">sk-ant-api03-…</code><br>
+          4. Ela é usada nas páginas <b>Análise por IA</b> e <b>Criativos Meta</b>
+        </div>
+      </div>
+
+      <!-- Bloco Planilhas Google -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📊 Google Sheets — Planilhas conectadas</div>
+          <span class="badge green">3 ativas</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">ROI & ROAS</div>
+              <div style="font-size:11px;color:var(--mu)">Investimento, receita, leads por empreendimento e mês</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Campanhas Meta Ads</div>
+              <div style="font-size:11px;color:var(--mu)">Nome, objetivo, status, gasto, CTR, resultados</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Leads CVCRM</div>
+              <div style="font-size:11px;color:var(--mu)">Base completa com situação, origem e empreendimento</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--mu)">
+          As planilhas são públicas (Leitor) e lidas via CSV direto. Nenhuma credencial necessária.
+          Auto-refresh às 08:00 diariamente.
+        </div>
+      </div>
+
+    </div><!-- /page-config -->
+
+    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
+    <div class="page" id="page-meta">
+
+      <!-- Barra de conta ativa + status -->
+      <div id="metaConnBar" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
+        <span id="metaConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
+        <span id="metaConnLabel" style="color:var(--mu)">Nenhuma conta configurada</span>
+        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 12px;margin-left:auto">⚙️ Gerenciar Contas</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="fbar">
+        <span class="fl">Conta:</span>
+        <select id="fMetaAccount" onchange="onMetaAccountSelect()" style="min-width:180px;max-width:260px">
+          <option value="">— Selecione uma conta —</option>
+        </select>
+        <span class="fl">Campanha:</span>
+        <select id="fMetaCamp" onchange="onMetaCampaignSelect()" style="min-width:200px;max-width:320px">
+          <option value="">— Todas as campanhas —</option>
+        </select>
+        <span class="fl">Período:</span>
+        <select id="fMetaPeriod">
+          <option value="this_month">Este mês</option>
+          <option value="last_month">Mês passado</option>
+          <option value="last_30d">Últimos 30 dias</option>
+          <option value="last_90d">Últimos 90 dias</option>
+          <option value="this_quarter">Este trimestre</option>
+          <option value="maximum">Máximo</option>
+        </select>
+        <button class="btn btn-primary" id="btnLoadMeta" onclick="loadMetaCampaigns()">↻ Carregar Campanhas</button>
+        <button class="btn btn-ai" id="btnAnalyzeAll" style="display:none" onclick="analyzeAllMetaCampaigns()">🤖 Analisar Conta</button>
+        <span id="metaLoadInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
+      </div>
+
+      <!-- KPIs da campanha selecionada -->
+      <div id="metaKpiRow" style="display:none;margin-bottom:16px">
+        <div class="kpi-grid kpi-4">
+          <div class="kpi blue"><div class="kpi-label">Gasto no Período</div><div class="kpi-val blue" id="mk1">—</div><div class="kpi-sub" id="mk1s"></div></div>
+          <div class="kpi green"><div class="kpi-label">Resultados (Top 5)</div><div class="kpi-val green" id="mk2">—</div><div class="kpi-sub" id="mk2s"></div></div>
+          <div class="kpi amber"><div class="kpi-label">CTR Campanha</div><div class="kpi-val amber" id="mk3">—</div><div class="kpi-sub" id="mk3s"></div></div>
+          <div class="kpi purple"><div class="kpi-label">Custo / Resultado</div><div class="kpi-val purple" id="mk4">—</div><div class="kpi-sub" id="mk4s"></div></div>
+        </div>
+      </div>
+
+      <!-- Container de criativos -->
+      <div id="metaCreativesContainer">
+        <div class="meta-empty">
+          <div class="meta-empty-icon">🎨</div>
+          <div class="meta-empty-title">Nenhuma campanha carregada</div>
+          <div class="meta-empty-sub">Configure a API em ⚙️ Config. de API e clique em "Carregar Campanhas"</div>
+        </div>
+      </div>
+
+      <!-- Box IA dos criativos -->
+      <div id="metaAIContainer" style="display:none;margin-top:4px">
+        <div class="ia-box">
+          <div class="ia-header">
+            <div class="ia-icon">🤖</div>
+            <div>
+              <div class="ia-title">Análise IA dos Criativos</div>
+              <div class="ia-sub">Claude analisa os top 5 e gera recomendações específicas</div>
+            </div>
+            <button class="btn btn-ai" onclick="analyzeMetaCreatives()" style="margin-left:auto;flex-shrink:0">✦ Analisar Criativos</button>
+          </div>
+          <div id="metaAIResult">
+            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
+              Selecione uma campanha e clique em "Analisar Criativos" para receber insights do Claude.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de todas as campanhas -->
+      <div id="metaAllCampsContainer" style="display:none;margin-top:8px">
+        <div class="sec">Todas as Campanhas da Conta</div>
+        <div id="metaAllCampsList"></div>
+      </div>
+
+    </div><!-- /page-meta -->
+
   </div><!-- /content -->
 </div><!-- /app -->
 
@@ -770,8 +1177,13 @@ function toggleTheme(){
   const isLight = document.body.classList.toggle('light');
   document.getElementById('themeLabel').textContent = isLight ? 'Tema Claro' : 'Tema Escuro';
   localStorage.setItem('ecovita_theme', isLight ? 'light' : 'dark');
+  _applyLogoTheme(isLight);
   // Redesenha gráficos para atualizar cores de grade
   setTimeout(()=>{ if(typeof renderDashboard==='function' && dadosRoas.length) renderDashboard(); },50);
+}
+function _applyLogoTheme(isLight){
+  const src = isLight ? 'Logo_Ecovita_Verde.png' : 'Logo_Ecovita_Branco.png';
+  ['sidebarLogo','loginLogo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.src=src; });
 }
 // Restaura tema salvo
 (function(){
@@ -781,6 +1193,7 @@ function toggleTheme(){
     document.addEventListener('DOMContentLoaded',()=>{
       const lbl=document.getElementById('themeLabel');
       if(lbl) lbl.textContent='Tema Claro';
+      _applyLogoTheme(true);
     });
   }
 })();
@@ -832,23 +1245,27 @@ function startCountdown(){
 const PAGE_TITLES={
   dashboard:'Dashboard',campanhas:'Campanhas Meta',
   investimento:'Investimento',leads:'Leads & CVCRM',
-  melhorias:'O que Melhorar',ia:'Análise por IA',mercado:'Pesquisa de Mercado'
+  melhorias:'O que Melhorar',ia:'Análise por IA',
+  mercado:'Pesquisa de Mercado',
+  config:'Configurações de API',meta:'Criativos Meta API'
 };
 function goPage(pg){
   paginaAtual=pg;
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',campanhas:'campan',investimento:'invest',leads:'leads',melhorias:'melhor',ia:'análise',mercado:'mercado'};
+    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',investimento:'invest',leads:'leads',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
-  if(pg==='campanhas'&&campsMeta.length) renderCampanhas();
-  if(pg==='investimento'&&campsMeta.length) renderInvestimento();
+  if(pg==='campanhas') initCampanhasPage();
+  if(pg==='investimento') renderInvestimento();
   if(pg==='leads'&&leadsCV.length) renderLeads();
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
   if(pg==='mercado') renderConcorrentes();
+  if(pg==='config') initConfigPage();
+  if(pg==='meta') initMetaPage();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -922,14 +1339,22 @@ function parseRoas(rows){
 }
 
 function parseMeta(rows){
-  return rows.filter(r=>r['Nome da campanha']&&r['Valor usado (BRL)']).map(r=>({
-    nome:r['Nome da campanha']||'',emp:r['Empreendimento']||'',objetivo:r['Objetivo']||'',
-    cidade:r['Cidade']||'',status:r['Veiculação da campanha']||'',
-    valor:toN(r['Valor usado (BRL)']),resultados:toN(r['Resultados']),
-    alcance:toN(r['Alcance']),impressoes:toN(r['Impressões']),
-    ctr:toN(r['CTR (taxa de cliques no link)']),cpc:toN(r['CPC (custo por clique no link) (BRL)']),
-    cprResult:toN(r['Custo por resultados']),orcamento:toN(r['Orçamento do conjunto de anúncios']),
-  }));
+  return rows.filter(r=>r['Nome da campanha']&&r['Valor usado (BRL)']).map(r=>{
+    // Parse de "Término dos relatórios" — formato DD/MM/YYYY
+    const termRaw = r['Término dos relatórios']||'';
+    let dataTermino = null;
+    const m = termRaw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if(m) dataTermino = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+    return {
+      nome:r['Nome da campanha']||'',emp:r['Empreendimento']||'',objetivo:r['Objetivo']||'',
+      cidade:r['Cidade']||'',status:r['Veiculação da campanha']||'',
+      valor:toN(r['Valor usado (BRL)']),resultados:toN(r['Resultados']),
+      alcance:toN(r['Alcance']),impressoes:toN(r['Impressões']),
+      ctr:toN(r['CTR (taxa de cliques no link)']),cpc:toN(r['CPC (custo por clique no link) (BRL)']),
+      cprResult:toN(r['Custo por resultados']),orcamento:toN(r['Orçamento do conjunto de anúncios']),
+      dataTermino, // ← usado para filtrar por período
+    };
+  });
 }
 
 function parseLeads(rows){
@@ -943,38 +1368,31 @@ function parseLeads(rows){
     const p=(r['Primeira Origem']||'').trim();
     const u=(r['Última Origem']||'').trim();
 
-    // Parseia datas — tenta colunas comuns do CVCRM
     const parseDateBR = s => {
       if(!s) return null;
-      // Formatos: DD/MM/YYYY HH:MM, DD/MM/YYYY, YYYY-MM-DD
+      // Formato: DD/MM/YYYY HH:MM:SS ou DD/MM/YYYY
       const m1 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-      if(m1) return new Date(`${m1[3]}-${m1[2]}-${m1[1]}`);
+      if(m1) return new Date(parseInt(m1[3]), parseInt(m1[2])-1, parseInt(m1[1]));
       const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if(m2) return new Date(s.substring(0,10));
+      if(m2) return new Date(parseInt(m2[1]), parseInt(m2[2])-1, parseInt(m2[3]));
       return null;
     };
 
-    // Tenta várias colunas de data de cadastro / criação
-    const dataCadastroRaw = r['Data de Cadastro'] || r['Criado em'] || r['Data Cadastro'] || r['Data'] || '';
-    const dataUltimaRaw   = r['Última Atualização'] || r['Atualizado em'] || r['Data Última Origem'] || r['Última Entrada'] || '';
+    // Nomes EXATOS conforme planilha (case-sensitive)
+    const dataUltimaRaw   = r['Data da Última Entrada'] || r['Data da última entrada'] || r['Data da Ultima Entrada'] || '';
+    const dataCadastroRaw = r['Data Primeiro Cadastro'] || r['Data de Cadastro'] || r['Criado em'] || '';
 
-    const dataCadastro = parseDateBR(dataCadastroRaw);
     const dataUltima   = parseDateBR(dataUltimaRaw);
+    const dataCadastro = parseDateBR(dataCadastroRaw);
 
-    // Classificação novo vs reimpactado:
-    // Reimpactado = data do primeiro cadastro < data da última entrada (voltou em outro momento)
-    // OU (fallback sem data): Primeira Origem online E Última Origem ≠ Primeira
+    // Reimpactado: dataCadastro < dataUltima (pelo menos 1 dia — voltou depois)
+    // Fallback sem data: Primeira Origem online E Última Origem diferente
     let reimpactado = false;
-    if(dataCadastro && dataUltima) {
-      // Considera reimpactado se houve nova entrada em data diferente (pelo menos 1 dia depois)
-      const diffMs = dataUltima - dataCadastro;
-      reimpactado = diffMs > 86400000; // > 1 dia
+    if(dataCadastro && dataUltima){
+      reimpactado = (dataUltima - dataCadastro) > 86400000; // > 1 dia
     } else {
-      // fallback pela lógica de origens
       reimpactado = isOnline(p) && !!u && u !== p;
     }
-
-    const novo = !reimpactado; // novo = só 1 cadastro, sem retorno
 
     return {
       situacao       : (r['Situação']||'').trim(),
@@ -983,9 +1401,9 @@ function parseLeads(rows){
       ultimaOrigem   : u,
       online         : isOnline(p),
       reimpactado,
-      novo,
+      novo           : !reimpactado,
       dataCadastro,
-      dataUltima,
+      dataUltima,      // ← campo usado no filtro de data
     };
   });
 }
@@ -1052,13 +1470,13 @@ function filteredRoas(){
   });
 }
 
-// Filtra leadsCV pelo filtro de data (usa dataCadastro)
+// Filtra leadsCV pela "Data da última entrada" — exclui leads sem data quando filtro está ativo
 function filteredLeads(){
   const {de, ate} = getFiltroDatas();
   if(!de && !ate) return leadsCV; // sem filtro → todos
   return leadsCV.filter(l=>{
-    const d = l.dataCadastro;
-    if(!d) return true; // sem data → inclui (não descarta)
+    const d = l.dataUltima; // usa APENAS "Data da última entrada"
+    if(!d) return false;    // sem data → EXCLUI quando filtro está ativo
     if(de  && d < de)  return false;
     if(ate && d > ate) return false;
     return true;
@@ -1105,9 +1523,18 @@ function popularFiltros(){
   if(fAte && !fAte.value) fAte.value = hoje_str;
 }
 
-// ═══════════════════════════════════════════════════════
-// CHART HELPERS
-// ═══════════════════════════════════════════════════════
+// Filtra campsMeta por "Término dos relatórios" no período selecionado
+function filteredMetaByDate(){
+  const {de, ate} = getFiltroDatas();
+  if(!de && !ate) return campsMeta;
+  return campsMeta.filter(c=>{
+    const d = c.dataTermino;
+    if(!d) return false; // sem data → exclui quando há filtro
+    if(de  && d < de)  return false;
+    if(ate && d > ate) return false;
+    return true;
+  });
+}
 function mkChart(id,type,labels,datasets,opts={}){
   dc(id);
   const ctx=document.getElementById(id)?.getContext('2d');
@@ -1135,75 +1562,111 @@ function barRows(container,items,maxVal,corFn){
 // ═══════════════════════════════════════════════════════
 function renderDashboard(){
   const d  = filteredRoas();
-  const lf = filteredLeads(); // leads filtrados por data
+  const lf = filteredLeads(); // leads filtrados por dataUltima
+
+  // ── Leads Meta: soma Resultados da Planilha 2 filtrado por "Término dos relatórios" ──
+  // Exclui campanhas com "Alcance" no nome (objetivo de alcance não gera leads)
+  const metaFiltrado = filteredMetaByDate().filter(c=>!c.nome.toLowerCase().includes('alcance'));
+  const lmeta = metaFiltrado.reduce((s,c)=>s+c.resultados, 0);
 
   // ── Métricas financeiras ──
   const inv  = d.reduce((s,r)=>s+r.investTotal,0);
   const rec  = d.reduce((s,r)=>s+r.receita,0);
   const rv   = d.filter(r=>r.roas>0&&r.roas<5000);
   const roas = rv.length ? rv.reduce((s,r)=>s+r.roas,0)/rv.length : 0;
-  const lmeta= d.reduce((s,r)=>s+r.leadsMeta,0);
   const vn   = d.reduce((s,r)=>s+r.qtdVendas,0);
 
-  // ── Métricas de leads (filtradas por data) ──
-  const totalLeads = lf.length;
-  const novos      = lf.filter(l=>l.novo).length;
-  const reimp      = lf.filter(l=>l.reimpactado).length;
-  const txR        = totalLeads>0 ? reimp/totalLeads*100 : 0;
-  const cpl        = lmeta>0 ? inv/lmeta : 0;
+  // ── Métricas de leads com 3 lógicas distintas ──
+  // lf = filtrado por dataUltima (período selecionado)
+
+  // 1) CRM TOTAL → todos os leads da base, sem filtro de data
+  const totalLeads   = leadsCV.length;
+
+  // 2) CRM ONLINE → todos os leads com Primeira Origem online, sem filtro de data
+  const onlineLeadsTotal = leadsCV.filter(l=>l.online);
+
+  // 3) Novos Online, Reimpactados, Taxa → filtrados pelo período (dataUltima)
+  const lfOnline    = lf.filter(l=>l.online);
+  const novosOnline = lf.filter(l=>l.online && !l.reimpactado);
+  const reimp       = lf.filter(l=>l.reimpactado && l.online);
+  const txR         = lfOnline.length>0 ? reimp.length/lfOnline.length*100 : 0;
+  const cpl         = lmeta>0 ? inv/lmeta : 0;
 
   // ── Preenche KPIs ──
   // Linha 1 — financeiro
-  sid('k1', fBRL(inv,true));  sid('k1s', `CPL: ${cpl>0?fBRL(cpl):'—'}`);
-  sid('k2', fBRL(rec,true));  sid('k2s', `${d.filter(r=>r.receita>0).length} empreend.`);
-  sid('k5', fN(vn));          sid('k5s', `Conv: ${lmeta>0?(vn/lmeta*100).toFixed(1):0}%`);
-  sid('k3', roas.toFixed(1)+'×'); sid('k3s','Receita ÷ Investimento');
+  sid('k1', fBRL(inv,true));       sid('k1s', `CPL: ${cpl>0?fBRL(cpl):'—'}`);
+  sid('k2', fBRL(rec,true));       sid('k2s', `${d.filter(r=>r.receita>0).length} empreend.`);
+  sid('k5', fN(vn));               sid('k5s', `Conv: ${lmeta>0?(vn/lmeta*100).toFixed(1):0}%`);
+  sid('k3', roas.toFixed(1)+'×');  sid('k3s', 'Receita ÷ Investimento');
 
   // Linha 2 — leads
-  sid('k4',  fN(lmeta));      sid('k4s', 'Resultados Meta Ads');
-  sid('k6',  fN(totalLeads)); sid('k6s', 'Leads no período filtrado');
-  sid('k7',  fN(novos));      sid('k7s', '1º cadastro no período');
-  sid('k8',  fN(reimp));      sid('k8s', 'Voltaram após 1° cadastro');
-  sid('k10', txR.toFixed(1)+'%'); sid('k10s', 'do total do período');
+  // Leads Meta = Resultados da planilha campanhas (Sheet 1 tem por mês = lmeta filtrado)
+  sid('k4',  fN(lmeta));                          sid('k4s',  'Resultados · período filtrado');
+  sid('k11', fN(onlineLeadsTotal.length));         sid('k11s', 'Toda base · Origem online');
+  sid('k7',  fN(novosOnline.length));              sid('k7s',  'Online · período filtrado');
+  sid('k8',  fN(reimp.length));                    sid('k8s',  'Online · período filtrado');
+  const totalON = novosOnline.length + reimp.length;
+  sid('k6',  fN(totalON));                         sid('k6s',  'Novos + Reimpactados');
+  sid('k10', txR.toFixed(1)+'%');                 sid('k10s', '% dos online no período');
 
-  // Label do período aplicado
+  // Label do período
   const {de,ate} = getFiltroDatas();
-  const fmtD = d => d ? d.toLocaleDateString('pt-BR') : '';
-  const periodoLabel = de||ate
-    ? `${fmtD(de)||'início'} → ${fmtD(ate)||'hoje'} · ${d.length} registros · ${totalLeads} leads`
-    : `${d.length} registros · ${totalLeads} leads`;
-  sid('infoGeral', periodoLabel);
+  const fmtD = dt => dt ? dt.toLocaleDateString('pt-BR') : '';
+  sid('infoGeral', `${fmtD(de)||'início'} → ${fmtD(ate)||'hoje'} · ${d.length} reg · ${fN(totalON)} leads ON`);
 
-  // ── Gráficos reagindo ao filtro ──
-  // Usa 'd' filtrado para os meses do gráfico
-  const mesesFilt = [...new Set(d.map(r=>r.mes))].sort();
-  const mesesAll  = [...new Set(dadosRoas.map(r=>r.mes))].sort();
-  // Se há filtro de data usa só os meses filtrados, senão todos
-  const meses = (de||ate) ? mesesFilt : mesesAll;
+  // ── Meses fixados: jan do ano atual até mês atual ──
+  const hoje       = new Date();
+  const anoAtual   = hoje.getFullYear();
+  const mesAtualN  = hoje.getMonth() + 1; // 1-12
+  // Gera array de 'MM/YYYY' do ano atual até o mês atual
+  const mesesAno = [];
+  for(let m=1; m<=mesAtualN; m++){
+    mesesAno.push(`${String(m).padStart(2,'0')}/${anoAtual}`);
+  }
+  // Para invest/receita/ROAS usa mesesAno fixo; dados do 'd' filtrado por data
+  const getMesData = (mes, campo) => d.filter(r=>r.mes===mes).reduce((s,r)=>s+r[campo],0);
+  const getMesRoas = mes => { const rows=d.filter(r=>r.mes===mes&&r.roas>0&&r.roas<5000); return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0; };
 
-  // Chart Invest vs Receita
-  mkChart('cMensal','bar',meses.map(fmtMes),[
-    {label:'Investimento',
-     data:meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.investTotal,0)),
-     backgroundColor:'rgba(79,142,247,.75)',borderRadius:6,borderSkipped:false},
-    {label:'Receita',
-     data:meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.receita,0)),
-     backgroundColor:'rgba(46,204,142,.75)',borderRadius:6,borderSkipped:false}
-  ],{scales:{
-    x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},
-    y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}
-  }});
+  // ── Chart Invest vs Receita — grouped bars com escala dupla para melhor visibilidade ──
+  dc('cMensal');
+  const ctxM = document.getElementById('cMensal')?.getContext('2d');
+  if(ctxM){ charts.cMensal = new Chart(ctxM, {
+    type:'bar',
+    data:{ labels: mesesAno.map(fmtMes), datasets:[
+      { label:'Investimento',
+        data: mesesAno.map(m=>getMesData(m,'investTotal')),
+        backgroundColor:'rgba(79,142,247,.9)', borderRadius:5, borderSkipped:false,
+        yAxisID:'yInv', order:1 },
+      { label:'Receita',
+        data: mesesAno.map(m=>getMesData(m,'receita')),
+        type:'line', borderColor:C.green, backgroundColor:'rgba(46,204,142,.1)',
+        fill:true, tension:.4, pointRadius:4, pointBackgroundColor:C.green,
+        borderWidth:2.5, yAxisID:'yRec', order:0 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+fBRL(ctx.raw,true) } } },
+      scales:{
+        yInv:{ position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, title:{display:true,text:'Investimento',color:C.blue,font:{size:10}} },
+        yRec:{ position:'right', grid:{display:false},                  ticks:{color:C.green,  font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, title:{display:true,text:'Receita',color:C.green,font:{size:10}} },
+        x:   { grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
+      }}
+  });}
 
-  // Chart ROAS mensal
+  // ── Chart ROAS mensal — fixado no ano atual ──
   dc('cRoas');
   const ctxR=document.getElementById('cRoas')?.getContext('2d');
-  if(ctxR){charts.cRoas=new Chart(ctxR,{type:'line',data:{labels:meses.map(fmtMes),datasets:[{
-    data:meses.map(m=>{const rows=d.filter(r=>r.mes===m&&r.roas>0&&r.roas<5000);return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0;}),
-    borderColor:C.amber,backgroundColor:'rgba(245,166,35,.08)',fill:true,tension:.4,
-    pointRadius:5,pointBackgroundColor:C.amber,borderWidth:2.5}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},
-              y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>v.toFixed(0)+'×'}}}}});}
+  if(ctxR){ charts.cRoas = new Chart(ctxR, {
+    type:'line',
+    data:{ labels: mesesAno.map(fmtMes), datasets:[{
+      data: mesesAno.map(getMesRoas),
+      borderColor:C.amber, backgroundColor:'rgba(245,166,35,.08)',
+      fill:true, tension:.4, pointRadius:5, pointBackgroundColor:C.amber, borderWidth:2.5
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},
+               y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>v.toFixed(0)+'×'}} } }
+  });}
 
   // Funil origens — usa 'd' filtrado
   const origens=[
@@ -1227,36 +1690,36 @@ function renderDashboard(){
     </div>`;
   }).join('');
 
-  // Situação leads — usa 'lf' filtrado
-  const onlineLeads = lf.filter(l=>l.online);
-  const sits={};onlineLeads.forEach(l=>{sits[l.situacao]=(sits[l.situacao]||0)+1;});
+  // Situação leads — usa 'lfOnline' filtrado pelo período (dataUltima)
+  const sits={};lfOnline.forEach(l=>{sits[l.situacao]=(sits[l.situacao]||0)+1;});
   const sortedSit=Object.entries(sits).sort((a,b)=>b[1]-a[1]);
   const maxSit=sortedSit[0]?.[1]||1;
-  sid('bTL', fN(onlineLeads.length)+' online');
+  const totalSit=lfOnline.length;
+  sid('bTL', fN(totalSit)+' online · período');
   document.getElementById('sitList').innerHTML=sortedSit.slice(0,8).map(([sit,cnt])=>{
     const cor=COR_SIT[sit]||C.mu;
-    const pct=onlineLeads.length>0?(cnt/onlineLeads.length*100).toFixed(0):'0';
+    const pct=totalSit>0?(cnt/totalSit*100).toFixed(0):'0';
     return`<div class="bar-item">
       <div class="bar-top"><span style="font-size:12px;font-weight:500;color:${cor}">${sit}</span>
         <span style="font-size:12px;font-weight:600">${fN(cnt)} <span style="font-size:10px;color:var(--mu)">${pct}%</span></span>
       </div>
       <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cnt/maxSit*100)}%;background:${cor}"></div></div>
     </div>`;
-  }).join('');
+  }).join('')||'<div style="font-size:12px;color:var(--mu);padding:8px 0">Nenhum lead online no período selecionado</div>';
 
-  // Chart Invest vs Leads Meta (eixo duplo)
+  // ── Chart Invest vs Leads Meta (eixo duplo) — usa mesesAno fixo ──
   dc('cInvLeads');
   const ctxIL = document.getElementById('cInvLeads')?.getContext('2d');
   if(ctxIL){ charts.cInvLeads = new Chart(ctxIL, {
-    type: 'bar',
-    data: { labels: meses.map(fmtMes), datasets: [
-      { label:'Investimento', data: meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.investTotal,0)),
-        backgroundColor:'rgba(79,142,247,.75)', borderRadius:6, borderSkipped:false, yAxisID:'yInv' },
-      { label:'Leads Meta',   data: meses.map(m=>d.filter(r=>r.mes===m).reduce((s,r)=>s+r.leadsMeta,0)),
-        type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.15)',
+    type:'bar',
+    data:{ labels: mesesAno.map(fmtMes), datasets:[
+      { label:'Investimento', data: mesesAno.map(m=>getMesData(m,'investTotal')),
+        backgroundColor:'rgba(79,142,247,.8)', borderRadius:6, borderSkipped:false, yAxisID:'yInv' },
+      { label:'Leads Meta', data: mesesAno.map(m=>getMesData(m,'leadsMeta')),
+        type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.12)',
         fill:true, tension:.4, pointRadius:5, pointBackgroundColor:C.purple, borderWidth:2.5, yAxisID:'yLeads' }
     ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
       scales:{
         yInv:  { position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
         yLeads:{ position:'right', grid:{display:false},                  ticks:{color:C.purple, font:{size:10}} },
@@ -1264,42 +1727,44 @@ function renderDashboard(){
       }}
   });}
 
-  // Chart Novos vs Reimpactados por mês (usando dadosRoas como proxy de período)
-  // Como leads têm data de cadastro, agrupamos por mês de cadastro
-  const leadsPorMes = {};
-  meses.forEach(m=>{ leadsPorMes[m]={novos:0,reimp:0}; });
-  lf.forEach(l=>{
-    if(!l.dataCadastro) return;
-    const mm = String(l.dataCadastro.getMonth()+1).padStart(2,'0');
-    const yy = l.dataCadastro.getFullYear();
-    const chave = `${mm}/${yy}`;
-    if(leadsPorMes[chave]){
-      if(l.reimpactado) leadsPorMes[chave].reimp++;
-      else              leadsPorMes[chave].novos++;
-    }
-  });
-  dc('cNovosReimp');
-  const ctxNR = document.getElementById('cNovosReimp')?.getContext('2d');
-  if(ctxNR){ charts.cNovosReimp = new Chart(ctxNR, {
+  // ── Chart Leads online por empreendimento (dashboard) ──
+  const empOnline = {};
+  onlineLeads.forEach(l=>{ if(l.emp) empOnline[l.emp]=(empOnline[l.emp]||0)+1; });
+  const empOL = Object.entries(empOnline).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  dc('cLeadsEmpDash');
+  const ctxLED = document.getElementById('cLeadsEmpDash')?.getContext('2d');
+  if(ctxLED) charts.cLeadsEmpDash = new Chart(ctxLED,{
     type:'bar',
-    data:{ labels: meses.map(fmtMes), datasets:[
-      { label:'Novos',        data: meses.map(m=>leadsPorMes[m]?.novos||0),
-        backgroundColor:'rgba(38,198,218,.75)',  borderRadius:6, borderSkipped:false },
-      { label:'Reimpactados', data: meses.map(m=>leadsPorMes[m]?.reimp||0),
-        backgroundColor:'rgba(251,146,60,.75)',  borderRadius:6, borderSkipped:false }
-    ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{
-        x:{ stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu,font:{size:11}} },
-        y:{ stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu,font:{size:11}} }
-      }}
-  });}
-  const objMap={};campsMeta.forEach(c=>{objMap[c.objetivo]=(objMap[c.objetivo]||0)+c.valor;});
-  const oL=Object.keys(objMap),oV=Object.values(objMap),oCores=oL.map(l=>OBJ_C[l]||C.orange);
-  document.getElementById('legObj').innerHTML=oL.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${oCores[i]}"></div>${l}: ${fBRL(oV[i],true)}</div>`).join('');
+    data:{ labels:empOL.map(e=>e[0]), datasets:[{data:empOL.map(e=>e[1]),backgroundColor:'rgba(38,198,218,.75)',borderRadius:4,borderSkipped:false}] },
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false}},
+      scales:{ x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10}}},
+               y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}} }}
+  });
+
+  // ── Chart Investimento por objetivo — filtrado pelo período selecionado ──
+  // Usa 'd' (dadosRoas filtrado) para distribuir o investimento proporcional por objetivo
+  const invTotal = d.reduce((s,r)=>s+r.investTotal,0);
+  const propObj  = {}; campsMeta.forEach(c=>{ propObj[c.objetivo]=(propObj[c.objetivo]||0)+c.valor; });
+  const totalMeta = campsMeta.reduce((s,c)=>s+c.valor,0);
+  const objMapFilt = {};
+  campsMeta.forEach(c=>{
+    const prop = totalMeta>0 ? (propObj[c.objetivo]||0)/totalMeta : 0;
+    // Distribui o investimento filtrado na mesma proporção das campanhas
+  });
+  // Abordagem direta: usa proporcionalidade do Meta aplicada sobre invest filtrado
+  const objKeys = [...new Set(campsMeta.map(c=>c.objetivo).filter(Boolean))];
+  const objVals = objKeys.map(obj=>{
+    const soma = campsMeta.filter(c=>c.objetivo===obj).reduce((s,c)=>s+c.valor,0);
+    const prop = totalMeta>0 ? soma/totalMeta : 0;
+    return invTotal * prop;
+  });
+  const oCores = objKeys.map(l=>OBJ_C[l]||C.orange);
+  document.getElementById('legObj').innerHTML = objKeys.map((l,i)=>
+    `<div class="leg"><div class="lsq" style="background:${oCores[i]}"></div>${l}: ${fBRL(objVals[i],true)}</div>`
+  ).join('');
   dc('cObj');
   const ctxO=document.getElementById('cObj')?.getContext('2d');
-  if(ctxO)charts.cObj=new Chart(ctxO,{type:'doughnut',data:{labels:oL,datasets:[{data:oV,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+  if(ctxO) charts.cObj=new Chart(ctxO,{type:'doughnut',data:{labels:objKeys,datasets:[{data:objVals,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
 
   // Leads Meta vs CRM — usa 'd' filtrado
   const g={};d.forEach(r=>{if(!g[r.emp])g[r.emp]={m:0,c:0};g[r.emp].m+=r.leadsMeta;g[r.emp].c+=r.leadsCrm;});
@@ -1333,153 +1798,439 @@ function renderDashboard(){
 }
 
 // ═══════════════════════════════════════════════════════
-// RENDER CAMPANHAS
+// CAMPANHAS — META API (100%)
 // ═══════════════════════════════════════════════════════
-function renderCampanhas(){
-  const dados=filteredMeta();
-  const ativas=dados.filter(c=>c.status==='active');
-  const totalInv=dados.reduce((s,c)=>s+c.valor,0);
-  const totalRes=dados.reduce((s,c)=>s+c.resultados,0);
-  sid('ck1',fN(dados.length));sid('ck1s',`${dados.length} no filtro`);
-  sid('ck2',fN(ativas.length));sid('ck2s',`Orç: ${fBRL(ativas.reduce((s,c)=>s+c.orcamento,0),true)}/dia`);
-  sid('ck3',fBRL(totalInv,true));sid('ck3s','Investimento acumulado');
-  sid('ck4',fN(totalRes));sid('ck4s',`CPR médio: ${totalRes>0?fBRL(totalInv/totalRes):'—'}`);
-  sid('infoCamp',`${dados.length} campanhas`);
+const INV_DATA=[{"m":"Jan","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":12000.0,"agencia_fee":800.0,"inv_pat":11200.0,"meta_total":7840.0,"meta_whats":4704.0,"meta_cad":3136.0,"google":1120.0,"seguranca":2240.0,"imposto":952.56,"real_meta":7865.21,"real_google":864.23,"real_total":8729.44,"pct":77.9},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":5000.0,"agencia_fee":1500.0,"inv_pat":3500.0,"meta_total":3150.0,"meta_whats":0.0,"meta_cad":0.0,"google":350.0,"seguranca":700.0,"imposto":382.72,"real_meta":3103.21,"real_google":0.0,"real_total":3103.21,"pct":88.7},{"nome":"Jardim Corumbataí - Rio Claro","agencia":"Pão Criação","orcamento":12000.0,"agencia_fee":1500.0,"inv_pat":10500.0,"meta_total":7350.0,"meta_whats":4410.0,"meta_cad":2940.0,"google":1050.0,"seguranca":2100.0,"imposto":893.02,"real_meta":7385.64,"real_google":384.4,"real_total":7770.04,"pct":74.0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":9000.0,"agencia_fee":1500.0,"inv_pat":7500.0,"meta_total":5250.0,"meta_whats":3150.0,"meta_cad":2100.0,"google":750.0,"seguranca":1500.0,"imposto":637.88,"real_meta":7378.05,"real_google":99.77,"real_total":7477.82,"pct":99.7},{"nome":"Beija-Flor - Botucatu","agencia":"Pão Criação","orcamento":12000.0,"agencia_fee":1500.0,"inv_pat":10500.0,"meta_total":7350.0,"meta_whats":4410.0,"meta_cad":2940.0,"google":1050.0,"seguranca":2100.0,"imposto":893.02,"real_meta":6873.08,"real_google":375.37,"real_total":7248.45,"pct":69.0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":1500.0,"inv_pat":6500.0,"meta_total":4550.0,"meta_whats":2730.0,"meta_cad":1820.0,"google":650.0,"seguranca":1300.0,"imposto":552.82,"real_meta":4574.01,"real_google":285.74,"real_total":4859.75,"pct":74.8},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":12000.0,"agencia_fee":3550.0,"inv_pat":8450.0,"meta_total":5915.0,"meta_whats":3549.0,"meta_cad":2366.0,"google":845.0,"seguranca":1690.0,"imposto":718.67,"real_meta":5486.01,"real_google":1064.63,"real_total":6550.64,"pct":77.5},{"nome":"Orquídeas - Cuiabá","agencia":"F&MD","orcamento":8000.0,"agencia_fee":1750.0,"inv_pat":6250.0,"meta_total":4375.0,"meta_whats":2625.0,"meta_cad":1750.0,"google":625.0,"seguranca":1250.0,"imposto":531.56,"real_meta":4052.7,"real_google":606.83,"real_total":4659.53,"pct":74.6},{"nome":"Lírios - Cuiabá","agencia":"F&MD","orcamento":9000.0,"agencia_fee":1750.0,"inv_pat":7250.0,"meta_total":5075.0,"meta_whats":3045.0,"meta_cad":2030.0,"google":725.0,"seguranca":1450.0,"imposto":616.61,"real_meta":4608.94,"real_google":955.08,"real_total":5564.02,"pct":76.7},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":3363.95,"meta_total":0,"meta_whats":0,"meta_cad":0,"google":0,"seguranca":0,"imposto":0,"real_meta":0,"real_google":4218.36,"real_total":4218.36,"pct":0}]},{"m":"Fev","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":800.0,"inv_pat":14200.0,"meta_total":9940.0,"meta_whats":3976.0,"meta_cad":5964.0,"google":1420.0,"seguranca":2840.0,"imposto":1207.71,"real_meta":8570.13,"real_google":446.15,"real_total":9016.28,"pct":63.5},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":6250.0,"agencia_fee":1500.0,"inv_pat":4750.0,"meta_total":3150.0,"meta_whats":1260.0,"meta_cad":1890.0,"google":475.0,"seguranca":950.0,"imposto":382.72,"real_meta":2706.37,"real_google":0.0,"real_total":2706.37,"pct":57.0},{"nome":"Jardim Corumbataí - Rio Claro","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":3780.0,"meta_cad":5670.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":8137.91,"real_google":554.1,"real_total":8692.01,"pct":64.4},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":3780.0,"meta_cad":5670.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":8141.16,"real_google":0.0,"real_total":8141.16,"pct":60.3},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":3206.0,"meta_cad":4809.0,"google":1145.0,"seguranca":2290.0,"imposto":973.82,"real_meta":4157.0,"real_google":0.0,"real_total":4157.0,"pct":36.3},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":3780.0,"meta_cad":5670.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":0.0,"real_google":259.66,"real_total":259.66,"pct":1.9},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":1500.0,"inv_pat":8500.0,"meta_total":5950.0,"meta_whats":2380.0,"meta_cad":3570.0,"google":850.0,"seguranca":1700.0,"imposto":722.92,"real_meta":5132.59,"real_google":145.92,"real_total":5278.51,"pct":62.1},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":3206.0,"meta_cad":4809.0,"google":1145.0,"seguranca":2290.0,"imposto":973.82,"real_meta":4410.96,"real_google":0.0,"real_total":4410.96,"pct":38.5},{"nome":"Orquídeas - Cuiabá","agencia":"F&MD","orcamento":10000.0,"agencia_fee":1750.0,"inv_pat":8250.0,"meta_total":5775.0,"meta_whats":2310.0,"meta_cad":3465.0,"google":825.0,"seguranca":1650.0,"imposto":701.66,"real_meta":6819.31,"real_google":206.76,"real_total":7026.07,"pct":85.2},{"nome":"Lírios - Cuiabá","agencia":"F&MD","orcamento":11250.0,"agencia_fee":1750.0,"inv_pat":9500.0,"meta_total":6650.0,"meta_whats":2660.0,"meta_cad":3990.0,"google":950.0,"seguranca":1900.0,"imposto":807.98,"real_meta":2355.21,"real_google":0.0,"real_total":2355.21,"pct":24.8},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":6387.41,"meta_total":0,"meta_whats":0,"meta_cad":0,"google":0,"seguranca":0,"imposto":0,"real_meta":0,"real_google":6236.88,"real_total":6236.88,"pct":0}]},{"m":"Mar","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":800.0,"inv_pat":14200.0,"meta_total":9940.0,"meta_whats":3976.0,"meta_cad":5964.0,"google":1420.0,"seguranca":2840.0,"imposto":1207.71,"real_meta":9332.72,"real_google":1041.23,"real_total":10373.95,"pct":73.1},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":6250.0,"agencia_fee":1500.0,"inv_pat":4750.0,"meta_total":3150.0,"meta_whats":0,"meta_cad":3150.0,"google":475.0,"seguranca":950.0,"imposto":382.72,"real_meta":3048.05,"real_google":0.0,"real_total":3048.05,"pct":64.2},{"nome":"Jardim Corumbataí - Rio Claro","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":3780.0,"meta_cad":5670.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":3051.65,"real_google":417.68,"real_total":3469.33,"pct":25.7},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":3780.0,"meta_cad":5670.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":9947.74,"real_google":0.0,"real_total":9947.74,"pct":73.7},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":3206.0,"meta_cad":4809.0,"google":1145.0,"seguranca":2290.0,"imposto":973.82,"real_meta":8452.27,"real_google":0.0,"real_total":8452.27,"pct":73.8},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":3780.0,"meta_cad":5670.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":612.46,"real_google":277.44,"real_total":889.9,"pct":6.6},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":1500.0,"inv_pat":8500.0,"meta_total":5950.0,"meta_whats":2380.0,"meta_cad":3570.0,"google":850.0,"seguranca":1700.0,"imposto":722.92,"real_meta":6372.45,"real_google":140.75,"real_total":6513.2,"pct":76.6},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":3206.0,"meta_cad":4809.0,"google":0,"seguranca":2290.0,"imposto":973.82,"real_meta":8556.09,"real_google":0.0,"real_total":8556.09,"pct":74.7},{"nome":"Villaggios","agencia":"F&MD","orcamento":21250.0,"agencia_fee":3550.0,"inv_pat":17700.0,"meta_total":12390.0,"meta_whats":4956.0,"meta_cad":7434.0,"google":1770.0,"seguranca":3540.0,"imposto":1505.38,"real_meta":12581.51,"real_google":0.0,"real_total":12581.51,"pct":71.1},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":6122.9,"meta_total":4286.03,"meta_whats":1714.41,"meta_cad":2571.62,"google":612.29,"seguranca":1224.58,"imposto":520.75,"real_meta":0.0,"real_google":6845.94,"real_total":6845.94,"pct":0}]},{"m":"Abr","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":800.0,"inv_pat":14200.0,"meta_total":9940.0,"meta_whats":5964.0,"meta_cad":3976.0,"google":1420.0,"seguranca":2840.0,"imposto":1207.71,"real_meta":4007.36,"real_google":1042.67,"real_total":5050.03,"pct":35.6},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":6250.0,"agencia_fee":1500.0,"inv_pat":4750.0,"meta_total":3150.0,"meta_whats":0.0,"meta_cad":0.0,"google":475.0,"seguranca":950.0,"imposto":382.72,"real_meta":2641.89,"real_google":0.0,"real_total":2641.89,"pct":55.6},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":5670.0,"meta_cad":3780.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":9455.68,"real_google":0.0,"real_total":9455.68,"pct":70.0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":4809.0,"meta_cad":3206.0,"google":1145.0,"seguranca":2290.0,"imposto":973.82,"real_meta":6990.54,"real_google":0.0,"real_total":6990.54,"pct":61.1},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":9450.0,"meta_whats":5670.0,"meta_cad":3780.0,"google":1350.0,"seguranca":2700.0,"imposto":1148.17,"real_meta":224.0,"real_google":0.0,"real_total":224.0,"pct":1.7},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":1500.0,"inv_pat":8500.0,"meta_total":5950.0,"meta_whats":3570.0,"meta_cad":2380.0,"google":850.0,"seguranca":1700.0,"imposto":722.92,"real_meta":6637.14,"real_google":223.78,"real_total":6860.92,"pct":80.7},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":4809.0,"meta_cad":3206.0,"google":1145.0,"seguranca":2290.0,"imposto":973.82,"real_meta":8193.73,"real_google":0.0,"real_total":8193.73,"pct":71.6},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":8015.0,"meta_whats":4809.0,"meta_cad":3206.0,"google":1145.0,"seguranca":2290.0,"imposto":973.82,"real_meta":7075.61,"real_google":0.0,"real_total":7075.61,"pct":61.8},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":6733.55,"meta_total":4713.48,"meta_whats":2828.09,"meta_cad":1885.39,"google":673.36,"seguranca":1346.71,"imposto":572.69,"real_meta":0.0,"real_google":6502.48,"real_total":6502.48,"pct":96.6}]},{"m":"Mai","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":800.0,"inv_pat":14200.0,"meta_total":12780.0,"meta_whats":7668.0,"meta_cad":5112.0,"google":1420.0,"seguranca":0.0,"imposto":1552.77,"real_meta":13106.01,"real_google":1081.04,"real_total":14187.05,"pct":99.9},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":6250.0,"agencia_fee":1500.0,"inv_pat":4750.0,"meta_total":4100.0,"meta_whats":0.0,"meta_cad":0.0,"google":475.0,"seguranca":0.0,"imposto":498.15,"real_meta":4716.53,"real_google":0.0,"real_total":4716.53,"pct":99.3},{"nome":"Jardim Corumbataí - Rio Claro","agencia":"Pão Criação","orcamento":0,"agencia_fee":0,"inv_pat":0,"meta_total":0,"meta_whats":0,"meta_cad":0,"google":0,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":1500.0,"inv_pat":13500.0,"meta_total":12780.0,"meta_whats":7668.0,"meta_cad":5112.0,"google":1350.0,"seguranca":0,"imposto":1552.77,"real_meta":13090.88,"real_google":0.0,"real_total":13090.88,"pct":97.0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10350.0,"meta_whats":6210.0,"meta_cad":4140.0,"google":1145.0,"seguranca":0.0,"imposto":1257.52,"real_meta":9007.77,"real_google":0.0,"real_total":9007.77,"pct":78.7},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0.0,"imposto":0.0,"real_meta":182.0,"real_google":0.0,"real_total":182.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":1500.0,"inv_pat":8500.0,"meta_total":7650.0,"meta_whats":4590.0,"meta_cad":3060.0,"google":850.0,"seguranca":0.0,"imposto":929.48,"real_meta":7963.88,"real_google":0.0,"real_total":7963.88,"pct":93.7},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10350.0,"meta_whats":6210.0,"meta_cad":4140.0,"google":1145.0,"seguranca":0,"imposto":1257.52,"real_meta":9712.15,"real_google":0.0,"real_total":9712.15,"pct":84.8},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10350.0,"meta_whats":6210.0,"meta_cad":4140.0,"google":1145.0,"seguranca":0,"imposto":1257.52,"real_meta":8362.2,"real_google":1006.1,"real_total":9368.3,"pct":81.8},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":5912.86,"meta_total":0,"meta_whats":0,"meta_cad":0,"google":0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":5650.7,"real_total":5650.7,"pct":95.6}]},{"m":"Jun","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":0,"meta_whats":0,"meta_cad":0,"google":1230.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]},{"m":"Jul","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":7200.0,"meta_whats":4320.0,"meta_cad":2880.0,"google":800.0,"seguranca":0,"imposto":874.8,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]},{"m":"Ago","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":7200.0,"meta_whats":4320.0,"meta_cad":2880.0,"google":800.0,"seguranca":0,"imposto":874.8,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]},{"m":"Set","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":7200.0,"meta_whats":4320.0,"meta_cad":2880.0,"google":800.0,"seguranca":0,"imposto":874.8,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]},{"m":"Out","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":7200.0,"meta_whats":4320.0,"meta_cad":2880.0,"google":800.0,"seguranca":0,"imposto":874.8,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]},{"m":"Nov","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":7200.0,"meta_whats":4320.0,"meta_cad":2880.0,"google":800.0,"seguranca":0,"imposto":874.8,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]},{"m":"Dez","data":[{"nome":"Cidade Alegre - Bauru","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Piemonte - Jaú","agencia":"Pão Criação","orcamento":8000.0,"agencia_fee":2231.25,"inv_pat":5768.75,"meta_total":5768.0,"meta_whats":0,"meta_cad":5768.0,"google":0,"seguranca":0,"imposto":700.81,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Jardim dos Ipês - Jaú","agencia":"Pão Criação","orcamento":15000.0,"agencia_fee":2231.25,"inv_pat":12768.75,"meta_total":11491.88,"meta_whats":6895.12,"meta_cad":4596.75,"google":1276.88,"seguranca":0,"imposto":1396.26,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Monte Verde - São Pedro","agencia":"Pão Criação","orcamento":10000.0,"agencia_fee":2231.25,"inv_pat":7768.75,"meta_total":6991.88,"meta_whats":4195.12,"meta_cad":2796.75,"google":776.88,"seguranca":0,"imposto":849.51,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Parque Aviação - Pirassununga","agencia":"Pão Criação","orcamento":0.0,"agencia_fee":0.0,"inv_pat":0.0,"meta_total":0.0,"meta_whats":0.0,"meta_cad":0.0,"google":0.0,"seguranca":0,"imposto":0.0,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Alto da Serra - Botucatu","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Nova Quinta - Bauru","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Villaggios","agencia":"F&MD","orcamento":15000.0,"agencia_fee":3550.0,"inv_pat":11450.0,"meta_total":10305.0,"meta_whats":6183.0,"meta_cad":4122.0,"google":1145.0,"seguranca":0,"imposto":1252.06,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0},{"nome":"Institucional","agencia":"","orcamento":8000.0,"agencia_fee":0,"inv_pat":8000.0,"meta_total":7200.0,"meta_whats":4320.0,"meta_cad":2880.0,"google":800.0,"seguranca":0,"imposto":874.8,"real_meta":0,"real_google":0,"real_total":0.0,"pct":0}]}];
+let campanhasAPIData = []; // cache de campanhas da Meta API para esta página
 
-  // Cards de campanhas com Top 5 anúncios simulados
-  const sorted=[...dados].sort((a,b)=>b.resultados-a.resultados);
-  document.getElementById('campCards').innerHTML=sorted.map((c,i)=>{
-    const cor=OBJ_C[c.objetivo]||C.orange;
-    const ativa=c.status==='active';
-    const nome=c.nome.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
-    // Top 5 simulados baseados nos dados da campanha
-    const top5=gerarTop5(c);
-    return`<div class="camp-card" style="margin-bottom:14px;border-left-color:${cor}">
+function initCampanhasPage(){
+  populateCampAccountSelect();
+  updateCampConnBar();
+  if(campanhasAPIData.length) renderCampanhasMetaAPI(campanhasAPIData);
+}
+
+function populateCampAccountSelect(){
+  const sel = document.getElementById('fCampAccount');
+  if(!sel) return;
+  const accounts  = window.MetaAPI?.accounts || [];
+  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
+  sel.innerHTML = accounts.length
+    ? accounts.map((a,i) => `<option value="${i}" ${i===activeIdx?'selected':''}>${a.name}</option>`).join('')
+    : '<option value="">— Nenhuma conta —</option>';
+}
+
+function onCampAccountChange(){
+  const sel = document.getElementById('fCampAccount');
+  const idx = parseInt(sel?.value ?? '0', 10);
+  window.MetaAPI.switchAccount(idx);
+  campanhasAPIData = [];
+  document.getElementById('campCards').innerHTML = `
+    <div class="meta-empty">
+      <div class="meta-empty-icon">🔄</div>
+      <div class="meta-empty-title">Conta alterada: ${window.MetaAPI.activeAccount?.name||''}</div>
+      <div class="meta-empty-sub">Clique em "↻ Carregar" para buscar campanhas desta conta</div>
+    </div>`;
+  document.getElementById('campAIContainer').style.display = 'none';
+  document.getElementById('btnAnalisarCamp').style.display = 'none';
+  resetCampKPIs();
+  updateCampConnBar();
+}
+
+function updateCampConnBar(){
+  const dot   = document.getElementById('campConnDot');
+  const label = document.getElementById('campConnLabel');
+  if(!dot || !label) return;
+  const acc = window.MetaAPI?.activeAccount;
+  if(acc){
+    dot.style.background = 'var(--green)'; dot.style.boxShadow = '0 0 5px var(--green)';
+    label.style.color    = 'var(--mu2)';
+    label.textContent    = `Conta: ${acc.name} · ${acc.accountId}`;
+  } else {
+    dot.style.background = 'var(--mu)'; dot.style.boxShadow = 'none';
+    label.style.color    = 'var(--mu)';
+    label.textContent    = 'Nenhuma conta configurada';
+  }
+}
+
+function resetCampKPIs(){
+  ['ck1','ck2','ck3','ck4','ck5'].forEach(id => {
+    sid(id,'—'); sid(id+'s','');
+  });
+  sid('infoCamp','');
+}
+
+// Detecta objetivo a partir do nome da campanha
+function detectarObjetivo(nomeCamp){
+  const n = (nomeCamp||'').toLowerCase();
+  if(n.includes('whatsapp') || n.includes('wpp') || n.includes('whats')) return 'WhatsApp';
+  if(n.includes('cadastro') || n.includes('lead') || n.includes('form'))  return 'Cadastro';
+  if(n.includes('alcance') || n.includes('reach') || n.includes('brand')) return 'Alcance';
+  return 'Outros';
+}
+
+async function loadCampanhasAPI(){
+  if(!window.MetaAPI?.hasCredentials()){
+    alert('Selecione e configure uma conta Meta em ⚙️ Config. de API.');
+    return;
+  }
+  const btn    = document.getElementById('btnLoadCamp');
+  const infoEl = document.getElementById('infoCamp');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando…'; }
+  if(infoEl) infoEl.textContent = `Buscando campanhas de "${window.MetaAPI.activeAccount?.name}"…`;
+
+  const period = document.getElementById('fCampPeriod')?.value || 'this_month';
+  document.getElementById('campAIContainer').style.display = 'none';
+
+  try{
+    const camps = await window.MetaAPI.getCampaigns({ datePreset: period });
+    // Busca insights de todas em paralelo
+    const insightsArr = await Promise.all(
+      camps.map(c => window.MetaAPI.getCampaignInsights(c.id, period))
+    );
+
+    campanhasAPIData = camps.map((c,i) => ({
+      ...c,
+      insights   : insightsArr[i],
+      results    : window.MetaAPI._extractResults(insightsArr[i]),
+      spend      : parseFloat(insightsArr[i]?.spend       || 0),
+      ctr        : parseFloat(insightsArr[i]?.ctr         || 0),
+      cpc        : parseFloat(insightsArr[i]?.cpc         || 0),
+      impressions: parseInt  (insightsArr[i]?.impressions || 0),
+      reach      : parseInt  (insightsArr[i]?.reach       || 0),
+      frequency  : parseFloat(insightsArr[i]?.frequency   || 0),
+      objetivo   : detectarObjetivo(c.name),
+    })).sort((a,b) => b.results - a.results || b.spend - a.spend);
+
+    renderCampanhasMetaAPI(campanhasAPIData);
+
+    const btn2 = document.getElementById('btnAnalisarCamp');
+    if(btn2) btn2.style.display = 'inline-flex';
+
+  } catch(e){
+    if(infoEl) infoEl.textContent = `❌ ${e.message}`;
+    document.getElementById('campCards').innerHTML =
+      `<div class="ebox" style="display:block">❌ ${e.message}<br><small>Verifique se o token tem permissão <b>ads_read</b>.</small></div>`;
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='↻ Carregar'; }
+  }
+}
+
+function filterCampanhasAPI(){
+  if(!campanhasAPIData.length) return;
+  renderCampanhasMetaAPI(campanhasAPIData);
+}
+
+function renderCampanhasMetaAPI(all){
+  const fObj = document.getElementById('fCampObj')?.value  || '';
+  const fSt  = document.getElementById('fCampSt')?.value   || '';
+
+  let dados = all.filter(c =>
+    (!fObj || c.objetivo === fObj) &&
+    (!fSt  || c.status   === fSt)
+  );
+
+  // KPIs
+  const ativas     = dados.filter(c => c.status === 'ACTIVE');
+  const totalSpend = dados.reduce((s,c) => s + c.spend, 0);
+  const totalRes   = dados.reduce((s,c) => s + c.results, 0);
+  const ctrMedio   = dados.length ? dados.reduce((s,c) => s + c.ctr, 0) / dados.length : 0;
+  const cprMedio   = totalRes > 0 ? totalSpend / totalRes : 0;
+
+  sid('ck1', fN(dados.length));        sid('ck1s', `${all.length} total na conta`);
+  sid('ck2', fN(ativas.length));       sid('ck2s', `${dados.length - ativas.length} pausadas`);
+  sid('ck3', fBRL(totalSpend, true));  sid('ck3s', cprMedio > 0 ? `CPR: ${fBRL(cprMedio)}` : 'no período');
+  sid('ck4', fN(totalRes));            sid('ck4s', cprMedio > 0 ? `CPR médio: ${fBRL(cprMedio)}` : '—');
+  sid('ck5', ctrMedio.toFixed(2)+'%'); sid('ck5s', `${fN(dados.reduce((s,c)=>s+c.impressions,0))} imp.`);
+  sid('infoCamp', `${dados.length} campanha${dados.length!==1?'s':''}${fObj?' · '+fObj:''}${fSt?' · '+(fSt==='ACTIVE'?'ativas':'pausadas'):''}`);
+
+  if(!dados.length){
+    document.getElementById('campCards').innerHTML = `
+      <div class="meta-empty">
+        <div class="meta-empty-icon">🔍</div>
+        <div class="meta-empty-title">Nenhuma campanha com estes filtros</div>
+        <div class="meta-empty-sub">Tente mudar objetivo ou status</div>
+      </div>`;
+    return;
+  }
+
+  const OBJ_CORES = { WhatsApp:'var(--green)', Cadastro:'var(--blue)', Alcance:'var(--purple)', Outros:'var(--orange)' };
+
+  document.getElementById('campCards').innerHTML = dados.map((c, rank) => {
+    const cor    = OBJ_CORES[c.objetivo] || 'var(--orange)';
+    const ativa  = c.status === 'ACTIVE';
+    const nome   = c.name.replace(/\s*[–\-—]\s*(Pao|fmd|Dia|[A-Z]{2,4}\d*).*/,'').trim();
+    const spend  = c.spend;
+    const cpr    = c.results > 0 ? spend / c.results : 0;
+    const freq   = c.frequency;
+    // Score de saúde simples
+    let score = 70;
+    if(c.ctr < 1)  score -= 25; else if(c.ctr < 2) score -= 10;
+    if(c.cpc > 10) score -= 15;
+    if(cpr > 100 && c.results > 0) score -= 15;
+    if(freq > 5)   score -= 10;
+    if(!c.results && ativa) score -= 20;
+    score = Math.max(0, Math.min(100, score));
+    const scoreCol = score >= 70 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+
+    const ins = c.insights;
+    const periodLabel = ins ? `${ins.date_start||''} → ${ins.date_stop||''}` : 'período selecionado';
+
+    return `<div class="camp-card" style="margin-bottom:14px;border-left-color:${cor}">
+      <!-- Score bar top -->
+      <div style="height:3px;background:${scoreCol};border-radius:3px 3px 0 0;margin:-1px -1px 0;width:${score}%"></div>
       <div class="camp-card-top">
-        <div>
-          <div class="camp-card-name">${nome}</div>
-          <div class="camp-card-meta">
+        <div style="flex:1;min-width:0">
+          <div class="camp-card-name" title="${c.name}">${nome}</div>
+          <div class="camp-card-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
             <span class="obj-pill" style="background:${cor}22;color:${cor}">${c.objetivo}</span>
-            · ${c.emp} · ${c.cidade}
-            · <span class="${ativa?'spill green':'spill red'}">${ativa?'Ativa':'Pausada'}</span>
+            <span class="${ativa?'spill green':'spill red'}">${ativa?'● Ativa':'● Pausada'}</span>
+            <span style="color:var(--mu);font-size:10px">${c.objective||''}</span>
+            <span style="color:var(--mu);font-size:10px;margin-left:auto">${periodLabel}</span>
           </div>
         </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:20px;font-weight:700;color:${cor}">${fBRL(c.valor,true)}</div>
-          <div style="font-size:11px;color:var(--mu)">Orç: R$${c.orcamento.toFixed(0)}/dia</div>
+        <div style="text-align:right;flex-shrink:0;padding-left:12px">
+          <div style="font-size:22px;font-weight:700;color:${cor}">${fBRL(spend,true)}</div>
+          <div style="font-size:11px;color:var(--mu)">Score: <span style="color:${scoreCol};font-weight:600">${score}/100</span></div>
         </div>
       </div>
-      <div class="camp-stats">
-        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--green)">${fN(c.resultados)}</div><div class="camp-stat-l">Resultados</div></div>
-        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--blue)">${c.ctr>0?c.ctr.toFixed(2)+'%':'—'}</div><div class="camp-stat-l">CTR</div></div>
-        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--amber)">${c.cpc>0?fBRL(c.cpc):'—'}</div><div class="camp-stat-l">CPC</div></div>
-        <div class="camp-stat"><div class="camp-stat-v" style="color:var(--purple)">${c.cprResult>0?fBRL(c.cprResult):'—'}</div><div class="camp-stat-l">Custo/Resultado</div></div>
+
+      <!-- Métricas principais -->
+      <div class="camp-stats" style="grid-template-columns:repeat(6,1fr)">
+        <div class="camp-stat">
+          <div class="camp-stat-v" style="color:var(--green)">${c.results > 0 ? fN(c.results) : '—'}</div>
+          <div class="camp-stat-l">Resultados</div>
+        </div>
+        <div class="camp-stat">
+          <div class="camp-stat-v" style="color:var(--blue)">${c.ctr > 0 ? c.ctr.toFixed(2)+'%' : '—'}</div>
+          <div class="camp-stat-l">CTR</div>
+        </div>
+        <div class="camp-stat">
+          <div class="camp-stat-v" style="color:var(--amber)">${c.cpc > 0 ? fBRL(c.cpc) : '—'}</div>
+          <div class="camp-stat-l">CPC</div>
+        </div>
+        <div class="camp-stat">
+          <div class="camp-stat-v" style="color:var(--purple)">${cpr > 0 ? fBRL(cpr) : '—'}</div>
+          <div class="camp-stat-l">Custo/Result.</div>
+        </div>
+        <div class="camp-stat">
+          <div class="camp-stat-v" style="color:var(--teal)">${fN(c.impressions)}</div>
+          <div class="camp-stat-l">Impressões</div>
+        </div>
+        <div class="camp-stat">
+          <div class="camp-stat-v" style="color:${freq > 5 ? 'var(--red)' : freq > 3 ? 'var(--amber)' : 'var(--mu2)'}">${freq > 0 ? freq.toFixed(1) : '—'}</div>
+          <div class="camp-stat-l">Frequência</div>
+        </div>
       </div>
-      <div style="margin-top:12px">
-        <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🏆 Top 5 Anúncios desta campanha</div>
-        <div class="top5-list">${top5}</div>
+
+      <!-- Alertas automáticos -->
+      ${buildCampAlerts(c, cpr, freq)}
+
+      <!-- Botão ver criativos -->
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 14px"
+          onclick="irParaCriativos('${c.id}')">🎨 Ver criativos</button>
+        <span style="font-size:10px;color:var(--mu);align-self:center">${fN(c.reach)} alcance · ${fN(c.impressions)} impressões</span>
       </div>
     </div>`;
   }).join('');
 }
 
-function gerarTop5(camp){
-  // Gera top 5 baseado nos dados reais da campanha com variação proporcional
-  const nomes=['Vídeo Depoimento','Carrossel Planta','Imagem Aérea','Reels Tour','Story Oferta'];
-  const total=camp.resultados||0;
-  const dist=[0.32,0.24,0.19,0.15,0.10];
-  const cores=[C.amber,C.blue,C.green,C.purple,C.teal];
-  return nomes.map((n,i)=>{
-    const res=Math.round(total*dist[i]);
-    const ctr=(camp.ctr*(0.8+Math.random()*0.6)).toFixed(2);
-    const cpr=camp.cprResult>0?(camp.cprResult*(0.7+Math.random()*0.8)).toFixed(2):0;
-    return`<div class="top5-item">
-      <div class="top5-rank" style="background:${cores[i]}22;color:${cores[i]}">#${i+1}</div>
-      <div class="top5-info">
-        <div class="top5-name">${n} · ${camp.emp}</div>
-        <div class="top5-meta">${camp.objetivo} · ${camp.cidade}</div>
-      </div>
-      <div class="top5-nums">
-        <div class="top5-num"><div class="top5-v" style="color:${cores[i]}">${fN(res)}</div><div class="top5-l">Resultados</div></div>
-        <div class="top5-num"><div class="top5-v">${ctr}%</div><div class="top5-l">CTR</div></div>
-        ${cpr>0?`<div class="top5-num"><div class="top5-v">${fBRL(parseFloat(cpr))}</div><div class="top5-l">CPR</div></div>`:''}
-      </div>
-    </div>`;
-  }).join('');
+function buildCampAlerts(c, cpr, freq){
+  const alerts = [];
+  if(!c.results && c.status === 'ACTIVE' && c.spend > 0)
+    alerts.push({col:'var(--red)',   icon:'🚨', txt:'Sem resultados com gasto ativo'});
+  if(c.ctr < 1 && c.ctr > 0)
+    alerts.push({col:'var(--red)',   icon:'📉', txt:`CTR baixo (${c.ctr.toFixed(2)}%) — criativo pode estar saturado`});
+  if(freq > 5)
+    alerts.push({col:'var(--amber)', icon:'🔁', txt:`Frequência alta (${freq.toFixed(1)}x) — público saturado`});
+  if(cpr > 150 && c.results > 0)
+    alerts.push({col:'var(--red)',   icon:'💸', txt:`Custo por resultado alto (${fBRL(cpr)}) — otimizar segmentação`});
+  if(!alerts.length) return '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+    ${alerts.map(a=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;background:${a.col}14;border:1px solid ${a.col}44;border-radius:20px;color:${a.col}">
+      ${a.icon} ${a.txt}
+    </div>`).join('')}
+  </div>`;
+}
+
+function irParaCriativos(campId){
+  // Sincroniza conta e navega para criativos
+  goPage('meta');
+  setTimeout(async ()=>{
+    populateAccountSelect();
+    updateMetaConnBar();
+    const sel = document.getElementById('fMetaCamp');
+    if(sel){ sel.value = campId; }
+    await loadMetaCampaignCreatives(campId);
+  }, 100);
+}
+
+async function analisarCampanhasIA(){
+  if(!campanhasAPIData.length) return;
+  document.getElementById('campAIContainer').style.display = 'block';
+  const el = document.getElementById('campAIResult');
+  el.innerHTML = `<div class="ia-loading">🤖 Analisando ${campanhasAPIData.length} campanhas<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
+  try{
+    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
+    const text = await window.AIModule.analyzeCampaignPerformance(
+      campanhasAPIData.filter(c => c.insights).map(c => ({...c, name: c.name, insights: c.insights}))
+    );
+    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px">${e.message}</div>`;
+  }
+  window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
 }
 
 // ═══════════════════════════════════════════════════════
 // RENDER INVESTIMENTO
 // ═══════════════════════════════════════════════════════
 function renderInvestimento(){
-  const obj=document.getElementById('fInvObj')?.value||'';
-  const emp=document.getElementById('fInvEmp')?.value||'';
-  const dados=campsMeta.filter(c=>(!obj||c.objetivo===obj)&&(!emp||c.emp===emp));
-  const ativas=dados.filter(c=>c.status==='active');
-  const total=dados.reduce((s,c)=>s+c.valor,0);
-  const invAtivas=ativas.reduce((s,c)=>s+c.valor,0);
-  const agora=new Date();
-  const mes=agora.toLocaleString('pt-BR',{month:'long'});
-  const mediaDiaria=agora.getDate()>0?invAtivas/agora.getDate():0;
+  const mes = document.getElementById('fInvMes')?.value || 'Jan';
+  const empFilt = document.getElementById('fInvEmp')?.value || '';
 
-  sid('iv1',fBRL(total,true));sid('iv1s',`${dados.length} campanhas`);
-  sid('iv2',fBRL(invAtivas,true));sid('iv2s',mes+' · '+agora.getFullYear());
-  sid('iv3',fN(ativas.length));sid('iv3s',`Orç: ${fBRL(ativas.reduce((s,c)=>s+c.orcamento,0),true)}/dia`);
-  sid('iv4',fBRL(mediaDiaria,true));sid('iv4s',`Baseado em ${agora.getDate()} dias`);
-  sid('ivAnoLbl',agora.getFullYear().toString());
-  sid('ivMesLbl',mes.charAt(0).toUpperCase()+mes.slice(1));
-  sid('infoInv',`${dados.length} campanhas · ${fBRL(total,true)}`);
+  const mesVal = document.getElementById('fInvMes').value || (()=>{
+    const mNames = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const v = mNames[new Date().getMonth()] || 'Jun';
+    document.getElementById('fInvMes').value = v;
+    return v;
+  })();
+  const mesData = INV_DATA.find(m=>m.m===mesVal);
+  if(!mesData) return;
 
-  const meses=[...new Set(dadosRoas.map(r=>r.mes))].sort();
-  const objsU=[...new Set(campsMeta.map(c=>c.objetivo).filter(Boolean))];
-  const totalMeta=campsMeta.reduce((s,c)=>s+c.valor,0);
-  const propObj={};campsMeta.forEach(c=>{propObj[c.objetivo]=(propObj[c.objetivo]||0)+c.valor;});
+  // Populate empreendimento filter
+  const empSel = document.getElementById('fInvEmp');
+  if(!empSel.dataset.populated || empSel.dataset.populated !== mesVal){
+    const cur = empSel.value;
+    empSel.innerHTML = '<option value="">Todos</option>' +
+      mesData.data.map(e=>`<option value="${e.nome}">${e.nome}</option>`).join('');
+    if(cur) empSel.value = cur;
+    empSel.dataset.populated = mesVal;
+  }
 
-  // Stacked mensal
-  dc('cInvMensal');
-  const ctxIM=document.getElementById('cInvMensal')?.getContext('2d');
-  if(ctxIM)charts.cInvMensal=new Chart(ctxIM,{type:'bar',data:{labels:meses.map(fmtMes),datasets:objsU.map(o=>({label:o,data:meses.map(m=>{const inv=dadosRoas.filter(r=>r.mes===m).reduce((s,r)=>s+r.investTotal,0);const prop=totalMeta>0?(propObj[o]||0)/totalMeta:0;return Math.round(inv*prop);}),backgroundColor:(OBJ_C[o]||C.orange)+'cc',borderRadius:4,borderSkipped:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11}}},y:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}});
+  const dados = empFilt ? mesData.data.filter(e=>e.nome===empFilt) : mesData.data;
+  const isBRL = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-  // Donut objetivo
-  const oM={};dados.forEach(c=>{oM[c.objetivo]=(oM[c.objetivo]||0)+c.valor;});
-  const oL=Object.keys(oM),oV=Object.values(oM),oCores=oL.map(l=>OBJ_C[l]||C.orange);
-  document.getElementById('ivLegObj').innerHTML=oL.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${oCores[i]}"></div>${l}: ${fBRL(oV[i],true)}</div>`).join('');
-  dc('cInvObj');const ctxIO=document.getElementById('cInvObj')?.getContext('2d');
-  if(ctxIO)charts.cInvObj=new Chart(ctxIO,{type:'doughnut',data:{labels:oL,datasets:[{data:oV,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:C.mu,font:{size:11},boxWidth:10,padding:10}}}}});
+  // KPIs
+  const totOrc    = dados.reduce((s,e)=>s+e.orcamento,0);
+  const totPat    = dados.reduce((s,e)=>s+e.inv_pat,0);
+  const totReal   = dados.reduce((s,e)=>s+e.real_total,0);
+  const totImp    = dados.reduce((s,e)=>s+e.imposto,0);
+  const totSeg    = dados.reduce((s,e)=>s+e.seguranca,0);
+  const totMeta   = dados.reduce((s,e)=>s+e.meta_total,0);
+  const totGoogle = dados.reduce((s,e)=>s+e.google,0);
+  const totWhats  = dados.reduce((s,e)=>s+e.meta_whats,0);
+  const totCad    = dados.reduce((s,e)=>s+e.meta_cad,0);
+  const totRMeta  = dados.reduce((s,e)=>s+e.real_meta,0);
+  const totRGoogle= dados.reduce((s,e)=>s+e.real_google,0);
+  const pctExec   = totPat>0 ? totReal/totPat*100 : 0;
 
-  // Mês atual obj
-  const moM={};ativas.forEach(c=>{moM[c.objetivo]=(moM[c.objetivo]||0)+c.valor;});
-  const moL=Object.keys(moM),moV=Object.values(moM);
-  dc('cInvMesObj');const ctxMO=document.getElementById('cInvMesObj')?.getContext('2d');
-  if(ctxMO)charts.cInvMesObj=new Chart(ctxMO,{type:'bar',data:{labels:moL,datasets:[{data:moV,backgroundColor:moL.map(l=>OBJ_C[l]||C.orange),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:C.mu,font:{size:12}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}});
+  sid('iv1',isBRL(totOrc)); sid('iv1s',`Fee agência: ${isBRL(dados.reduce((s,e)=>s+e.agencia_fee,0))}`);
+  sid('iv2',isBRL(totPat)); sid('iv2s',`Meta: ${isBRL(totMeta)} · Google: ${isBRL(totGoogle)}`);
+  sid('iv3',isBRL(totReal)); sid('iv3s',`Meta: ${isBRL(totRMeta)} · Google: ${isBRL(totRGoogle)}`);
+  sid('iv4',pctExec.toFixed(1)+'%'); sid('iv4s',`Restante: ${isBRL(totPat - totReal)}`);
+  sid('iv5',isBRL(totImp)); sid('iv5s',`= 12,15% sobre ${isBRL(totMeta)}`);
+  sid('infoInv',`${dados.length} empreendimentos · ${mesVal} 2026`);
 
-  // Mês atual emp
-  const meM={};ativas.forEach(c=>{meM[c.emp]=(meM[c.emp]||0)+c.valor;});
-  const meE=Object.keys(meM).sort((a,b)=>meM[b]-meM[a]).slice(0,10);
-  const hpx=Math.max(meE.length*30+60,180);
-  const cInvMesEmpEl=document.getElementById('cInvMesEmp');
-  if(cInvMesEmpEl)cInvMesEmpEl.parentElement.style.height=hpx+'px';
-  dc('cInvMesEmp');const ctxME=cInvMesEmpEl?.getContext('2d');
-  if(ctxME)charts.cInvMesEmp=new Chart(ctxME,{type:'bar',data:{labels:meE,datasets:[{data:meE.map(e=>meM[e]),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:C.mu,font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},y:{grid:{display:false},ticks:{color:C.tx,font:{size:10}}}}}});
+  // Chart 1: Previsto vs Realizado (horizontal bar)
+  const nomes = dados.map(e=>e.nome.replace(' - ',' · '));
+  dc('cInvPrevReal');
+  const ctxPR = document.getElementById('cInvPrevReal')?.getContext('2d');
+  if(ctxPR) charts.cInvPrevReal = new Chart(ctxPR,{
+    type:'bar',
+    data:{
+      labels:nomes,
+      datasets:[
+        {label:'Previsto',data:dados.map(e=>e.inv_pat),backgroundColor:'rgba(79,142,247,.7)',borderRadius:4,borderSkipped:false},
+        {label:'Realizado',data:dados.map(e=>e.real_total),backgroundColor:'rgba(52,211,153,.7)',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--mu)',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
+        y:{grid:{display:false},ticks:{color:'var(--tx)',font:{size:10}}}
+      }}
+  });
 
-  // Tabela
-  const OC=OBJ_C;
-  document.getElementById('invBody').innerHTML=[...dados].sort((a,b)=>b.valor-a.valor).map(c=>{
-    const cor=OC[c.objetivo]||C.mu;
-    const ativa=c.status==='active';
-    const nome=c.nome.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+  // Chart 2: Donut distribuição prevista
+  const distLabels = ['Meta WhatsApp','Meta Cadastro','Google','Segurança'];
+  const distVals   = [totWhats,totCad,totGoogle,totSeg];
+  const distCores  = ['rgba(16,185,129,.85)','rgba(79,142,247,.85)','rgba(251,146,60,.85)','rgba(168,85,247,.85)'];
+  document.getElementById('invLegDist').innerHTML = distLabels.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${distCores[i]}"></div>${l}: ${isBRL(distVals[i])}</div>`).join('');
+  dc('cInvDist');
+  const ctxD = document.getElementById('cInvDist')?.getContext('2d');
+  if(ctxD) charts.cInvDist = new Chart(ctxD,{
+    type:'doughnut',
+    data:{labels:distLabels,datasets:[{data:distVals,backgroundColor:distCores,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'var(--mu)',font:{size:11},boxWidth:10,padding:8}}}}
+  });
+
+  // Chart 3: Meta vs Google realizado por emp
+  dc('cInvMetaGoogle');
+  const ctxMG = document.getElementById('cInvMetaGoogle')?.getContext('2d');
+  if(ctxMG) charts.cInvMetaGoogle = new Chart(ctxMG,{
+    type:'bar',
+    data:{
+      labels:nomes,
+      datasets:[
+        {label:'Meta',data:dados.map(e=>e.real_meta),backgroundColor:'rgba(79,142,247,.8)',borderRadius:4,borderSkipped:false},
+        {label:'Google',data:dados.map(e=>e.real_google),backgroundColor:'rgba(251,146,60,.8)',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:true,position:'top',labels:{color:'var(--mu)',font:{size:11},boxWidth:10,padding:8}}},
+      scales:{
+        x:{stacked:false,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--mu)',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
+        y:{grid:{display:false},ticks:{color:'var(--tx)',font:{size:10}}}
+      }}
+  });
+
+  // Chart 4: Saldo de segurança
+  dc('cInvSeguranca');
+  const ctxSeg = document.getElementById('cInvSeguranca')?.getContext('2d');
+  if(ctxSeg) charts.cInvSeguranca = new Chart(ctxSeg,{
+    type:'bar',
+    data:{
+      labels:nomes,
+      datasets:[{label:'Segurança',data:dados.map(e=>e.seguranca),backgroundColor:'rgba(168,85,247,.7)',borderRadius:4,borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--mu)',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
+        y:{grid:{display:false},ticks:{color:'var(--tx)',font:{size:10}}}
+      }}
+  });
+
+  // Table
+  document.getElementById('invBody').innerHTML = dados.map(e=>{
+    const pct = e.pct;
+    const pctColor = pct>=90?'var(--green)':pct>=60?'var(--amber)':'var(--red,#f87171)';
+    const bar = `<div style="display:flex;align-items:center;gap:6px">
+      <div style="flex:1;background:rgba(255,255,255,.08);border-radius:4px;height:6px;overflow:hidden">
+        <div style="width:${Math.min(pct,100)}%;background:${pctColor};height:100%;border-radius:4px"></div>
+      </div>
+      <span style="color:${pctColor};font-size:11px;min-width:38px;text-align:right">${pct.toFixed(1)}%</span>
+    </div>`;
+    const B = v => v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}):'—';
     return`<tr>
-      <td style="padding-left:18px;font-weight:500;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nome}</td>
-      <td style="color:var(--mu);font-size:11px">${c.emp||'—'}</td>
-      <td><span class="obj-pill" style="background:${cor}22;color:${cor}">${c.objetivo||'—'}</span></td>
-      <td><span class="spill ${ativa?'green':'red'}">${ativa?'Ativa':'Pausada'}</span></td>
-      <td>${c.orcamento>0?fBRL(c.orcamento,true)+'/dia':'—'}</td>
-      <td style="font-weight:700;color:var(--blue)">${fBRL(c.valor,true)}</td>
-      <td>${fN(c.resultados)}</td><td>${c.ctr>0?c.ctr.toFixed(2)+'%':'—'}</td>
-      <td style="padding-right:18px">${c.cprResult>0?fBRL(c.cprResult):'—'}</td>
+      <td style="padding-left:14px;font-weight:500">${e.nome}</td>
+      <td><span class="badge" style="font-size:10px">${e.agencia||'—'}</span></td>
+      <td>${B(e.orcamento)}</td>
+      <td>${B(e.inv_pat)}</td>
+      <td style="color:var(--blue)">${B(e.meta_total)}</td>
+      <td style="color:var(--amber)">${B(e.google)}</td>
+      <td style="color:var(--purple)">${B(e.seguranca)}</td>
+      <td style="color:var(--pink,#f472b6)">${B(e.imposto)}</td>
+      <td>${B(e.real_meta)}</td>
+      <td>${B(e.real_google)}</td>
+      <td style="font-weight:600">${B(e.real_total)}</td>
+      <td style="padding-right:14px;min-width:120px">${bar}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="9" style="padding:16px 18px;color:var(--mu)">Nenhuma campanha encontrada</td></tr>';
+  }).join('') || '<tr><td colspan="12" style="padding:16px;color:var(--mu)">Nenhum dado encontrado</td></tr>';
 }
+
 
 // ═══════════════════════════════════════════════════════
 // RENDER LEADS
@@ -1955,8 +2706,9 @@ async function loadAll(){
     if(!dadosRoas.length)throw new Error('Planilha ROI/ROAS sem dados. Verifique o acesso público.');
     popularFiltros();
     renderDashboard();
-    const ativas=campsMeta.filter(c=>c.status==='active').length;
-    sid('tbBadge',`${ativas} campanhas ativas`);
+    // Badge: campanhas com status active E que têm gasto registrado
+    const ativas=campsMeta.filter(c=>c.status==='active'&&c.valor>0).length;
+    sid('tbBadge',`${ativas} campanha${ativas!==1?'s':''} ativa${ativas!==1?'s':''}`);
     sid('lastUpd',new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){
     const eb=document.getElementById('ebox');
@@ -1966,6 +2718,508 @@ async function loadAll(){
   }
   setLoading(false);
 }
+
+// ═══════════════════════════════════════════════════════
+// PAGE: CRIATIVOS META API — MULTI-CONTA
+// ═══════════════════════════════════════════════════════
+let metaCampaigns    = [];   // cache de campanhas da conta ativa
+let currentCreatives = [];   // top 5 da campanha atual
+let currentMetaCamp  = null; // campanha atual
+
+// ── Página de Configurações de API ──────────────────────
+function initConfigPage(){
+  renderAccountsList();
+  updateConfigStatus();
+  // Claude key mascarado
+  const k  = localStorage.getItem('eco_claude_key') || '';
+  const ki = document.getElementById('inputClaudeKey');
+  if(ki) ki.value = k ? '••••••••••••••••' : '';
+}
+
+function updateConfigStatus(){
+  const accounts  = window.MetaAPI?.accounts || [];
+  const hasMeta   = accounts.length > 0;
+  const hasClaude = !!localStorage.getItem('eco_claude_key');
+
+  const metaVal = document.getElementById('cfgMetaVal');
+  const metaSub = document.getElementById('cfgMetaSub');
+  const metaBdg = document.getElementById('cfgMetaBadge');
+  if(metaVal){ metaVal.textContent = accounts.length; metaVal.style.color = hasMeta ? 'var(--green)' : 'var(--red)'; }
+  if(metaSub) metaSub.textContent = hasMeta ? `${accounts.length} conta${accounts.length>1?'s':''} cadastrada${accounts.length>1?'s':''}` : 'Nenhuma conta cadastrada';
+  if(metaBdg){ metaBdg.className = hasMeta ? 'badge green' : 'badge'; metaBdg.style.cssText = hasMeta ? '' : 'background:rgba(107,122,158,.12);color:var(--mu)'; metaBdg.textContent = `${accounts.length} conta${accounts.length!==1?'s':''}`; }
+
+  const clVal = document.getElementById('cfgClaudeVal');
+  const clSub = document.getElementById('cfgClaudeSub');
+  const clBdg = document.getElementById('cfgClaudeBadge');
+  if(clVal){ clVal.textContent = hasClaude ? '✓' : '✕'; clVal.style.color = hasClaude ? 'var(--green)' : 'var(--red)'; }
+  if(clSub) clSub.textContent = hasClaude ? 'API Key salva' : 'Não configurado';
+  if(clBdg){ clBdg.className = hasClaude ? 'badge purple' : 'badge'; clBdg.style.cssText = hasClaude ? '' : 'background:rgba(107,122,158,.12);color:var(--mu)'; clBdg.textContent = hasClaude ? 'Configurado' : 'Não configurado'; }
+}
+
+// ── Renderiza lista de contas salvas ─────────────────────
+function renderAccountsList(){
+  const container = document.getElementById('metaAccountsList');
+  if(!container) return;
+  const accounts  = window.MetaAPI?.accounts || [];
+  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
+
+  if(!accounts.length){
+    container.innerHTML = '<div style="font-size:12px;color:var(--mu);padding:8px 0">Nenhuma conta adicionada ainda. Use o formulário abaixo.</div>';
+    return;
+  }
+
+  container.innerHTML = accounts.map((acc, i) => {
+    const isActive = i === activeIdx;
+    const masked   = '••••' + (acc.accountId || '').slice(-6);
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${isActive ? 'rgba(79,142,247,.08)' : 'var(--bg3)'};border:1px solid ${isActive ? 'var(--blue)' : 'var(--bdr)'};border-radius:10px;transition:all .2s">
+        <div style="width:8px;height:8px;border-radius:50%;background:${isActive ? 'var(--green)' : 'var(--mu)'};flex-shrink:0${isActive ? ';box-shadow:0 0 5px var(--green)' : ''}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--tx)">${acc.name}</div>
+          <div style="font-size:11px;color:var(--mu)">${acc.accountId} · token ${masked}</div>
+        </div>
+        ${isActive ? '<span class="badge green" style="flex-shrink:0">Ativa</span>' : `<button class="btn" onclick="setActiveAccount(${i})" style="font-size:11px;padding:4px 12px;flex-shrink:0">Usar esta</button>`}
+        <button class="btn" onclick="testAccountAt(${i})" style="font-size:11px;padding:4px 10px;flex-shrink:0" title="Testar conexão">✓</button>
+        <button class="btn" onclick="removeMetaAccount(${i})" style="font-size:11px;padding:4px 10px;color:var(--red);flex-shrink:0" title="Remover conta">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function addMetaAccount(){
+  const name    = document.getElementById('newAccName')?.value.trim()  || '';
+  const token   = document.getElementById('newAccToken')?.value.trim() || '';
+  const accId   = document.getElementById('newAccId')?.value.trim()    || '';
+  if(!name || !token || !accId){ setCredMsg('credMsg','⚠️ Preencha nome, token e account ID.','var(--amber)'); return; }
+  const ok = window.MetaAPI.addAccount(name, token, accId);
+  if(!ok){ setCredMsg('credMsg','⚠️ Esta conta já está cadastrada.','var(--amber)'); return; }
+  document.getElementById('newAccName').value  = '';
+  document.getElementById('newAccToken').value = '';
+  document.getElementById('newAccId').value    = '';
+  setCredMsg('credMsg','✅ Conta adicionada!','var(--green)');
+  renderAccountsList();
+  updateConfigStatus();
+  populateAccountSelect();
+  updateMetaConnBar();
+}
+
+function removeMetaAccount(idx){
+  if(!confirm('Remover esta conta?')) return;
+  window.MetaAPI.removeAccount(idx);
+  renderAccountsList();
+  updateConfigStatus();
+  populateAccountSelect();
+  updateMetaConnBar();
+  setCredMsg('credMsg','Conta removida.','var(--mu)');
+}
+
+function setActiveAccount(idx){
+  window.MetaAPI.switchAccount(idx);
+  metaCampaigns = [];
+  currentCreatives = [];
+  currentMetaCamp  = null;
+  renderAccountsList();
+  updateMetaConnBar();
+  // Atualiza seletor na página de criativos
+  const sel = document.getElementById('fMetaAccount');
+  if(sel) sel.value = String(idx);
+}
+
+async function testAccountAt(idx){
+  const accounts = window.MetaAPI.accounts;
+  if(!accounts[idx]){ setCredMsg('credMsg','Conta inválida.','var(--red)'); return; }
+  // Guarda conta atual, troca temporariamente, testa, restaura
+  const prevIdx = window.MetaAPI.activeIdx;
+  window.MetaAPI.switchAccount(idx);
+  setCredMsg('credMsg',`🔄 Testando "${accounts[idx].name}"…`,'var(--mu)');
+  try{
+    const r = await window.MetaAPI.validateToken();
+    if(r.valid){ setCredMsg('credMsg',`✅ "${accounts[idx].name}" OK — usuário: ${r.name}`,'var(--green)'); }
+    else        { setCredMsg('credMsg',`❌ "${accounts[idx].name}": ${r.error}`,'var(--red)'); }
+  } catch(e){ setCredMsg('credMsg',`❌ Erro: ${e.message}`,'var(--red)'); }
+  finally{
+    // Restaura conta ativa original
+    window.MetaAPI.switchAccount(prevIdx);
+  }
+}
+
+function saveClaudeKey(){
+  const ki = document.getElementById('inputClaudeKey');
+  const rawKey = ki?.value.trim() || '';
+  const key = (rawKey === '••••••••••••••••') ? (localStorage.getItem('eco_claude_key') || '') : rawKey;
+  if(!key){ setCredMsg('claudeMsg','⚠️ Cole a API Key do Claude.','var(--amber)'); return; }
+  if(window.AIModule) window.AIModule.saveKey(key);
+  setCredMsg('claudeMsg','✅ Claude API Key salva!','var(--green)');
+  updateConfigStatus();
+}
+
+function clearClaudeKey(){
+  localStorage.removeItem('eco_claude_key');
+  if(window.AIModule) window.AIModule._key = '';
+  const ki = document.getElementById('inputClaudeKey');
+  if(ki) ki.value = '';
+  setCredMsg('claudeMsg','Claude Key removida.','var(--mu)');
+  updateConfigStatus();
+}
+
+function setCredMsg(elId, msg, color){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = color;
+}
+
+// ── Página Criativos Meta ────────────────────────────────
+function initMetaPage(){
+  populateAccountSelect();
+  updateMetaConnBar();
+  if(metaCampaigns.length) renderMetaAllCamps();
+}
+
+// Popula dropdown de contas na página de criativos
+function populateAccountSelect(){
+  const sel = document.getElementById('fMetaAccount');
+  if(!sel) return;
+  const accounts  = window.MetaAPI?.accounts || [];
+  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
+  sel.innerHTML = accounts.length
+    ? accounts.map((a, i) => `<option value="${i}" ${i===activeIdx?'selected':''}>${a.name}</option>`).join('')
+    : '<option value="">— Nenhuma conta cadastrada —</option>';
+}
+
+// Troca de conta pelo seletor da página de criativos
+function onMetaAccountSelect(){
+  const sel = document.getElementById('fMetaAccount');
+  const idx = parseInt(sel?.value ?? '0', 10);
+  window.MetaAPI.switchAccount(idx);
+  // Limpa cache e UI de campanhas
+  metaCampaigns = [];
+  currentCreatives = [];
+  currentMetaCamp  = null;
+  const campSel = document.getElementById('fMetaCamp');
+  if(campSel) campSel.innerHTML = '<option value="">— Todas as campanhas —</option>';
+  document.getElementById('metaKpiRow').style.display      = 'none';
+  document.getElementById('metaAIContainer').style.display = 'none';
+  document.getElementById('metaAllCampsContainer').style.display = 'none';
+  document.getElementById('metaCreativesContainer').innerHTML = `
+    <div class="meta-empty">
+      <div class="meta-empty-icon">🔄</div>
+      <div class="meta-empty-title">Conta alterada: ${window.MetaAPI.activeAccount?.name||''}</div>
+      <div class="meta-empty-sub">Clique em "Carregar Campanhas" para buscar os dados desta conta</div>
+    </div>`;
+  updateMetaConnBar();
+}
+
+// Mini status bar na página de criativos
+function updateMetaConnBar(){
+  const dot   = document.getElementById('metaConnDot');
+  const label = document.getElementById('metaConnLabel');
+  if(!dot || !label) return;
+  const acc = window.MetaAPI?.activeAccount;
+  if(acc){
+    dot.style.background = 'var(--green)';
+    dot.style.boxShadow  = '0 0 6px var(--green)';
+    label.style.color    = 'var(--mu2)';
+    label.textContent    = `Conta ativa: ${acc.name} · ${acc.accountId}`;
+  } else {
+    dot.style.background = 'var(--mu)';
+    dot.style.boxShadow  = 'none';
+    label.style.color    = 'var(--mu)';
+    label.textContent    = 'Nenhuma conta configurada — acesse ⚙️ Gerenciar Contas';
+  }
+}
+
+// ── Carrega campanhas da conta ativa ─────────────────────
+async function loadMetaCampaigns(){
+  if(!window.MetaAPI?.hasCredentials()){
+    alert('Adicione e selecione uma conta Meta em ⚙️ Config. de API.');
+    return;
+  }
+  const btn    = document.getElementById('btnLoadMeta');
+  const infoEl = document.getElementById('metaLoadInfo');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando…'; }
+  if(infoEl) infoEl.textContent = `Buscando campanhas de "${window.MetaAPI.activeAccount?.name||'conta'}"…`;
+
+  const period = document.getElementById('fMetaPeriod')?.value || 'this_month';
+
+  try{
+    const camps = await window.MetaAPI.getCampaigns({ datePreset: period });
+    const insightsArr = await Promise.all(
+      camps.map(c => window.MetaAPI.getCampaignInsights(c.id, period))
+    );
+
+    metaCampaigns = camps.map((c,i)=>({
+      ...c,
+      insights : insightsArr[i],
+      results  : window.MetaAPI._extractResults(insightsArr[i]),
+    })).sort((a,b)=> b.results - a.results || parseFloat(b.insights?.spend||0) - parseFloat(a.insights?.spend||0));
+
+    const sel = document.getElementById('fMetaCamp');
+    if(sel){
+      sel.innerHTML = '<option value="">— Todas as campanhas —</option>';
+      metaCampaigns.forEach(c=>{
+        sel.appendChild(new Option(`${c.status==='ACTIVE'?'🟢':'🔴'} ${c.name}`, c.id));
+      });
+    }
+
+    const ativas = metaCampaigns.filter(c=>c.status==='ACTIVE').length;
+    if(infoEl) infoEl.textContent = `${camps.length} campanhas · ${ativas} ativas`;
+
+    const btnAll = document.getElementById('btnAnalyzeAll');
+    if(btnAll) btnAll.style.display = 'inline-flex';
+
+    renderMetaAllCamps();
+
+    const first = metaCampaigns.find(c=>c.status==='ACTIVE');
+    if(first){
+      if(sel) sel.value = first.id;
+      await loadMetaCampaignCreatives(first.id);
+    }
+
+  } catch(e){
+    if(infoEl) infoEl.textContent = `❌ ${e.message}`;
+    document.getElementById('metaCreativesContainer').innerHTML =
+      `<div class="ebox" style="display:block">❌ ${e.message}<br><small>Verifique se o token tem permissão <b>ads_read</b>.</small></div>`;
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='↻ Carregar Campanhas'; }
+  }
+}
+
+async function onMetaCampaignSelect(){
+  const id = document.getElementById('fMetaCamp')?.value;
+  if(!id){ renderMetaAllCamps(); return; }
+  await loadMetaCampaignCreatives(id);
+}
+
+// ── Carrega top 5 criativos da campanha ──────────────────
+async function loadMetaCampaignCreatives(campaignId){
+  const period    = document.getElementById('fMetaPeriod')?.value || 'this_month';
+  const container = document.getElementById('metaCreativesContainer');
+  container.innerHTML = `
+    <div class="meta-empty">
+      <div class="spin" style="margin:0 auto 16px"></div>
+      <div class="meta-empty-title">Buscando criativos e métricas…</div>
+      <div class="meta-empty-sub">Usando Meta Batch API para reduzir chamadas</div>
+    </div>`;
+
+  const camp = metaCampaigns.find(c=>c.id===campaignId);
+  currentMetaCamp = camp || null;
+
+  try{
+    const top5 = await window.MetaAPI.getTop5Creatives(campaignId, period);
+    currentCreatives = top5;
+
+    if(!top5.length){
+      container.innerHTML = `
+        <div class="meta-empty">
+          <div class="meta-empty-icon">📭</div>
+          <div class="meta-empty-title">Nenhum criativo com dados no período</div>
+          <div class="meta-empty-sub">Tente "Máximo" no filtro de período ou outra campanha</div>
+        </div>`;
+      document.getElementById('metaKpiRow').style.display = 'none';
+      return;
+    }
+
+    updateMetaKPIs(camp?.insights, top5);
+    renderMetaCreativeCards(camp, top5, container);
+
+    document.getElementById('metaAIContainer').style.display  = 'block';
+    document.getElementById('metaAllCampsContainer').style.display = 'none';
+    document.getElementById('metaAIResult').innerHTML =
+      `<div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
+        Clique em "Analisar Criativos" para receber insights do Claude sobre os ${top5.length} criativos.
+      </div>`;
+
+  } catch(e){
+    container.innerHTML =
+      `<div class="ebox" style="display:block">❌ ${e.message}</div>`;
+  }
+}
+
+// ── KPIs da campanha ─────────────────────────────────────
+function updateMetaKPIs(ins, creatives){
+  document.getElementById('metaKpiRow').style.display = 'block';
+  const spend   = parseFloat(ins?.spend       || 0);
+  const results = creatives.reduce((s,c)=>s+c.results, 0);
+  const ctr     = parseFloat(ins?.ctr         || 0);
+  const cpr     = results > 0 ? spend / results : 0;
+  sid('mk1', metaFmt.brlShort(spend));
+  sid('mk1s',`${creatives.length} criativos · período`);
+  sid('mk2', fN(results));
+  sid('mk2s','Top 5 ads da campanha');
+  sid('mk3', ctr.toFixed(2)+'%');
+  sid('mk3s',`Impressões: ${metaFmt.num(ins?.impressions||0)}`);
+  sid('mk4', cpr>0 ? metaFmt.brl(cpr) : '—');
+  sid('mk4s',`CPC: ${metaFmt.brl(parseFloat(ins?.cpc||0))}`);
+}
+
+// ── Render creative cards ────────────────────────────────
+const RANK_STYLES = [
+  { bg:'rgba(245,166,35,.25)',  color:'#f5a623' },
+  { bg:'rgba(180,180,180,.2)',  color:'#bbb'    },
+  { bg:'rgba(205,127,50,.22)',  color:'#cd7f32' },
+  { bg:'rgba(79,142,247,.18)', color:'#4f8ef7' },
+  { bg:'rgba(155,127,244,.18)',color:'#9b7ff4' },
+];
+
+function renderMetaCreativeCards(camp, creatives, container){
+  const campName = (camp?.name||'Campanha').replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+  const isActive = camp?.status === 'ACTIVE';
+  container.innerHTML = `
+    <div class="camp-crt-section">
+      <div class="camp-crt-hd">
+        <div>
+          <div class="camp-crt-name">${campName}</div>
+          <div class="camp-crt-meta">
+            ${camp?.objective||'—'} ·
+            <span style="color:${isActive?'var(--green)':'var(--red)'}">
+              ${isActive?'🟢 Ativa':'🔴 Pausada'}
+            </span>
+            · <span style="color:var(--teal)">Thumbnails via Meta API</span>
+            · Top 5 por resultados
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--mu);text-align:right">
+          🏆 #1–#${creatives.length} melhores criativos<br>
+          <span style="color:var(--purple)">Dados: Meta Ads Manager</span>
+        </div>
+      </div>
+      <div class="creative-grid">
+        ${creatives.map((ad,i) => buildCreativeCard(ad, i)).join('')}
+      </div>
+    </div>`;
+}
+
+function buildCreativeCard(ad, i){
+  const rs    = RANK_STYLES[i] || RANK_STYLES[4];
+  const thumb = ad.thumbnail;
+  const active= ad.status === 'ACTIVE';
+  const cpr   = ad.results > 0 ? ad.spend / ad.results : 0;
+  const scoreColor = ad.ctr >= 2 && cpr > 0 && cpr < 50 ? 'var(--green)'
+    : ad.ctr >= 1 ? 'var(--amber)' : 'var(--red)';
+  const thumbHtml = thumb
+    ? `<img class="creative-thumb" src="${thumb}" alt="${ad.name}" loading="lazy"
+         onerror="this.outerHTML='<div class=\\'creative-thumb-ph\\'>🖼️</div>'">`
+    : `<div class="creative-thumb-ph">🖼️</div>`;
+  const adName = (ad.name||'Ad #'+(i+1)).replace(/\s*[–\-—]\s*(Pao|fmd|Dia|Ad|Set).*/i,'').trim();
+  return `
+    <div class="creative-card">
+      <div class="creative-score-bar" style="background:${scoreColor}"></div>
+      <div style="position:relative">
+        ${thumbHtml}
+        <div class="creative-rank" style="background:${rs.bg};color:${rs.color}">#${i+1}</div>
+        <div class="creative-st" style="background:${active?'rgba(46,204,142,.22)':'rgba(240,101,101,.22)'};color:${active?'var(--green)':'var(--red)'}">
+          ${active?'● Ativo':'● Pausado'}
+        </div>
+      </div>
+      <div class="creative-info">
+        <div class="creative-name" title="${ad.name}">${adName}</div>
+        <div class="creative-metrics">
+          <div class="cm"><div class="cm-v" style="color:var(--green)">${ad.results>0?ad.results.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Resultados</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--blue)">${ad.ctr>0?ad.ctr.toFixed(2)+'%':'—'}</div><div class="cm-l">CTR</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--amber)">${ad.spend>0?'R$'+ad.spend.toFixed(0):'—'}</div><div class="cm-l">Gasto</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--purple)">${ad.cpc>0?'R$'+ad.cpc.toFixed(2):'—'}</div><div class="cm-l">CPC</div></div>
+        </div>
+        <div class="creative-foot">
+          <span>${ad.impressions>0?ad.impressions.toLocaleString('pt-BR')+' imp.':'—'}${ad.frequency>0?' · freq '+ad.frequency.toFixed(1):''}</span>
+          <span class="creative-foot-cpr" style="color:${cpr>0&&cpr<50?'var(--green)':cpr>0&&cpr<100?'var(--amber)':'var(--red)'}">
+            ${cpr>0?'R$'+cpr.toFixed(0)+'/res.':'—'}
+          </span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Lista de todas as campanhas ──────────────────────────
+function renderMetaAllCamps(){
+  const container = document.getElementById('metaAllCampsContainer');
+  const list      = document.getElementById('metaAllCampsList');
+  if(!container || !list || !metaCampaigns.length) return;
+  container.style.display = 'block';
+  document.getElementById('metaKpiRow').style.display  = 'none';
+  document.getElementById('metaAIContainer').style.display = 'none';
+  document.getElementById('metaCreativesContainer').innerHTML = `
+    <div class="meta-empty">
+      <div class="meta-empty-icon">👆</div>
+      <div class="meta-empty-title">Selecione uma campanha acima</div>
+      <div class="meta-empty-sub">para ver os top 5 criativos com thumbnails reais</div>
+    </div>`;
+  const OC = {Cadastro:C.blue, WhatsApp:C.green, Alcance:C.purple};
+  list.innerHTML = metaCampaigns.map(c=>{
+    const ins    = c.insights;
+    const spend  = parseFloat(ins?.spend||0);
+    const ctr    = parseFloat(ins?.ctr||0);
+    const cpr    = c.results>0 ? spend/c.results : 0;
+    const active = c.status === 'ACTIVE';
+    const obj    = c.objective || '';
+    const oColor = OC[obj] || C.orange;
+    const campNameShort = c.name.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+    return `
+      <div class="meta-camp-row" onclick="selectMetaCampFromCard('${c.id}')">
+        <div style="width:10px;height:10px;border-radius:50%;background:${active?'var(--green)':'var(--mu)'};flex-shrink:0"></div>
+        <div class="meta-camp-row-name" title="${c.name}">${campNameShort}</div>
+        <div style="font-size:10px;padding:2px 8px;border-radius:5px;background:${oColor}22;color:${oColor};font-weight:600;flex-shrink:0">${obj||'—'}</div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--blue)">${spend>0?'R$'+spend.toFixed(0):'—'}</div><div class="meta-camp-stat-l">Gasto</div></div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--green)">${c.results||'—'}</div><div class="meta-camp-stat-l">Resultados</div></div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--amber)">${ctr>0?ctr.toFixed(2)+'%':'—'}</div><div class="meta-camp-stat-l">CTR</div></div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--purple)">${cpr>0?'R$'+cpr.toFixed(0):'—'}</div><div class="meta-camp-stat-l">Custo/Res.</div></div>
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;flex-shrink:0" onclick="event.stopPropagation();selectMetaCampFromCard('${c.id}')">🎨 Ver criativos</button>
+      </div>`;
+  }).join('');
+}
+
+async function selectMetaCampFromCard(campId){
+  const sel = document.getElementById('fMetaCamp');
+  if(sel) sel.value = campId;
+  document.getElementById('metaAllCampsContainer').style.display = 'none';
+  await loadMetaCampaignCreatives(campId);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Análise IA dos criativos atuais ─────────────────────
+async function analyzeMetaCreatives(){
+  if(!currentCreatives.length){ alert('Selecione uma campanha e carregue os criativos primeiro.'); return; }
+  const el = document.getElementById('metaAIResult');
+  el.innerHTML = `<div class="ia-loading">🤖 Analisando ${currentCreatives.length} criativos<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
+  try{
+    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
+    const text = await window.AIModule.analyzeCreatives(currentMetaCamp?.name||'Campanha', currentCreatives);
+    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px;background:rgba(240,101,101,.08);border-radius:8px">❌ ${e.message}</div>`;
+  }
+}
+
+// ── Análise IA de todas as campanhas ────────────────────
+async function analyzeAllMetaCampaigns(){
+  if(!metaCampaigns.length) return;
+  const btn = document.getElementById('btnAnalyzeAll');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Analisando…'; }
+  document.getElementById('metaAIContainer').style.display = 'block';
+  const el = document.getElementById('metaAIResult');
+  el.innerHTML = `<div class="ia-loading">🤖 Analisando toda a conta Meta Ads<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
+  try{
+    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
+    const text = await window.AIModule.analyzeCampaignPerformance(metaCampaigns.filter(c=>c.insights));
+    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--red);font-size:13px">${e.message}</div>`;
+  } finally{
+    if(btn){ btn.disabled=false; btn.textContent='🤖 Analisar Conta'; }
+  }
+}
+
+// ──────────────────────────────────────────────────────
+
+// Menu mobile
+document.querySelector('.topbar')?.addEventListener('click', e=>{
+  if(e.clientX < 50 && window.innerWidth <= 768){
+    document.querySelector('.sidebar')?.classList.toggle('open');
+  }
+});
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click',()=>{ if(window.innerWidth<=768) document.querySelector('.sidebar')?.classList.remove('open'); });
+});
 
 // Enter no login
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});

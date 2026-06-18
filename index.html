@@ -91,6 +91,7 @@ input[type=date]:focus{border-color:var(--blue)}
 /* KPI GRID */
 .kpi-grid{display:grid;gap:10px;margin-bottom:16px}
 .kpi-5{grid-template-columns:repeat(5,1fr)}
+.kpi-6{grid-template-columns:repeat(6,1fr)}
 .kpi-4{grid-template-columns:repeat(4,1fr)}
 .kpi-5{grid-template-columns:repeat(5,1fr)}
 .kpi-3{grid-template-columns:repeat(3,1fr)}
@@ -242,12 +243,13 @@ input[type=date]:focus{border-color:var(--blue)}
 /* ═══════════════════ RESPONSIVO ═══════════════════ */
 @media(max-width:1200px){
   .kpi-grid.kpi-5{grid-template-columns:repeat(3,1fr)}
+  .kpi-grid.kpi-6{grid-template-columns:repeat(3,1fr)}
   .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(3,1fr)!important}
   .g53{grid-template-columns:1fr 1fr}
 }
 @media(max-width:1024px){
   :root{--sidebar:200px}
-  .kpi-grid.kpi-4,.kpi-grid.kpi-5{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid.kpi-4,.kpi-grid.kpi-5,.kpi-grid.kpi-6{grid-template-columns:repeat(2,1fr)}
   .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(2,1fr)!important}
   .g2,.g3,.g53,.g32,.g21{grid-template-columns:1fr}
   .form-row,.concorrente-grid{grid-template-columns:1fr 1fr}
@@ -266,7 +268,7 @@ input[type=date]:focus{border-color:var(--blue)}
   .tb-title{font-size:13px}
   .page{padding:12px}
   .fbar{padding:8px 12px;gap:8px}
-  .kpi-grid.kpi-4,.kpi-grid.kpi-5{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid.kpi-4,.kpi-grid.kpi-5,.kpi-grid.kpi-6{grid-template-columns:repeat(2,1fr)}
   .kpi-grid[style*="repeat(6"]{grid-template-columns:repeat(2,1fr)!important}
   .kpi-val{font-size:22px}
   .g2,.g3,.g53,.g32,.g21{grid-template-columns:1fr}
@@ -718,12 +720,13 @@ body.light .theme-label{color:var(--blue)}
         <span class="fl" id="infoInv" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
       </div>
 
-      <div class="kpi-grid kpi-5">
+      <div class="kpi-grid kpi-6">
         <div class="kpi blue"><div class="kpi-label">Orçamento Previsto</div><div class="kpi-val blue" id="iv1">—</div><div class="kpi-sub" id="iv1s"></div></div>
         <div class="kpi teal"><div class="kpi-label">Inv. Patrocinado</div><div class="kpi-val teal" id="iv2">—</div><div class="kpi-sub" id="iv2s"></div></div>
         <div class="kpi green"><div class="kpi-label">Realizado Total</div><div class="kpi-val green" id="iv3">—</div><div class="kpi-sub" id="iv3s"></div></div>
         <div class="kpi amber"><div class="kpi-label">% Executado</div><div class="kpi-val amber" id="iv4">—</div><div class="kpi-sub" id="iv4s"></div></div>
         <div class="kpi purple"><div class="kpi-label">Impostos Meta (CBS+IBF)</div><div class="kpi-val purple" id="iv5">—</div><div class="kpi-sub" id="iv5s"></div></div>
+        <div class="kpi pink"><div class="kpi-label">Gasto com Agências</div><div class="kpi-val pink" id="iv6">—</div><div class="kpi-sub" id="iv6s"></div></div>
       </div>
 
       <div class="grid g53">
@@ -2086,8 +2089,11 @@ async function analisarCampanhasIA(){
 // RENDER INVESTIMENTO
 // ═══════════════════════════════════════════════════════
 function renderInvestimento(){
-  const mes = document.getElementById('fInvMes')?.value || 'Jan';
-  const empFilt = document.getElementById('fInvEmp')?.value || '';
+  // ── Theme-aware colors ──
+  const isLight = document.body.classList.contains('light');
+  const clrMu   = isLight ? '#6b7280' : '#8b9ab0';
+  const clrTx   = isLight ? '#1a2332' : '#e2e8f0';
+  const clrGrid = isLight ? 'rgba(0,0,0,.07)' : 'rgba(255,255,255,.05)';
 
   const mesVal = document.getElementById('fInvMes').value || (()=>{
     const mNames = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -2095,6 +2101,8 @@ function renderInvestimento(){
     document.getElementById('fInvMes').value = v;
     return v;
   })();
+
+  const empFilt = document.getElementById('fInvEmp')?.value || '';
   const mesData = INV_DATA.find(m=>m.m===mesVal);
   if(!mesData) return;
 
@@ -2110,9 +2118,11 @@ function renderInvestimento(){
 
   const dados = empFilt ? mesData.data.filter(e=>e.nome===empFilt) : mesData.data;
   const isBRL = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const B = v => v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}):'—';
 
-  // KPIs
+  // ── Totais ──
   const totOrc    = dados.reduce((s,e)=>s+e.orcamento,0);
+  const totFee    = dados.reduce((s,e)=>s+e.agencia_fee,0);
   const totPat    = dados.reduce((s,e)=>s+e.inv_pat,0);
   const totReal   = dados.reduce((s,e)=>s+e.real_total,0);
   const totImp    = dados.reduce((s,e)=>s+e.imposto,0);
@@ -2125,35 +2135,45 @@ function renderInvestimento(){
   const totRGoogle= dados.reduce((s,e)=>s+e.real_google,0);
   const pctExec   = totPat>0 ? totReal/totPat*100 : 0;
 
-  sid('iv1',isBRL(totOrc)); sid('iv1s',`Fee agência: ${isBRL(dados.reduce((s,e)=>s+e.agencia_fee,0))}`);
-  sid('iv2',isBRL(totPat)); sid('iv2s',`Meta: ${isBRL(totMeta)} · Google: ${isBRL(totGoogle)}`);
-  sid('iv3',isBRL(totReal)); sid('iv3s',`Meta: ${isBRL(totRMeta)} · Google: ${isBRL(totRGoogle)}`);
-  sid('iv4',pctExec.toFixed(1)+'%'); sid('iv4s',`Restante: ${isBRL(totPat - totReal)}`);
-  sid('iv5',isBRL(totImp)); sid('iv5s',`= 12,15% sobre ${isBRL(totMeta)}`);
+  sid('iv1',isBRL(totOrc));   sid('iv1s',`Fee agência: ${isBRL(totFee)}`);
+  sid('iv2',isBRL(totPat));   sid('iv2s',`Meta: ${isBRL(totMeta)} · Google: ${isBRL(totGoogle)}`);
+  sid('iv3',isBRL(totReal));  sid('iv3s',`Meta: ${isBRL(totRMeta)} · Google: ${isBRL(totRGoogle)}`);
+  sid('iv4',pctExec.toFixed(1)+'%'); sid('iv4s',`Restante: ${isBRL(totPat-totReal)}`);
+  sid('iv5',isBRL(totImp));   sid('iv5s',`= 12,15% sobre ${isBRL(totMeta)}`);
+  sid('iv6',isBRL(totFee));   sid('iv6s',`${dados.filter(e=>e.agencia_fee>0).length} empreendimentos`);
   sid('infoInv',`${dados.length} empreendimentos · ${mesVal} 2026`);
 
-  // Chart 1: Previsto vs Realizado (horizontal bar)
+  // ── Opções base para eixos ──
+  const xTickOpts = {color:clrMu,font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'};
+  const yTickOpts = {color:clrTx,font:{size:11}};
+  const xGridOpts = {color:clrGrid};
+  const barH = 22; // altura fixa por barra
   const nomes = dados.map(e=>e.nome.replace(' - ',' · '));
+
+  // ── Chart 1: Previsto vs Realizado ──
+  const pr_h = Math.max(nomes.length * barH * 2 + 60, 180);
+  const prEl = document.getElementById('cInvPrevReal');
+  if(prEl) prEl.parentElement.style.height = pr_h+'px';
   dc('cInvPrevReal');
-  const ctxPR = document.getElementById('cInvPrevReal')?.getContext('2d');
+  const ctxPR = prEl?.getContext('2d');
   if(ctxPR) charts.cInvPrevReal = new Chart(ctxPR,{
     type:'bar',
     data:{
       labels:nomes,
       datasets:[
-        {label:'Previsto',data:dados.map(e=>e.inv_pat),backgroundColor:'rgba(79,142,247,.7)',borderRadius:4,borderSkipped:false},
-        {label:'Realizado',data:dados.map(e=>e.real_total),backgroundColor:'rgba(52,211,153,.7)',borderRadius:4,borderSkipped:false}
+        {label:'Previsto', data:dados.map(e=>e.inv_pat),   backgroundColor:'rgba(79,142,247,.75)', borderRadius:4, borderSkipped:false, barThickness:barH},
+        {label:'Realizado',data:dados.map(e=>e.real_total),backgroundColor:'rgba(52,211,153,.75)', borderRadius:4, borderSkipped:false, barThickness:barH}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
       plugins:{legend:{display:false}},
       scales:{
-        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--mu)',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
-        y:{grid:{display:false},ticks:{color:'var(--tx)',font:{size:10}}}
+        x:{grid:{color:clrGrid},ticks:xTickOpts},
+        y:{grid:{display:false},ticks:{color:clrTx,font:{size:11}}}
       }}
   });
 
-  // Chart 2: Donut distribuição prevista
+  // ── Chart 2: Donut distribuição prevista ──
   const distLabels = ['Meta WhatsApp','Meta Cadastro','Google','Segurança'];
   const distVals   = [totWhats,totCad,totGoogle,totSeg];
   const distCores  = ['rgba(16,185,129,.85)','rgba(79,142,247,.85)','rgba(251,146,60,.85)','rgba(168,85,247,.85)'];
@@ -2163,74 +2183,79 @@ function renderInvestimento(){
   if(ctxD) charts.cInvDist = new Chart(ctxD,{
     type:'doughnut',
     data:{labels:distLabels,datasets:[{data:distVals,backgroundColor:distCores,borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'var(--mu)',font:{size:11},boxWidth:10,padding:8}}}}
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:true,position:'bottom',labels:{color:clrMu,font:{size:11},boxWidth:10,padding:8}}}}
   });
 
-  // Chart 3: Meta vs Google realizado por emp
+  // ── Chart 3: Meta vs Google realizado ──
+  const mg_h = Math.max(nomes.length * barH * 2 + 60, 180);
+  const mgEl = document.getElementById('cInvMetaGoogle');
+  if(mgEl) mgEl.parentElement.style.height = mg_h+'px';
   dc('cInvMetaGoogle');
-  const ctxMG = document.getElementById('cInvMetaGoogle')?.getContext('2d');
+  const ctxMG = mgEl?.getContext('2d');
   if(ctxMG) charts.cInvMetaGoogle = new Chart(ctxMG,{
     type:'bar',
     data:{
       labels:nomes,
       datasets:[
-        {label:'Meta',data:dados.map(e=>e.real_meta),backgroundColor:'rgba(79,142,247,.8)',borderRadius:4,borderSkipped:false},
-        {label:'Google',data:dados.map(e=>e.real_google),backgroundColor:'rgba(251,146,60,.8)',borderRadius:4,borderSkipped:false}
+        {label:'Meta',  data:dados.map(e=>e.real_meta),  backgroundColor:'rgba(79,142,247,.8)',  borderRadius:4, borderSkipped:false, barThickness:barH},
+        {label:'Google',data:dados.map(e=>e.real_google),backgroundColor:'rgba(251,146,60,.8)', borderRadius:4, borderSkipped:false, barThickness:barH}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-      plugins:{legend:{display:true,position:'top',labels:{color:'var(--mu)',font:{size:11},boxWidth:10,padding:8}}},
+      plugins:{legend:{display:true,position:'top',labels:{color:clrMu,font:{size:11},boxWidth:10,padding:8}}},
       scales:{
-        x:{stacked:false,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--mu)',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
-        y:{grid:{display:false},ticks:{color:'var(--tx)',font:{size:10}}}
+        x:{grid:{color:clrGrid},ticks:xTickOpts},
+        y:{grid:{display:false},ticks:{color:clrTx,font:{size:11}}}
       }}
   });
 
-  // Chart 4: Saldo de segurança
+  // ── Chart 4: Saldo de Segurança ──
+  const seg_h = Math.max(nomes.length * barH + 60, 180);
+  const segEl = document.getElementById('cInvSeguranca');
+  if(segEl) segEl.parentElement.style.height = seg_h+'px';
   dc('cInvSeguranca');
-  const ctxSeg = document.getElementById('cInvSeguranca')?.getContext('2d');
+  const ctxSeg = segEl?.getContext('2d');
   if(ctxSeg) charts.cInvSeguranca = new Chart(ctxSeg,{
     type:'bar',
     data:{
       labels:nomes,
-      datasets:[{label:'Segurança',data:dados.map(e=>e.seguranca),backgroundColor:'rgba(168,85,247,.7)',borderRadius:4,borderSkipped:false}]
+      datasets:[{label:'Segurança',data:dados.map(e=>e.seguranca),backgroundColor:'rgba(168,85,247,.75)',borderRadius:4,borderSkipped:false,barThickness:barH}]
     },
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
       plugins:{legend:{display:false}},
       scales:{
-        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--mu)',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
-        y:{grid:{display:false},ticks:{color:'var(--tx)',font:{size:10}}}
+        x:{grid:{color:clrGrid},ticks:xTickOpts},
+        y:{grid:{display:false},ticks:{color:clrTx,font:{size:11}}}
       }}
   });
 
-  // Table
+  // ── Tabela ──
   document.getElementById('invBody').innerHTML = dados.map(e=>{
     const pct = e.pct;
-    const pctColor = pct>=90?'var(--green)':pct>=60?'var(--amber)':'var(--red,#f87171)';
+    const pctColor = pct>=90?'#34d399':pct>=60?'#fbbf24':'#f87171';
     const bar = `<div style="display:flex;align-items:center;gap:6px">
-      <div style="flex:1;background:rgba(255,255,255,.08);border-radius:4px;height:6px;overflow:hidden">
+      <div style="flex:1;background:rgba(128,128,128,.2);border-radius:4px;height:7px;overflow:hidden">
         <div style="width:${Math.min(pct,100)}%;background:${pctColor};height:100%;border-radius:4px"></div>
       </div>
-      <span style="color:${pctColor};font-size:11px;min-width:38px;text-align:right">${pct.toFixed(1)}%</span>
+      <span style="color:${pctColor};font-size:11px;min-width:40px;text-align:right">${pct.toFixed(1)}%</span>
     </div>`;
-    const B = v => v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}):'—';
     return`<tr>
       <td style="padding-left:14px;font-weight:500">${e.nome}</td>
       <td><span class="badge" style="font-size:10px">${e.agencia||'—'}</span></td>
       <td>${B(e.orcamento)}</td>
       <td>${B(e.inv_pat)}</td>
-      <td style="color:var(--blue)">${B(e.meta_total)}</td>
-      <td style="color:var(--amber)">${B(e.google)}</td>
-      <td style="color:var(--purple)">${B(e.seguranca)}</td>
-      <td style="color:var(--pink,#f472b6)">${B(e.imposto)}</td>
+      <td style="color:#4f8ef7">${B(e.meta_total)}</td>
+      <td style="color:#fb923c">${B(e.google)}</td>
+      <td style="color:#a855f7">${B(e.seguranca)}</td>
+      <td style="color:#f472b6">${B(e.imposto)}</td>
       <td>${B(e.real_meta)}</td>
       <td>${B(e.real_google)}</td>
       <td style="font-weight:600">${B(e.real_total)}</td>
       <td style="padding-right:14px;min-width:120px">${bar}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="12" style="padding:16px;color:var(--mu)">Nenhum dado encontrado</td></tr>';
+  }).join('') || '<tr><td colspan="12" style="padding:16px;color:'+clrMu+'">Nenhum dado encontrado</td></tr>';
 }
-
 
 // ═══════════════════════════════════════════════════════
 // RENDER LEADS

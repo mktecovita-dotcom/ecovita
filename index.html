@@ -426,7 +426,7 @@ body.light .theme-label{color:var(--blue)}
       <div class="sb-logo-mark"><img id="sidebarLogo" src="Logo_Ecovita_Branco.png" alt="Ecovita"></div>
     </div>
     <nav class="sb-nav">
-      <div class="sb-section">Principal</div>
+      <div class="sb-section">Performance</div>
       <div class="nav-item active" onclick="goPage('dashboard')">
         <span class="nav-icon">📊</span> Dashboard
       </div>
@@ -439,12 +439,6 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
       </div>
-      <div class="nav-item" onclick="goPage('instagram')">
-        <span class="nav-icon">📸</span> Instagram Orgânico
-      </div>
-      <div class="nav-item" onclick="goPage('facebook')">
-        <span class="nav-icon">📘</span> Facebook Orgânico
-      </div>
       <div class="sb-section">Análise</div>
       <div class="nav-item" onclick="goPage('melhorias')">
         <span class="nav-icon">🎯</span> O que Melhorar
@@ -454,6 +448,13 @@ body.light .theme-label{color:var(--blue)}
       </div>
       <div class="nav-item" onclick="goPage('mercado')">
         <span class="nav-icon">🔍</span> Pesquisa de Mercado
+      </div>
+      <div class="sb-section">Conteúdo Orgânico</div>
+      <div class="nav-item" onclick="goPage('instagram')">
+        <span class="nav-icon">📸</span> Instagram Orgânico
+      </div>
+      <div class="nav-item" onclick="goPage('facebook')">
+        <span class="nav-icon">📘</span> Facebook Orgânico
       </div>
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
@@ -1042,47 +1043,74 @@ body.light .theme-label{color:var(--blue)}
         </div>
       </div>
 
-      <!-- Bloco Social Orgânico -->
+      <!-- Bloco Instagram Orgânico -->
       <div class="card" style="margin-bottom:14px">
         <div class="card-hd">
-          <div class="card-title">📸 Instagram & Facebook Orgânico</div>
-          <span class="badge" id="cfgSocialBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+          <div class="card-title">📸 Instagram Orgânico</div>
+          <span class="badge" id="cfgIgBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
         </div>
         <div style="font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.6">
-          Use um <b>Token de Acesso de Usuário</b> com permissões: <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">pages_read_engagement · instagram_basic · instagram_manage_insights · pages_show_list</code>
+          Token com permissões: <code style="background:rgba(232,121,249,.1);color:#e879f9;padding:1px 5px;border-radius:4px">instagram_basic · instagram_manage_insights · pages_show_list</code>
         </div>
         <div style="display:grid;gap:10px;margin-bottom:14px">
           <div class="cred-field">
-            <label>Page Access Token (Facebook + Instagram)</label>
-            <input type="password" id="inputPageToken" placeholder="EAA… (token da página ou usuário com permissões)" autocomplete="new-password"
+            <label>Token de Acesso (Instagram)</label>
+            <input type="password" id="inputIgToken" placeholder="EAA… (User ou Page Access Token)" autocomplete="new-password"
               style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="cred-field">
-              <label>Facebook Page ID</label>
-              <input type="text" id="inputFbPageId" placeholder="Ex: 123456789012345"
-                style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-            </div>
-            <div class="cred-field">
-              <label>Instagram Business Account ID</label>
-              <input type="text" id="inputIgAccountId" placeholder="Ex: 17841400000000000"
-                style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-            </div>
+          <div class="cred-field">
+            <label>Instagram Business Account ID</label>
+            <input type="text" id="inputIgAccountId" placeholder="Ex: 17841400000000000"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-ai" onclick="saveSocialConfig()">💾 Salvar</button>
-          <button class="btn" onclick="testSocialConfig()" id="btnTestSocial">🔍 Testar conexão</button>
-          <button class="btn" onclick="clearSocialConfig()" style="color:var(--red)">✕ Limpar</button>
-          <span id="socialMsg" style="font-size:12px;margin-left:4px"></span>
+          <button class="btn btn-ai" onclick="saveIgConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testIgConfig()" id="btnTestIg">🔍 Testar</button>
+          <button class="btn" onclick="clearIgConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="igMsg" style="font-size:12px;margin-left:4px"></span>
         </div>
         <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
-          <b style="color:var(--tx)">Como obter o token:</b><br>
-          1. Acesse <b>developers.facebook.com → Explorador de API do Graph</b><br>
-          2. Selecione seu app → clique <b>"Gerar Token de Acesso"</b><br>
-          3. Ative: <b>pages_read_engagement, instagram_basic, instagram_manage_insights, pages_show_list</b><br>
-          4. Para o Page ID: acesse sua página no Facebook → <b>Configurações → Sobre → ID da Página</b><br>
-          5. Para o IG ID: Graph API → <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">GET /me/accounts → instagram_business_account</code>
+          <b style="color:var(--tx)">Como obter:</b><br>
+          1. <b>developers.facebook.com → Explorador de API do Graph</b><br>
+          2. Gerar token com: <b>instagram_basic, instagram_manage_insights, pages_show_list</b><br>
+          3. IG Account ID: <code style="background:rgba(232,121,249,.1);color:#e879f9;padding:1px 4px;border-radius:4px">GET /me/accounts</code> → campo <b>instagram_business_account → id</b>
+        </div>
+      </div>
+
+      <!-- Bloco Facebook Orgânico -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">📘 Facebook Orgânico</div>
+          <span class="badge" id="cfgFbBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.6">
+          Token com permissões: <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">pages_read_engagement · pages_show_list · read_insights</code>
+        </div>
+        <div style="display:grid;gap:10px;margin-bottom:14px">
+          <div class="cred-field">
+            <label>Token de Acesso (Facebook Page)</label>
+            <input type="password" id="inputFbToken" placeholder="EAA… (Page Access Token preferível)" autocomplete="new-password"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
+          </div>
+          <div class="cred-field">
+            <label>Facebook Page ID</label>
+            <input type="text" id="inputFbPageId" placeholder="Ex: 123456789012345"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="saveFbConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testFbConfig()" id="btnTestFb">🔍 Testar</button>
+          <button class="btn" onclick="clearFbConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="fbMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter:</b><br>
+          1. <b>developers.facebook.com → Explorador de API do Graph</b><br>
+          2. Gerar token com: <b>pages_read_engagement, pages_show_list, read_insights</b><br>
+          3. Page ID: página no Facebook → <b>Configurações → Sobre → ID da Página</b><br>
+          4. Ou use <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 4px;border-radius:4px">GET /me/accounts</code> → campo <b>id</b> da página
         </div>
       </div>
 
@@ -2836,73 +2864,131 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 // ═══════════════════════════════════════════════════════
 
 // ── Config helpers ──────────────────────────────────────
-function saveSocialConfig(){
-  const tok = document.getElementById('inputPageToken')?.value?.trim();
-  const fbId = document.getElementById('inputFbPageId')?.value?.trim();
+// ── Instagram Config ────────────────────────────────────
+function saveIgConfig(){
+  const tok = document.getElementById('inputIgToken')?.value?.trim();
   const igId = document.getElementById('inputIgAccountId')?.value?.trim();
-  if(!tok){ sid('socialMsg','⚠️ Token obrigatório'); return; }
-  localStorage.setItem('eco_page_token', tok);
-  if(fbId) localStorage.setItem('eco_fb_page_id', fbId);
+  if(!tok){ sid('igMsg','⚠️ Token obrigatório'); return; }
+  localStorage.setItem('eco_ig_token', tok);
   if(igId) localStorage.setItem('eco_ig_account_id', igId);
-  updateSocialBadge();
-  sid('socialMsg','✅ Salvo!');
-  setTimeout(()=>sid('socialMsg',''), 3000);
+  updateIgBadge();
+  sid('igMsg','✅ Salvo!');
+  setTimeout(()=>sid('igMsg',''), 3000);
 }
-function clearSocialConfig(){
-  ['eco_page_token','eco_fb_page_id','eco_ig_account_id'].forEach(k=>localStorage.removeItem(k));
-  ['inputPageToken','inputFbPageId','inputIgAccountId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  updateSocialBadge();
-  sid('socialMsg','Configurações removidas');
-  setTimeout(()=>sid('socialMsg',''), 2000);
+function clearIgConfig(){
+  ['eco_ig_token','eco_ig_account_id'].forEach(k=>localStorage.removeItem(k));
+  ['inputIgToken','inputIgAccountId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  updateIgBadge();
+  sid('igMsg','Configurações removidas');
+  setTimeout(()=>sid('igMsg',''), 2000);
 }
-function updateSocialBadge(){
-  const badge = document.getElementById('cfgSocialBadge');
+function updateIgBadge(){
+  const badge = document.getElementById('cfgIgBadge');
   if(!badge) return;
-  const tok = localStorage.getItem('eco_page_token');
-  const fbId = localStorage.getItem('eco_fb_page_id');
+  const tok = localStorage.getItem('eco_ig_token');
   const igId = localStorage.getItem('eco_ig_account_id');
-  if(tok && (fbId || igId)){
+  if(tok && igId){
     badge.textContent = '✓ Configurado';
-    badge.style.background = 'rgba(52,211,153,.15)';
-    badge.style.color = '#34d399';
+    badge.style.background = 'rgba(232,121,249,.15)';
+    badge.style.color = '#e879f9';
   } else {
     badge.textContent = 'Não configurado';
     badge.style.background = 'rgba(107,122,158,.12)';
     badge.style.color = 'var(--mu)';
   }
 }
-async function testSocialConfig(){
-  const tok = localStorage.getItem('eco_page_token');
-  const btn = document.getElementById('btnTestSocial');
-  if(!tok){ sid('socialMsg','⚠️ Salve o token primeiro'); return; }
+async function testIgConfig(){
+  const tok = localStorage.getItem('eco_ig_token');
+  const btn = document.getElementById('btnTestIg');
+  if(!tok){ sid('igMsg','⚠️ Salve o token primeiro'); return; }
   if(btn) btn.disabled = true;
-  sid('socialMsg','🔄 Testando…');
+  sid('igMsg','🔄 Testando…');
   try {
     const res = await fetch(`https://graph.facebook.com/v20.0/me?fields=id,name&access_token=${tok}`);
     const d = await res.json();
     if(d.error) throw new Error(d.error.message);
-    sid('socialMsg',`✅ Conectado como: ${d.name} (${d.id})`);
+    sid('igMsg',`✅ Conectado: ${d.name} (${d.id})`);
   } catch(e){
-    sid('socialMsg',`❌ Erro: ${e.message}`);
+    sid('igMsg',`❌ ${e.message}`);
   }
   if(btn) btn.disabled = false;
 }
-function initSocialConfig(){
-  const tok = localStorage.getItem('eco_page_token');
-  const fbId = localStorage.getItem('eco_fb_page_id');
+function initIgConfig(){
+  const tok = localStorage.getItem('eco_ig_token');
   const igId = localStorage.getItem('eco_ig_account_id');
-  if(tok){ const el=document.getElementById('inputPageToken'); if(el) el.value='••••••••••'; }
-  if(fbId){ const el=document.getElementById('inputFbPageId'); if(el) el.value=fbId; }
+  if(tok){ const el=document.getElementById('inputIgToken'); if(el) el.value='••••••••••'; }
   if(igId){ const el=document.getElementById('inputIgAccountId'); if(el) el.value=igId; }
-  updateSocialBadge();
+  updateIgBadge();
+}
+
+// ── Facebook Config ──────────────────────────────────────
+function saveFbConfig(){
+  const tok = document.getElementById('inputFbToken')?.value?.trim();
+  const fbId = document.getElementById('inputFbPageId')?.value?.trim();
+  if(!tok){ sid('fbMsg','⚠️ Token obrigatório'); return; }
+  localStorage.setItem('eco_fb_token', tok);
+  if(fbId) localStorage.setItem('eco_fb_page_id', fbId);
+  updateFbBadge();
+  sid('fbMsg','✅ Salvo!');
+  setTimeout(()=>sid('fbMsg',''), 3000);
+}
+function clearFbConfig(){
+  ['eco_fb_token','eco_fb_page_id'].forEach(k=>localStorage.removeItem(k));
+  ['inputFbToken','inputFbPageId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  updateFbBadge();
+  sid('fbMsg','Configurações removidas');
+  setTimeout(()=>sid('fbMsg',''), 2000);
+}
+function updateFbBadge(){
+  const badge = document.getElementById('cfgFbBadge');
+  if(!badge) return;
+  const tok = localStorage.getItem('eco_fb_token');
+  const fbId = localStorage.getItem('eco_fb_page_id');
+  if(tok && fbId){
+    badge.textContent = '✓ Configurado';
+    badge.style.background = 'rgba(79,142,247,.15)';
+    badge.style.color = 'var(--blue)';
+  } else {
+    badge.textContent = 'Não configurado';
+    badge.style.background = 'rgba(107,122,158,.12)';
+    badge.style.color = 'var(--mu)';
+  }
+}
+async function testFbConfig(){
+  const tok = localStorage.getItem('eco_fb_token');
+  const btn = document.getElementById('btnTestFb');
+  if(!tok){ sid('fbMsg','⚠️ Salve o token primeiro'); return; }
+  if(btn) btn.disabled = true;
+  sid('fbMsg','🔄 Testando…');
+  try {
+    const res = await fetch(`https://graph.facebook.com/v20.0/me?fields=id,name&access_token=${tok}`);
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message);
+    sid('fbMsg',`✅ Conectado: ${d.name} (${d.id})`);
+  } catch(e){
+    sid('fbMsg',`❌ ${e.message}`);
+  }
+  if(btn) btn.disabled = false;
+}
+function initFbConfig(){
+  const tok = localStorage.getItem('eco_fb_token');
+  const fbId = localStorage.getItem('eco_fb_page_id');
+  if(tok){ const el=document.getElementById('inputFbToken'); if(el) el.value='••••••••••'; }
+  if(fbId){ const el=document.getElementById('inputFbPageId'); if(el) el.value=fbId; }
+  updateFbBadge();
 }
 
 // ── Helpers API ─────────────────────────────────────────
-function getSocialCreds(){
+function getIgCreds(){
   return{
-    token: localStorage.getItem('eco_page_token'),
-    fbId:  localStorage.getItem('eco_fb_page_id'),
+    token: localStorage.getItem('eco_ig_token'),
     igId:  localStorage.getItem('eco_ig_account_id'),
+  };
+}
+function getFbCreds(){
+  return{
+    token: localStorage.getItem('eco_fb_token'),
+    fbId:  localStorage.getItem('eco_fb_page_id'),
   };
 }
 function dateRange(days){
@@ -2921,10 +3007,10 @@ function formatDate(iso){ return new Date(iso).toLocaleDateString('pt-BR',{day:'
 
 // ── INSTAGRAM ────────────────────────────────────────────
 async function loadInstagram(){
-  const {token,igId} = getSocialCreds();
+  const {token,igId} = getIgCreds();
   const statusEl = document.getElementById('igStatus');
   if(!token || !igId){
-    if(statusEl) statusEl.innerHTML = '⚠️ Configure o token e o IG Account ID em <b>⚙️ Config. de API</b>';
+    if(statusEl) statusEl.innerHTML = '⚠️ Configure o <b>Token Instagram</b> e o <b>IG Account ID</b> em ⚙️ Config. de API';
     return;
   }
   if(statusEl) statusEl.textContent = '⏳ Carregando…';
@@ -3038,10 +3124,10 @@ async function loadInstagram(){
 
 // ── FACEBOOK ────────────────────────────────────────────
 async function loadFacebook(){
-  const {token,fbId} = getSocialCreds();
+  const {token,fbId} = getFbCreds();
   const statusEl = document.getElementById('fbStatus');
   if(!token || !fbId){
-    if(statusEl) statusEl.innerHTML = '⚠️ Configure o token e o FB Page ID em <b>⚙️ Config. de API</b>';
+    if(statusEl) statusEl.innerHTML = '⚠️ Configure o <b>Token Facebook</b> e o <b>FB Page ID</b> em ⚙️ Config. de API';
     return;
   }
   if(statusEl) statusEl.textContent = '⏳ Carregando…';
@@ -3199,7 +3285,8 @@ let currentMetaCamp  = null; // campanha atual
 function initConfigPage(){
   renderAccountsList();
   updateConfigStatus();
-  initSocialConfig();
+  initIgConfig();
+  initFbConfig();
   // Claude key mascarado
   const k  = localStorage.getItem('eco_claude_key') || '';
   const ki = document.getElementById('inputClaudeKey');

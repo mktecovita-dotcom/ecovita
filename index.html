@@ -439,6 +439,12 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
       </div>
+      <div class="nav-item" onclick="goPage('instagram')">
+        <span class="nav-icon">📸</span> Instagram Orgânico
+      </div>
+      <div class="nav-item" onclick="goPage('facebook')">
+        <span class="nav-icon">📘</span> Facebook Orgânico
+      </div>
       <div class="sb-section">Análise</div>
       <div class="nav-item" onclick="goPage('melhorias')">
         <span class="nav-icon">🎯</span> O que Melhorar
@@ -779,6 +785,88 @@ body.light .theme-label{color:var(--blue)}
     </div>
 
     
+    <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
+    <div class="page" id="page-instagram">
+      <div class="fbar">
+        <span class="fl">Período:</span>
+        <select id="fIgPeriod" onchange="loadInstagram()">
+          <option value="7">Últimos 7 dias</option>
+          <option value="14">Últimos 14 dias</option>
+          <option value="30" selected>Últimos 30 dias</option>
+          <option value="60">Últimos 60 dias</option>
+          <option value="90">Últimos 90 dias</option>
+        </select>
+        <button class="btn btn-ai" onclick="loadInstagram()" style="margin-left:8px">↻ Carregar</button>
+        <span id="igStatus" style="margin-left:auto;font-size:12px;color:var(--mu)"></span>
+      </div>
+
+      <div class="kpi-grid kpi-5" style="margin-bottom:12px">
+        <div class="kpi blue"><div class="kpi-label">Impressões</div><div class="kpi-val blue" id="igk1">—</div><div class="kpi-sub" id="igk1s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Alcance</div><div class="kpi-val teal" id="igk2">—</div><div class="kpi-sub" id="igk2s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Engajamento</div><div class="kpi-val green" id="igk3">—</div><div class="kpi-sub" id="igk3s"></div></div>
+        <div class="kpi purple"><div class="kpi-label">Visualizações de Perfil</div><div class="kpi-val purple" id="igk4">—</div><div class="kpi-sub" id="igk4s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Seguidores</div><div class="kpi-val amber" id="igk5">—</div><div class="kpi-sub" id="igk5s"></div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Impressões & Alcance por dia</div></div>
+          <div class="cw" style="height:220px"><canvas id="cIgTimeline"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Tipo de conteúdo</div></div>
+          <div class="legend" id="igLegTipo"></div>
+          <div class="cw" style="height:220px"><canvas id="cIgTipo"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec">Top Publicações</div>
+      <div id="igPostGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:12px">
+        <div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Carregue os dados para ver as publicações</div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
+    <div class="page" id="page-facebook">
+      <div class="fbar">
+        <span class="fl">Período:</span>
+        <select id="fFbPeriod" onchange="loadFacebook()">
+          <option value="7">Últimos 7 dias</option>
+          <option value="14">Últimos 14 dias</option>
+          <option value="30" selected>Últimos 30 dias</option>
+          <option value="60">Últimos 60 dias</option>
+          <option value="90">Últimos 90 dias</option>
+        </select>
+        <button class="btn btn-ai" onclick="loadFacebook()" style="margin-left:8px">↻ Carregar</button>
+        <span id="fbStatus" style="margin-left:auto;font-size:12px;color:var(--mu)"></span>
+      </div>
+
+      <div class="kpi-grid kpi-5" style="margin-bottom:12px">
+        <div class="kpi blue"><div class="kpi-label">Impressões</div><div class="kpi-val blue" id="fbk1">—</div><div class="kpi-sub" id="fbk1s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Alcance</div><div class="kpi-val teal" id="fbk2">—</div><div class="kpi-sub" id="fbk2s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Engajamentos</div><div class="kpi-val green" id="fbk3">—</div><div class="kpi-sub" id="fbk3s"></div></div>
+        <div class="kpi purple"><div class="kpi-label">Novos Seguidores</div><div class="kpi-val purple" id="fbk4">—</div><div class="kpi-sub" id="fbk4s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Total Seguidores</div><div class="kpi-val amber" id="fbk5">—</div><div class="kpi-sub" id="fbk5s"></div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Alcance & Impressões por dia</div></div>
+          <div class="cw" style="height:220px"><canvas id="cFbTimeline"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Engajamento por tipo</div></div>
+          <div class="legend" id="fbLegEng"></div>
+          <div class="cw" style="height:220px"><canvas id="cFbEng"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec">Top Publicações</div>
+      <div id="fbPostGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:12px">
+        <div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Carregue os dados para ver as publicações</div>
+      </div>
+    </div>
+
     <!-- ══════════════ PAGE: MELHORIAS ══════════════ -->
     <div class="page" id="page-melhorias">
       <div class="fbar">
@@ -951,6 +1039,50 @@ body.light .theme-label{color:var(--blue)}
           2. Selecione seu App e gere token com permissões: <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_read</code> e <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_management</code><br>
           3. Para uso prolongado: use um <b>System User Token</b> (não expira) ou token de longa duração (60 dias)<br>
           4. O Ad Account ID está em <b>Meta Ads Manager → URL da conta</b> (formato <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">act_XXXXXXXXX</code>)
+        </div>
+      </div>
+
+      <!-- Bloco Social Orgânico -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">📸 Instagram & Facebook Orgânico</div>
+          <span class="badge" id="cfgSocialBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.6">
+          Use um <b>Token de Acesso de Usuário</b> com permissões: <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">pages_read_engagement · instagram_basic · instagram_manage_insights · pages_show_list</code>
+        </div>
+        <div style="display:grid;gap:10px;margin-bottom:14px">
+          <div class="cred-field">
+            <label>Page Access Token (Facebook + Instagram)</label>
+            <input type="password" id="inputPageToken" placeholder="EAA… (token da página ou usuário com permissões)" autocomplete="new-password"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="cred-field">
+              <label>Facebook Page ID</label>
+              <input type="text" id="inputFbPageId" placeholder="Ex: 123456789012345"
+                style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
+            </div>
+            <div class="cred-field">
+              <label>Instagram Business Account ID</label>
+              <input type="text" id="inputIgAccountId" placeholder="Ex: 17841400000000000"
+                style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="saveSocialConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testSocialConfig()" id="btnTestSocial">🔍 Testar conexão</button>
+          <button class="btn" onclick="clearSocialConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="socialMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter o token:</b><br>
+          1. Acesse <b>developers.facebook.com → Explorador de API do Graph</b><br>
+          2. Selecione seu app → clique <b>"Gerar Token de Acesso"</b><br>
+          3. Ative: <b>pages_read_engagement, instagram_basic, instagram_manage_insights, pages_show_list</b><br>
+          4. Para o Page ID: acesse sua página no Facebook → <b>Configurações → Sobre → ID da Página</b><br>
+          5. Para o IG ID: Graph API → <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">GET /me/accounts → instagram_business_account</code>
         </div>
       </div>
 
@@ -1213,12 +1345,14 @@ function goPage(pg){
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',investimento:'invest',leads:'leads',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',investimento:'invest',instagram:'instagr',facebook:'faceboo',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='campanhas') initCampanhasPage();
   if(pg==='investimento') renderInvestimento();
+  if(pg==='instagram') loadInstagram();
+  if(pg==='facebook')  loadFacebook();
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -2698,6 +2832,327 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 }
 
 // ═══════════════════════════════════════════════════════
+// SOCIAL ORGÂNICO — Instagram & Facebook
+// ═══════════════════════════════════════════════════════
+
+// ── Config helpers ──────────────────────────────────────
+function saveSocialConfig(){
+  const tok = document.getElementById('inputPageToken')?.value?.trim();
+  const fbId = document.getElementById('inputFbPageId')?.value?.trim();
+  const igId = document.getElementById('inputIgAccountId')?.value?.trim();
+  if(!tok){ sid('socialMsg','⚠️ Token obrigatório'); return; }
+  localStorage.setItem('eco_page_token', tok);
+  if(fbId) localStorage.setItem('eco_fb_page_id', fbId);
+  if(igId) localStorage.setItem('eco_ig_account_id', igId);
+  updateSocialBadge();
+  sid('socialMsg','✅ Salvo!');
+  setTimeout(()=>sid('socialMsg',''), 3000);
+}
+function clearSocialConfig(){
+  ['eco_page_token','eco_fb_page_id','eco_ig_account_id'].forEach(k=>localStorage.removeItem(k));
+  ['inputPageToken','inputFbPageId','inputIgAccountId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  updateSocialBadge();
+  sid('socialMsg','Configurações removidas');
+  setTimeout(()=>sid('socialMsg',''), 2000);
+}
+function updateSocialBadge(){
+  const badge = document.getElementById('cfgSocialBadge');
+  if(!badge) return;
+  const tok = localStorage.getItem('eco_page_token');
+  const fbId = localStorage.getItem('eco_fb_page_id');
+  const igId = localStorage.getItem('eco_ig_account_id');
+  if(tok && (fbId || igId)){
+    badge.textContent = '✓ Configurado';
+    badge.style.background = 'rgba(52,211,153,.15)';
+    badge.style.color = '#34d399';
+  } else {
+    badge.textContent = 'Não configurado';
+    badge.style.background = 'rgba(107,122,158,.12)';
+    badge.style.color = 'var(--mu)';
+  }
+}
+async function testSocialConfig(){
+  const tok = localStorage.getItem('eco_page_token');
+  const btn = document.getElementById('btnTestSocial');
+  if(!tok){ sid('socialMsg','⚠️ Salve o token primeiro'); return; }
+  if(btn) btn.disabled = true;
+  sid('socialMsg','🔄 Testando…');
+  try {
+    const res = await fetch(`https://graph.facebook.com/v20.0/me?fields=id,name&access_token=${tok}`);
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message);
+    sid('socialMsg',`✅ Conectado como: ${d.name} (${d.id})`);
+  } catch(e){
+    sid('socialMsg',`❌ Erro: ${e.message}`);
+  }
+  if(btn) btn.disabled = false;
+}
+function initSocialConfig(){
+  const tok = localStorage.getItem('eco_page_token');
+  const fbId = localStorage.getItem('eco_fb_page_id');
+  const igId = localStorage.getItem('eco_ig_account_id');
+  if(tok){ const el=document.getElementById('inputPageToken'); if(el) el.value='••••••••••'; }
+  if(fbId){ const el=document.getElementById('inputFbPageId'); if(el) el.value=fbId; }
+  if(igId){ const el=document.getElementById('inputIgAccountId'); if(el) el.value=igId; }
+  updateSocialBadge();
+}
+
+// ── Helpers API ─────────────────────────────────────────
+function getSocialCreds(){
+  return{
+    token: localStorage.getItem('eco_page_token'),
+    fbId:  localStorage.getItem('eco_fb_page_id'),
+    igId:  localStorage.getItem('eco_ig_account_id'),
+  };
+}
+function dateRange(days){
+  const until = Math.floor(Date.now()/1000);
+  const since = until - (days*86400);
+  return {since,until};
+}
+async function socialFetch(path){
+  const res = await fetch(`https://graph.facebook.com/v20.0${path}`);
+  const d = await res.json();
+  if(d.error) throw new Error(`Meta API: ${d.error.message} (code ${d.error.code})`);
+  return d;
+}
+function fK(n){ return n>=1000?(n/1000).toFixed(1)+'k':String(n); }
+function formatDate(iso){ return new Date(iso).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+
+// ── INSTAGRAM ────────────────────────────────────────────
+async function loadInstagram(){
+  const {token,igId} = getSocialCreds();
+  const statusEl = document.getElementById('igStatus');
+  if(!token || !igId){
+    if(statusEl) statusEl.innerHTML = '⚠️ Configure o token e o IG Account ID em <b>⚙️ Config. de API</b>';
+    return;
+  }
+  if(statusEl) statusEl.textContent = '⏳ Carregando…';
+  const days = parseInt(document.getElementById('fIgPeriod')?.value||'30');
+  const {since,until} = dateRange(days);
+
+  try {
+    // 1. Account info + follower count
+    const acct = await socialFetch(`/${igId}?fields=username,followers_count,media_count&access_token=${token}`);
+
+    // 2. Account insights (impressions, reach, profile_views, follower_count daily)
+    const insR = await socialFetch(`/${igId}/insights?metric=impressions,reach,profile_views,follower_count&period=day&since=${since}&until=${until}&access_token=${token}`);
+    const insMap = {};
+    (insR.data||[]).forEach(m=>{ insMap[m.name] = m.values||[]; });
+
+    const sumVals = (arr) => (arr||[]).reduce((s,v)=>s+(v.value||0),0);
+    const totImp     = sumVals(insMap['impressions']);
+    const totReach   = sumVals(insMap['reach']);
+    const totProf    = sumVals(insMap['profile_views']);
+    const follChange = (insMap['follower_count']||[]).reduce((d,v,i,a)=>i===0?0:d+(v.value-(a[i-1].value||0)),0);
+
+    sid('igk1', fK(totImp));   sid('igk1s',`${days} dias`);
+    sid('igk2', fK(totReach)); sid('igk2s', totImp>0?`Taxa: ${(totReach/totImp*100).toFixed(1)}%`:'');
+    sid('igk3', '—');          sid('igk3s', 'Ver nos posts');
+    sid('igk4', fK(totProf));  sid('igk4s', `${days} dias`);
+    sid('igk5', fK(acct.followers_count||0)); sid('igk5s', follChange>=0?`+${fK(follChange)} no período`:`${fK(follChange)} no período`);
+
+    // 3. Timeline chart (impressões + alcance por dia)
+    const days_labels = (insMap['impressions']||[]).map(v=>formatDate(v.end_time));
+    const imp_vals    = (insMap['impressions']||[]).map(v=>v.value||0);
+    const reach_vals  = (insMap['reach']||[]).map(v=>v.value||0);
+    dc('cIgTimeline');
+    const ctx1 = document.getElementById('cIgTimeline')?.getContext('2d');
+    if(ctx1) charts.cIgTimeline = new Chart(ctx1,{
+      type:'line',
+      data:{ labels:days_labels, datasets:[
+        {label:'Impressões',data:imp_vals,  borderColor:'rgba(79,142,247,.9)', backgroundColor:'rgba(79,142,247,.12)',fill:true,tension:.3,pointRadius:2},
+        {label:'Alcance',   data:reach_vals,borderColor:'rgba(52,211,153,.9)', backgroundColor:'rgba(52,211,153,.12)', fill:true,tension:.3,pointRadius:2}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:'top',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}},
+        scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},maxTicksLimit:10}},
+                y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},callback:v=>fK(v)}}}}
+    });
+
+    // 4. Media posts
+    const mediaR = await socialFetch(`/${igId}/media?fields=id,caption,media_type,media_url,thumbnail_url,timestamp,permalink,like_count,comments_count&limit=30&access_token=${token}`);
+    const posts = (mediaR.data||[]);
+
+    // Fetch insights for each post (batch style - sequential to avoid rate limit)
+    let totalEng = 0;
+    const typeCount = {};
+    const postCards = [];
+    for(const p of posts.slice(0,20)){
+      let pImp=0, pReach=0, pSaved=0, pEng=0;
+      try{
+        const pi = await socialFetch(`/${p.id}/insights?metric=impressions,reach,saved,total_interactions&access_token=${token}`);
+        (pi.data||[]).forEach(m=>{
+          if(m.name==='impressions')         pImp  = m.values?.[0]?.value||0;
+          if(m.name==='reach')               pReach= m.values?.[0]?.value||0;
+          if(m.name==='saved')               pSaved= m.values?.[0]?.value||0;
+          if(m.name==='total_interactions')  pEng  = m.values?.[0]?.value||0;
+        });
+      }catch(e){}
+      totalEng += pEng;
+      const type = p.media_type||'IMAGE';
+      typeCount[type] = (typeCount[type]||0)+1;
+      const thumb = p.thumbnail_url||p.media_url||'';
+      const cap   = (p.caption||'').substring(0,120)+(p.caption?.length>120?'…':'');
+      const dt    = formatDate(p.timestamp);
+      postCards.push(`<div class="card" style="padding:0;overflow:hidden">
+        ${thumb?`<a href="${p.permalink}" target="_blank" rel="noopener">
+          <img src="${thumb}" alt="" style="width:100%;height:180px;object-fit:cover;display:block">
+        </a>`:'<div style="height:180px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--mu)">'+type+'</div>'}
+        <div style="padding:12px">
+          <div style="font-size:11px;color:var(--mu);margin-bottom:6px">${dt} · ${type}</div>
+          ${cap?`<div style="font-size:12px;color:var(--mu2);margin-bottom:10px;line-height:1.5">${cap}</div>`:''}
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center">
+            <div><div style="font-size:15px;font-weight:700;color:var(--blue)">${fK(pImp)}</div><div style="font-size:10px;color:var(--mu)">Imp.</div></div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--teal)">${fK(pReach)}</div><div style="font-size:10px;color:var(--mu)">Alcance</div></div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--green)">${fK(p.like_count||0)}</div><div style="font-size:10px;color:var(--mu)">Curtidas</div></div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--purple)">${fK(pSaved)}</div><div style="font-size:10px;color:var(--mu)">Salvos</div></div>
+          </div>
+        </div>
+      </div>`);
+    }
+    sid('igk3', fK(totalEng)); sid('igk3s', `${posts.length} publicações`);
+
+    document.getElementById('igPostGrid').innerHTML = postCards.join('') || '<div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Nenhuma publicação encontrada</div>';
+
+    // Tipo de conteúdo chart
+    const typeLabels = Object.keys(typeCount);
+    const typeVals   = Object.values(typeCount);
+    const typeCores  = ['rgba(79,142,247,.85)','rgba(52,211,153,.85)','rgba(251,146,60,.85)','rgba(232,121,249,.85)'];
+    const typeNames  = {'IMAGE':'Foto','VIDEO':'Vídeo','CAROUSEL_ALBUM':'Carrossel','REELS':'Reels'};
+    document.getElementById('igLegTipo').innerHTML = typeLabels.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${typeCores[i%typeCores.length]}"></div>${typeNames[l]||l}: ${typeVals[i]}</div>`).join('');
+    dc('cIgTipo');
+    const ctx2 = document.getElementById('cIgTipo')?.getContext('2d');
+    if(ctx2) charts.cIgTipo = new Chart(ctx2,{
+      type:'doughnut',
+      data:{labels:typeLabels.map(l=>typeNames[l]||l),datasets:[{data:typeVals,backgroundColor:typeCores,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}}}
+    });
+
+    if(statusEl) statusEl.textContent = `✅ ${posts.length} posts · atualizado agora`;
+  } catch(e){
+    if(statusEl) statusEl.innerHTML = `❌ ${e.message}`;
+    console.error('Instagram API error:', e);
+  }
+}
+
+// ── FACEBOOK ────────────────────────────────────────────
+async function loadFacebook(){
+  const {token,fbId} = getSocialCreds();
+  const statusEl = document.getElementById('fbStatus');
+  if(!token || !fbId){
+    if(statusEl) statusEl.innerHTML = '⚠️ Configure o token e o FB Page ID em <b>⚙️ Config. de API</b>';
+    return;
+  }
+  if(statusEl) statusEl.textContent = '⏳ Carregando…';
+  const days = parseInt(document.getElementById('fFbPeriod')?.value||'30');
+  const {since,until} = dateRange(days);
+
+  try {
+    // 1. Page info
+    const page = await socialFetch(`/${fbId}?fields=name,fan_count,followers_count&access_token=${token}`);
+
+    // 2. Page insights
+    const insR = await socialFetch(`/${fbId}/insights?metric=page_impressions,page_reach,page_engaged_users,page_fan_adds,page_fan_removes&period=day&since=${since}&until=${until}&access_token=${token}`);
+    const insMap = {};
+    (insR.data||[]).forEach(m=>{ insMap[m.name] = m.values||[]; });
+
+    const sumVals = (arr) => (arr||[]).reduce((s,v)=>s+(v.value||0),0);
+    const totImp  = sumVals(insMap['page_impressions']);
+    const totReach= sumVals(insMap['page_reach']);
+    const totEng  = sumVals(insMap['page_engaged_users']);
+    const totNew  = sumVals(insMap['page_fan_adds']);
+    const totRem  = sumVals(insMap['page_fan_removes']);
+
+    sid('fbk1', fK(totImp));   sid('fbk1s', `${days} dias`);
+    sid('fbk2', fK(totReach)); sid('fbk2s', totImp>0?`Taxa: ${(totReach/totImp*100).toFixed(1)}%`:'');
+    sid('fbk3', fK(totEng));   sid('fbk3s', `Taxa: ${totReach>0?(totEng/totReach*100).toFixed(1):0}%`);
+    sid('fbk4', `+${fK(totNew)}`); sid('fbk4s', `−${fK(totRem)} removeram`);
+    sid('fbk5', fK(page.fan_count||page.followers_count||0)); sid('fbk5s', page.name||'');
+
+    // 3. Timeline chart
+    const days_labels = (insMap['page_impressions']||[]).map(v=>formatDate(v.end_time));
+    const imp_vals    = (insMap['page_impressions']||[]).map(v=>v.value||0);
+    const reach_vals  = (insMap['page_reach']||[]).map(v=>v.value||0);
+    dc('cFbTimeline');
+    const ctx1 = document.getElementById('cFbTimeline')?.getContext('2d');
+    if(ctx1) charts.cFbTimeline = new Chart(ctx1,{
+      type:'line',
+      data:{ labels:days_labels, datasets:[
+        {label:'Impressões',data:imp_vals,  borderColor:'rgba(79,142,247,.9)', backgroundColor:'rgba(79,142,247,.12)',fill:true,tension:.3,pointRadius:2},
+        {label:'Alcance',   data:reach_vals,borderColor:'rgba(52,211,153,.9)', backgroundColor:'rgba(52,211,153,.12)', fill:true,tension:.3,pointRadius:2}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:'top',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}},
+        scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},maxTicksLimit:10}},
+                y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},callback:v=>fK(v)}}}}
+    });
+
+    // 4. Engajamento por tipo (donut)
+    const engData = await socialFetch(`/${fbId}/insights?metric=page_actions_post_reactions_like_total,page_actions_post_reactions_love_total,page_actions_post_reactions_haha_total,page_actions_post_reactions_wow_total,page_actions_post_reactions_sorry_total,page_actions_post_reactions_anger_total&period=day&since=${since}&until=${until}&access_token=${token}`).catch(()=>({data:[]}));
+    const reacMap = {};
+    (engData.data||[]).forEach(m=>{
+      const key = m.name.replace('page_actions_post_reactions_','').replace('_total','');
+      reacMap[key] = (m.values||[]).reduce((s,v)=>s+(v.value||0),0);
+    });
+    const reacLabels = {like:'👍 Curtir',love:'❤️ Amei',haha:'😂 Haha',wow:'😮 Uau',sorry:'😢 Triste',anger:'😠 Grr'};
+    const reacEntries = Object.entries(reacMap).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+    const reacCores = ['rgba(79,142,247,.85)','rgba(232,121,249,.85)','rgba(251,191,36,.85)','rgba(52,211,153,.85)','rgba(100,116,139,.85)','rgba(248,113,113,.85)'];
+    document.getElementById('fbLegEng').innerHTML = reacEntries.map(([k,v],i)=>`<div class="leg"><div class="lsq" style="background:${reacCores[i%reacCores.length]}"></div>${reacLabels[k]||k}: ${fK(v)}</div>`).join('');
+    dc('cFbEng');
+    const ctx2 = document.getElementById('cFbEng')?.getContext('2d');
+    if(ctx2) charts.cFbEng = new Chart(ctx2,{
+      type:'doughnut',
+      data:{labels:reacEntries.map(([k])=>reacLabels[k]||k),datasets:[{data:reacEntries.map(e=>e[1]),backgroundColor:reacCores,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}}}
+    });
+
+    // 5. Posts
+    const postsR = await socialFetch(`/${fbId}/posts?fields=id,message,story,created_time,full_picture,permalink_url&limit=20&since=${since}&until=${until}&access_token=${token}`);
+    const fbPosts = (postsR.data||[]);
+    const postCards = [];
+    for(const p of fbPosts.slice(0,16)){
+      let pImp=0,pReach=0,pEng=0,pReacs=0;
+      try{
+        const pi = await socialFetch(`/${p.id}/insights?metric=post_impressions,post_reach,post_engaged_users,post_reactions_by_type_total&access_token=${token}`);
+        (pi.data||[]).forEach(m=>{
+          if(m.name==='post_impressions')       pImp  = m.values?.[0]?.value||0;
+          if(m.name==='post_reach')             pReach= m.values?.[0]?.value||0;
+          if(m.name==='post_engaged_users')     pEng  = m.values?.[0]?.value||0;
+          if(m.name==='post_reactions_by_type_total'){
+            const rv = m.values?.[0]?.value||{};
+            pReacs = Object.values(rv).reduce((s,v)=>s+v,0);
+          }
+        });
+      }catch(e){}
+      const msg = (p.message||p.story||'').substring(0,120)+((p.message||p.story||'').length>120?'…':'');
+      const dt  = formatDate(p.created_time);
+      postCards.push(`<div class="card" style="padding:0;overflow:hidden">
+        ${p.full_picture?`<a href="${p.permalink_url}" target="_blank" rel="noopener">
+          <img src="${p.full_picture}" alt="" style="width:100%;height:160px;object-fit:cover;display:block">
+        </a>`:''}
+        <div style="padding:12px">
+          <div style="font-size:11px;color:var(--mu);margin-bottom:6px">${dt}</div>
+          ${msg?`<div style="font-size:12px;color:var(--mu2);margin-bottom:10px;line-height:1.5">${msg}</div>`:''}
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center">
+            <div><div style="font-size:15px;font-weight:700;color:var(--blue)">${fK(pImp)}</div><div style="font-size:10px;color:var(--mu)">Imp.</div></div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--teal)">${fK(pReach)}</div><div style="font-size:10px;color:var(--mu)">Alcance</div></div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--green)">${fK(pEng)}</div><div style="font-size:10px;color:var(--mu)">Engaj.</div></div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--purple)">${fK(pReacs)}</div><div style="font-size:10px;color:var(--mu)">Reações</div></div>
+          </div>
+        </div>
+      </div>`);
+    }
+    document.getElementById('fbPostGrid').innerHTML = postCards.join('') || '<div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Nenhuma publicação encontrada neste período</div>';
+
+    if(statusEl) statusEl.textContent = `✅ ${fbPosts.length} posts · atualizado agora`;
+  } catch(e){
+    if(statusEl) statusEl.innerHTML = `❌ ${e.message}`;
+    console.error('Facebook API error:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
 // LOAD ALL
 // ═══════════════════════════════════════════════════════
 function setLoading(on,msg=''){
@@ -2744,6 +3199,7 @@ let currentMetaCamp  = null; // campanha atual
 function initConfigPage(){
   renderAccountsList();
   updateConfigStatus();
+  initSocialConfig();
   // Claude key mascarado
   const k  = localStorage.getItem('eco_claude_key') || '';
   const ki = document.getElementById('inputClaudeKey');

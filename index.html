@@ -3138,31 +3138,44 @@ async function loadFacebook(){
     // 1. Page info
     const page = await socialFetch(`/${fbId}?fields=name,fan_count,followers_count&access_token=${token}`);
 
-    // 2. Page insights
-    const insR = await socialFetch(`/${fbId}/insights?metric=page_impressions,page_reach,page_engaged_users,page_fan_adds,page_fan_removes&period=day&since=${since}&until=${until}&access_token=${token}`);
-    const insMap = {};
-    (insR.data||[]).forEach(m=>{ insMap[m.name] = m.values||[]; });
+    // 2. Page insights — métricas válidas na versão atual da API
+    // Busca em duas chamadas separadas para isolar erros
+    let totImp=0, totReach=0, totEng=0, totNew=0, totRem=0;
+    const imp_vals=[], reach_vals=[], days_labels=[];
 
-    const sumVals = (arr) => (arr||[]).reduce((s,v)=>s+(v.value||0),0);
-    const totImp  = sumVals(insMap['page_impressions']);
-    const totReach= sumVals(insMap['page_reach']);
-    const totEng  = sumVals(insMap['page_engaged_users']);
-    const totNew  = sumVals(insMap['page_fan_adds']);
-    const totRem  = sumVals(insMap['page_fan_removes']);
+    try {
+      const insR = await socialFetch(`/${fbId}/insights?metric=page_impressions,page_impressions_unique&period=day&since=${since}&until=${until}&access_token=${token}`);
+      const insMap = {};
+      (insR.data||[]).forEach(m=>{ insMap[m.name] = m.values||[]; });
+      totImp   = (insMap['page_impressions']||[]).reduce((s,v)=>s+(v.value||0),0);
+      totReach = (insMap['page_impressions_unique']||[]).reduce((s,v)=>s+(v.value||0),0);
+      (insMap['page_impressions']||[]).forEach(v=>{ imp_vals.push(v.value||0); days_labels.push(formatDate(v.end_time)); });
+      (insMap['page_impressions_unique']||[]).forEach(v=>reach_vals.push(v.value||0));
+    } catch(e){ console.warn('FB impressions error:', e.message); }
+
+    try {
+      const engR = await socialFetch(`/${fbId}/insights?metric=page_post_engagements&period=day&since=${since}&until=${until}&access_token=${token}`);
+      totEng = (engR.data?.[0]?.values||[]).reduce((s,v)=>s+(v.value||0),0);
+    } catch(e){ console.warn('FB engagement error:', e.message); }
+
+    try {
+      const fanR = await socialFetch(`/${fbId}/insights?metric=page_fan_adds,page_fan_removes&period=day&since=${since}&until=${until}&access_token=${token}`);
+      const fanMap = {};
+      (fanR.data||[]).forEach(m=>{ fanMap[m.name] = m.values||[]; });
+      totNew = (fanMap['page_fan_adds']||[]).reduce((s,v)=>s+(v.value||0),0);
+      totRem = (fanMap['page_fan_removes']||[]).reduce((s,v)=>s+(v.value||0),0);
+    } catch(e){ console.warn('FB fans error:', e.message); }
 
     sid('fbk1', fK(totImp));   sid('fbk1s', `${days} dias`);
     sid('fbk2', fK(totReach)); sid('fbk2s', totImp>0?`Taxa: ${(totReach/totImp*100).toFixed(1)}%`:'');
-    sid('fbk3', fK(totEng));   sid('fbk3s', `Taxa: ${totReach>0?(totEng/totReach*100).toFixed(1):0}%`);
+    sid('fbk3', fK(totEng));   sid('fbk3s', totReach>0?`Taxa: ${(totEng/totReach*100).toFixed(1)}%`:'');
     sid('fbk4', `+${fK(totNew)}`); sid('fbk4s', `−${fK(totRem)} removeram`);
     sid('fbk5', fK(page.fan_count||page.followers_count||0)); sid('fbk5s', page.name||'');
 
     // 3. Timeline chart
-    const days_labels = (insMap['page_impressions']||[]).map(v=>formatDate(v.end_time));
-    const imp_vals    = (insMap['page_impressions']||[]).map(v=>v.value||0);
-    const reach_vals  = (insMap['page_reach']||[]).map(v=>v.value||0);
     dc('cFbTimeline');
     const ctx1 = document.getElementById('cFbTimeline')?.getContext('2d');
-    if(ctx1) charts.cFbTimeline = new Chart(ctx1,{
+    if(ctx1 && days_labels.length) charts.cFbTimeline = new Chart(ctx1,{
       type:'line',
       data:{ labels:days_labels, datasets:[
         {label:'Impressões',data:imp_vals,  borderColor:'rgba(79,142,247,.9)', backgroundColor:'rgba(79,142,247,.12)',fill:true,tension:.3,pointRadius:2},
@@ -3174,42 +3187,57 @@ async function loadFacebook(){
                 y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},callback:v=>fK(v)}}}}
     });
 
-    // 4. Engajamento por tipo (donut)
-    const engData = await socialFetch(`/${fbId}/insights?metric=page_actions_post_reactions_like_total,page_actions_post_reactions_love_total,page_actions_post_reactions_haha_total,page_actions_post_reactions_wow_total,page_actions_post_reactions_sorry_total,page_actions_post_reactions_anger_total&period=day&since=${since}&until=${until}&access_token=${token}`).catch(()=>({data:[]}));
-    const reacMap = {};
-    (engData.data||[]).forEach(m=>{
-      const key = m.name.replace('page_actions_post_reactions_','').replace('_total','');
-      reacMap[key] = (m.values||[]).reduce((s,v)=>s+(v.value||0),0);
-    });
-    const reacLabels = {like:'👍 Curtir',love:'❤️ Amei',haha:'😂 Haha',wow:'😮 Uau',sorry:'😢 Triste',anger:'😠 Grr'};
-    const reacEntries = Object.entries(reacMap).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+    // 4. Engajamento por tipo — usando métricas de reações disponíveis
+    let reacEntries = [];
+    try {
+      // Tenta buscar reações individuais (pode não estar disponível em todos os tokens)
+      const reacR = await socialFetch(`/${fbId}/insights?metric=page_actions_post_reactions_like_total,page_actions_post_reactions_love_total,page_actions_post_reactions_haha_total,page_actions_post_reactions_wow_total,page_actions_post_reactions_sorry_total,page_actions_post_reactions_anger_total&period=day&since=${since}&until=${until}&access_token=${token}`).catch(()=>({data:[]}));
+      const reacMap = {};
+      (reacR.data||[]).forEach(m=>{
+        const key = m.name.replace('page_actions_post_reactions_','').replace('_total','');
+        reacMap[key] = (m.values||[]).reduce((s,v)=>s+(v.value||0),0);
+      });
+      reacEntries = Object.entries(reacMap).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+    } catch(e){}
+
+    // Fallback: se não tiver reações, usa tipos de post
+    if(!reacEntries.length){
+      reacEntries = [['engajamentos', totEng]].filter(e=>e[1]>0);
+    }
+
+    const reacLabels = {like:'👍 Curtir',love:'❤️ Amei',haha:'😂 Haha',wow:'😮 Uau',sorry:'😢 Triste',anger:'😠 Grr',engajamentos:'💬 Engajamentos'};
     const reacCores = ['rgba(79,142,247,.85)','rgba(232,121,249,.85)','rgba(251,191,36,.85)','rgba(52,211,153,.85)','rgba(100,116,139,.85)','rgba(248,113,113,.85)'];
     document.getElementById('fbLegEng').innerHTML = reacEntries.map(([k,v],i)=>`<div class="leg"><div class="lsq" style="background:${reacCores[i%reacCores.length]}"></div>${reacLabels[k]||k}: ${fK(v)}</div>`).join('');
     dc('cFbEng');
     const ctx2 = document.getElementById('cFbEng')?.getContext('2d');
-    if(ctx2) charts.cFbEng = new Chart(ctx2,{
+    if(ctx2 && reacEntries.length) charts.cFbEng = new Chart(ctx2,{
       type:'doughnut',
       data:{labels:reacEntries.map(([k])=>reacLabels[k]||k),datasets:[{data:reacEntries.map(e=>e[1]),backgroundColor:reacCores,borderWidth:0}]},
       options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}}}
     });
 
     // 5. Posts
-    const postsR = await socialFetch(`/${fbId}/posts?fields=id,message,story,created_time,full_picture,permalink_url&limit=20&since=${since}&until=${until}&access_token=${token}`);
-    const fbPosts = (postsR.data||[]);
+    let fbPosts = [];
+    try {
+      const postsR = await socialFetch(`/${fbId}/posts?fields=id,message,story,created_time,full_picture,permalink_url&limit=20&since=${since}&until=${until}&access_token=${token}`);
+      fbPosts = postsR.data||[];
+    } catch(e){ console.warn('FB posts error:', e.message); }
+
     const postCards = [];
     for(const p of fbPosts.slice(0,16)){
       let pImp=0,pReach=0,pEng=0,pReacs=0;
       try{
-        const pi = await socialFetch(`/${p.id}/insights?metric=post_impressions,post_reach,post_engaged_users,post_reactions_by_type_total&access_token=${token}`);
+        const pi = await socialFetch(`/${p.id}/insights?metric=post_impressions,post_reach,post_engaged_users&access_token=${token}`);
         (pi.data||[]).forEach(m=>{
-          if(m.name==='post_impressions')       pImp  = m.values?.[0]?.value||0;
-          if(m.name==='post_reach')             pReach= m.values?.[0]?.value||0;
-          if(m.name==='post_engaged_users')     pEng  = m.values?.[0]?.value||0;
-          if(m.name==='post_reactions_by_type_total'){
-            const rv = m.values?.[0]?.value||{};
-            pReacs = Object.values(rv).reduce((s,v)=>s+v,0);
-          }
+          if(m.name==='post_impressions')   pImp  = m.values?.[0]?.value||0;
+          if(m.name==='post_reach')         pReach= m.values?.[0]?.value||0;
+          if(m.name==='post_engaged_users') pEng  = m.values?.[0]?.value||0;
         });
+        // Reações do post via campo reactions
+        try {
+          const rr = await socialFetch(`/${p.id}?fields=reactions.summary(true)&access_token=${token}`);
+          pReacs = rr.reactions?.summary?.total_count||0;
+        } catch(e){}
       }catch(e){}
       const msg = (p.message||p.story||'').substring(0,120)+((p.message||p.story||'').length>120?'…':'');
       const dt  = formatDate(p.created_time);

@@ -5,457 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ecovita · Sistema de Tráfego Pago</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<div class="page active" id="page-dashboard">
-      <div class="ebox" id="ebox"></div>
-
-      <!-- Filtros globais -->
-      <div class="fbar">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
-          <span class="fl">De:</span>
-          <input type="date" id="fDataDe" onkeydown="if(event.key==='Enter')aplicarFiltro()">
-          <span class="fl">Até:</span>
-          <input type="date" id="fDataAte" onkeydown="if(event.key==='Enter')aplicarFiltro()">
-          <button class="btn btn-primary" onclick="aplicarFiltro()" style="padding:6px 16px">▶ Aplicar</button>
-          <button class="btn" onclick="limparFiltro()" style="padding:6px 12px;font-size:11px">✕ Limpar</button>
-          <div style="width:1px;height:20px;background:var(--bdr);margin:0 2px"></div>
-          <span class="fl">Empreendimento:</span>
-          <select id="fEmp" onchange="renderDashboard()"><option value="">Todos</option></select>
-        </div>
-        <span id="infoGeral" style="font-size:11px;color:var(--mu);white-space:nowrap;padding-left:12px"></span>
-      </div>
-
-      <!-- KPI Row 1: Financeiro -->
-      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        💰 Financeiro
-        <div style="flex:1;height:1px;background:var(--bdr)"></div>
-      </div>
-      <div class="kpi-grid kpi-4" style="margin-bottom:16px">
-        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="k1">—</div><div class="kpi-sub" id="k1s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Receita Gerada</div><div class="kpi-val green" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Vendas</div><div class="kpi-val teal" id="k5">—</div><div class="kpi-sub" id="k5s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">ROAS Médio</div><div class="kpi-val amber" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
-      </div>
-
-      <!-- KPI Row 2: Leads -->
-      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        👥 Leads
-        <div style="flex:1;height:1px;background:var(--bdr)"></div>
-      </div>
-      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px">
-        <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
-        <div class="kpi blue"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
-        <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
-        <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
-      </div>
-
-      <div class="grid g53">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
-            <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
-          </div>
-          <div class="cw" style="height:210px"><canvas id="cMensal"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">ROAS por mês</div></div>
-          <div class="cw" style="height:230px"><canvas id="cRoas"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Investimento vs Leads Meta -->
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento vs Leads Meta — por mês</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
-            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Leads Meta</div>
-          </div>
-          <div class="cw" style="height:200px"><canvas id="cInvLeads"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento por objetivo</div></div>
-          <div class="legend" id="legObj"></div>
-          <div class="cw" style="height:200px"><canvas id="cObj"></canvas></div>
-        </div>
-      </div>
-
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Funil por Origem — Leads & Conversão</div><span class="badge blue">CVCRM Online</span></div>
-          <div id="funilList" class="bar-row"></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL">—</span></div>
-          <div class="bar-row" id="sitList"></div>
-        </div>
-      </div>
-
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Leads Meta vs CVCRM por empreendimento</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Meta</div>
-            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>CVCRM</div>
-          </div>
-          <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Leads por Origem Online</div></div>
-          <div class="legend" id="legOrigemOnline"></div>
-          <div class="cw" style="height:220px"><canvas id="cOrigemOnline"></canvas></div>
-        </div>
-      </div>
-
-      <div class="sec">Performance por empreendimento</div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <div class="twrap">
-          <table class="tbl">
-            <thead><tr>
-              <th style="padding-left:18px">Empreendimento</th>
-              <th>Investido</th><th>Receita</th><th>ROAS</th>
-              <th>Leads Meta</th><th>Leads CRM</th><th>WhatsApp</th><th>Formulário</th><th>Website</th>
-              <th>Vendas</th><th style="padding-right:18px">Status</th>
-            </tr></thead>
-            <tbody id="empBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
-  <div class="page" id="page-melhorias">
-      <div class="fbar">
-        <span class="fl">Objetivo:</span>
-        <select id="fMelObj" onchange="renderMelhorias()"><option value="">Todos</option></select>
-        <span class="fl">Mostrar apenas:</span>
-        <select id="fMelPrio" onchange="renderMelhorias()">
-          <option value="">Todas as campanhas</option>
-          <option value="critico">Crítico (CTR baixo + CPC alto)</option>
-          <option value="otimizar">Para otimizar</option>
-        </select>
-      </div>
-      <div id="melhoriasContent"></div>
-    </div>
-
-    <!-- ══════════════ PAGE: IA ANÁLISE ══════════════ -->
-  <div class="page" id="page-ia">
-      <div class="grid g21" style="margin-bottom:16px">
-        <div>
-          <div class="ia-box">
-            <div class="ia-header">
-              <div class="ia-icon">🤖</div>
-              <div>
-                <div class="ia-title">Análise Inteligente de Campanhas</div>
-                <div class="ia-sub">Powered by Claude · Atualizado com dados reais</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-              <button class="btn btn-ai" onclick="analisarIA('geral')">📊 Análise Geral</button>
-              <button class="btn btn-ai" onclick="analisarIA('campanhas')">📣 Top Campanhas</button>
-              <button class="btn btn-ai" onclick="analisarIA('leads')">👥 Análise de Leads</button>
-              <button class="btn btn-ai" onclick="analisarIA('orcamento')">💰 Otimização de Orçamento</button>
-              <button class="btn btn-ai" onclick="analisarIA('proximos')">🎯 Próximos Passos</button>
-            </div>
-            <div id="iaResult">
-              <div style="font-size:13px;color:var(--mu);text-align:center;padding:24px 0">
-                Selecione um tipo de análise acima para que a IA analise seus dados em tempo real.
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="card" style="margin-bottom:12px">
-            <div class="card-hd"><div class="card-title">Alertas automáticos</div><span class="badge red" id="alertCount">—</span></div>
-            <div id="alertList" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-          <div class="card">
-            <div class="card-hd"><div class="card-title">Score de saúde das campanhas</div></div>
-            <div class="cw" style="height:200px"><canvas id="cScore"></canvas></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: MERCADO ══════════════ -->
-  <div class="page" id="page-mercado">
-      <div class="mercado-form">
-        <h3>➕ Adicionar Concorrente</h3>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Nome do Concorrente</label>
-            <input type="text" id="mNome" placeholder="Ex: Construtora XYZ">
-          </div>
-          <div class="form-field">
-            <label>Cidade de Atuação</label>
-            <input type="text" id="mCidade" placeholder="Ex: Bauru, SP">
-          </div>
-          <div class="form-field">
-            <label>Ticket Médio (R$)</label>
-            <input type="number" id="mTicket" placeholder="Ex: 220000">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-field">
-            <label>CPL estimado (R$)</label>
-            <input type="number" id="mCpl" placeholder="Ex: 35">
-          </div>
-          <div class="form-field">
-            <label>Investimento mensal (R$)</label>
-            <input type="number" id="mInvest" placeholder="Ex: 15000">
-          </div>
-          <div class="form-field">
-            <label>Canais usados</label>
-            <input type="text" id="mCanais" placeholder="Ex: Meta, Google, TikTok">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-field" style="grid-column:span 3">
-            <label>Observações / Diferenciais</label>
-            <textarea id="mObs" placeholder="Ex: Foco em WhatsApp, criativo com vídeo, campanha de alcance forte…"></textarea>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-primary" onclick="addConcorrente()">Salvar concorrente</button>
-          <button class="btn btn-ai" onclick="analisarMercado()">🤖 Analisar mercado com IA</button>
-        </div>
-      </div>
-
-      <div id="concorrentesContent">
-        <div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">
-          Nenhum concorrente cadastrado ainda. Adicione acima para começar a análise de mercado.
-        </div>
-      </div>
-
-      <div id="mercadoIA" style="display:none;margin-top:16px"></div>
-    </div>
-
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
-
-  <div class="page" id="page-config">
-
-      <!-- Status cards das integrações -->
-      <div class="kpi-grid kpi-3" style="margin-bottom:20px">
-        <div class="kpi blue" id="cfgStatusMeta">
-          <div class="kpi-label">Contas Meta Ads</div>
-          <div class="kpi-val" id="cfgMetaVal" style="font-size:20px">0</div>
-          <div class="kpi-sub" id="cfgMetaSub">Nenhuma conta cadastrada</div>
-        </div>
-        <div class="kpi purple" id="cfgStatusClaude">
-          <div class="kpi-label">Claude AI (Anthropic)</div>
-          <div class="kpi-val" id="cfgClaudeVal" style="font-size:20px">—</div>
-          <div class="kpi-sub" id="cfgClaudeSub">Não configurado</div>
-        </div>
-        <div class="kpi green">
-          <div class="kpi-label">Planilhas Google</div>
-          <div class="kpi-val green" style="font-size:20px">✓</div>
-          <div class="kpi-sub">3 sheets conectadas via CSV público</div>
-        </div>
-      </div>
-
-      <!-- Gerenciador de Contas Meta -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">🔵 Contas Meta Marketing API</div>
-          <span class="badge" id="cfgMetaBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 contas</span>
-        </div>
-
-        <!-- Lista de contas salvas -->
-        <div id="metaAccountsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
-
-        <!-- Formulário adicionar nova conta -->
-        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:10px">➕ Adicionar nova conta</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-            <div class="cred-field">
-              <label>Nome da conta</label>
-              <input type="text" id="newAccName" placeholder="Ex: Ecovita Goiânia" autocomplete="off"
-                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-            </div>
-            <div class="cred-field">
-              <label>Access Token</label>
-              <input type="password" id="newAccToken" placeholder="EAAxxxxxxxx…" autocomplete="new-password"
-                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-            </div>
-            <div class="cred-field">
-              <label>Ad Account ID</label>
-              <input type="text" id="newAccId" placeholder="act_123456789" autocomplete="off"
-                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary" onclick="addMetaAccount()">➕ Adicionar conta</button>
-            <span id="credMsg" style="font-size:12px"></span>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
-          <b style="color:var(--tx)">Como obter o Token:</b><br>
-          1. Acesse <b>developers.facebook.com → Ferramentas → Explorador de API do Graph</b><br>
-          2. Selecione seu App e gere token com permissões: <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_read</code> e <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_management</code><br>
-          3. Para uso prolongado: use um <b>System User Token</b> (não expira) ou token de longa duração (60 dias)<br>
-          4. O Ad Account ID está em <b>Meta Ads Manager → URL da conta</b> (formato <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">act_XXXXXXXXX</code>)
-        </div>
-      </div>
-
-
-
-      <!-- Bloco Claude API -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">🤖 Claude AI — Anthropic</div>
-          <span class="badge" id="cfgClaudeBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
-        </div>
-
-        <div style="margin-bottom:14px">
-          <div class="cred-field">
-            <label>API Key</label>
-            <input type="password" id="inputClaudeKey" placeholder="sk-ant-api03-…" autocomplete="new-password"
-              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-ai"  onclick="saveClaudeKey()">💾 Salvar Claude Key</button>
-          <button class="btn"         onclick="clearClaudeKey()" style="color:var(--red)">✕ Limpar</button>
-          <span id="claudeMsg" style="font-size:12px;margin-left:4px"></span>
-        </div>
-
-        <div style="margin-top:16px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
-          <b style="color:var(--tx)">Como obter a API Key:</b><br>
-          1. Acesse <b>console.anthropic.com → API Keys</b><br>
-          2. Clique em <b>"Create Key"</b>, nomeie e copie<br>
-          3. A key começa com <code style="background:rgba(155,127,244,.12);color:var(--purple);padding:1px 5px;border-radius:4px">sk-ant-api03-…</code><br>
-          4. Ela é usada nas páginas <b>Análise por IA</b> e <b>Criativos Meta</b>
-        </div>
-      </div>
-
-      <!-- Bloco Planilhas Google -->
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-title">📊 Google Sheets — Planilhas conectadas</div>
-          <span class="badge green">3 ativas</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
-            <div class="sync-dot"></div>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:600">ROI & ROAS</div>
-              <div style="font-size:11px;color:var(--mu)">Investimento, receita, leads por empreendimento e mês</div>
-            </div>
-            <span class="badge green">Conectada</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
-            <div class="sync-dot"></div>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:600">Campanhas Meta Ads</div>
-              <div style="font-size:11px;color:var(--mu)">Nome, objetivo, status, gasto, CTR, resultados</div>
-            </div>
-            <span class="badge green">Conectada</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
-            <div class="sync-dot"></div>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:600">Leads CVCRM</div>
-              <div style="font-size:11px;color:var(--mu)">Base completa com situação, origem e empreendimento</div>
-            </div>
-            <span class="badge green">Conectada</span>
-          </div>
-        </div>
-        <div style="margin-top:12px;font-size:11px;color:var(--mu)">
-          As planilhas são públicas (Leitor) e lidas via CSV direto. Nenhuma credencial necessária.
-          Auto-refresh às 08:00 diariamente.
-        </div>
-      </div>
-
-    </div><!-- /page-config -->
-
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <div class="page" id="page-meta">
-
-      <!-- Barra de conta ativa + status -->
-      <div id="metaConnBar" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
-        <span id="metaConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
-        <span id="metaConnLabel" style="color:var(--mu)">Nenhuma conta configurada</span>
-        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 12px;margin-left:auto">⚙️ Gerenciar Contas</button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="fbar">
-        <span class="fl">Conta:</span>
-        <select id="fMetaAccount" onchange="onMetaAccountSelect()" style="min-width:180px;max-width:260px">
-          <option value="">— Selecione uma conta —</option>
-        </select>
-        <span class="fl">Campanha:</span>
-        <select id="fMetaCamp" onchange="onMetaCampaignSelect()" style="min-width:200px;max-width:320px">
-          <option value="">— Todas as campanhas —</option>
-        </select>
-        <span class="fl">Período:</span>
-        <select id="fMetaPeriod">
-          <option value="this_month">Este mês</option>
-          <option value="last_month">Mês passado</option>
-          <option value="last_30d">Últimos 30 dias</option>
-          <option value="last_90d">Últimos 90 dias</option>
-          <option value="this_quarter">Este trimestre</option>
-          <option value="maximum">Máximo</option>
-        </select>
-        <button class="btn btn-primary" id="btnLoadMeta" onclick="loadMetaCampaigns()">↻ Carregar Campanhas</button>
-        <button class="btn btn-ai" id="btnAnalyzeAll" style="display:none" onclick="analyzeAllMetaCampaigns()">🤖 Analisar Conta</button>
-        <span id="metaLoadInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
-      </div>
-
-      <!-- KPIs da campanha selecionada -->
-      <div id="metaKpiRow" style="display:none;margin-bottom:16px">
-        <div class="kpi-grid kpi-4">
-          <div class="kpi blue"><div class="kpi-label">Gasto no Período</div><div class="kpi-val blue" id="mk1">—</div><div class="kpi-sub" id="mk1s"></div></div>
-          <div class="kpi green"><div class="kpi-label">Resultados (Top 5)</div><div class="kpi-val green" id="mk2">—</div><div class="kpi-sub" id="mk2s"></div></div>
-          <div class="kpi amber"><div class="kpi-label">CTR Campanha</div><div class="kpi-val amber" id="mk3">—</div><div class="kpi-sub" id="mk3s"></div></div>
-          <div class="kpi purple"><div class="kpi-label">Custo / Resultado</div><div class="kpi-val purple" id="mk4">—</div><div class="kpi-sub" id="mk4s"></div></div>
-        </div>
-      </div>
-
-      <!-- Container de criativos -->
-      <div id="metaCreativesContainer">
-        <div class="meta-empty">
-          <div class="meta-empty-icon">🎨</div>
-          <div class="meta-empty-title">Nenhuma campanha carregada</div>
-          <div class="meta-empty-sub">Configure a API em ⚙️ Config. de API e clique em "Carregar Campanhas"</div>
-        </div>
-      </div>
-
-      <!-- Box IA dos criativos -->
-      <div id="metaAIContainer" style="display:none;margin-top:4px">
-        <div class="ia-box">
-          <div class="ia-header">
-            <div class="ia-icon">🤖</div>
-            <div>
-              <div class="ia-title">Análise IA dos Criativos</div>
-              <div class="ia-sub">Claude analisa os top 5 e gera recomendações específicas</div>
-            </div>
-            <button class="btn btn-ai" onclick="analyzeMetaCreatives()" style="margin-left:auto;flex-shrink:0">✦ Analisar Criativos</button>
-          </div>
-          <div id="metaAIResult">
-            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
-              Selecione uma campanha e clique em "Analisar Criativos" para receber insights do Claude.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista de todas as campanhas -->
-      <div id="metaAllCampsContainer" style="display:none;margin-top:8px">
-        <div class="sec">Todas as Campanhas da Conta</div>
-        <div id="metaAllCampsList"></div>
-      </div>
-
-    </div><!-- /page-meta -->
-
-  </div><!-- /content -->
-</div><!-- /app -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="app.js"></script>
 <style>
@@ -532,7 +81,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .page.active{display:block}
 
 /* FILTER BAR */
-.fbar{display:flex;gap:10px;align-items:center;flex-wrap:nowrap;margin-bottom:20px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px}
+.fbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px}
 .fl{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;font-weight:600}
 select{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);padding:6px 28px 6px 10px;border-radius:8px;font-size:12px;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7a9e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;font-family:inherit;transition:border-color .2s}
 select:focus{border-color:var(--blue)}
@@ -900,7 +449,7 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('mercado')">
         <span class="nav-icon">🔍</span> Pesquisa de Mercado
       </div>
-
+      
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -948,7 +497,126 @@ body.light .theme-label{color:var(--blue)}
   <div class="content">
 
     <!-- ══════════════ PAGE: DASHBOARD ══════════════ -->
-      <div class="page" id="page-campanhas">
+    <div class="page active" id="page-dashboard">
+      <div class="ebox" id="ebox"></div>
+
+      <!-- Filtros globais -->
+      <div class="fbar">
+        <span class="fl">De:</span>
+        <input type="date" id="fDataDe" onkeydown="if(event.key==='Enter')aplicarFiltro()">
+        <span class="fl">Até:</span>
+        <input type="date" id="fDataAte" onkeydown="if(event.key==='Enter')aplicarFiltro()">
+        <button class="btn btn-primary" onclick="aplicarFiltro()" style="padding:6px 16px">▶ Aplicar</button>
+        <button class="btn" onclick="limparFiltro()" style="padding:6px 12px;font-size:11px">✕ Limpar</button>
+        <div style="width:1px;height:20px;background:var(--bdr);margin:0 4px"></div>
+        <span class="fl">Empreendimento:</span>
+        <select id="fEmp" onchange="renderDashboard()"><option value="">Todos</option></select>
+        <span class="fl" id="infoGeral" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
+      </div>
+
+      <!-- KPI Row 1: Financeiro -->
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        💰 Financeiro
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+      <div class="kpi-grid kpi-4" style="margin-bottom:16px">
+        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="k1">—</div><div class="kpi-sub" id="k1s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Receita Gerada</div><div class="kpi-val green" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Vendas</div><div class="kpi-val teal" id="k5">—</div><div class="kpi-sub" id="k5s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">ROAS Médio</div><div class="kpi-val amber" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
+      </div>
+
+      <!-- KPI Row 2: Leads -->
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        👥 Leads
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px">
+        <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
+        <div class="kpi blue"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
+        <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
+        <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
+      </div>
+
+      <div class="grid g53">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
+            <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
+          </div>
+          <div class="cw" style="height:210px"><canvas id="cMensal"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">ROAS por mês</div></div>
+          <div class="cw" style="height:230px"><canvas id="cRoas"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Investimento vs Leads Meta -->
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento vs Leads Meta — por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Leads Meta</div>
+          </div>
+          <div class="cw" style="height:200px"><canvas id="cInvLeads"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento por objetivo</div></div>
+          <div class="legend" id="legObj"></div>
+          <div class="cw" style="height:200px"><canvas id="cObj"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Funil por Origem — Leads & Conversão</div><span class="badge blue">CVCRM Online</span></div>
+          <div id="funilList" class="bar-row"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL">—</span></div>
+          <div class="bar-row" id="sitList"></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads Meta vs CVCRM por empreendimento</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Meta</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>CVCRM</div>
+          </div>
+          <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads por Origem Online</div></div>
+          <div class="legend" id="legOrigemOnline"></div>
+          <div class="cw" style="height:220px"><canvas id="cOrigemOnline"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec">Performance por empreendimento</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr>
+              <th style="padding-left:18px">Empreendimento</th>
+              <th>Investido</th><th>Receita</th><th>ROAS</th>
+              <th>Leads Meta</th><th>Leads CRM</th><th>WhatsApp</th><th>Formulário</th><th>Website</th>
+              <th>Vendas</th><th style="padding-right:18px">Status</th>
+            </tr></thead>
+            <tbody id="empBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
+    <div class="page" id="page-campanhas">
 
       <!-- Barra de conta + status -->
       <div id="campConnBar" style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
@@ -1113,7 +781,339 @@ body.light .theme-label{color:var(--blue)}
 
     
     <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
-  
+
+<!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
+
+<!-- ══════════════ PAGE: MELHORIAS ══════════════ -->
+    <div class="page" id="page-melhorias">
+      <div class="fbar">
+        <span class="fl">Objetivo:</span>
+        <select id="fMelObj" onchange="renderMelhorias()"><option value="">Todos</option></select>
+        <span class="fl">Mostrar apenas:</span>
+        <select id="fMelPrio" onchange="renderMelhorias()">
+          <option value="">Todas as campanhas</option>
+          <option value="critico">Crítico (CTR baixo + CPC alto)</option>
+          <option value="otimizar">Para otimizar</option>
+        </select>
+      </div>
+      <div id="melhoriasContent"></div>
+    </div>
+
+    <!-- ══════════════ PAGE: IA ANÁLISE ══════════════ -->
+    <div class="page" id="page-ia">
+      <div class="grid g21" style="margin-bottom:16px">
+        <div>
+          <div class="ia-box">
+            <div class="ia-header">
+              <div class="ia-icon">🤖</div>
+              <div>
+                <div class="ia-title">Análise Inteligente de Campanhas</div>
+                <div class="ia-sub">Powered by Claude · Atualizado com dados reais</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <button class="btn btn-ai" onclick="analisarIA('geral')">📊 Análise Geral</button>
+              <button class="btn btn-ai" onclick="analisarIA('campanhas')">📣 Top Campanhas</button>
+              <button class="btn btn-ai" onclick="analisarIA('leads')">👥 Análise de Leads</button>
+              <button class="btn btn-ai" onclick="analisarIA('orcamento')">💰 Otimização de Orçamento</button>
+              <button class="btn btn-ai" onclick="analisarIA('proximos')">🎯 Próximos Passos</button>
+            </div>
+            <div id="iaResult">
+              <div style="font-size:13px;color:var(--mu);text-align:center;padding:24px 0">
+                Selecione um tipo de análise acima para que a IA analise seus dados em tempo real.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-hd"><div class="card-title">Alertas automáticos</div><span class="badge red" id="alertCount">—</span></div>
+            <div id="alertList" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Score de saúde das campanhas</div></div>
+            <div class="cw" style="height:200px"><canvas id="cScore"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: MERCADO ══════════════ -->
+    <div class="page" id="page-mercado">
+      <div class="mercado-form">
+        <h3>➕ Adicionar Concorrente</h3>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nome do Concorrente</label>
+            <input type="text" id="mNome" placeholder="Ex: Construtora XYZ">
+          </div>
+          <div class="form-field">
+            <label>Cidade de Atuação</label>
+            <input type="text" id="mCidade" placeholder="Ex: Bauru, SP">
+          </div>
+          <div class="form-field">
+            <label>Ticket Médio (R$)</label>
+            <input type="number" id="mTicket" placeholder="Ex: 220000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>CPL estimado (R$)</label>
+            <input type="number" id="mCpl" placeholder="Ex: 35">
+          </div>
+          <div class="form-field">
+            <label>Investimento mensal (R$)</label>
+            <input type="number" id="mInvest" placeholder="Ex: 15000">
+          </div>
+          <div class="form-field">
+            <label>Canais usados</label>
+            <input type="text" id="mCanais" placeholder="Ex: Meta, Google, TikTok">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field" style="grid-column:span 3">
+            <label>Observações / Diferenciais</label>
+            <textarea id="mObs" placeholder="Ex: Foco em WhatsApp, criativo com vídeo, campanha de alcance forte…"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="addConcorrente()">Salvar concorrente</button>
+          <button class="btn btn-ai" onclick="analisarMercado()">🤖 Analisar mercado com IA</button>
+        </div>
+      </div>
+
+      <div id="concorrentesContent">
+        <div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">
+          Nenhum concorrente cadastrado ainda. Adicione acima para começar a análise de mercado.
+        </div>
+      </div>
+
+      <div id="mercadoIA" style="display:none;margin-top:16px"></div>
+    </div>
+
+    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
+    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
+    <div class="page" id="page-config">
+
+      <!-- Status cards das integrações -->
+      <div class="kpi-grid kpi-3" style="margin-bottom:20px">
+        <div class="kpi blue" id="cfgStatusMeta">
+          <div class="kpi-label">Contas Meta Ads</div>
+          <div class="kpi-val" id="cfgMetaVal" style="font-size:20px">0</div>
+          <div class="kpi-sub" id="cfgMetaSub">Nenhuma conta cadastrada</div>
+        </div>
+        <div class="kpi purple" id="cfgStatusClaude">
+          <div class="kpi-label">Claude AI (Anthropic)</div>
+          <div class="kpi-val" id="cfgClaudeVal" style="font-size:20px">—</div>
+          <div class="kpi-sub" id="cfgClaudeSub">Não configurado</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">Planilhas Google</div>
+          <div class="kpi-val green" style="font-size:20px">✓</div>
+          <div class="kpi-sub">3 sheets conectadas via CSV público</div>
+        </div>
+      </div>
+
+      <!-- Gerenciador de Contas Meta -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">🔵 Contas Meta Marketing API</div>
+          <span class="badge" id="cfgMetaBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 contas</span>
+        </div>
+
+        <!-- Lista de contas salvas -->
+        <div id="metaAccountsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+
+        <!-- Formulário adicionar nova conta -->
+        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:10px">➕ Adicionar nova conta</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="cred-field">
+              <label>Nome da conta</label>
+              <input type="text" id="newAccName" placeholder="Ex: Ecovita Goiânia" autocomplete="off"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+            <div class="cred-field">
+              <label>Access Token</label>
+              <input type="password" id="newAccToken" placeholder="EAAxxxxxxxx…" autocomplete="new-password"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+            <div class="cred-field">
+              <label>Ad Account ID</label>
+              <input type="text" id="newAccId" placeholder="act_123456789" autocomplete="off"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" onclick="addMetaAccount()">➕ Adicionar conta</button>
+            <span id="credMsg" style="font-size:12px"></span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter o Token:</b><br>
+          1. Acesse <b>developers.facebook.com → Ferramentas → Explorador de API do Graph</b><br>
+          2. Selecione seu App e gere token com permissões: <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_read</code> e <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_management</code><br>
+          3. Para uso prolongado: use um <b>System User Token</b> (não expira) ou token de longa duração (60 dias)<br>
+          4. O Ad Account ID está em <b>Meta Ads Manager → URL da conta</b> (formato <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">act_XXXXXXXXX</code>)
+        </div>
+      </div>
+
+
+
+      <!-- Bloco Claude API -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">🤖 Claude AI — Anthropic</div>
+          <span class="badge" id="cfgClaudeBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="cred-field">
+            <label>API Key</label>
+            <input type="password" id="inputClaudeKey" placeholder="sk-ant-api03-…" autocomplete="new-password"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai"  onclick="saveClaudeKey()">💾 Salvar Claude Key</button>
+          <button class="btn"         onclick="clearClaudeKey()" style="color:var(--red)">✕ Limpar</button>
+          <span id="claudeMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter a API Key:</b><br>
+          1. Acesse <b>console.anthropic.com → API Keys</b><br>
+          2. Clique em <b>"Create Key"</b>, nomeie e copie<br>
+          3. A key começa com <code style="background:rgba(155,127,244,.12);color:var(--purple);padding:1px 5px;border-radius:4px">sk-ant-api03-…</code><br>
+          4. Ela é usada nas páginas <b>Análise por IA</b> e <b>Criativos Meta</b>
+        </div>
+      </div>
+
+      <!-- Bloco Planilhas Google -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📊 Google Sheets — Planilhas conectadas</div>
+          <span class="badge green">3 ativas</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">ROI & ROAS</div>
+              <div style="font-size:11px;color:var(--mu)">Investimento, receita, leads por empreendimento e mês</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Campanhas Meta Ads</div>
+              <div style="font-size:11px;color:var(--mu)">Nome, objetivo, status, gasto, CTR, resultados</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Leads CVCRM</div>
+              <div style="font-size:11px;color:var(--mu)">Base completa com situação, origem e empreendimento</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--mu)">
+          As planilhas são públicas (Leitor) e lidas via CSV direto. Nenhuma credencial necessária.
+          Auto-refresh às 08:00 diariamente.
+        </div>
+      </div>
+
+    </div><!-- /page-config -->
+
+    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
+    <div class="page" id="page-meta">
+
+      <!-- Barra de conta ativa + status -->
+      <div id="metaConnBar" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
+        <span id="metaConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
+        <span id="metaConnLabel" style="color:var(--mu)">Nenhuma conta configurada</span>
+        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 12px;margin-left:auto">⚙️ Gerenciar Contas</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="fbar">
+        <span class="fl">Conta:</span>
+        <select id="fMetaAccount" onchange="onMetaAccountSelect()" style="min-width:180px;max-width:260px">
+          <option value="">— Selecione uma conta —</option>
+        </select>
+        <span class="fl">Campanha:</span>
+        <select id="fMetaCamp" onchange="onMetaCampaignSelect()" style="min-width:200px;max-width:320px">
+          <option value="">— Todas as campanhas —</option>
+        </select>
+        <span class="fl">Período:</span>
+        <select id="fMetaPeriod">
+          <option value="this_month">Este mês</option>
+          <option value="last_month">Mês passado</option>
+          <option value="last_30d">Últimos 30 dias</option>
+          <option value="last_90d">Últimos 90 dias</option>
+          <option value="this_quarter">Este trimestre</option>
+          <option value="maximum">Máximo</option>
+        </select>
+        <button class="btn btn-primary" id="btnLoadMeta" onclick="loadMetaCampaigns()">↻ Carregar Campanhas</button>
+        <button class="btn btn-ai" id="btnAnalyzeAll" style="display:none" onclick="analyzeAllMetaCampaigns()">🤖 Analisar Conta</button>
+        <span id="metaLoadInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
+      </div>
+
+      <!-- KPIs da campanha selecionada -->
+      <div id="metaKpiRow" style="display:none;margin-bottom:16px">
+        <div class="kpi-grid kpi-4">
+          <div class="kpi blue"><div class="kpi-label">Gasto no Período</div><div class="kpi-val blue" id="mk1">—</div><div class="kpi-sub" id="mk1s"></div></div>
+          <div class="kpi green"><div class="kpi-label">Resultados (Top 5)</div><div class="kpi-val green" id="mk2">—</div><div class="kpi-sub" id="mk2s"></div></div>
+          <div class="kpi amber"><div class="kpi-label">CTR Campanha</div><div class="kpi-val amber" id="mk3">—</div><div class="kpi-sub" id="mk3s"></div></div>
+          <div class="kpi purple"><div class="kpi-label">Custo / Resultado</div><div class="kpi-val purple" id="mk4">—</div><div class="kpi-sub" id="mk4s"></div></div>
+        </div>
+      </div>
+
+      <!-- Container de criativos -->
+      <div id="metaCreativesContainer">
+        <div class="meta-empty">
+          <div class="meta-empty-icon">🎨</div>
+          <div class="meta-empty-title">Nenhuma campanha carregada</div>
+          <div class="meta-empty-sub">Configure a API em ⚙️ Config. de API e clique em "Carregar Campanhas"</div>
+        </div>
+      </div>
+
+      <!-- Box IA dos criativos -->
+      <div id="metaAIContainer" style="display:none;margin-top:4px">
+        <div class="ia-box">
+          <div class="ia-header">
+            <div class="ia-icon">🤖</div>
+            <div>
+              <div class="ia-title">Análise IA dos Criativos</div>
+              <div class="ia-sub">Claude analisa os top 5 e gera recomendações específicas</div>
+            </div>
+            <button class="btn btn-ai" onclick="analyzeMetaCreatives()" style="margin-left:auto;flex-shrink:0">✦ Analisar Criativos</button>
+          </div>
+          <div id="metaAIResult">
+            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
+              Selecione uma campanha e clique em "Analisar Criativos" para receber insights do Claude.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de todas as campanhas -->
+      <div id="metaAllCampsContainer" style="display:none;margin-top:8px">
+        <div class="sec">Todas as Campanhas da Conta</div>
+        <div id="metaAllCampsList"></div>
+      </div>
+
+    </div><!-- /page-meta -->
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
 <script>
 // ═══════════════════════════════════════════════════════
 // CONFIG
@@ -2710,548 +2710,3 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 
 // ── Config helpers ──────────────────────────────────────
 
-// ── Helpers API ─────────────────────────────────────────
-
-// ═══════════════════════════════════════════════════════
-// LOAD ALL
-// ═══════════════════════════════════════════════════════
-function setLoading(on,msg=''){
-  document.getElementById('lov').style.display=on?'flex':'none';
-  if(msg)document.getElementById('ltx').textContent=msg;
-  const btn=document.getElementById('btnR');
-  if(btn){btn.disabled=on;btn.textContent=on?'⏳ Aguarde…':'↻ Atualizar';}
-}
-
-async function loadAll(){
-  setLoading(true,'Conectando às planilhas…');
-  document.getElementById('ebox').style.display='none';
-  try{
-    setLoading(true,'Carregando ROI & ROAS…');
-    dadosRoas=parseRoas(await fetchCSV(SH_ROAS,0));
-    setLoading(true,'Carregando campanhas Meta Ads…');
-    campsMeta=parseMeta(await fetchCSV(SH_META,0));
-    setLoading(true,'Carregando leads CVCRM…');
-    leadsCV=parseLeads(await fetchCSV(SH_LEADS,0));
-    if(!dadosRoas.length)throw new Error('Planilha ROI/ROAS sem dados. Verifique o acesso público.');
-    popularFiltros();
-    renderDashboard();
-    // Badge: campanhas com status active E que têm gasto registrado
-    const ativas=campsMeta.filter(c=>c.status==='active'&&c.valor>0).length;
-    sid('tbBadge',`${ativas} campanha${ativas!==1?'s':''} ativa${ativas!==1?'s':''}`);
-    sid('lastUpd',new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
-  }catch(e){
-    const eb=document.getElementById('ebox');
-    eb.innerHTML=`⚠️ ${e.message}<br><small>Verifique se as 3 planilhas estão com "Qualquer pessoa com o link → Leitor".</small>`;
-    eb.style.display='block';
-    console.error(e);
-  }
-  setLoading(false);
-}
-
-// ═══════════════════════════════════════════════════════
-// PAGE: CRIATIVOS META API — MULTI-CONTA
-// ═══════════════════════════════════════════════════════
-let metaCampaigns    = [];   // cache de campanhas da conta ativa
-let currentCreatives = [];   // top 5 da campanha atual
-let currentMetaCamp  = null; // campanha atual
-
-// ── Página de Configurações de API ──────────────────────
-function initConfigPage(){
-  renderAccountsList();
-  updateConfigStatus();
-  // Claude key mascarado
-  const k  = localStorage.getItem('eco_claude_key') || '';
-  const ki = document.getElementById('inputClaudeKey');
-  if(ki) ki.value = k ? '••••••••••••••••' : '';
-}
-
-function updateConfigStatus(){
-  const accounts  = window.MetaAPI?.accounts || [];
-  const hasMeta   = accounts.length > 0;
-  const hasClaude = !!localStorage.getItem('eco_claude_key');
-
-  const metaVal = document.getElementById('cfgMetaVal');
-  const metaSub = document.getElementById('cfgMetaSub');
-  const metaBdg = document.getElementById('cfgMetaBadge');
-  if(metaVal){ metaVal.textContent = accounts.length; metaVal.style.color = hasMeta ? 'var(--green)' : 'var(--red)'; }
-  if(metaSub) metaSub.textContent = hasMeta ? `${accounts.length} conta${accounts.length>1?'s':''} cadastrada${accounts.length>1?'s':''}` : 'Nenhuma conta cadastrada';
-  if(metaBdg){ metaBdg.className = hasMeta ? 'badge green' : 'badge'; metaBdg.style.cssText = hasMeta ? '' : 'background:rgba(107,122,158,.12);color:var(--mu)'; metaBdg.textContent = `${accounts.length} conta${accounts.length!==1?'s':''}`; }
-
-  const clVal = document.getElementById('cfgClaudeVal');
-  const clSub = document.getElementById('cfgClaudeSub');
-  const clBdg = document.getElementById('cfgClaudeBadge');
-  if(clVal){ clVal.textContent = hasClaude ? '✓' : '✕'; clVal.style.color = hasClaude ? 'var(--green)' : 'var(--red)'; }
-  if(clSub) clSub.textContent = hasClaude ? 'API Key salva' : 'Não configurado';
-  if(clBdg){ clBdg.className = hasClaude ? 'badge purple' : 'badge'; clBdg.style.cssText = hasClaude ? '' : 'background:rgba(107,122,158,.12);color:var(--mu)'; clBdg.textContent = hasClaude ? 'Configurado' : 'Não configurado'; }
-}
-
-// ── Renderiza lista de contas salvas ─────────────────────
-function renderAccountsList(){
-  const container = document.getElementById('metaAccountsList');
-  if(!container) return;
-  const accounts  = window.MetaAPI?.accounts || [];
-  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
-
-  if(!accounts.length){
-    container.innerHTML = '<div style="font-size:12px;color:var(--mu);padding:8px 0">Nenhuma conta adicionada ainda. Use o formulário abaixo.</div>';
-    return;
-  }
-
-  container.innerHTML = accounts.map((acc, i) => {
-    const isActive = i === activeIdx;
-    const masked   = '••••' + (acc.accountId || '').slice(-6);
-    return `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${isActive ? 'rgba(79,142,247,.08)' : 'var(--bg3)'};border:1px solid ${isActive ? 'var(--blue)' : 'var(--bdr)'};border-radius:10px;transition:all .2s">
-        <div style="width:8px;height:8px;border-radius:50%;background:${isActive ? 'var(--green)' : 'var(--mu)'};flex-shrink:0${isActive ? ';box-shadow:0 0 5px var(--green)' : ''}"></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--tx)">${acc.name}</div>
-          <div style="font-size:11px;color:var(--mu)">${acc.accountId} · token ${masked}</div>
-        </div>
-        ${isActive ? '<span class="badge green" style="flex-shrink:0">Ativa</span>' : `<button class="btn" onclick="setActiveAccount(${i})" style="font-size:11px;padding:4px 12px;flex-shrink:0">Usar esta</button>`}
-        <button class="btn" onclick="testAccountAt(${i})" style="font-size:11px;padding:4px 10px;flex-shrink:0" title="Testar conexão">✓</button>
-        <button class="btn" onclick="removeMetaAccount(${i})" style="font-size:11px;padding:4px 10px;color:var(--red);flex-shrink:0" title="Remover conta">✕</button>
-      </div>`;
-  }).join('');
-}
-
-function addMetaAccount(){
-  const name    = document.getElementById('newAccName')?.value.trim()  || '';
-  const token   = document.getElementById('newAccToken')?.value.trim() || '';
-  const accId   = document.getElementById('newAccId')?.value.trim()    || '';
-  if(!name || !token || !accId){ setCredMsg('credMsg','⚠️ Preencha nome, token e account ID.','var(--amber)'); return; }
-  const ok = window.MetaAPI.addAccount(name, token, accId);
-  if(!ok){ setCredMsg('credMsg','⚠️ Esta conta já está cadastrada.','var(--amber)'); return; }
-  document.getElementById('newAccName').value  = '';
-  document.getElementById('newAccToken').value = '';
-  document.getElementById('newAccId').value    = '';
-  setCredMsg('credMsg','✅ Conta adicionada!','var(--green)');
-  renderAccountsList();
-  updateConfigStatus();
-  populateAccountSelect();
-  updateMetaConnBar();
-}
-
-function removeMetaAccount(idx){
-  if(!confirm('Remover esta conta?')) return;
-  window.MetaAPI.removeAccount(idx);
-  renderAccountsList();
-  updateConfigStatus();
-  populateAccountSelect();
-  updateMetaConnBar();
-  setCredMsg('credMsg','Conta removida.','var(--mu)');
-}
-
-function setActiveAccount(idx){
-  window.MetaAPI.switchAccount(idx);
-  metaCampaigns = [];
-  currentCreatives = [];
-  currentMetaCamp  = null;
-  renderAccountsList();
-  updateMetaConnBar();
-  // Atualiza seletor na página de criativos
-  const sel = document.getElementById('fMetaAccount');
-  if(sel) sel.value = String(idx);
-}
-
-async function testAccountAt(idx){
-  const accounts = window.MetaAPI.accounts;
-  if(!accounts[idx]){ setCredMsg('credMsg','Conta inválida.','var(--red)'); return; }
-  // Guarda conta atual, troca temporariamente, testa, restaura
-  const prevIdx = window.MetaAPI.activeIdx;
-  window.MetaAPI.switchAccount(idx);
-  setCredMsg('credMsg',`🔄 Testando "${accounts[idx].name}"…`,'var(--mu)');
-  try{
-    const r = await window.MetaAPI.validateToken();
-    if(r.valid){ setCredMsg('credMsg',`✅ "${accounts[idx].name}" OK — usuário: ${r.name}`,'var(--green)'); }
-    else        { setCredMsg('credMsg',`❌ "${accounts[idx].name}": ${r.error}`,'var(--red)'); }
-  } catch(e){ setCredMsg('credMsg',`❌ Erro: ${e.message}`,'var(--red)'); }
-  finally{
-    // Restaura conta ativa original
-    window.MetaAPI.switchAccount(prevIdx);
-  }
-}
-
-function saveClaudeKey(){
-  const ki = document.getElementById('inputClaudeKey');
-  const rawKey = ki?.value.trim() || '';
-  const key = (rawKey === '••••••••••••••••') ? (localStorage.getItem('eco_claude_key') || '') : rawKey;
-  if(!key){ setCredMsg('claudeMsg','⚠️ Cole a API Key do Claude.','var(--amber)'); return; }
-  if(window.AIModule) window.AIModule.saveKey(key);
-  setCredMsg('claudeMsg','✅ Claude API Key salva!','var(--green)');
-  updateConfigStatus();
-}
-
-function clearClaudeKey(){
-  localStorage.removeItem('eco_claude_key');
-  if(window.AIModule) window.AIModule._key = '';
-  const ki = document.getElementById('inputClaudeKey');
-  if(ki) ki.value = '';
-  setCredMsg('claudeMsg','Claude Key removida.','var(--mu)');
-  updateConfigStatus();
-}
-
-function setCredMsg(elId, msg, color){
-  const el = document.getElementById(elId);
-  if(!el) return;
-  el.textContent = msg;
-  el.style.color = color;
-}
-
-// ── Página Criativos Meta ────────────────────────────────
-function initMetaPage(){
-  populateAccountSelect();
-  updateMetaConnBar();
-  if(metaCampaigns.length) renderMetaAllCamps();
-}
-
-// Popula dropdown de contas na página de criativos
-function populateAccountSelect(){
-  const sel = document.getElementById('fMetaAccount');
-  if(!sel) return;
-  const accounts  = window.MetaAPI?.accounts || [];
-  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
-  sel.innerHTML = accounts.length
-    ? accounts.map((a, i) => `<option value="${i}" ${i===activeIdx?'selected':''}>${a.name}</option>`).join('')
-    : '<option value="">— Nenhuma conta cadastrada —</option>';
-}
-
-// Troca de conta pelo seletor da página de criativos
-function onMetaAccountSelect(){
-  const sel = document.getElementById('fMetaAccount');
-  const idx = parseInt(sel?.value ?? '0', 10);
-  window.MetaAPI.switchAccount(idx);
-  // Limpa cache e UI de campanhas
-  metaCampaigns = [];
-  currentCreatives = [];
-  currentMetaCamp  = null;
-  const campSel = document.getElementById('fMetaCamp');
-  if(campSel) campSel.innerHTML = '<option value="">— Todas as campanhas —</option>';
-  document.getElementById('metaKpiRow').style.display      = 'none';
-  document.getElementById('metaAIContainer').style.display = 'none';
-  document.getElementById('metaAllCampsContainer').style.display = 'none';
-  document.getElementById('metaCreativesContainer').innerHTML = `
-    <div class="meta-empty">
-      <div class="meta-empty-icon">🔄</div>
-      <div class="meta-empty-title">Conta alterada: ${window.MetaAPI.activeAccount?.name||''}</div>
-      <div class="meta-empty-sub">Clique em "Carregar Campanhas" para buscar os dados desta conta</div>
-    </div>`;
-  updateMetaConnBar();
-}
-
-// Mini status bar na página de criativos
-function updateMetaConnBar(){
-  const dot   = document.getElementById('metaConnDot');
-  const label = document.getElementById('metaConnLabel');
-  if(!dot || !label) return;
-  const acc = window.MetaAPI?.activeAccount;
-  if(acc){
-    dot.style.background = 'var(--green)';
-    dot.style.boxShadow  = '0 0 6px var(--green)';
-    label.style.color    = 'var(--mu2)';
-    label.textContent    = `Conta ativa: ${acc.name} · ${acc.accountId}`;
-  } else {
-    dot.style.background = 'var(--mu)';
-    dot.style.boxShadow  = 'none';
-    label.style.color    = 'var(--mu)';
-    label.textContent    = 'Nenhuma conta configurada — acesse ⚙️ Gerenciar Contas';
-  }
-}
-
-// ── Carrega campanhas da conta ativa ─────────────────────
-async function loadMetaCampaigns(){
-  if(!window.MetaAPI?.hasCredentials()){
-    alert('Adicione e selecione uma conta Meta em ⚙️ Config. de API.');
-    return;
-  }
-  const btn    = document.getElementById('btnLoadMeta');
-  const infoEl = document.getElementById('metaLoadInfo');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando…'; }
-  if(infoEl) infoEl.textContent = `Buscando campanhas de "${window.MetaAPI.activeAccount?.name||'conta'}"…`;
-
-  const period = document.getElementById('fMetaPeriod')?.value || 'this_month';
-
-  try{
-    const camps = await window.MetaAPI.getCampaigns({ datePreset: period });
-    const insightsArr = await Promise.all(
-      camps.map(c => window.MetaAPI.getCampaignInsights(c.id, period))
-    );
-
-    metaCampaigns = camps.map((c,i)=>({
-      ...c,
-      insights : insightsArr[i],
-      results  : window.MetaAPI._extractResults(insightsArr[i]),
-    })).sort((a,b)=> b.results - a.results || parseFloat(b.insights?.spend||0) - parseFloat(a.insights?.spend||0));
-
-    const sel = document.getElementById('fMetaCamp');
-    if(sel){
-      sel.innerHTML = '<option value="">— Todas as campanhas —</option>';
-      metaCampaigns.forEach(c=>{
-        sel.appendChild(new Option(`${c.status==='ACTIVE'?'🟢':'🔴'} ${c.name}`, c.id));
-      });
-    }
-
-    const ativas = metaCampaigns.filter(c=>c.status==='ACTIVE').length;
-    if(infoEl) infoEl.textContent = `${camps.length} campanhas · ${ativas} ativas`;
-
-    const btnAll = document.getElementById('btnAnalyzeAll');
-    if(btnAll) btnAll.style.display = 'inline-flex';
-
-    renderMetaAllCamps();
-
-    const first = metaCampaigns.find(c=>c.status==='ACTIVE');
-    if(first){
-      if(sel) sel.value = first.id;
-      await loadMetaCampaignCreatives(first.id);
-    }
-
-  } catch(e){
-    if(infoEl) infoEl.textContent = `❌ ${e.message}`;
-    document.getElementById('metaCreativesContainer').innerHTML =
-      `<div class="ebox" style="display:block">❌ ${e.message}<br><small>Verifique se o token tem permissão <b>ads_read</b>.</small></div>`;
-  } finally {
-    if(btn){ btn.disabled=false; btn.textContent='↻ Carregar Campanhas'; }
-  }
-}
-
-async function onMetaCampaignSelect(){
-  const id = document.getElementById('fMetaCamp')?.value;
-  if(!id){ renderMetaAllCamps(); return; }
-  await loadMetaCampaignCreatives(id);
-}
-
-// ── Carrega top 5 criativos da campanha ──────────────────
-async function loadMetaCampaignCreatives(campaignId){
-  const period    = document.getElementById('fMetaPeriod')?.value || 'this_month';
-  const container = document.getElementById('metaCreativesContainer');
-  container.innerHTML = `
-    <div class="meta-empty">
-      <div class="spin" style="margin:0 auto 16px"></div>
-      <div class="meta-empty-title">Buscando criativos e métricas…</div>
-      <div class="meta-empty-sub">Usando Meta Batch API para reduzir chamadas</div>
-    </div>`;
-
-  const camp = metaCampaigns.find(c=>c.id===campaignId);
-  currentMetaCamp = camp || null;
-
-  try{
-    const top5 = await window.MetaAPI.getTop5Creatives(campaignId, period);
-    currentCreatives = top5;
-
-    if(!top5.length){
-      container.innerHTML = `
-        <div class="meta-empty">
-          <div class="meta-empty-icon">📭</div>
-          <div class="meta-empty-title">Nenhum criativo com dados no período</div>
-          <div class="meta-empty-sub">Tente "Máximo" no filtro de período ou outra campanha</div>
-        </div>`;
-      document.getElementById('metaKpiRow').style.display = 'none';
-      return;
-    }
-
-    updateMetaKPIs(camp?.insights, top5);
-    renderMetaCreativeCards(camp, top5, container);
-
-    document.getElementById('metaAIContainer').style.display  = 'block';
-    document.getElementById('metaAllCampsContainer').style.display = 'none';
-    document.getElementById('metaAIResult').innerHTML =
-      `<div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
-        Clique em "Analisar Criativos" para receber insights do Claude sobre os ${top5.length} criativos.
-      </div>`;
-
-  } catch(e){
-    container.innerHTML =
-      `<div class="ebox" style="display:block">❌ ${e.message}</div>`;
-  }
-}
-
-// ── KPIs da campanha ─────────────────────────────────────
-function updateMetaKPIs(ins, creatives){
-  document.getElementById('metaKpiRow').style.display = 'block';
-  const spend   = parseFloat(ins?.spend       || 0);
-  const results = creatives.reduce((s,c)=>s+c.results, 0);
-  const ctr     = parseFloat(ins?.ctr         || 0);
-  const cpr     = results > 0 ? spend / results : 0;
-  sid('mk1', metaFmt.brlShort(spend));
-  sid('mk1s',`${creatives.length} criativos · período`);
-  sid('mk2', fN(results));
-  sid('mk2s','Top 5 ads da campanha');
-  sid('mk3', ctr.toFixed(2)+'%');
-  sid('mk3s',`Impressões: ${metaFmt.num(ins?.impressions||0)}`);
-  sid('mk4', cpr>0 ? metaFmt.brl(cpr) : '—');
-  sid('mk4s',`CPC: ${metaFmt.brl(parseFloat(ins?.cpc||0))}`);
-}
-
-// ── Render creative cards ────────────────────────────────
-const RANK_STYLES = [
-  { bg:'rgba(245,166,35,.25)',  color:'#f5a623' },
-  { bg:'rgba(180,180,180,.2)',  color:'#bbb'    },
-  { bg:'rgba(205,127,50,.22)',  color:'#cd7f32' },
-  { bg:'rgba(79,142,247,.18)', color:'#4f8ef7' },
-  { bg:'rgba(155,127,244,.18)',color:'#9b7ff4' },
-];
-
-function renderMetaCreativeCards(camp, creatives, container){
-  const campName = (camp?.name||'Campanha').replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
-  const isActive = camp?.status === 'ACTIVE';
-  container.innerHTML = `
-    <div class="camp-crt-section">
-      <div class="camp-crt-hd">
-        <div>
-          <div class="camp-crt-name">${campName}</div>
-          <div class="camp-crt-meta">
-            ${camp?.objective||'—'} ·
-            <span style="color:${isActive?'var(--green)':'var(--red)'}">
-              ${isActive?'🟢 Ativa':'🔴 Pausada'}
-            </span>
-            · <span style="color:var(--teal)">Thumbnails via Meta API</span>
-            · Top 5 por resultados
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--mu);text-align:right">
-          🏆 #1–#${creatives.length} melhores criativos<br>
-          <span style="color:var(--purple)">Dados: Meta Ads Manager</span>
-        </div>
-      </div>
-      <div class="creative-grid">
-        ${creatives.map((ad,i) => buildCreativeCard(ad, i)).join('')}
-      </div>
-    </div>`;
-}
-
-function buildCreativeCard(ad, i){
-  const rs    = RANK_STYLES[i] || RANK_STYLES[4];
-  const thumb = ad.thumbnail;
-  const active= ad.status === 'ACTIVE';
-  const cpr   = ad.results > 0 ? ad.spend / ad.results : 0;
-  const scoreColor = ad.ctr >= 2 && cpr > 0 && cpr < 50 ? 'var(--green)'
-    : ad.ctr >= 1 ? 'var(--amber)' : 'var(--red)';
-  const thumbHtml = thumb
-    ? `<img class="creative-thumb" src="${thumb}" alt="${ad.name}" loading="lazy"
-         onerror="this.outerHTML='<div class=\\'creative-thumb-ph\\'>🖼️</div>'">`
-    : `<div class="creative-thumb-ph">🖼️</div>`;
-  const adName = (ad.name||'Ad #'+(i+1)).replace(/\s*[–\-—]\s*(Pao|fmd|Dia|Ad|Set).*/i,'').trim();
-  return `
-    <div class="creative-card">
-      <div class="creative-score-bar" style="background:${scoreColor}"></div>
-      <div style="position:relative">
-        ${thumbHtml}
-        <div class="creative-rank" style="background:${rs.bg};color:${rs.color}">#${i+1}</div>
-        <div class="creative-st" style="background:${active?'rgba(46,204,142,.22)':'rgba(240,101,101,.22)'};color:${active?'var(--green)':'var(--red)'}">
-          ${active?'● Ativo':'● Pausado'}
-        </div>
-      </div>
-      <div class="creative-info">
-        <div class="creative-name" title="${ad.name}">${adName}</div>
-        <div class="creative-metrics">
-          <div class="cm"><div class="cm-v" style="color:var(--green)">${ad.results>0?ad.results.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Resultados</div></div>
-          <div class="cm"><div class="cm-v" style="color:var(--blue)">${ad.ctr>0?ad.ctr.toFixed(2)+'%':'—'}</div><div class="cm-l">CTR</div></div>
-          <div class="cm"><div class="cm-v" style="color:var(--amber)">${ad.spend>0?'R$'+ad.spend.toFixed(0):'—'}</div><div class="cm-l">Gasto</div></div>
-          <div class="cm"><div class="cm-v" style="color:var(--purple)">${ad.cpc>0?'R$'+ad.cpc.toFixed(2):'—'}</div><div class="cm-l">CPC</div></div>
-        </div>
-        <div class="creative-foot">
-          <span>${ad.impressions>0?ad.impressions.toLocaleString('pt-BR')+' imp.':'—'}${ad.frequency>0?' · freq '+ad.frequency.toFixed(1):''}</span>
-          <span class="creative-foot-cpr" style="color:${cpr>0&&cpr<50?'var(--green)':cpr>0&&cpr<100?'var(--amber)':'var(--red)'}">
-            ${cpr>0?'R$'+cpr.toFixed(0)+'/res.':'—'}
-          </span>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ── Lista de todas as campanhas ──────────────────────────
-function renderMetaAllCamps(){
-  const container = document.getElementById('metaAllCampsContainer');
-  const list      = document.getElementById('metaAllCampsList');
-  if(!container || !list || !metaCampaigns.length) return;
-  container.style.display = 'block';
-  document.getElementById('metaKpiRow').style.display  = 'none';
-  document.getElementById('metaAIContainer').style.display = 'none';
-  document.getElementById('metaCreativesContainer').innerHTML = `
-    <div class="meta-empty">
-      <div class="meta-empty-icon">👆</div>
-      <div class="meta-empty-title">Selecione uma campanha acima</div>
-      <div class="meta-empty-sub">para ver os top 5 criativos com thumbnails reais</div>
-    </div>`;
-  const OC = {Cadastro:C.blue, WhatsApp:C.green, Alcance:C.purple};
-  list.innerHTML = metaCampaigns.map(c=>{
-    const ins    = c.insights;
-    const spend  = parseFloat(ins?.spend||0);
-    const ctr    = parseFloat(ins?.ctr||0);
-    const cpr    = c.results>0 ? spend/c.results : 0;
-    const active = c.status === 'ACTIVE';
-    const obj    = c.objective || '';
-    const oColor = OC[obj] || C.orange;
-    const campNameShort = c.name.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
-    return `
-      <div class="meta-camp-row" onclick="selectMetaCampFromCard('${c.id}')">
-        <div style="width:10px;height:10px;border-radius:50%;background:${active?'var(--green)':'var(--mu)'};flex-shrink:0"></div>
-        <div class="meta-camp-row-name" title="${c.name}">${campNameShort}</div>
-        <div style="font-size:10px;padding:2px 8px;border-radius:5px;background:${oColor}22;color:${oColor};font-weight:600;flex-shrink:0">${obj||'—'}</div>
-        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--blue)">${spend>0?'R$'+spend.toFixed(0):'—'}</div><div class="meta-camp-stat-l">Gasto</div></div>
-        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--green)">${c.results||'—'}</div><div class="meta-camp-stat-l">Resultados</div></div>
-        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--amber)">${ctr>0?ctr.toFixed(2)+'%':'—'}</div><div class="meta-camp-stat-l">CTR</div></div>
-        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--purple)">${cpr>0?'R$'+cpr.toFixed(0):'—'}</div><div class="meta-camp-stat-l">Custo/Res.</div></div>
-        <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;flex-shrink:0" onclick="event.stopPropagation();selectMetaCampFromCard('${c.id}')">🎨 Ver criativos</button>
-      </div>`;
-  }).join('');
-}
-
-async function selectMetaCampFromCard(campId){
-  const sel = document.getElementById('fMetaCamp');
-  if(sel) sel.value = campId;
-  document.getElementById('metaAllCampsContainer').style.display = 'none';
-  await loadMetaCampaignCreatives(campId);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ── Análise IA dos criativos atuais ─────────────────────
-async function analyzeMetaCreatives(){
-  if(!currentCreatives.length){ alert('Selecione uma campanha e carregue os criativos primeiro.'); return; }
-  const el = document.getElementById('metaAIResult');
-  el.innerHTML = `<div class="ia-loading">🤖 Analisando ${currentCreatives.length} criativos<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
-  try{
-    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
-    const text = await window.AIModule.analyzeCreatives(currentMetaCamp?.name||'Campanha', currentCreatives);
-    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
-  } catch(e){
-    el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px;background:rgba(240,101,101,.08);border-radius:8px">❌ ${e.message}</div>`;
-  }
-}
-
-// ── Análise IA de todas as campanhas ────────────────────
-async function analyzeAllMetaCampaigns(){
-  if(!metaCampaigns.length) return;
-  const btn = document.getElementById('btnAnalyzeAll');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Analisando…'; }
-  document.getElementById('metaAIContainer').style.display = 'block';
-  const el = document.getElementById('metaAIResult');
-  el.innerHTML = `<div class="ia-loading">🤖 Analisando toda a conta Meta Ads<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
-  try{
-    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
-    const text = await window.AIModule.analyzeCampaignPerformance(metaCampaigns.filter(c=>c.insights));
-    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch(e){
-    el.innerHTML = `<div style="color:var(--red);font-size:13px">${e.message}</div>`;
-  } finally{
-    if(btn){ btn.disabled=false; btn.textContent='🤖 Analisar Conta'; }
-  }
-}
-
-// ──────────────────────────────────────────────────────
-
-// Menu mobile
-document.querySelector('.topbar')?.addEventListener('click', e=>{
-  if(e.clientX < 50 && window.innerWidth <= 768){
-    document.querySelector('.sidebar')?.classList.toggle('open');
-  }
-});
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.addEventListener('click',()=>{ if(window.innerWidth<=768) document.querySelector('.sidebar')?.classList.remove('open'); });
-});
-
-// Enter no login
-document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-</script>
-</body>
-</html>

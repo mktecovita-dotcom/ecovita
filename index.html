@@ -5,6 +5,455 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ecovita · Sistema de Tráfego Pago</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<div class="page active" id="page-dashboard">
+      <div class="ebox" id="ebox"></div>
+
+      <!-- Filtros globais -->
+      <div class="fbar">
+        <span class="fl">De:</span>
+        <input type="date" id="fDataDe" onkeydown="if(event.key==='Enter')aplicarFiltro()">
+        <span class="fl">Até:</span>
+        <input type="date" id="fDataAte" onkeydown="if(event.key==='Enter')aplicarFiltro()">
+        <button class="btn btn-primary" onclick="aplicarFiltro()" style="padding:6px 16px">▶ Aplicar</button>
+        <button class="btn" onclick="limparFiltro()" style="padding:6px 12px;font-size:11px">✕ Limpar</button>
+        <div style="width:1px;height:20px;background:var(--bdr);margin:0 4px"></div>
+        <span class="fl">Empreendimento:</span>
+        <select id="fEmp" onchange="renderDashboard()"><option value="">Todos</option></select>
+        <span class="fl" id="infoGeral" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
+      </div>
+
+      <!-- KPI Row 1: Financeiro -->
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        💰 Financeiro
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+      <div class="kpi-grid kpi-4" style="margin-bottom:16px">
+        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="k1">—</div><div class="kpi-sub" id="k1s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Receita Gerada</div><div class="kpi-val green" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Vendas</div><div class="kpi-val teal" id="k5">—</div><div class="kpi-sub" id="k5s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">ROAS Médio</div><div class="kpi-val amber" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
+      </div>
+
+      <!-- KPI Row 2: Leads -->
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        👥 Leads
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px">
+        <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
+        <div class="kpi blue"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
+        <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
+        <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
+      </div>
+
+      <div class="grid g53">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
+            <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
+          </div>
+          <div class="cw" style="height:210px"><canvas id="cMensal"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">ROAS por mês</div></div>
+          <div class="cw" style="height:230px"><canvas id="cRoas"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Investimento vs Leads Meta -->
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento vs Leads Meta — por mês</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Leads Meta</div>
+          </div>
+          <div class="cw" style="height:200px"><canvas id="cInvLeads"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Investimento por objetivo</div></div>
+          <div class="legend" id="legObj"></div>
+          <div class="cw" style="height:200px"><canvas id="cObj"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Funil por Origem — Leads & Conversão</div><span class="badge blue">CVCRM Online</span></div>
+          <div id="funilList" class="bar-row"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL">—</span></div>
+          <div class="bar-row" id="sitList"></div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads Meta vs CVCRM por empreendimento</div></div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Meta</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>CVCRM</div>
+          </div>
+          <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Leads por Origem Online</div></div>
+          <div class="legend" id="legOrigemOnline"></div>
+          <div class="cw" style="height:220px"><canvas id="cOrigemOnline"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec">Performance por empreendimento</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr>
+              <th style="padding-left:18px">Empreendimento</th>
+              <th>Investido</th><th>Receita</th><th>ROAS</th>
+              <th>Leads Meta</th><th>Leads CRM</th><th>WhatsApp</th><th>Formulário</th><th>Website</th>
+              <th>Vendas</th><th style="padding-right:18px">Status</th>
+            </tr></thead>
+            <tbody id="empBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
+  <div class="page" id="page-melhorias">
+      <div class="fbar">
+        <span class="fl">Objetivo:</span>
+        <select id="fMelObj" onchange="renderMelhorias()"><option value="">Todos</option></select>
+        <span class="fl">Mostrar apenas:</span>
+        <select id="fMelPrio" onchange="renderMelhorias()">
+          <option value="">Todas as campanhas</option>
+          <option value="critico">Crítico (CTR baixo + CPC alto)</option>
+          <option value="otimizar">Para otimizar</option>
+        </select>
+      </div>
+      <div id="melhoriasContent"></div>
+    </div>
+
+    <!-- ══════════════ PAGE: IA ANÁLISE ══════════════ -->
+  <div class="page" id="page-ia">
+      <div class="grid g21" style="margin-bottom:16px">
+        <div>
+          <div class="ia-box">
+            <div class="ia-header">
+              <div class="ia-icon">🤖</div>
+              <div>
+                <div class="ia-title">Análise Inteligente de Campanhas</div>
+                <div class="ia-sub">Powered by Claude · Atualizado com dados reais</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <button class="btn btn-ai" onclick="analisarIA('geral')">📊 Análise Geral</button>
+              <button class="btn btn-ai" onclick="analisarIA('campanhas')">📣 Top Campanhas</button>
+              <button class="btn btn-ai" onclick="analisarIA('leads')">👥 Análise de Leads</button>
+              <button class="btn btn-ai" onclick="analisarIA('orcamento')">💰 Otimização de Orçamento</button>
+              <button class="btn btn-ai" onclick="analisarIA('proximos')">🎯 Próximos Passos</button>
+            </div>
+            <div id="iaResult">
+              <div style="font-size:13px;color:var(--mu);text-align:center;padding:24px 0">
+                Selecione um tipo de análise acima para que a IA analise seus dados em tempo real.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-hd"><div class="card-title">Alertas automáticos</div><span class="badge red" id="alertCount">—</span></div>
+            <div id="alertList" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Score de saúde das campanhas</div></div>
+            <div class="cw" style="height:200px"><canvas id="cScore"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: MERCADO ══════════════ -->
+  <div class="page" id="page-mercado">
+      <div class="mercado-form">
+        <h3>➕ Adicionar Concorrente</h3>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nome do Concorrente</label>
+            <input type="text" id="mNome" placeholder="Ex: Construtora XYZ">
+          </div>
+          <div class="form-field">
+            <label>Cidade de Atuação</label>
+            <input type="text" id="mCidade" placeholder="Ex: Bauru, SP">
+          </div>
+          <div class="form-field">
+            <label>Ticket Médio (R$)</label>
+            <input type="number" id="mTicket" placeholder="Ex: 220000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>CPL estimado (R$)</label>
+            <input type="number" id="mCpl" placeholder="Ex: 35">
+          </div>
+          <div class="form-field">
+            <label>Investimento mensal (R$)</label>
+            <input type="number" id="mInvest" placeholder="Ex: 15000">
+          </div>
+          <div class="form-field">
+            <label>Canais usados</label>
+            <input type="text" id="mCanais" placeholder="Ex: Meta, Google, TikTok">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field" style="grid-column:span 3">
+            <label>Observações / Diferenciais</label>
+            <textarea id="mObs" placeholder="Ex: Foco em WhatsApp, criativo com vídeo, campanha de alcance forte…"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="addConcorrente()">Salvar concorrente</button>
+          <button class="btn btn-ai" onclick="analisarMercado()">🤖 Analisar mercado com IA</button>
+        </div>
+      </div>
+
+      <div id="concorrentesContent">
+        <div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">
+          Nenhum concorrente cadastrado ainda. Adicione acima para começar a análise de mercado.
+        </div>
+      </div>
+
+      <div id="mercadoIA" style="display:none;margin-top:16px"></div>
+    </div>
+
+    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
+    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
+
+  <div class="page" id="page-config">
+
+      <!-- Status cards das integrações -->
+      <div class="kpi-grid kpi-3" style="margin-bottom:20px">
+        <div class="kpi blue" id="cfgStatusMeta">
+          <div class="kpi-label">Contas Meta Ads</div>
+          <div class="kpi-val" id="cfgMetaVal" style="font-size:20px">0</div>
+          <div class="kpi-sub" id="cfgMetaSub">Nenhuma conta cadastrada</div>
+        </div>
+        <div class="kpi purple" id="cfgStatusClaude">
+          <div class="kpi-label">Claude AI (Anthropic)</div>
+          <div class="kpi-val" id="cfgClaudeVal" style="font-size:20px">—</div>
+          <div class="kpi-sub" id="cfgClaudeSub">Não configurado</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">Planilhas Google</div>
+          <div class="kpi-val green" style="font-size:20px">✓</div>
+          <div class="kpi-sub">3 sheets conectadas via CSV público</div>
+        </div>
+      </div>
+
+      <!-- Gerenciador de Contas Meta -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">🔵 Contas Meta Marketing API</div>
+          <span class="badge" id="cfgMetaBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 contas</span>
+        </div>
+
+        <!-- Lista de contas salvas -->
+        <div id="metaAccountsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+
+        <!-- Formulário adicionar nova conta -->
+        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:10px">➕ Adicionar nova conta</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="cred-field">
+              <label>Nome da conta</label>
+              <input type="text" id="newAccName" placeholder="Ex: Ecovita Goiânia" autocomplete="off"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+            <div class="cred-field">
+              <label>Access Token</label>
+              <input type="password" id="newAccToken" placeholder="EAAxxxxxxxx…" autocomplete="new-password"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+            <div class="cred-field">
+              <label>Ad Account ID</label>
+              <input type="text" id="newAccId" placeholder="act_123456789" autocomplete="off"
+                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" onclick="addMetaAccount()">➕ Adicionar conta</button>
+            <span id="credMsg" style="font-size:12px"></span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter o Token:</b><br>
+          1. Acesse <b>developers.facebook.com → Ferramentas → Explorador de API do Graph</b><br>
+          2. Selecione seu App e gere token com permissões: <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_read</code> e <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_management</code><br>
+          3. Para uso prolongado: use um <b>System User Token</b> (não expira) ou token de longa duração (60 dias)<br>
+          4. O Ad Account ID está em <b>Meta Ads Manager → URL da conta</b> (formato <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">act_XXXXXXXXX</code>)
+        </div>
+      </div>
+
+
+
+      <!-- Bloco Claude API -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">🤖 Claude AI — Anthropic</div>
+          <span class="badge" id="cfgClaudeBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="cred-field">
+            <label>API Key</label>
+            <input type="password" id="inputClaudeKey" placeholder="sk-ant-api03-…" autocomplete="new-password"
+              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai"  onclick="saveClaudeKey()">💾 Salvar Claude Key</button>
+          <button class="btn"         onclick="clearClaudeKey()" style="color:var(--red)">✕ Limpar</button>
+          <span id="claudeMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
+          <b style="color:var(--tx)">Como obter a API Key:</b><br>
+          1. Acesse <b>console.anthropic.com → API Keys</b><br>
+          2. Clique em <b>"Create Key"</b>, nomeie e copie<br>
+          3. A key começa com <code style="background:rgba(155,127,244,.12);color:var(--purple);padding:1px 5px;border-radius:4px">sk-ant-api03-…</code><br>
+          4. Ela é usada nas páginas <b>Análise por IA</b> e <b>Criativos Meta</b>
+        </div>
+      </div>
+
+      <!-- Bloco Planilhas Google -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📊 Google Sheets — Planilhas conectadas</div>
+          <span class="badge green">3 ativas</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">ROI & ROAS</div>
+              <div style="font-size:11px;color:var(--mu)">Investimento, receita, leads por empreendimento e mês</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Campanhas Meta Ads</div>
+              <div style="font-size:11px;color:var(--mu)">Nome, objetivo, status, gasto, CTR, resultados</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
+            <div class="sync-dot"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Leads CVCRM</div>
+              <div style="font-size:11px;color:var(--mu)">Base completa com situação, origem e empreendimento</div>
+            </div>
+            <span class="badge green">Conectada</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--mu)">
+          As planilhas são públicas (Leitor) e lidas via CSV direto. Nenhuma credencial necessária.
+          Auto-refresh às 08:00 diariamente.
+        </div>
+      </div>
+
+    </div><!-- /page-config -->
+
+    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
+    <div class="page" id="page-meta">
+
+      <!-- Barra de conta ativa + status -->
+      <div id="metaConnBar" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
+        <span id="metaConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
+        <span id="metaConnLabel" style="color:var(--mu)">Nenhuma conta configurada</span>
+        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 12px;margin-left:auto">⚙️ Gerenciar Contas</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="fbar">
+        <span class="fl">Conta:</span>
+        <select id="fMetaAccount" onchange="onMetaAccountSelect()" style="min-width:180px;max-width:260px">
+          <option value="">— Selecione uma conta —</option>
+        </select>
+        <span class="fl">Campanha:</span>
+        <select id="fMetaCamp" onchange="onMetaCampaignSelect()" style="min-width:200px;max-width:320px">
+          <option value="">— Todas as campanhas —</option>
+        </select>
+        <span class="fl">Período:</span>
+        <select id="fMetaPeriod">
+          <option value="this_month">Este mês</option>
+          <option value="last_month">Mês passado</option>
+          <option value="last_30d">Últimos 30 dias</option>
+          <option value="last_90d">Últimos 90 dias</option>
+          <option value="this_quarter">Este trimestre</option>
+          <option value="maximum">Máximo</option>
+        </select>
+        <button class="btn btn-primary" id="btnLoadMeta" onclick="loadMetaCampaigns()">↻ Carregar Campanhas</button>
+        <button class="btn btn-ai" id="btnAnalyzeAll" style="display:none" onclick="analyzeAllMetaCampaigns()">🤖 Analisar Conta</button>
+        <span id="metaLoadInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
+      </div>
+
+      <!-- KPIs da campanha selecionada -->
+      <div id="metaKpiRow" style="display:none;margin-bottom:16px">
+        <div class="kpi-grid kpi-4">
+          <div class="kpi blue"><div class="kpi-label">Gasto no Período</div><div class="kpi-val blue" id="mk1">—</div><div class="kpi-sub" id="mk1s"></div></div>
+          <div class="kpi green"><div class="kpi-label">Resultados (Top 5)</div><div class="kpi-val green" id="mk2">—</div><div class="kpi-sub" id="mk2s"></div></div>
+          <div class="kpi amber"><div class="kpi-label">CTR Campanha</div><div class="kpi-val amber" id="mk3">—</div><div class="kpi-sub" id="mk3s"></div></div>
+          <div class="kpi purple"><div class="kpi-label">Custo / Resultado</div><div class="kpi-val purple" id="mk4">—</div><div class="kpi-sub" id="mk4s"></div></div>
+        </div>
+      </div>
+
+      <!-- Container de criativos -->
+      <div id="metaCreativesContainer">
+        <div class="meta-empty">
+          <div class="meta-empty-icon">🎨</div>
+          <div class="meta-empty-title">Nenhuma campanha carregada</div>
+          <div class="meta-empty-sub">Configure a API em ⚙️ Config. de API e clique em "Carregar Campanhas"</div>
+        </div>
+      </div>
+
+      <!-- Box IA dos criativos -->
+      <div id="metaAIContainer" style="display:none;margin-top:4px">
+        <div class="ia-box">
+          <div class="ia-header">
+            <div class="ia-icon">🤖</div>
+            <div>
+              <div class="ia-title">Análise IA dos Criativos</div>
+              <div class="ia-sub">Claude analisa os top 5 e gera recomendações específicas</div>
+            </div>
+            <button class="btn btn-ai" onclick="analyzeMetaCreatives()" style="margin-left:auto;flex-shrink:0">✦ Analisar Criativos</button>
+          </div>
+          <div id="metaAIResult">
+            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
+              Selecione uma campanha e clique em "Analisar Criativos" para receber insights do Claude.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de todas as campanhas -->
+      <div id="metaAllCampsContainer" style="display:none;margin-top:8px">
+        <div class="sec">Todas as Campanhas da Conta</div>
+        <div id="metaAllCampsList"></div>
+      </div>
+
+    </div><!-- /page-meta -->
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="app.js"></script>
 <style>
@@ -449,13 +898,7 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('mercado')">
         <span class="nav-icon">🔍</span> Pesquisa de Mercado
       </div>
-      <div class="sb-section">Conteúdo Orgânico</div>
-      <div class="nav-item" onclick="goPage('instagram')">
-        <span class="nav-icon">📸</span> Instagram Orgânico
-      </div>
-      <div class="nav-item" onclick="goPage('facebook')">
-        <span class="nav-icon">📘</span> Facebook Orgânico
-      </div>
+
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -503,126 +946,7 @@ body.light .theme-label{color:var(--blue)}
   <div class="content">
 
     <!-- ══════════════ PAGE: DASHBOARD ══════════════ -->
-    <div class="page active" id="page-dashboard">
-      <div class="ebox" id="ebox"></div>
-
-      <!-- Filtros globais -->
-      <div class="fbar">
-        <span class="fl">De:</span>
-        <input type="date" id="fDataDe" onkeydown="if(event.key==='Enter')aplicarFiltro()">
-        <span class="fl">Até:</span>
-        <input type="date" id="fDataAte" onkeydown="if(event.key==='Enter')aplicarFiltro()">
-        <button class="btn btn-primary" onclick="aplicarFiltro()" style="padding:6px 16px">▶ Aplicar</button>
-        <button class="btn" onclick="limparFiltro()" style="padding:6px 12px;font-size:11px">✕ Limpar</button>
-        <div style="width:1px;height:20px;background:var(--bdr);margin:0 4px"></div>
-        <span class="fl">Empreendimento:</span>
-        <select id="fEmp" onchange="renderDashboard()"><option value="">Todos</option></select>
-        <span class="fl" id="infoGeral" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
-      </div>
-
-      <!-- KPI Row 1: Financeiro -->
-      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        💰 Financeiro
-        <div style="flex:1;height:1px;background:var(--bdr)"></div>
-      </div>
-      <div class="kpi-grid kpi-4" style="margin-bottom:16px">
-        <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="k1">—</div><div class="kpi-sub" id="k1s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Receita Gerada</div><div class="kpi-val green" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Vendas</div><div class="kpi-val teal" id="k5">—</div><div class="kpi-sub" id="k5s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">ROAS Médio</div><div class="kpi-val amber" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
-      </div>
-
-      <!-- KPI Row 2: Leads -->
-      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        👥 Leads
-        <div style="flex:1;height:1px;background:var(--bdr)"></div>
-      </div>
-      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px">
-        <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
-        <div class="kpi blue"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
-        <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
-        <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
-      </div>
-
-      <div class="grid g53">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
-            <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
-          </div>
-          <div class="cw" style="height:210px"><canvas id="cMensal"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">ROAS por mês</div></div>
-          <div class="cw" style="height:230px"><canvas id="cRoas"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Investimento vs Leads Meta -->
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento vs Leads Meta — por mês</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
-            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Leads Meta</div>
-          </div>
-          <div class="cw" style="height:200px"><canvas id="cInvLeads"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento por objetivo</div></div>
-          <div class="legend" id="legObj"></div>
-          <div class="cw" style="height:200px"><canvas id="cObj"></canvas></div>
-        </div>
-      </div>
-
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Funil por Origem — Leads & Conversão</div><span class="badge blue">CVCRM Online</span></div>
-          <div id="funilList" class="bar-row"></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Situação dos Leads Online</div><span class="badge purple" id="bTL">—</span></div>
-          <div class="bar-row" id="sitList"></div>
-        </div>
-      </div>
-
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Leads Meta vs CVCRM por empreendimento</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Meta</div>
-            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>CVCRM</div>
-          </div>
-          <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Leads por Origem Online</div></div>
-          <div class="legend" id="legOrigemOnline"></div>
-          <div class="cw" style="height:220px"><canvas id="cOrigemOnline"></canvas></div>
-        </div>
-      </div>
-
-      <div class="sec">Performance por empreendimento</div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <div class="twrap">
-          <table class="tbl">
-            <thead><tr>
-              <th style="padding-left:18px">Empreendimento</th>
-              <th>Investido</th><th>Receita</th><th>ROAS</th>
-              <th>Leads Meta</th><th>Leads CRM</th><th>WhatsApp</th><th>Formulário</th><th>Website</th>
-              <th>Vendas</th><th style="padding-right:18px">Status</th>
-            </tr></thead>
-            <tbody id="empBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
-    <div class="page" id="page-campanhas">
+      <div class="page" id="page-campanhas">
 
       <!-- Barra de conta + status -->
       <div id="campConnBar" style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
@@ -787,499 +1111,7 @@ body.light .theme-label{color:var(--blue)}
 
     
     <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
-    <div class="page" id="page-instagram">
-      <div class="fbar">
-        <span class="fl">Período:</span>
-        <select id="fIgPeriod" onchange="loadInstagram()">
-          <option value="7">Últimos 7 dias</option>
-          <option value="14">Últimos 14 dias</option>
-          <option value="30" selected>Últimos 30 dias</option>
-          <option value="60">Últimos 60 dias</option>
-          <option value="90">Últimos 90 dias</option>
-        </select>
-        <button class="btn btn-ai" onclick="loadInstagram()" style="margin-left:8px">↻ Carregar</button>
-        <span id="igStatus" style="margin-left:auto;font-size:12px;color:var(--mu)"></span>
-      </div>
-
-      <div class="kpi-grid kpi-5" style="margin-bottom:12px">
-        <div class="kpi blue"><div class="kpi-label">Impressões</div><div class="kpi-val blue" id="igk1">—</div><div class="kpi-sub" id="igk1s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Alcance</div><div class="kpi-val teal" id="igk2">—</div><div class="kpi-sub" id="igk2s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Engajamento</div><div class="kpi-val green" id="igk3">—</div><div class="kpi-sub" id="igk3s"></div></div>
-        <div class="kpi purple"><div class="kpi-label">Visualizações de Perfil</div><div class="kpi-val purple" id="igk4">—</div><div class="kpi-sub" id="igk4s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">Seguidores</div><div class="kpi-val amber" id="igk5">—</div><div class="kpi-sub" id="igk5s"></div></div>
-      </div>
-
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Impressões & Alcance por dia</div></div>
-          <div class="cw" style="height:220px"><canvas id="cIgTimeline"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Tipo de conteúdo</div></div>
-          <div class="legend" id="igLegTipo"></div>
-          <div class="cw" style="height:220px"><canvas id="cIgTipo"></canvas></div>
-        </div>
-      </div>
-
-      <div class="sec">Top Publicações</div>
-      <div id="igPostGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:12px">
-        <div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Carregue os dados para ver as publicações</div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
-    <div class="page" id="page-facebook">
-      <div class="fbar">
-        <span class="fl">Período:</span>
-        <select id="fFbPeriod" onchange="loadFacebook()">
-          <option value="7">Últimos 7 dias</option>
-          <option value="14">Últimos 14 dias</option>
-          <option value="30" selected>Últimos 30 dias</option>
-          <option value="60">Últimos 60 dias</option>
-          <option value="90">Últimos 90 dias</option>
-        </select>
-        <button class="btn btn-ai" onclick="loadFacebook()" style="margin-left:8px">↻ Carregar</button>
-        <span id="fbStatus" style="margin-left:auto;font-size:12px;color:var(--mu)"></span>
-      </div>
-
-      <div class="kpi-grid kpi-5" style="margin-bottom:12px">
-        <div class="kpi blue"><div class="kpi-label">Impressões</div><div class="kpi-val blue" id="fbk1">—</div><div class="kpi-sub" id="fbk1s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Alcance</div><div class="kpi-val teal" id="fbk2">—</div><div class="kpi-sub" id="fbk2s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Engajamentos</div><div class="kpi-val green" id="fbk3">—</div><div class="kpi-sub" id="fbk3s"></div></div>
-        <div class="kpi purple"><div class="kpi-label">Novos Seguidores</div><div class="kpi-val purple" id="fbk4">—</div><div class="kpi-sub" id="fbk4s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">Total Seguidores</div><div class="kpi-val amber" id="fbk5">—</div><div class="kpi-sub" id="fbk5s"></div></div>
-      </div>
-
-      <div class="grid g2" style="margin-bottom:12px">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Alcance & Impressões por dia</div></div>
-          <div class="cw" style="height:220px"><canvas id="cFbTimeline"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Engajamento por tipo</div></div>
-          <div class="legend" id="fbLegEng"></div>
-          <div class="cw" style="height:220px"><canvas id="cFbEng"></canvas></div>
-        </div>
-      </div>
-
-      <div class="sec">Top Publicações</div>
-      <div id="fbPostGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:12px">
-        <div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Carregue os dados para ver as publicações</div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: MELHORIAS ══════════════ -->
-    <div class="page" id="page-melhorias">
-      <div class="fbar">
-        <span class="fl">Objetivo:</span>
-        <select id="fMelObj" onchange="renderMelhorias()"><option value="">Todos</option></select>
-        <span class="fl">Mostrar apenas:</span>
-        <select id="fMelPrio" onchange="renderMelhorias()">
-          <option value="">Todas as campanhas</option>
-          <option value="critico">Crítico (CTR baixo + CPC alto)</option>
-          <option value="otimizar">Para otimizar</option>
-        </select>
-      </div>
-      <div id="melhoriasContent"></div>
-    </div>
-
-    <!-- ══════════════ PAGE: IA ANÁLISE ══════════════ -->
-    <div class="page" id="page-ia">
-      <div class="grid g21" style="margin-bottom:16px">
-        <div>
-          <div class="ia-box">
-            <div class="ia-header">
-              <div class="ia-icon">🤖</div>
-              <div>
-                <div class="ia-title">Análise Inteligente de Campanhas</div>
-                <div class="ia-sub">Powered by Claude · Atualizado com dados reais</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-              <button class="btn btn-ai" onclick="analisarIA('geral')">📊 Análise Geral</button>
-              <button class="btn btn-ai" onclick="analisarIA('campanhas')">📣 Top Campanhas</button>
-              <button class="btn btn-ai" onclick="analisarIA('leads')">👥 Análise de Leads</button>
-              <button class="btn btn-ai" onclick="analisarIA('orcamento')">💰 Otimização de Orçamento</button>
-              <button class="btn btn-ai" onclick="analisarIA('proximos')">🎯 Próximos Passos</button>
-            </div>
-            <div id="iaResult">
-              <div style="font-size:13px;color:var(--mu);text-align:center;padding:24px 0">
-                Selecione um tipo de análise acima para que a IA analise seus dados em tempo real.
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="card" style="margin-bottom:12px">
-            <div class="card-hd"><div class="card-title">Alertas automáticos</div><span class="badge red" id="alertCount">—</span></div>
-            <div id="alertList" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-          <div class="card">
-            <div class="card-hd"><div class="card-title">Score de saúde das campanhas</div></div>
-            <div class="cw" style="height:200px"><canvas id="cScore"></canvas></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: MERCADO ══════════════ -->
-    <div class="page" id="page-mercado">
-      <div class="mercado-form">
-        <h3>➕ Adicionar Concorrente</h3>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Nome do Concorrente</label>
-            <input type="text" id="mNome" placeholder="Ex: Construtora XYZ">
-          </div>
-          <div class="form-field">
-            <label>Cidade de Atuação</label>
-            <input type="text" id="mCidade" placeholder="Ex: Bauru, SP">
-          </div>
-          <div class="form-field">
-            <label>Ticket Médio (R$)</label>
-            <input type="number" id="mTicket" placeholder="Ex: 220000">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-field">
-            <label>CPL estimado (R$)</label>
-            <input type="number" id="mCpl" placeholder="Ex: 35">
-          </div>
-          <div class="form-field">
-            <label>Investimento mensal (R$)</label>
-            <input type="number" id="mInvest" placeholder="Ex: 15000">
-          </div>
-          <div class="form-field">
-            <label>Canais usados</label>
-            <input type="text" id="mCanais" placeholder="Ex: Meta, Google, TikTok">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-field" style="grid-column:span 3">
-            <label>Observações / Diferenciais</label>
-            <textarea id="mObs" placeholder="Ex: Foco em WhatsApp, criativo com vídeo, campanha de alcance forte…"></textarea>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-primary" onclick="addConcorrente()">Salvar concorrente</button>
-          <button class="btn btn-ai" onclick="analisarMercado()">🤖 Analisar mercado com IA</button>
-        </div>
-      </div>
-
-      <div id="concorrentesContent">
-        <div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">
-          Nenhum concorrente cadastrado ainda. Adicione acima para começar a análise de mercado.
-        </div>
-      </div>
-
-      <div id="mercadoIA" style="display:none;margin-top:16px"></div>
-    </div>
-
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
-    <div class="page" id="page-config">
-
-      <!-- Status cards das integrações -->
-      <div class="kpi-grid kpi-3" style="margin-bottom:20px">
-        <div class="kpi blue" id="cfgStatusMeta">
-          <div class="kpi-label">Contas Meta Ads</div>
-          <div class="kpi-val" id="cfgMetaVal" style="font-size:20px">0</div>
-          <div class="kpi-sub" id="cfgMetaSub">Nenhuma conta cadastrada</div>
-        </div>
-        <div class="kpi purple" id="cfgStatusClaude">
-          <div class="kpi-label">Claude AI (Anthropic)</div>
-          <div class="kpi-val" id="cfgClaudeVal" style="font-size:20px">—</div>
-          <div class="kpi-sub" id="cfgClaudeSub">Não configurado</div>
-        </div>
-        <div class="kpi green">
-          <div class="kpi-label">Planilhas Google</div>
-          <div class="kpi-val green" style="font-size:20px">✓</div>
-          <div class="kpi-sub">3 sheets conectadas via CSV público</div>
-        </div>
-      </div>
-
-      <!-- Gerenciador de Contas Meta -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">🔵 Contas Meta Marketing API</div>
-          <span class="badge" id="cfgMetaBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 contas</span>
-        </div>
-
-        <!-- Lista de contas salvas -->
-        <div id="metaAccountsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
-
-        <!-- Formulário adicionar nova conta -->
-        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:10px">➕ Adicionar nova conta</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-            <div class="cred-field">
-              <label>Nome da conta</label>
-              <input type="text" id="newAccName" placeholder="Ex: Ecovita Goiânia" autocomplete="off"
-                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-            </div>
-            <div class="cred-field">
-              <label>Access Token</label>
-              <input type="password" id="newAccToken" placeholder="EAAxxxxxxxx…" autocomplete="new-password"
-                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-            </div>
-            <div class="cred-field">
-              <label>Ad Account ID</label>
-              <input type="text" id="newAccId" placeholder="act_123456789" autocomplete="off"
-                style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary" onclick="addMetaAccount()">➕ Adicionar conta</button>
-            <span id="credMsg" style="font-size:12px"></span>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
-          <b style="color:var(--tx)">Como obter o Token:</b><br>
-          1. Acesse <b>developers.facebook.com → Ferramentas → Explorador de API do Graph</b><br>
-          2. Selecione seu App e gere token com permissões: <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_read</code> e <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">ads_management</code><br>
-          3. Para uso prolongado: use um <b>System User Token</b> (não expira) ou token de longa duração (60 dias)<br>
-          4. O Ad Account ID está em <b>Meta Ads Manager → URL da conta</b> (formato <code style="background:rgba(79,142,247,.12);color:var(--blue);padding:1px 5px;border-radius:4px">act_XXXXXXXXX</code>)
-        </div>
-      </div>
-
-      <!-- Bloco Instagram Orgânico -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">📸 Instagram Orgânico</div>
-          <span class="badge" id="cfgIgBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
-        </div>
-
-        <!-- Passo 1: Token -->
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">① Cole seu Token de Acesso</div>
-          <div style="font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6">
-            Acesse <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--blue)">developers.facebook.com/tools/explorer</a>
-            → selecione seu app → clique <b>Gerar Token</b> → ative:
-            <code style="background:rgba(232,121,249,.1);color:#e879f9;padding:1px 5px;border-radius:4px">instagram_basic · instagram_manage_insights · pages_show_list</code>
-          </div>
-          <input type="password" id="inputIgToken" placeholder="Cole o token aqui (EAA…)" autocomplete="new-password"
-            style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
-        </div>
-
-        <!-- Passo 2: Buscar IG Account ID -->
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">② Buscar seu Instagram Business Account ID</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-            <button class="btn btn-ai" onclick="fetchIgAccounts()" style="white-space:nowrap">🔍 Buscar páginas vinculadas</button>
-            <span style="font-size:11px;color:var(--mu)">O sistema usa o token para encontrar seu IG automaticamente</span>
-          </div>
-          <div id="igAccountsPicker" style="display:none;margin-top:8px"></div>
-          <div style="margin-top:10px">
-            <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Instagram Business Account ID</label>
-            <input type="text" id="inputIgAccountId" placeholder="Preenchido ao buscar, ou cole manualmente (17841400…)"
-              style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-ai" onclick="saveIgConfig()">💾 Salvar</button>
-          <button class="btn" onclick="testIgConfig()" id="btnTestIg">🔍 Testar conexão</button>
-          <button class="btn" onclick="clearIgConfig()" style="color:var(--red)">✕ Limpar</button>
-          <span id="igMsg" style="font-size:12px;margin-left:4px"></span>
-        </div>
-      </div>
-
-      <!-- Bloco Facebook Orgânico -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">📘 Facebook Orgânico</div>
-          <span class="badge" id="cfgFbBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
-        </div>
-
-        <!-- Passo 1: Token -->
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">① Cole seu Token de Acesso</div>
-          <div style="font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6">
-            Acesse <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--blue)">developers.facebook.com/tools/explorer</a>
-            → selecione seu app → clique <b>Gerar Token</b> → ative:
-            <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">pages_read_engagement · pages_show_list · read_insights</code>
-          </div>
-          <input type="password" id="inputFbToken" placeholder="Cole o token aqui (EAA…)" autocomplete="new-password"
-            style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
-        </div>
-
-        <!-- Passo 2: Buscar Page ID -->
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">② Buscar seu Facebook Page ID</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-            <button class="btn btn-ai" onclick="fetchFbPages()" style="white-space:nowrap">🔍 Buscar minhas páginas</button>
-            <span style="font-size:11px;color:var(--mu)">O sistema lista suas páginas para você escolher</span>
-          </div>
-          <div id="fbPagesPicker" style="display:none;margin-top:8px"></div>
-          <div style="margin-top:10px">
-            <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Facebook Page ID</label>
-            <input type="text" id="inputFbPageId" placeholder="Preenchido ao buscar, ou cole manualmente (337403…)"
-              style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-ai" onclick="saveFbConfig()">💾 Salvar</button>
-          <button class="btn" onclick="testFbConfig()" id="btnTestFb">🔍 Testar conexão</button>
-          <button class="btn" onclick="clearFbConfig()" style="color:var(--red)">✕ Limpar</button>
-          <span id="fbMsg" style="font-size:12px;margin-left:4px"></span>
-        </div>
-      </div>
-
-      <!-- Bloco Claude API -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">🤖 Claude AI — Anthropic</div>
-          <span class="badge" id="cfgClaudeBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
-        </div>
-
-        <div style="margin-bottom:14px">
-          <div class="cred-field">
-            <label>API Key</label>
-            <input type="password" id="inputClaudeKey" placeholder="sk-ant-api03-…" autocomplete="new-password"
-              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .2s">
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-ai"  onclick="saveClaudeKey()">💾 Salvar Claude Key</button>
-          <button class="btn"         onclick="clearClaudeKey()" style="color:var(--red)">✕ Limpar</button>
-          <span id="claudeMsg" style="font-size:12px;margin-left:4px"></span>
-        </div>
-
-        <div style="margin-top:16px;padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.7;color:var(--mu2)">
-          <b style="color:var(--tx)">Como obter a API Key:</b><br>
-          1. Acesse <b>console.anthropic.com → API Keys</b><br>
-          2. Clique em <b>"Create Key"</b>, nomeie e copie<br>
-          3. A key começa com <code style="background:rgba(155,127,244,.12);color:var(--purple);padding:1px 5px;border-radius:4px">sk-ant-api03-…</code><br>
-          4. Ela é usada nas páginas <b>Análise por IA</b> e <b>Criativos Meta</b>
-        </div>
-      </div>
-
-      <!-- Bloco Planilhas Google -->
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-title">📊 Google Sheets — Planilhas conectadas</div>
-          <span class="badge green">3 ativas</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
-            <div class="sync-dot"></div>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:600">ROI & ROAS</div>
-              <div style="font-size:11px;color:var(--mu)">Investimento, receita, leads por empreendimento e mês</div>
-            </div>
-            <span class="badge green">Conectada</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
-            <div class="sync-dot"></div>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:600">Campanhas Meta Ads</div>
-              <div style="font-size:11px;color:var(--mu)">Nome, objetivo, status, gasto, CTR, resultados</div>
-            </div>
-            <span class="badge green">Conectada</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
-            <div class="sync-dot"></div>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:600">Leads CVCRM</div>
-              <div style="font-size:11px;color:var(--mu)">Base completa com situação, origem e empreendimento</div>
-            </div>
-            <span class="badge green">Conectada</span>
-          </div>
-        </div>
-        <div style="margin-top:12px;font-size:11px;color:var(--mu)">
-          As planilhas são públicas (Leitor) e lidas via CSV direto. Nenhuma credencial necessária.
-          Auto-refresh às 08:00 diariamente.
-        </div>
-      </div>
-
-    </div><!-- /page-config -->
-
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <div class="page" id="page-meta">
-
-      <!-- Barra de conta ativa + status -->
-      <div id="metaConnBar" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
-        <span id="metaConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
-        <span id="metaConnLabel" style="color:var(--mu)">Nenhuma conta configurada</span>
-        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 12px;margin-left:auto">⚙️ Gerenciar Contas</button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="fbar">
-        <span class="fl">Conta:</span>
-        <select id="fMetaAccount" onchange="onMetaAccountSelect()" style="min-width:180px;max-width:260px">
-          <option value="">— Selecione uma conta —</option>
-        </select>
-        <span class="fl">Campanha:</span>
-        <select id="fMetaCamp" onchange="onMetaCampaignSelect()" style="min-width:200px;max-width:320px">
-          <option value="">— Todas as campanhas —</option>
-        </select>
-        <span class="fl">Período:</span>
-        <select id="fMetaPeriod">
-          <option value="this_month">Este mês</option>
-          <option value="last_month">Mês passado</option>
-          <option value="last_30d">Últimos 30 dias</option>
-          <option value="last_90d">Últimos 90 dias</option>
-          <option value="this_quarter">Este trimestre</option>
-          <option value="maximum">Máximo</option>
-        </select>
-        <button class="btn btn-primary" id="btnLoadMeta" onclick="loadMetaCampaigns()">↻ Carregar Campanhas</button>
-        <button class="btn btn-ai" id="btnAnalyzeAll" style="display:none" onclick="analyzeAllMetaCampaigns()">🤖 Analisar Conta</button>
-        <span id="metaLoadInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
-      </div>
-
-      <!-- KPIs da campanha selecionada -->
-      <div id="metaKpiRow" style="display:none;margin-bottom:16px">
-        <div class="kpi-grid kpi-4">
-          <div class="kpi blue"><div class="kpi-label">Gasto no Período</div><div class="kpi-val blue" id="mk1">—</div><div class="kpi-sub" id="mk1s"></div></div>
-          <div class="kpi green"><div class="kpi-label">Resultados (Top 5)</div><div class="kpi-val green" id="mk2">—</div><div class="kpi-sub" id="mk2s"></div></div>
-          <div class="kpi amber"><div class="kpi-label">CTR Campanha</div><div class="kpi-val amber" id="mk3">—</div><div class="kpi-sub" id="mk3s"></div></div>
-          <div class="kpi purple"><div class="kpi-label">Custo / Resultado</div><div class="kpi-val purple" id="mk4">—</div><div class="kpi-sub" id="mk4s"></div></div>
-        </div>
-      </div>
-
-      <!-- Container de criativos -->
-      <div id="metaCreativesContainer">
-        <div class="meta-empty">
-          <div class="meta-empty-icon">🎨</div>
-          <div class="meta-empty-title">Nenhuma campanha carregada</div>
-          <div class="meta-empty-sub">Configure a API em ⚙️ Config. de API e clique em "Carregar Campanhas"</div>
-        </div>
-      </div>
-
-      <!-- Box IA dos criativos -->
-      <div id="metaAIContainer" style="display:none;margin-top:4px">
-        <div class="ia-box">
-          <div class="ia-header">
-            <div class="ia-icon">🤖</div>
-            <div>
-              <div class="ia-title">Análise IA dos Criativos</div>
-              <div class="ia-sub">Claude analisa os top 5 e gera recomendações específicas</div>
-            </div>
-            <button class="btn btn-ai" onclick="analyzeMetaCreatives()" style="margin-left:auto;flex-shrink:0">✦ Analisar Criativos</button>
-          </div>
-          <div id="metaAIResult">
-            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
-              Selecione uma campanha e clique em "Analisar Criativos" para receber insights do Claude.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista de todas as campanhas -->
-      <div id="metaAllCampsContainer" style="display:none;margin-top:8px">
-        <div class="sec">Todas as Campanhas da Conta</div>
-        <div id="metaAllCampsList"></div>
-      </div>
-
-    </div><!-- /page-meta -->
-
-  </div><!-- /content -->
-</div><!-- /app -->
-
+  
 <script>
 // ═══════════════════════════════════════════════════════
 // CONFIG
@@ -1386,14 +1218,12 @@ function goPage(pg){
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',investimento:'invest',instagram:'instagr',facebook:'faceboo',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',investimento:'invest',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='campanhas') initCampanhasPage();
   if(pg==='investimento') renderInvestimento();
-  if(pg==='instagram') loadInstagram();
-  if(pg==='facebook')  loadFacebook();
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -2878,489 +2708,7 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 
 // ── Config helpers ──────────────────────────────────────
 
-// ── Busca automática de páginas FB/IG ───────────────────
-async function fetchFbPages(){
-  const tok = document.getElementById('inputFbToken')?.value?.trim();
-  if(!tok || tok.startsWith('•')){ sid('fbMsg','⚠️ Cole o token primeiro'); return; }
-  sid('fbMsg','🔄 Buscando páginas…');
-  try {
-    const res = await fetch(`https://graph.facebook.com/v20.0/me/accounts?fields=id,name,access_token,picture&access_token=${tok}`);
-    const d = await res.json();
-    if(d.error) throw new Error(d.error.message);
-    const pages = d.data||[];
-    if(!pages.length){ sid('fbMsg','Nenhuma página encontrada. Você precisa ser Admin de uma Página.'); return; }
-
-    const picker = document.getElementById('fbPagesPicker');
-    picker.style.display = 'block';
-    picker.innerHTML = `<div style="font-size:11px;color:var(--mu);margin-bottom:8px">${pages.length} página(s) encontrada(s) — clique para selecionar:</div>` +
-      pages.map(p=>`
-        <div onclick="selectFbPageFromPicker('${p.id}','${p.name.replace(/'/g,"\'")}','${p.access_token}')"
-          style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .15s"
-          onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--bdr)'">
-          <span style="font-size:18px">📄</span>
-          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">${p.name}</div>
-          <div style="font-size:11px;color:var(--mu)">ID: ${p.id}</div></div>
-          <span style="font-size:11px;color:var(--blue);font-weight:600">Selecionar →</span>
-        </div>`).join('');
-    sid('fbMsg','');
-  } catch(e){ sid('fbMsg',`❌ ${e.message}`); }
-}
-
-function selectFbPageFromPicker(id, name, pageToken){
-  // Use the page-specific token (more reliable than user token)
-  document.getElementById('inputFbToken').value = '••••••••••';
-  document.getElementById('inputFbPageId').value = id;
-  localStorage.setItem('eco_fb_token', pageToken);
-  localStorage.setItem('eco_fb_page_id', id);
-  updateFbBadge();
-  document.getElementById('fbPagesPicker').style.display='none';
-  sid('fbMsg',`✅ "${name}" selecionada — clique Salvar para confirmar`);
-}
-
-async function fetchIgAccounts(){
-  const tok = document.getElementById('inputIgToken')?.value?.trim();
-  if(!tok || tok.startsWith('•')){ sid('igMsg','⚠️ Cole o token primeiro'); return; }
-  sid('igMsg','🔄 Buscando contas Instagram…');
-  try {
-    // Fetch pages and their linked IG accounts
-    const res = await fetch(`https://graph.facebook.com/v20.0/me/accounts?fields=id,name,instagram_business_account&access_token=${tok}`);
-    const d = await res.json();
-    if(d.error) throw new Error(d.error.message);
-    const pages = (d.data||[]).filter(p=>p.instagram_business_account);
-
-    if(!pages.length){
-      sid('igMsg','Nenhuma conta Instagram Business vinculada encontrada. Verifique se sua conta IG está conectada a uma Página.');
-      return;
-    }
-
-    const picker = document.getElementById('igAccountsPicker');
-    picker.style.display = 'block';
-    picker.innerHTML = `<div style="font-size:11px;color:var(--mu);margin-bottom:8px">${pages.length} conta(s) encontrada(s):</div>` +
-      pages.map(p=>`
-        <div onclick="selectIgAccountFromPicker('${p.instagram_business_account.id}','${p.name.replace(/'/g,"\'")}')"
-          style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .15s"
-          onmouseover="this.style.borderColor='#e879f9'" onmouseout="this.style.borderColor='var(--bdr)'">
-          <span style="font-size:18px">📸</span>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:600;color:var(--tx)">Instagram vinculado a: ${p.name}</div>
-            <div style="font-size:11px;color:var(--mu)">IG Account ID: ${p.instagram_business_account.id}</div>
-          </div>
-          <span style="font-size:11px;color:#e879f9;font-weight:600">Selecionar →</span>
-        </div>`).join('');
-    sid('igMsg','');
-  } catch(e){ sid('igMsg',`❌ ${e.message}`); }
-}
-
-function selectIgAccountFromPicker(igId, pageName){
-  document.getElementById('inputIgAccountId').value = igId;
-  localStorage.setItem('eco_ig_account_id', igId);
-  document.getElementById('igAccountsPicker').style.display='none';
-  sid('igMsg',`✅ IG ID "${igId}" selecionado — clique Salvar`);
-}
-
-
-// ── Instagram Config ────────────────────────────────────
-function saveIgConfig(){
-  const tok = document.getElementById('inputIgToken')?.value?.trim();
-  const igId = document.getElementById('inputIgAccountId')?.value?.trim();
-  if(!tok){ sid('igMsg','⚠️ Token obrigatório'); return; }
-  localStorage.setItem('eco_ig_token', tok);
-  if(igId) localStorage.setItem('eco_ig_account_id', igId);
-  updateIgBadge();
-  sid('igMsg','✅ Salvo!');
-  setTimeout(()=>sid('igMsg',''), 3000);
-}
-function clearIgConfig(){
-  ['eco_ig_token','eco_ig_account_id'].forEach(k=>localStorage.removeItem(k));
-  ['inputIgToken','inputIgAccountId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  updateIgBadge();
-  sid('igMsg','Configurações removidas');
-  setTimeout(()=>sid('igMsg',''), 2000);
-}
-function updateIgBadge(){
-  const badge = document.getElementById('cfgIgBadge');
-  if(!badge) return;
-  const tok = localStorage.getItem('eco_ig_token');
-  const igId = localStorage.getItem('eco_ig_account_id');
-  if(tok && igId){
-    badge.textContent = '✓ Configurado';
-    badge.style.background = 'rgba(232,121,249,.15)';
-    badge.style.color = '#e879f9';
-  } else {
-    badge.textContent = 'Não configurado';
-    badge.style.background = 'rgba(107,122,158,.12)';
-    badge.style.color = 'var(--mu)';
-  }
-}
-async function testIgConfig(){
-  const tok = localStorage.getItem('eco_ig_token');
-  const btn = document.getElementById('btnTestIg');
-  if(!tok){ sid('igMsg','⚠️ Salve o token primeiro'); return; }
-  if(btn) btn.disabled = true;
-  sid('igMsg','🔄 Testando…');
-  try {
-    const res = await fetch(`https://graph.facebook.com/v20.0/me?fields=id,name&access_token=${tok}`);
-    const d = await res.json();
-    if(d.error) throw new Error(d.error.message);
-    sid('igMsg',`✅ Conectado: ${d.name} (${d.id})`);
-  } catch(e){
-    sid('igMsg',`❌ ${e.message}`);
-  }
-  if(btn) btn.disabled = false;
-}
-function initIgConfig(){
-  const tok = localStorage.getItem('eco_ig_token');
-  const igId = localStorage.getItem('eco_ig_account_id');
-  if(tok){ const el=document.getElementById('inputIgToken'); if(el) el.value='••••••••••'; }
-  if(igId){ const el=document.getElementById('inputIgAccountId'); if(el) el.value=igId; }
-  updateIgBadge();
-}
-
-// ── Facebook Config ──────────────────────────────────────
-function saveFbConfig(){
-  const tok = document.getElementById('inputFbToken')?.value?.trim();
-  const fbId = document.getElementById('inputFbPageId')?.value?.trim();
-  if(!tok){ sid('fbMsg','⚠️ Token obrigatório'); return; }
-  localStorage.setItem('eco_fb_token', tok);
-  if(fbId) localStorage.setItem('eco_fb_page_id', fbId);
-  updateFbBadge();
-  sid('fbMsg','✅ Salvo!');
-  setTimeout(()=>sid('fbMsg',''), 3000);
-}
-function clearFbConfig(){
-  ['eco_fb_token','eco_fb_page_id'].forEach(k=>localStorage.removeItem(k));
-  ['inputFbToken','inputFbPageId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  updateFbBadge();
-  sid('fbMsg','Configurações removidas');
-  setTimeout(()=>sid('fbMsg',''), 2000);
-}
-function updateFbBadge(){
-  const badge = document.getElementById('cfgFbBadge');
-  if(!badge) return;
-  const tok = localStorage.getItem('eco_fb_token');
-  const fbId = localStorage.getItem('eco_fb_page_id');
-  if(tok && fbId){
-    badge.textContent = '✓ Configurado';
-    badge.style.background = 'rgba(79,142,247,.15)';
-    badge.style.color = 'var(--blue)';
-  } else {
-    badge.textContent = 'Não configurado';
-    badge.style.background = 'rgba(107,122,158,.12)';
-    badge.style.color = 'var(--mu)';
-  }
-}
-async function testFbConfig(){
-  const tok = localStorage.getItem('eco_fb_token');
-  const btn = document.getElementById('btnTestFb');
-  if(!tok){ sid('fbMsg','⚠️ Salve o token primeiro'); return; }
-  if(btn) btn.disabled = true;
-  sid('fbMsg','🔄 Testando…');
-  try {
-    const res = await fetch(`https://graph.facebook.com/v20.0/me?fields=id,name&access_token=${tok}`);
-    const d = await res.json();
-    if(d.error) throw new Error(d.error.message);
-    sid('fbMsg',`✅ Conectado: ${d.name} (${d.id})`);
-  } catch(e){
-    sid('fbMsg',`❌ ${e.message}`);
-  }
-  if(btn) btn.disabled = false;
-}
-function initFbConfig(){
-  const tok = localStorage.getItem('eco_fb_token');
-  const fbId = localStorage.getItem('eco_fb_page_id');
-  if(tok){ const el=document.getElementById('inputFbToken'); if(el) el.value='••••••••••'; }
-  if(fbId){ const el=document.getElementById('inputFbPageId'); if(el) el.value=fbId; }
-  updateFbBadge();
-}
-
 // ── Helpers API ─────────────────────────────────────────
-function getIgCreds(){
-  return{
-    token: localStorage.getItem('eco_ig_token'),
-    igId:  localStorage.getItem('eco_ig_account_id'),
-  };
-}
-function getFbCreds(){
-  return{
-    token: localStorage.getItem('eco_fb_token'),
-    fbId:  localStorage.getItem('eco_fb_page_id'),
-  };
-}
-function dateRange(days){
-  const until = Math.floor(Date.now()/1000);
-  const since = until - (days*86400);
-  return {since,until};
-}
-async function socialFetch(path){
-  const res = await fetch(`https://graph.facebook.com/v20.0${path}`);
-  const d = await res.json();
-  if(d.error) throw new Error(`Meta API: ${d.error.message} (code ${d.error.code})`);
-  return d;
-}
-function fK(n){ return n>=1000?(n/1000).toFixed(1)+'k':String(n); }
-function formatDate(iso){ return new Date(iso).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
-
-// ── INSTAGRAM ────────────────────────────────────────────
-async function loadInstagram(){
-  const {token,igId} = getIgCreds();
-  const statusEl = document.getElementById('igStatus');
-  if(!token || !igId){
-    if(statusEl) statusEl.innerHTML = '⚠️ Configure o <b>Token Instagram</b> e o <b>IG Account ID</b> em ⚙️ Config. de API';
-    return;
-  }
-  if(statusEl) statusEl.textContent = '⏳ Carregando…';
-  const days = parseInt(document.getElementById('fIgPeriod')?.value||'30');
-  const {since,until} = dateRange(days);
-
-  try {
-    // 1. Account info
-    const acct = await socialFetch(`/${igId}?fields=username,followers_count,media_count&access_token=${token}`);
-
-    // 2. Media list com campos diretos (evita erros de metrics inválidas)
-    const mediaR = await socialFetch(`/${igId}/media?fields=id,caption,media_type,media_product_type,timestamp,thumbnail_url,media_url,permalink,like_count,comments_count&limit=50&since=${since}&access_token=${token}`);
-    const posts = (mediaR.data||[]);
-
-    // 3. Insights por post (separado para isolar erros)
-    let totReach=0, totViews=0, totEng=0;
-    const postData = [];
-    for(const p of posts){
-      let reach=0, impressions=0, saved=0, views=0, interactions=0;
-      try {
-        // Métricas disponíveis por tipo de mídia
-        const isVideo = ['VIDEO','REELS'].includes(p.media_type) || p.media_product_type==='REELS';
-        const metrics = isVideo
-          ? 'reach,impressions,saved,video_views,total_interactions'
-          : 'reach,impressions,saved,total_interactions';
-        const pi = await socialFetch(`/${p.id}/insights?metric=${metrics}&access_token=${token}`);
-        (pi.data||[]).forEach(m=>{
-          if(m.name==='reach')              reach        = m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='impressions')        impressions  = m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='saved')              saved        = m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='video_views')        views        = m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='total_interactions') interactions = m.values?.[0]?.value ?? m.value ?? 0;
-        });
-      } catch(e){ console.warn('IG post insights error:', p.id, e.message); }
-      totReach  += reach;
-      totViews  += views || impressions;
-      totEng    += interactions || (p.like_count||0) + (p.comments_count||0);
-      postData.push({...p, reach, impressions, saved, views, interactions});
-    }
-
-    // 4. KPIs
-    sid('igk1', fK(totViews));      sid('igk1s', `${days} dias`);
-    sid('igk2', fK(totReach));      sid('igk2s', `${posts.length} publicações`);
-    sid('igk3', fK(totEng));        sid('igk3s', 'curtidas + comentários + interações');
-    sid('igk4', fK(acct.followers_count||0)); sid('igk4s', `@${acct.username||''}`);
-    sid('igk5', fK(acct.media_count||posts.length)); sid('igk5s', 'total no perfil');
-
-    // 5. Timeline chart (reach por post ao longo do tempo)
-    const sorted = [...postData].sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
-    dc('cIgTimeline');
-    const ctx1 = document.getElementById('cIgTimeline')?.getContext('2d');
-    if(ctx1) charts.cIgTimeline = new Chart(ctx1,{
-      type:'line',
-      data:{ labels:sorted.map(p=>formatDate(p.timestamp)),
-             datasets:[
-               {label:'Visualizações',data:sorted.map(p=>p.views||p.impressions),borderColor:'rgba(79,142,247,.9)',backgroundColor:'rgba(79,142,247,.12)',fill:true,tension:.3,pointRadius:2},
-               {label:'Alcance',      data:sorted.map(p=>p.reach),               borderColor:'rgba(52,211,153,.9)',backgroundColor:'rgba(52,211,153,.12)',fill:true,tension:.3,pointRadius:2}
-             ]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:true,position:'top',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}},
-        scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},maxTicksLimit:12}},
-                y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},callback:v=>fK(v)}}}}
-    });
-
-    // 6. Tipo de conteúdo donut
-    const typeCount={};
-    postData.forEach(p=>{ const t=p.media_product_type||p.media_type||'POST'; typeCount[t]=(typeCount[t]||0)+1; });
-    const typeNames={'REELS':'Reels','IMAGE':'Foto','VIDEO':'Vídeo','CAROUSEL_ALBUM':'Carrossel','POST':'Post','FEED':'Feed'};
-    const typeCores=['rgba(232,121,249,.85)','rgba(79,142,247,.85)','rgba(52,211,153,.85)','rgba(251,146,60,.85)'];
-    const typeEntries=Object.entries(typeCount).sort((a,b)=>b[1]-a[1]);
-    document.getElementById('igLegTipo').innerHTML=typeEntries.map(([k,v],i)=>`<div class="leg"><div class="lsq" style="background:${typeCores[i%typeCores.length]}"></div>${typeNames[k]||k}: ${v}</div>`).join('');
-    dc('cIgTipo');
-    const ctx2=document.getElementById('cIgTipo')?.getContext('2d');
-    if(ctx2) charts.cIgTipo=new Chart(ctx2,{type:'doughnut',
-      data:{labels:typeEntries.map(([k])=>typeNames[k]||k),datasets:[{data:typeEntries.map(e=>e[1]),backgroundColor:typeCores,borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}}}
-    });
-
-    // 7. Posts grid (estilo Business Suite)
-    const igTypeIcon={'REELS':'🎬','VIDEO':'🎬','CAROUSEL_ALBUM':'🖼️','IMAGE':'📷','POST':'📄'};
-    document.getElementById('igPostGrid').innerHTML = postData.length
-      ? postData.map(p=>{
-          const thumb = p.thumbnail_url||p.media_url||'';
-          const type  = p.media_product_type||p.media_type||'POST';
-          const cap   = (p.caption||'').substring(0,100)+((p.caption||'').length>100?'…':'');
-          const isVideo = ['VIDEO','REELS'].includes(p.media_type)||type==='REELS';
-          return `<div class="card" style="padding:0;overflow:hidden">
-            ${thumb
-              ? `<a href="${p.permalink}" target="_blank" rel="noopener" style="display:block;position:relative">
-                  <img src="${thumb}" alt="" style="width:100%;height:170px;object-fit:cover;display:block">
-                  <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600">${igTypeIcon[type]||'📄'} ${typeNames[type]||type}</div>
-                </a>`
-              : `<div style="height:170px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:32px">${igTypeIcon[type]||'📄'}</div>`}
-            <div style="padding:10px 12px">
-              <div style="font-size:11px;color:var(--mu);margin-bottom:6px">${formatDate(p.timestamp)}</div>
-              ${cap?`<div style="font-size:12px;color:var(--mu2);margin-bottom:8px;line-height:1.5;height:36px;overflow:hidden">${cap}</div>`:''}
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;text-align:center">
-                <div><div style="font-size:14px;font-weight:700;color:var(--blue)">${fK(isVideo?p.views:p.impressions)}</div><div style="font-size:10px;color:var(--mu)">${isVideo?'Views':'Imp.'}</div></div>
-                <div><div style="font-size:14px;font-weight:700;color:var(--teal)">${fK(p.reach)}</div><div style="font-size:10px;color:var(--mu)">Alcance</div></div>
-                <div><div style="font-size:14px;font-weight:700;color:var(--green)">${fK(p.like_count||0)}</div><div style="font-size:10px;color:var(--mu)">Curtidas</div></div>
-                <div><div style="font-size:14px;font-weight:700;color:var(--purple)">${fK(p.saved||0)}</div><div style="font-size:10px;color:var(--mu)">Salvos</div></div>
-              </div>
-            </div>
-          </div>`;
-        }).join('')
-      : '<div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Nenhuma publicação encontrada no período</div>';
-
-    if(statusEl) statusEl.textContent = `✅ ${posts.length} publicações carregadas`;
-  } catch(e){
-    if(statusEl) statusEl.innerHTML = `❌ ${e.message}`;
-    console.error('Instagram API error:', e);
-  }
-}
-
-// ── FACEBOOK ────────────────────────────────────────────
-async function loadFacebook(){
-  const {token,fbId} = getFbCreds();
-  const statusEl = document.getElementById('fbStatus');
-  if(!token || !fbId){
-    if(statusEl) statusEl.innerHTML = '⚠️ Configure o <b>Token Facebook</b> e o <b>FB Page ID</b> em ⚙️ Config. de API';
-    return;
-  }
-  if(statusEl) statusEl.textContent = '⏳ Carregando…';
-  const days = parseInt(document.getElementById('fFbPeriod')?.value||'30');
-  const {since,until} = dateRange(days);
-
-  try {
-    // 1. Page info
-    const page = await socialFetch(`/${fbId}?fields=name,fan_count,followers_count&access_token=${token}`);
-
-    // 2. Posts da página (published_posts é mais completo que /posts)
-    let fbPosts = [];
-    try {
-      const postsR = await socialFetch(`/${fbId}/published_posts?fields=id,message,story,created_time,full_picture,permalink_url,shares,attachments{media_type}&limit=50&since=${since}&until=${until}&access_token=${token}`);
-      fbPosts = postsR.data||[];
-    } catch(e){
-      // fallback to /posts
-      try {
-        const postsR2 = await socialFetch(`/${fbId}/posts?fields=id,message,story,created_time,full_picture,permalink_url,shares&limit=50&since=${since}&until=${until}&access_token=${token}`);
-        fbPosts = postsR2.data||[];
-      } catch(e2){ console.warn('FB posts error:', e2.message); }
-    }
-
-    // 3. Insights por post (mais confiável que page-level insights)
-    let totReach=0, totViews=0, totEng=0, totReacs=0;
-    const postData = [];
-    for(const p of fbPosts.slice(0,30)){
-      let reach=0, impressions=0, eng=0, videoViews=0, reacs=0;
-      try {
-        const pi = await socialFetch(`/${p.id}/insights?metric=post_impressions_unique,post_impressions,post_engaged_users,post_video_views&access_token=${token}`);
-        (pi.data||[]).forEach(m=>{
-          if(m.name==='post_impressions_unique') reach      = m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='post_impressions')        impressions= m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='post_engaged_users')      eng        = m.values?.[0]?.value ?? m.value ?? 0;
-          if(m.name==='post_video_views')        videoViews = m.values?.[0]?.value ?? m.value ?? 0;
-        });
-      } catch(e){ console.warn('FB post insights error:', p.id, e.message); }
-      try {
-        const rr = await socialFetch(`/${p.id}?fields=reactions.summary(true)&access_token=${token}`);
-        reacs = rr.reactions?.summary?.total_count||0;
-      } catch(e){}
-      totReach  += reach;
-      totViews  += videoViews||impressions;
-      totEng    += eng;
-      totReacs  += reacs;
-      const mediaType = p.attachments?.data?.[0]?.media_type||'';
-      const isVideo = ['video','video_inline'].includes(mediaType);
-      postData.push({...p, reach, impressions, eng, videoViews, reacs, isVideo});
-    }
-
-    // 4. KPIs
-    sid('fbk1', fK(totViews));   sid('fbk1s', `${days} dias`);
-    sid('fbk2', fK(totReach));   sid('fbk2s', `${fbPosts.length} publicações`);
-    sid('fbk3', fK(totEng));     sid('fbk3s', 'usuários engajados');
-    sid('fbk4', fK(totReacs));   sid('fbk4s', 'reações no período');
-    sid('fbk5', fK(page.fan_count||page.followers_count||0)); sid('fbk5s', page.name||'');
-
-    // 5. Timeline chart
-    const sorted = [...postData].sort((a,b)=>new Date(a.created_time)-new Date(b.created_time));
-    dc('cFbTimeline');
-    const ctx1 = document.getElementById('cFbTimeline')?.getContext('2d');
-    if(ctx1 && sorted.length) charts.cFbTimeline = new Chart(ctx1,{
-      type:'line',
-      data:{labels:sorted.map(p=>formatDate(p.created_time)),
-            datasets:[
-              {label:'Visualizações/Imp.',data:sorted.map(p=>p.videoViews||p.impressions),borderColor:'rgba(79,142,247,.9)',backgroundColor:'rgba(79,142,247,.12)',fill:true,tension:.3,pointRadius:2},
-              {label:'Alcance',           data:sorted.map(p=>p.reach),                    borderColor:'rgba(52,211,153,.9)',backgroundColor:'rgba(52,211,153,.12)',fill:true,tension:.3,pointRadius:2}
-            ]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:true,position:'top',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}},
-        scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},maxTicksLimit:12}},
-                y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#8b9ab0',font:{size:10},callback:v=>fK(v)}}}}
-    });
-
-    // 6. Engajamento donut (por tipo de reação via post-level)
-    const reacLabels={'like':'👍 Curtir','love':'❤️ Amei','haha':'😂 Haha','wow':'😮 Uau','sorry':'😢 Triste','anger':'😠 Grr'};
-    const reacCores=['rgba(79,142,247,.85)','rgba(232,121,249,.85)','rgba(251,191,36,.85)','rgba(52,211,153,.85)','rgba(100,116,139,.85)','rgba(248,113,113,.85)'];
-    // Aggregate reactions from posts
-    const reacAgg={};
-    for(const p of postData.slice(0,10)){
-      try {
-        const rr = await socialFetch(`/${p.id}?fields=reactions.type(LIKE).summary(true),reactions.type(LOVE).summary(true),reactions.type(HAHA).summary(true),reactions.type(WOW).summary(true),reactions.type(SORRY).summary(true),reactions.type(ANGER).summary(true)&access_token=${token}`);
-        ['LIKE','LOVE','HAHA','WOW','SORRY','ANGER'].forEach(t=>{
-          const key=t.toLowerCase();
-          const v=rr[`reactions_${t}`]?.summary?.total_count||0; // may not work
-          reacAgg[key]=(reacAgg[key]||0)+v;
-        });
-      } catch(e){}
-    }
-    let reacEntries=Object.entries(reacAgg).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
-    if(!reacEntries.length) reacEntries=[['engajamentos',totEng]].filter(e=>e[1]>0);
-
-    document.getElementById('fbLegEng').innerHTML=reacEntries.map(([k,v],i)=>`<div class="leg"><div class="lsq" style="background:${reacCores[i%reacCores.length]}"></div>${reacLabels[k]||k}: ${fK(v)}</div>`).join('');
-    dc('cFbEng');
-    const ctx2=document.getElementById('cFbEng')?.getContext('2d');
-    if(ctx2&&reacEntries.length) charts.cFbEng=new Chart(ctx2,{type:'doughnut',
-      data:{labels:reacEntries.map(([k])=>reacLabels[k]||k),datasets:[{data:reacEntries.map(e=>e[1]),backgroundColor:reacCores,borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b9ab0',font:{size:11},boxWidth:10,padding:8}}}}
-    });
-
-    // 7. Posts grid (estilo Business Suite)
-    const fbTypeIcon={'video':'🎬','video_inline':'🎬','photo':'📷','album':'🖼️','link':'🔗','status':'📝'};
-    document.getElementById('fbPostGrid').innerHTML = postData.length
-      ? postData.map(p=>{
-          const msg = (p.message||p.story||'').substring(0,100)+((p.message||p.story||'').length>100?'…':'');
-          const mediaType = p.attachments?.data?.[0]?.media_type||'status';
-          const typeLabel = mediaType==='video'||mediaType==='video_inline'?'Vídeo/Reel':mediaType==='album'?'Carrossel':mediaType==='photo'?'Foto':'Post';
-          return `<div class="card" style="padding:0;overflow:hidden">
-            ${p.full_picture
-              ? `<a href="${p.permalink_url}" target="_blank" rel="noopener" style="display:block;position:relative">
-                  <img src="${p.full_picture}" alt="" style="width:100%;height:170px;object-fit:cover;display:block">
-                  <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600">${fbTypeIcon[mediaType]||'📄'} ${typeLabel}</div>
-                </a>`
-              : `<div style="height:120px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px">${fbTypeIcon[mediaType]||'📄'}</div>`}
-            <div style="padding:10px 12px">
-              <div style="font-size:11px;color:var(--mu);margin-bottom:6px">${formatDate(p.created_time)}</div>
-              ${msg?`<div style="font-size:12px;color:var(--mu2);margin-bottom:8px;line-height:1.5;height:36px;overflow:hidden">${msg}</div>`:''}
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;text-align:center">
-                <div><div style="font-size:14px;font-weight:700;color:var(--blue)">${fK(p.videoViews||p.impressions)}</div><div style="font-size:10px;color:var(--mu)">${p.isVideo?'Views':'Imp.'}</div></div>
-                <div><div style="font-size:14px;font-weight:700;color:var(--teal)">${fK(p.reach)}</div><div style="font-size:10px;color:var(--mu)">Alcance</div></div>
-                <div><div style="font-size:14px;font-weight:700;color:var(--green)">${fK(p.eng)}</div><div style="font-size:10px;color:var(--mu)">Engaj.</div></div>
-                <div><div style="font-size:14px;font-weight:700;color:var(--purple)">${fK(p.reacs)}</div><div style="font-size:10px;color:var(--mu)">Reações</div></div>
-              </div>
-            </div>
-          </div>`;
-        }).join('')
-      : '<div style="color:var(--mu);padding:20px;text-align:center;grid-column:1/-1">Nenhuma publicação encontrada no período</div>';
-
-    if(statusEl) statusEl.textContent = `✅ ${fbPosts.length} publicações carregadas`;
-  } catch(e){
-    if(statusEl) statusEl.innerHTML = `❌ ${e.message}`;
-    console.error('Facebook API error:', e);
-  }
-}
-
 
 // ═══════════════════════════════════════════════════════
 // LOAD ALL
@@ -3409,8 +2757,6 @@ let currentMetaCamp  = null; // campanha atual
 function initConfigPage(){
   renderAccountsList();
   updateConfigStatus();
-  initIgConfig();
-  initFbConfig();
   // Claude key mascarado
   const k  = localStorage.getItem('eco_claude_key') || '';
   const ki = document.getElementById('inputClaudeKey');

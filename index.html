@@ -2710,3 +2710,548 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 
 // ── Config helpers ──────────────────────────────────────
 
+// ═══════════════════════════════════════════════════════
+// LOAD ALL
+// ═══════════════════════════════════════════════════════
+function setLoading(on,msg=''){
+  document.getElementById('lov').style.display=on?'flex':'none';
+  if(msg)document.getElementById('ltx').textContent=msg;
+  const btn=document.getElementById('btnR');
+  if(btn){btn.disabled=on;btn.textContent=on?'⏳ Aguarde…':'↻ Atualizar';}
+}
+
+async function loadAll(){
+  setLoading(true,'Conectando às planilhas…');
+  document.getElementById('ebox').style.display='none';
+  try{
+    setLoading(true,'Carregando ROI & ROAS…');
+    dadosRoas=parseRoas(await fetchCSV(SH_ROAS,0));
+    setLoading(true,'Carregando campanhas Meta Ads…');
+    campsMeta=parseMeta(await fetchCSV(SH_META,0));
+    setLoading(true,'Carregando leads CVCRM…');
+    leadsCV=parseLeads(await fetchCSV(SH_LEADS,0));
+    if(!dadosRoas.length)throw new Error('Planilha ROI/ROAS sem dados. Verifique o acesso público.');
+    popularFiltros();
+    renderDashboard();
+    // Badge: campanhas com status active E que têm gasto registrado
+    const ativas=campsMeta.filter(c=>c.status==='active'&&c.valor>0).length;
+    sid('tbBadge',`${ativas} campanha${ativas!==1?'s':''} ativa${ativas!==1?'s':''}`);
+    sid('lastUpd',new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){
+    const eb=document.getElementById('ebox');
+    eb.innerHTML=`⚠️ ${e.message}<br><small>Verifique se as 3 planilhas estão com "Qualquer pessoa com o link → Leitor".</small>`;
+    eb.style.display='block';
+    console.error(e);
+  }
+  setLoading(false);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// PAGE: CRIATIVOS META API — MULTI-CONTA
+// ═══════════════════════════════════════════════════════
+let metaCampaigns    = [];   // cache de campanhas da conta ativa
+let currentCreatives = [];   // top 5 da campanha atual
+let currentMetaCamp  = null; // campanha atual
+
+// ── Página de Configurações de API ──────────────────────
+function initConfigPage(){
+  renderAccountsList();
+  updateConfigStatus();
+  // Claude key mascarado
+  const k  = localStorage.getItem('eco_claude_key') || '';
+  const ki = document.getElementById('inputClaudeKey');
+  if(ki) ki.value = k ? '••••••••••••••••' : '';
+}
+
+function updateConfigStatus(){
+  const accounts  = window.MetaAPI?.accounts || [];
+  const hasMeta   = accounts.length > 0;
+  const hasClaude = !!localStorage.getItem('eco_claude_key');
+
+  const metaVal = document.getElementById('cfgMetaVal');
+  const metaSub = document.getElementById('cfgMetaSub');
+  const metaBdg = document.getElementById('cfgMetaBadge');
+  if(metaVal){ metaVal.textContent = accounts.length; metaVal.style.color = hasMeta ? 'var(--green)' : 'var(--red)'; }
+  if(metaSub) metaSub.textContent = hasMeta ? `${accounts.length} conta${accounts.length>1?'s':''} cadastrada${accounts.length>1?'s':''}` : 'Nenhuma conta cadastrada';
+  if(metaBdg){ metaBdg.className = hasMeta ? 'badge green' : 'badge'; metaBdg.style.cssText = hasMeta ? '' : 'background:rgba(107,122,158,.12);color:var(--mu)'; metaBdg.textContent = `${accounts.length} conta${accounts.length!==1?'s':''}`; }
+
+  const clVal = document.getElementById('cfgClaudeVal');
+  const clSub = document.getElementById('cfgClaudeSub');
+  const clBdg = document.getElementById('cfgClaudeBadge');
+  if(clVal){ clVal.textContent = hasClaude ? '✓' : '✕'; clVal.style.color = hasClaude ? 'var(--green)' : 'var(--red)'; }
+  if(clSub) clSub.textContent = hasClaude ? 'API Key salva' : 'Não configurado';
+  if(clBdg){ clBdg.className = hasClaude ? 'badge purple' : 'badge'; clBdg.style.cssText = hasClaude ? '' : 'background:rgba(107,122,158,.12);color:var(--mu)'; clBdg.textContent = hasClaude ? 'Configurado' : 'Não configurado'; }
+}
+
+// ── Renderiza lista de contas salvas ─────────────────────
+function renderAccountsList(){
+  const container = document.getElementById('metaAccountsList');
+  if(!container) return;
+  const accounts  = window.MetaAPI?.accounts || [];
+  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
+
+  if(!accounts.length){
+    container.innerHTML = '<div style="font-size:12px;color:var(--mu);padding:8px 0">Nenhuma conta adicionada ainda. Use o formulário abaixo.</div>';
+    return;
+  }
+
+  container.innerHTML = accounts.map((acc, i) => {
+    const isActive = i === activeIdx;
+    const masked   = '••••' + (acc.accountId || '').slice(-6);
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${isActive ? 'rgba(79,142,247,.08)' : 'var(--bg3)'};border:1px solid ${isActive ? 'var(--blue)' : 'var(--bdr)'};border-radius:10px;transition:all .2s">
+        <div style="width:8px;height:8px;border-radius:50%;background:${isActive ? 'var(--green)' : 'var(--mu)'};flex-shrink:0${isActive ? ';box-shadow:0 0 5px var(--green)' : ''}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--tx)">${acc.name}</div>
+          <div style="font-size:11px;color:var(--mu)">${acc.accountId} · token ${masked}</div>
+        </div>
+        ${isActive ? '<span class="badge green" style="flex-shrink:0">Ativa</span>' : `<button class="btn" onclick="setActiveAccount(${i})" style="font-size:11px;padding:4px 12px;flex-shrink:0">Usar esta</button>`}
+        <button class="btn" onclick="testAccountAt(${i})" style="font-size:11px;padding:4px 10px;flex-shrink:0" title="Testar conexão">✓</button>
+        <button class="btn" onclick="removeMetaAccount(${i})" style="font-size:11px;padding:4px 10px;color:var(--red);flex-shrink:0" title="Remover conta">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function addMetaAccount(){
+  const name    = document.getElementById('newAccName')?.value.trim()  || '';
+  const token   = document.getElementById('newAccToken')?.value.trim() || '';
+  const accId   = document.getElementById('newAccId')?.value.trim()    || '';
+  if(!name || !token || !accId){ setCredMsg('credMsg','⚠️ Preencha nome, token e account ID.','var(--amber)'); return; }
+  const ok = window.MetaAPI.addAccount(name, token, accId);
+  if(!ok){ setCredMsg('credMsg','⚠️ Esta conta já está cadastrada.','var(--amber)'); return; }
+  document.getElementById('newAccName').value  = '';
+  document.getElementById('newAccToken').value = '';
+  document.getElementById('newAccId').value    = '';
+  setCredMsg('credMsg','✅ Conta adicionada!','var(--green)');
+  renderAccountsList();
+  updateConfigStatus();
+  populateAccountSelect();
+  updateMetaConnBar();
+}
+
+function removeMetaAccount(idx){
+  if(!confirm('Remover esta conta?')) return;
+  window.MetaAPI.removeAccount(idx);
+  renderAccountsList();
+  updateConfigStatus();
+  populateAccountSelect();
+  updateMetaConnBar();
+  setCredMsg('credMsg','Conta removida.','var(--mu)');
+}
+
+function setActiveAccount(idx){
+  window.MetaAPI.switchAccount(idx);
+  metaCampaigns = [];
+  currentCreatives = [];
+  currentMetaCamp  = null;
+  renderAccountsList();
+  updateMetaConnBar();
+  // Atualiza seletor na página de criativos
+  const sel = document.getElementById('fMetaAccount');
+  if(sel) sel.value = String(idx);
+}
+
+async function testAccountAt(idx){
+  const accounts = window.MetaAPI.accounts;
+  if(!accounts[idx]){ setCredMsg('credMsg','Conta inválida.','var(--red)'); return; }
+  // Guarda conta atual, troca temporariamente, testa, restaura
+  const prevIdx = window.MetaAPI.activeIdx;
+  window.MetaAPI.switchAccount(idx);
+  setCredMsg('credMsg',`🔄 Testando "${accounts[idx].name}"…`,'var(--mu)');
+  try{
+    const r = await window.MetaAPI.validateToken();
+    if(r.valid){ setCredMsg('credMsg',`✅ "${accounts[idx].name}" OK — usuário: ${r.name}`,'var(--green)'); }
+    else        { setCredMsg('credMsg',`❌ "${accounts[idx].name}": ${r.error}`,'var(--red)'); }
+  } catch(e){ setCredMsg('credMsg',`❌ Erro: ${e.message}`,'var(--red)'); }
+  finally{
+    // Restaura conta ativa original
+    window.MetaAPI.switchAccount(prevIdx);
+  }
+}
+
+function saveClaudeKey(){
+  const ki = document.getElementById('inputClaudeKey');
+  const rawKey = ki?.value.trim() || '';
+  const key = (rawKey === '••••••••••••••••') ? (localStorage.getItem('eco_claude_key') || '') : rawKey;
+  if(!key){ setCredMsg('claudeMsg','⚠️ Cole a API Key do Claude.','var(--amber)'); return; }
+  if(window.AIModule) window.AIModule.saveKey(key);
+  setCredMsg('claudeMsg','✅ Claude API Key salva!','var(--green)');
+  updateConfigStatus();
+}
+
+function clearClaudeKey(){
+  localStorage.removeItem('eco_claude_key');
+  if(window.AIModule) window.AIModule._key = '';
+  const ki = document.getElementById('inputClaudeKey');
+  if(ki) ki.value = '';
+  setCredMsg('claudeMsg','Claude Key removida.','var(--mu)');
+  updateConfigStatus();
+}
+
+function setCredMsg(elId, msg, color){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = color;
+}
+
+// ── Página Criativos Meta ────────────────────────────────
+function initMetaPage(){
+  populateAccountSelect();
+  updateMetaConnBar();
+  if(metaCampaigns.length) renderMetaAllCamps();
+}
+
+// Popula dropdown de contas na página de criativos
+function populateAccountSelect(){
+  const sel = document.getElementById('fMetaAccount');
+  if(!sel) return;
+  const accounts  = window.MetaAPI?.accounts || [];
+  const activeIdx = window.MetaAPI?.activeIdx ?? 0;
+  sel.innerHTML = accounts.length
+    ? accounts.map((a, i) => `<option value="${i}" ${i===activeIdx?'selected':''}>${a.name}</option>`).join('')
+    : '<option value="">— Nenhuma conta cadastrada —</option>';
+}
+
+// Troca de conta pelo seletor da página de criativos
+function onMetaAccountSelect(){
+  const sel = document.getElementById('fMetaAccount');
+  const idx = parseInt(sel?.value ?? '0', 10);
+  window.MetaAPI.switchAccount(idx);
+  // Limpa cache e UI de campanhas
+  metaCampaigns = [];
+  currentCreatives = [];
+  currentMetaCamp  = null;
+  const campSel = document.getElementById('fMetaCamp');
+  if(campSel) campSel.innerHTML = '<option value="">— Todas as campanhas —</option>';
+  document.getElementById('metaKpiRow').style.display      = 'none';
+  document.getElementById('metaAIContainer').style.display = 'none';
+  document.getElementById('metaAllCampsContainer').style.display = 'none';
+  document.getElementById('metaCreativesContainer').innerHTML = `
+    <div class="meta-empty">
+      <div class="meta-empty-icon">🔄</div>
+      <div class="meta-empty-title">Conta alterada: ${window.MetaAPI.activeAccount?.name||''}</div>
+      <div class="meta-empty-sub">Clique em "Carregar Campanhas" para buscar os dados desta conta</div>
+    </div>`;
+  updateMetaConnBar();
+}
+
+// Mini status bar na página de criativos
+function updateMetaConnBar(){
+  const dot   = document.getElementById('metaConnDot');
+  const label = document.getElementById('metaConnLabel');
+  if(!dot || !label) return;
+  const acc = window.MetaAPI?.activeAccount;
+  if(acc){
+    dot.style.background = 'var(--green)';
+    dot.style.boxShadow  = '0 0 6px var(--green)';
+    label.style.color    = 'var(--mu2)';
+    label.textContent    = `Conta ativa: ${acc.name} · ${acc.accountId}`;
+  } else {
+    dot.style.background = 'var(--mu)';
+    dot.style.boxShadow  = 'none';
+    label.style.color    = 'var(--mu)';
+    label.textContent    = 'Nenhuma conta configurada — acesse ⚙️ Gerenciar Contas';
+  }
+}
+
+// ── Carrega campanhas da conta ativa ─────────────────────
+async function loadMetaCampaigns(){
+  if(!window.MetaAPI?.hasCredentials()){
+    alert('Adicione e selecione uma conta Meta em ⚙️ Config. de API.');
+    return;
+  }
+  const btn    = document.getElementById('btnLoadMeta');
+  const infoEl = document.getElementById('metaLoadInfo');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando…'; }
+  if(infoEl) infoEl.textContent = `Buscando campanhas de "${window.MetaAPI.activeAccount?.name||'conta'}"…`;
+
+  const period = document.getElementById('fMetaPeriod')?.value || 'this_month';
+
+  try{
+    const camps = await window.MetaAPI.getCampaigns({ datePreset: period });
+    const insightsArr = await Promise.all(
+      camps.map(c => window.MetaAPI.getCampaignInsights(c.id, period))
+    );
+
+    metaCampaigns = camps.map((c,i)=>({
+      ...c,
+      insights : insightsArr[i],
+      results  : window.MetaAPI._extractResults(insightsArr[i]),
+    })).sort((a,b)=> b.results - a.results || parseFloat(b.insights?.spend||0) - parseFloat(a.insights?.spend||0));
+
+    const sel = document.getElementById('fMetaCamp');
+    if(sel){
+      sel.innerHTML = '<option value="">— Todas as campanhas —</option>';
+      metaCampaigns.forEach(c=>{
+        sel.appendChild(new Option(`${c.status==='ACTIVE'?'🟢':'🔴'} ${c.name}`, c.id));
+      });
+    }
+
+    const ativas = metaCampaigns.filter(c=>c.status==='ACTIVE').length;
+    if(infoEl) infoEl.textContent = `${camps.length} campanhas · ${ativas} ativas`;
+
+    const btnAll = document.getElementById('btnAnalyzeAll');
+    if(btnAll) btnAll.style.display = 'inline-flex';
+
+    renderMetaAllCamps();
+
+    const first = metaCampaigns.find(c=>c.status==='ACTIVE');
+    if(first){
+      if(sel) sel.value = first.id;
+      await loadMetaCampaignCreatives(first.id);
+    }
+
+  } catch(e){
+    if(infoEl) infoEl.textContent = `❌ ${e.message}`;
+    document.getElementById('metaCreativesContainer').innerHTML =
+      `<div class="ebox" style="display:block">❌ ${e.message}<br><small>Verifique se o token tem permissão <b>ads_read</b>.</small></div>`;
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='↻ Carregar Campanhas'; }
+  }
+}
+
+async function onMetaCampaignSelect(){
+  const id = document.getElementById('fMetaCamp')?.value;
+  if(!id){ renderMetaAllCamps(); return; }
+  await loadMetaCampaignCreatives(id);
+}
+
+// ── Carrega top 5 criativos da campanha ──────────────────
+async function loadMetaCampaignCreatives(campaignId){
+  const period    = document.getElementById('fMetaPeriod')?.value || 'this_month';
+  const container = document.getElementById('metaCreativesContainer');
+  container.innerHTML = `
+    <div class="meta-empty">
+      <div class="spin" style="margin:0 auto 16px"></div>
+      <div class="meta-empty-title">Buscando criativos e métricas…</div>
+      <div class="meta-empty-sub">Usando Meta Batch API para reduzir chamadas</div>
+    </div>`;
+
+  const camp = metaCampaigns.find(c=>c.id===campaignId);
+  currentMetaCamp = camp || null;
+
+  try{
+    const top5 = await window.MetaAPI.getTop5Creatives(campaignId, period);
+    currentCreatives = top5;
+
+    if(!top5.length){
+      container.innerHTML = `
+        <div class="meta-empty">
+          <div class="meta-empty-icon">📭</div>
+          <div class="meta-empty-title">Nenhum criativo com dados no período</div>
+          <div class="meta-empty-sub">Tente "Máximo" no filtro de período ou outra campanha</div>
+        </div>`;
+      document.getElementById('metaKpiRow').style.display = 'none';
+      return;
+    }
+
+    updateMetaKPIs(camp?.insights, top5);
+    renderMetaCreativeCards(camp, top5, container);
+
+    document.getElementById('metaAIContainer').style.display  = 'block';
+    document.getElementById('metaAllCampsContainer').style.display = 'none';
+    document.getElementById('metaAIResult').innerHTML =
+      `<div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
+        Clique em "Analisar Criativos" para receber insights do Claude sobre os ${top5.length} criativos.
+      </div>`;
+
+  } catch(e){
+    container.innerHTML =
+      `<div class="ebox" style="display:block">❌ ${e.message}</div>`;
+  }
+}
+
+// ── KPIs da campanha ─────────────────────────────────────
+function updateMetaKPIs(ins, creatives){
+  document.getElementById('metaKpiRow').style.display = 'block';
+  const spend   = parseFloat(ins?.spend       || 0);
+  const results = creatives.reduce((s,c)=>s+c.results, 0);
+  const ctr     = parseFloat(ins?.ctr         || 0);
+  const cpr     = results > 0 ? spend / results : 0;
+  sid('mk1', metaFmt.brlShort(spend));
+  sid('mk1s',`${creatives.length} criativos · período`);
+  sid('mk2', fN(results));
+  sid('mk2s','Top 5 ads da campanha');
+  sid('mk3', ctr.toFixed(2)+'%');
+  sid('mk3s',`Impressões: ${metaFmt.num(ins?.impressions||0)}`);
+  sid('mk4', cpr>0 ? metaFmt.brl(cpr) : '—');
+  sid('mk4s',`CPC: ${metaFmt.brl(parseFloat(ins?.cpc||0))}`);
+}
+
+// ── Render creative cards ────────────────────────────────
+const RANK_STYLES = [
+  { bg:'rgba(245,166,35,.25)',  color:'#f5a623' },
+  { bg:'rgba(180,180,180,.2)',  color:'#bbb'    },
+  { bg:'rgba(205,127,50,.22)',  color:'#cd7f32' },
+  { bg:'rgba(79,142,247,.18)', color:'#4f8ef7' },
+  { bg:'rgba(155,127,244,.18)',color:'#9b7ff4' },
+];
+
+function renderMetaCreativeCards(camp, creatives, container){
+  const campName = (camp?.name||'Campanha').replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+  const isActive = camp?.status === 'ACTIVE';
+  container.innerHTML = `
+    <div class="camp-crt-section">
+      <div class="camp-crt-hd">
+        <div>
+          <div class="camp-crt-name">${campName}</div>
+          <div class="camp-crt-meta">
+            ${camp?.objective||'—'} ·
+            <span style="color:${isActive?'var(--green)':'var(--red)'}">
+              ${isActive?'🟢 Ativa':'🔴 Pausada'}
+            </span>
+            · <span style="color:var(--teal)">Thumbnails via Meta API</span>
+            · Top 5 por resultados
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--mu);text-align:right">
+          🏆 #1–#${creatives.length} melhores criativos<br>
+          <span style="color:var(--purple)">Dados: Meta Ads Manager</span>
+        </div>
+      </div>
+      <div class="creative-grid">
+        ${creatives.map((ad,i) => buildCreativeCard(ad, i)).join('')}
+      </div>
+    </div>`;
+}
+
+function buildCreativeCard(ad, i){
+  const rs    = RANK_STYLES[i] || RANK_STYLES[4];
+  const thumb = ad.thumbnail;
+  const active= ad.status === 'ACTIVE';
+  const cpr   = ad.results > 0 ? ad.spend / ad.results : 0;
+  const scoreColor = ad.ctr >= 2 && cpr > 0 && cpr < 50 ? 'var(--green)'
+    : ad.ctr >= 1 ? 'var(--amber)' : 'var(--red)';
+  const thumbHtml = thumb
+    ? `<img class="creative-thumb" src="${thumb}" alt="${ad.name}" loading="lazy"
+         onerror="this.outerHTML='<div class=\\'creative-thumb-ph\\'>🖼️</div>'">`
+    : `<div class="creative-thumb-ph">🖼️</div>`;
+  const adName = (ad.name||'Ad #'+(i+1)).replace(/\s*[–\-—]\s*(Pao|fmd|Dia|Ad|Set).*/i,'').trim();
+  return `
+    <div class="creative-card">
+      <div class="creative-score-bar" style="background:${scoreColor}"></div>
+      <div style="position:relative">
+        ${thumbHtml}
+        <div class="creative-rank" style="background:${rs.bg};color:${rs.color}">#${i+1}</div>
+        <div class="creative-st" style="background:${active?'rgba(46,204,142,.22)':'rgba(240,101,101,.22)'};color:${active?'var(--green)':'var(--red)'}">
+          ${active?'● Ativo':'● Pausado'}
+        </div>
+      </div>
+      <div class="creative-info">
+        <div class="creative-name" title="${ad.name}">${adName}</div>
+        <div class="creative-metrics">
+          <div class="cm"><div class="cm-v" style="color:var(--green)">${ad.results>0?ad.results.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Resultados</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--blue)">${ad.ctr>0?ad.ctr.toFixed(2)+'%':'—'}</div><div class="cm-l">CTR</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--amber)">${ad.spend>0?'R$'+ad.spend.toFixed(0):'—'}</div><div class="cm-l">Gasto</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--purple)">${ad.cpc>0?'R$'+ad.cpc.toFixed(2):'—'}</div><div class="cm-l">CPC</div></div>
+        </div>
+        <div class="creative-foot">
+          <span>${ad.impressions>0?ad.impressions.toLocaleString('pt-BR')+' imp.':'—'}${ad.frequency>0?' · freq '+ad.frequency.toFixed(1):''}</span>
+          <span class="creative-foot-cpr" style="color:${cpr>0&&cpr<50?'var(--green)':cpr>0&&cpr<100?'var(--amber)':'var(--red)'}">
+            ${cpr>0?'R$'+cpr.toFixed(0)+'/res.':'—'}
+          </span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Lista de todas as campanhas ──────────────────────────
+function renderMetaAllCamps(){
+  const container = document.getElementById('metaAllCampsContainer');
+  const list      = document.getElementById('metaAllCampsList');
+  if(!container || !list || !metaCampaigns.length) return;
+  container.style.display = 'block';
+  document.getElementById('metaKpiRow').style.display  = 'none';
+  document.getElementById('metaAIContainer').style.display = 'none';
+  document.getElementById('metaCreativesContainer').innerHTML = `
+    <div class="meta-empty">
+      <div class="meta-empty-icon">👆</div>
+      <div class="meta-empty-title">Selecione uma campanha acima</div>
+      <div class="meta-empty-sub">para ver os top 5 criativos com thumbnails reais</div>
+    </div>`;
+  const OC = {Cadastro:C.blue, WhatsApp:C.green, Alcance:C.purple};
+  list.innerHTML = metaCampaigns.map(c=>{
+    const ins    = c.insights;
+    const spend  = parseFloat(ins?.spend||0);
+    const ctr    = parseFloat(ins?.ctr||0);
+    const cpr    = c.results>0 ? spend/c.results : 0;
+    const active = c.status === 'ACTIVE';
+    const obj    = c.objective || '';
+    const oColor = OC[obj] || C.orange;
+    const campNameShort = c.name.replace(/\s*[–\-—]\s*(Pao|fmd|Dia).*/i,'').trim();
+    return `
+      <div class="meta-camp-row" onclick="selectMetaCampFromCard('${c.id}')">
+        <div style="width:10px;height:10px;border-radius:50%;background:${active?'var(--green)':'var(--mu)'};flex-shrink:0"></div>
+        <div class="meta-camp-row-name" title="${c.name}">${campNameShort}</div>
+        <div style="font-size:10px;padding:2px 8px;border-radius:5px;background:${oColor}22;color:${oColor};font-weight:600;flex-shrink:0">${obj||'—'}</div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--blue)">${spend>0?'R$'+spend.toFixed(0):'—'}</div><div class="meta-camp-stat-l">Gasto</div></div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--green)">${c.results||'—'}</div><div class="meta-camp-stat-l">Resultados</div></div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--amber)">${ctr>0?ctr.toFixed(2)+'%':'—'}</div><div class="meta-camp-stat-l">CTR</div></div>
+        <div class="meta-camp-stat"><div class="meta-camp-stat-v" style="color:var(--purple)">${cpr>0?'R$'+cpr.toFixed(0):'—'}</div><div class="meta-camp-stat-l">Custo/Res.</div></div>
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;flex-shrink:0" onclick="event.stopPropagation();selectMetaCampFromCard('${c.id}')">🎨 Ver criativos</button>
+      </div>`;
+  }).join('');
+}
+
+async function selectMetaCampFromCard(campId){
+  const sel = document.getElementById('fMetaCamp');
+  if(sel) sel.value = campId;
+  document.getElementById('metaAllCampsContainer').style.display = 'none';
+  await loadMetaCampaignCreatives(campId);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Análise IA dos criativos atuais ─────────────────────
+async function analyzeMetaCreatives(){
+  if(!currentCreatives.length){ alert('Selecione uma campanha e carregue os criativos primeiro.'); return; }
+  const el = document.getElementById('metaAIResult');
+  el.innerHTML = `<div class="ia-loading">🤖 Analisando ${currentCreatives.length} criativos<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
+  try{
+    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
+    const text = await window.AIModule.analyzeCreatives(currentMetaCamp?.name||'Campanha', currentCreatives);
+    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px;background:rgba(240,101,101,.08);border-radius:8px">❌ ${e.message}</div>`;
+  }
+}
+
+// ── Análise IA de todas as campanhas ────────────────────
+async function analyzeAllMetaCampaigns(){
+  if(!metaCampaigns.length) return;
+  const btn = document.getElementById('btnAnalyzeAll');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Analisando…'; }
+  document.getElementById('metaAIContainer').style.display = 'block';
+  const el = document.getElementById('metaAIResult');
+  el.innerHTML = `<div class="ia-loading">🤖 Analisando toda a conta Meta Ads<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div>`;
+  try{
+    if(!window.AIModule?.hasKey()) throw new Error('Configure a Claude API Key em ⚙️ Config. de API.');
+    const text = await window.AIModule.analyzeCampaignPerformance(metaCampaigns.filter(c=>c.insights));
+    el.innerHTML = `<div class="ia-result">${formatarTextoIA(text)}</div>`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--red);font-size:13px">${e.message}</div>`;
+  } finally{
+    if(btn){ btn.disabled=false; btn.textContent='🤖 Analisar Conta'; }
+  }
+}
+
+// ──────────────────────────────────────────────────────
+
+// Menu mobile
+document.querySelector('.topbar')?.addEventListener('click', e=>{
+  if(e.clientX < 50 && window.innerWidth <= 768){
+    document.querySelector('.sidebar')?.classList.toggle('open');
+  }
+});
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click',()=>{ if(window.innerWidth<=768) document.querySelector('.sidebar')?.classList.remove('open'); });
+});
+
+// Enter no login
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>
+

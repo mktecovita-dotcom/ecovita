@@ -396,8 +396,6 @@ body.light .theme-label{color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="fb-root"></div>
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
 
 <!-- ═══════════════ LOGIN ═══════════════ -->
 <div id="loginScreen">
@@ -1045,105 +1043,87 @@ body.light .theme-label{color:var(--blue)}
         </div>
       </div>
 
-      <!-- Bloco Conexão Meta Orgânico (OAuth) -->
-      <div class="card" style="margin-bottom:14px" id="socialOauthCard">
+      <!-- Bloco Instagram Orgânico -->
+      <div class="card" style="margin-bottom:14px">
         <div class="card-hd">
-          <div class="card-title">🔗 Conectar Instagram & Facebook Orgânico</div>
-          <span class="badge" id="cfgOauthBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não conectado</span>
-        </div>
-        <div style="font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.6">
-          Conecte sua conta via Facebook Login — igual ao Reportei. O sistema busca automaticamente os tokens e IDs das suas páginas.
+          <div class="card-title">📸 Instagram Orgânico</div>
+          <span class="badge" id="cfgIgBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
         </div>
 
-        <!-- App ID field -->
-        <div style="margin-bottom:14px">
-          <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Facebook App ID</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input type="text" id="inputFbAppId" placeholder="Ex: 123456789012345 (do developers.facebook.com)"
-              style="flex:1;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-            <button class="btn btn-ai" onclick="saveFbAppId()" style="white-space:nowrap">💾 Salvar App ID</button>
+        <!-- Passo 1: Token -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">① Cole seu Token de Acesso</div>
+          <div style="font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6">
+            Acesse <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--blue)">developers.facebook.com/tools/explorer</a>
+            → selecione seu app → clique <b>Gerar Token</b> → ative:
+            <code style="background:rgba(232,121,249,.1);color:#e879f9;padding:1px 5px;border-radius:4px">instagram_basic · instagram_manage_insights · pages_show_list</code>
           </div>
-          <div style="font-size:11px;color:var(--mu);margin-top:6px">
-            Crie um app em <b>developers.facebook.com</b> → tipo "Consumidor" → adicione produtos: <b>Facebook Login</b> e <b>Instagram Basic Display</b>. Nas configurações do Login, adicione como URI válida: <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 4px;border-radius:4px">file:///</code> e o domínio onde este arquivo está hospedado.
+          <input type="password" id="inputIgToken" placeholder="Cole o token aqui (EAA…)" autocomplete="new-password"
+            style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
+        </div>
+
+        <!-- Passo 2: Buscar IG Account ID -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">② Buscar seu Instagram Business Account ID</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <button class="btn btn-ai" onclick="fetchIgAccounts()" style="white-space:nowrap">🔍 Buscar páginas vinculadas</button>
+            <span style="font-size:11px;color:var(--mu)">O sistema usa o token para encontrar seu IG automaticamente</span>
+          </div>
+          <div id="igAccountsPicker" style="display:none;margin-top:8px"></div>
+          <div style="margin-top:10px">
+            <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Instagram Business Account ID</label>
+            <input type="text" id="inputIgAccountId" placeholder="Preenchido ao buscar, ou cole manualmente (17841400…)"
+              style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
           </div>
         </div>
 
-        <!-- Connect button -->
-        <div id="fbConnectArea" style="margin-bottom:16px">
-          <button class="btn btn-ai" id="btnFbLogin" onclick="initFbOAuth()" style="padding:10px 20px;font-size:14px;gap:10px">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" style="width:18px;height:18px;object-fit:contain"> Conectar com Facebook
-          </button>
-          <span id="oauthMsg" style="font-size:12px;color:var(--mu);margin-left:10px"></span>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="saveIgConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testIgConfig()" id="btnTestIg">🔍 Testar conexão</button>
+          <button class="btn" onclick="clearIgConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="igMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+      </div>
+
+      <!-- Bloco Facebook Orgânico -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">📘 Facebook Orgânico</div>
+          <span class="badge" id="cfgFbBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
         </div>
 
-        <!-- Connected pages -->
-        <div id="fbPagesArea" style="display:none">
-          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">Selecione sua Página do Facebook:</div>
-          <div id="fbPagesList" style="display:grid;gap:8px;margin-bottom:14px"></div>
+        <!-- Passo 1: Token -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">① Cole seu Token de Acesso</div>
+          <div style="font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6">
+            Acesse <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--blue)">developers.facebook.com/tools/explorer</a>
+            → selecione seu app → clique <b>Gerar Token</b> → ative:
+            <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">pages_read_engagement · pages_show_list · read_insights</code>
+          </div>
+          <input type="password" id="inputFbToken" placeholder="Cole o token aqui (EAA…)" autocomplete="new-password"
+            style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
         </div>
 
-        <!-- IG block separado -->
-        <div style="border-top:1px solid var(--bdr);padding-top:14px;margin-top:4px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:600;color:var(--tx)">📸 Instagram Business</div>
-            <span class="badge" id="cfgIgBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        <!-- Passo 2: Buscar Page ID -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">② Buscar seu Facebook Page ID</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <button class="btn btn-ai" onclick="fetchFbPages()" style="white-space:nowrap">🔍 Buscar minhas páginas</button>
+            <span style="font-size:11px;color:var(--mu)">O sistema lista suas páginas para você escolher</span>
           </div>
-          <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Após conectar o Facebook, selecione a página vinculada ao Instagram para buscar o Account ID automaticamente.</div>
-          <div id="igAccountArea" style="display:none">
-            <div id="igAccountsList" style="display:grid;gap:8px;margin-bottom:10px"></div>
+          <div id="fbPagesPicker" style="display:none;margin-top:8px"></div>
+          <div style="margin-top:10px">
+            <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Facebook Page ID</label>
+            <input type="text" id="inputFbPageId" placeholder="Preenchido ao buscar, ou cole manualmente (337403…)"
+              style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
           </div>
-          <!-- Manual fallback -->
-          <details style="margin-top:8px">
-            <summary style="font-size:12px;color:var(--mu);cursor:pointer;user-select:none">Ou configure manualmente ▾</summary>
-            <div style="padding:12px 0 4px;display:grid;gap:10px">
-              <div>
-                <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Token Instagram (manual)</label>
-                <input type="password" id="inputIgToken" placeholder="EAA…" autocomplete="new-password"
-                  style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-              </div>
-              <div>
-                <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Instagram Business Account ID (manual)</label>
-                <input type="text" id="inputIgAccountId" placeholder="Ex: 17841400000000000"
-                  style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-              </div>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ai" onclick="saveIgConfig()">💾 Salvar</button>
-                <button class="btn" onclick="testIgConfig()" id="btnTestIg">🔍 Testar</button>
-                <button class="btn" onclick="clearIgConfig()" style="color:var(--red)">✕ Limpar</button>
-                <span id="igMsg" style="font-size:12px;margin-left:4px;align-self:center"></span>
-              </div>
-            </div>
-          </details>
         </div>
 
-        <!-- FB manual fallback -->
-        <div style="border-top:1px solid var(--bdr);padding-top:14px;margin-top:14px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:600;color:var(--tx)">📘 Facebook Page (ativo)</div>
-            <span class="badge" id="cfgFbBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
-          </div>
-          <div id="fbActivePage" style="font-size:12px;color:var(--mu)">Nenhuma página selecionada.</div>
-          <details style="margin-top:8px">
-            <summary style="font-size:12px;color:var(--mu);cursor:pointer;user-select:none">Ou configure manualmente ▾</summary>
-            <div style="padding:12px 0 4px;display:grid;gap:10px">
-              <div>
-                <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Token de Acesso (manual)</label>
-                <input type="password" id="inputFbToken" placeholder="EAA…" autocomplete="new-password"
-                  style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-              </div>
-              <div>
-                <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Facebook Page ID (manual)</label>
-                <input type="text" id="inputFbPageId" placeholder="Ex: 337403936432736"
-                  style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-              </div>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ai" onclick="saveFbConfig()">💾 Salvar</button>
-                <button class="btn" onclick="testFbConfig()" id="btnTestFb">🔍 Testar</button>
-                <button class="btn" onclick="clearFbConfig()" style="color:var(--red)">✕ Limpar</button>
-                <span id="fbMsg" style="font-size:12px;margin-left:4px;align-self:center"></span>
-              </div>
-            </div>
-          </details>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="saveFbConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testFbConfig()" id="btnTestFb">🔍 Testar conexão</button>
+          <button class="btn" onclick="clearFbConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="fbMsg" style="font-size:12px;margin-left:4px"></span>
         </div>
       </div>
 
@@ -2898,219 +2878,86 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 
 // ── Config helpers ──────────────────────────────────────
 
-// ══════════════════════════════════════════════════════════
-// FACEBOOK OAUTH — Login automático via SDK
-// ══════════════════════════════════════════════════════════
-let _fbSdkReady = false;
-let _fbSdkCb    = [];
-
-window.fbAsyncInit = function(){
-  const appId = localStorage.getItem('eco_fb_app_id');
-  if(!appId) return;
-  FB.init({ appId, cookie:true, xfbml:false, version:'v20.0' });
-  _fbSdkReady = true;
-  _fbSdkCb.forEach(fn=>fn());
-  _fbSdkCb = [];
-  FB.getLoginStatus(r=>{ if(r.status==='connected') _onFbLogin(r.authResponse); });
-};
-
-function _ensureSdk(cb){
-  if(_fbSdkReady){ cb(); return; }
-  const appId = localStorage.getItem('eco_fb_app_id');
-  if(!appId){ sid('oauthMsg','⚠️ Salve o App ID primeiro'); return; }
-  // Re-init if SDK already loaded but not inited
-  if(typeof FB !== 'undefined'){
-    FB.init({ appId, cookie:true, xfbml:false, version:'v20.0' });
-    _fbSdkReady = true;
-    cb();
-    return;
-  }
-  _fbSdkCb.push(cb);
-}
-
-function saveFbAppId(){
-  const v = document.getElementById('inputFbAppId')?.value?.trim();
-  if(!v){ sid('oauthMsg','⚠️ Cole o App ID'); return; }
-  localStorage.setItem('eco_fb_app_id', v);
-  // Re-init SDK with new App ID
-  _fbSdkReady = false;
-  if(typeof FB !== 'undefined'){
-    FB.init({ appId:v, cookie:true, xfbml:false, version:'v20.0' });
-    _fbSdkReady = true;
-  }
-  sid('oauthMsg','✅ App ID salvo! Clique em "Conectar com Facebook".');
-}
-
-function initFbOAuth(){
-  _ensureSdk(()=>{
-    FB.login(r=>{
-      if(r.status==='connected') _onFbLogin(r.authResponse);
-      else sid('oauthMsg','⚠️ Login cancelado ou negado.');
-    },{scope:'pages_read_engagement,pages_show_list,read_insights,instagram_basic,instagram_manage_insights,business_management'});
-  });
-}
-
-async function _onFbLogin(auth){
-  sid('oauthMsg','🔄 Buscando páginas…');
+// ── Busca automática de páginas FB/IG ───────────────────
+async function fetchFbPages(){
+  const tok = document.getElementById('inputFbToken')?.value?.trim();
+  if(!tok || tok.startsWith('•')){ sid('fbMsg','⚠️ Cole o token primeiro'); return; }
+  sid('fbMsg','🔄 Buscando páginas…');
   try {
-    // Get pages the user manages with their Page Access Tokens
-    const res = await new Promise((ok,err)=>
-      FB.api('/me/accounts?fields=id,name,access_token,picture,instagram_business_account',
-        {access_token: auth.accessToken}, d=>d.error?err(d.error):ok(d))
-    );
-    const pages = res.data||[];
-    if(!pages.length){ sid('oauthMsg','⚠️ Nenhuma página encontrada. Você precisa ser Admin de uma Página.'); return; }
+    const res = await fetch(`https://graph.facebook.com/v20.0/me/accounts?fields=id,name,access_token,picture&access_token=${tok}`);
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message);
+    const pages = d.data||[];
+    if(!pages.length){ sid('fbMsg','Nenhuma página encontrada. Você precisa ser Admin de uma Página.'); return; }
 
-    // Store user token for fallback
-    localStorage.setItem('eco_fb_user_token', auth.accessToken);
-
-    // Render page list
-    renderFbPagesList(pages);
-    document.getElementById('fbPagesArea').style.display='block';
-    updateOauthBadge('pages');
-    sid('oauthMsg',`✅ ${pages.length} página(s) encontrada(s)`);
-  } catch(e){
-    sid('oauthMsg',`❌ ${e.message||JSON.stringify(e)}`);
-  }
+    const picker = document.getElementById('fbPagesPicker');
+    picker.style.display = 'block';
+    picker.innerHTML = `<div style="font-size:11px;color:var(--mu);margin-bottom:8px">${pages.length} página(s) encontrada(s) — clique para selecionar:</div>` +
+      pages.map(p=>`
+        <div onclick="selectFbPageFromPicker('${p.id}','${p.name.replace(/'/g,"\'")}','${p.access_token}')"
+          style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .15s"
+          onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--bdr)'">
+          <span style="font-size:18px">📄</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">${p.name}</div>
+          <div style="font-size:11px;color:var(--mu)">ID: ${p.id}</div></div>
+          <span style="font-size:11px;color:var(--blue);font-weight:600">Selecionar →</span>
+        </div>`).join('');
+    sid('fbMsg','');
+  } catch(e){ sid('fbMsg',`❌ ${e.message}`); }
 }
 
-function renderFbPagesList(pages){
-  const list = document.getElementById('fbPagesList');
-  if(!list) return;
-  list.innerHTML = pages.map(p=>{
-    const igId = p.instagram_business_account?.id || '';
-    const pic  = p.picture?.data?.url || '';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;transition:border-color .2s"
-      onclick="selectFbPage('${p.id}','${p.name.replace(/'/g,"\'")}','${p.access_token}','${igId}')"
-      id="fbPage_${p.id}">
-      ${pic?`<img src="${pic}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">`:
-            `<div style="width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px">📄</div>`}
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600;color:var(--tx)">${p.name}</div>
-        <div style="font-size:11px;color:var(--mu)">ID: ${p.id}${igId?' · 📸 IG vinculado':' · sem IG vinculado'}</div>
-      </div>
-      <button class="btn btn-ai" style="font-size:11px;padding:5px 14px">Selecionar</button>
-    </div>`;
-  }).join('');
-}
-
-function selectFbPage(fbId, name, token, igId){
-  // Save FB credentials
-  localStorage.setItem('eco_fb_token', token);
-  localStorage.setItem('eco_fb_page_id', fbId);
+function selectFbPageFromPicker(id, name, pageToken){
+  // Use the page-specific token (more reliable than user token)
+  document.getElementById('inputFbToken').value = '••••••••••';
+  document.getElementById('inputFbPageId').value = id;
+  localStorage.setItem('eco_fb_token', pageToken);
+  localStorage.setItem('eco_fb_page_id', id);
   updateFbBadge();
+  document.getElementById('fbPagesPicker').style.display='none';
+  sid('fbMsg',`✅ "${name}" selecionada — clique Salvar para confirmar`);
+}
 
-  // Show active page
-  const el = document.getElementById('fbActivePage');
-  if(el) el.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(79,142,247,.08);border:1px solid var(--blue);border-radius:8px">
-    <span style="font-size:16px">📘</span>
-    <div><div style="font-size:13px;font-weight:600;color:var(--tx)">${name}</div>
-    <div style="font-size:11px;color:var(--mu)">ID: ${fbId}</div></div>
-    <button class="btn" onclick="clearFbPage()" style="margin-left:auto;font-size:11px;color:var(--red)">✕</button>
-  </div>`;
+async function fetchIgAccounts(){
+  const tok = document.getElementById('inputIgToken')?.value?.trim();
+  if(!tok || tok.startsWith('•')){ sid('igMsg','⚠️ Cole o token primeiro'); return; }
+  sid('igMsg','🔄 Buscando contas Instagram…');
+  try {
+    // Fetch pages and their linked IG accounts
+    const res = await fetch(`https://graph.facebook.com/v20.0/me/accounts?fields=id,name,instagram_business_account&access_token=${tok}`);
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message);
+    const pages = (d.data||[]).filter(p=>p.instagram_business_account);
 
-  // Highlight selected
-  document.querySelectorAll('[id^="fbPage_"]').forEach(el=>el.style.borderColor='var(--bdr)');
-  const sel = document.getElementById('fbPage_'+fbId);
-  if(sel) sel.style.borderColor='var(--blue)';
-
-  // If page has IG linked, auto-configure Instagram
-  if(igId){
-    localStorage.setItem('eco_ig_account_id', igId);
-    // Use the page token for IG too
-    localStorage.setItem('eco_ig_token', token);
-    updateIgBadge();
-
-    const igArea = document.getElementById('igAccountArea');
-    const igList = document.getElementById('igAccountsList');
-    if(igArea && igList){
-      igList.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.3);border-radius:10px">
-        <span style="font-size:20px">📸</span>
-        <div><div style="font-size:13px;font-weight:600;color:var(--tx)">Instagram vinculado à página</div>
-        <div style="font-size:11px;color:var(--mu)">Account ID: ${igId}</div></div>
-        <span class="badge" style="background:rgba(232,121,249,.15);color:#e879f9;margin-left:auto">✓ Configurado</span>
-      </div>`;
-      igArea.style.display='block';
+    if(!pages.length){
+      sid('igMsg','Nenhuma conta Instagram Business vinculada encontrada. Verifique se sua conta IG está conectada a uma Página.');
+      return;
     }
-    sid('oauthMsg',`✅ Facebook + Instagram configurados automaticamente!`);
-  } else {
-    sid('oauthMsg',`✅ Página "${name}" selecionada. Configure o Instagram manualmente abaixo.`);
-  }
 
-  updateOauthBadge('connected');
+    const picker = document.getElementById('igAccountsPicker');
+    picker.style.display = 'block';
+    picker.innerHTML = `<div style="font-size:11px;color:var(--mu);margin-bottom:8px">${pages.length} conta(s) encontrada(s):</div>` +
+      pages.map(p=>`
+        <div onclick="selectIgAccountFromPicker('${p.instagram_business_account.id}','${p.name.replace(/'/g,"\'")}')"
+          style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .15s"
+          onmouseover="this.style.borderColor='#e879f9'" onmouseout="this.style.borderColor='var(--bdr)'">
+          <span style="font-size:18px">📸</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--tx)">Instagram vinculado a: ${p.name}</div>
+            <div style="font-size:11px;color:var(--mu)">IG Account ID: ${p.instagram_business_account.id}</div>
+          </div>
+          <span style="font-size:11px;color:#e879f9;font-weight:600">Selecionar →</span>
+        </div>`).join('');
+    sid('igMsg','');
+  } catch(e){ sid('igMsg',`❌ ${e.message}`); }
 }
 
-function clearFbPage(){
-  ['eco_fb_token','eco_fb_page_id'].forEach(k=>localStorage.removeItem(k));
-  const el = document.getElementById('fbActivePage');
-  if(el) el.textContent = 'Nenhuma página selecionada.';
-  updateFbBadge();
-  updateOauthBadge('pages');
+function selectIgAccountFromPicker(igId, pageName){
+  document.getElementById('inputIgAccountId').value = igId;
+  localStorage.setItem('eco_ig_account_id', igId);
+  document.getElementById('igAccountsPicker').style.display='none';
+  sid('igMsg',`✅ IG ID "${igId}" selecionado — clique Salvar`);
 }
 
-function updateOauthBadge(state){
-  const badge = document.getElementById('cfgOauthBadge');
-  if(!badge) return;
-  if(state==='connected'){
-    badge.textContent='✓ Conectado';
-    badge.style.background='rgba(52,211,153,.15)';
-    badge.style.color='#34d399';
-  } else if(state==='pages'){
-    badge.textContent='Escolha uma página';
-    badge.style.background='rgba(251,191,36,.15)';
-    badge.style.color='var(--amber)';
-  } else {
-    badge.textContent='Não conectado';
-    badge.style.background='rgba(107,122,158,.12)';
-    badge.style.color='var(--mu)';
-  }
-}
-
-function initOAuthConfig(){
-  const appId = localStorage.getItem('eco_fb_app_id');
-  if(appId){
-    const el = document.getElementById('inputFbAppId');
-    if(el) el.value = appId;
-    // Init SDK
-    if(typeof FB !== 'undefined' && !_fbSdkReady){
-      FB.init({appId, cookie:true, xfbml:false, version:'v20.0'});
-      _fbSdkReady = true;
-    }
-  }
-  const fbTok = localStorage.getItem('eco_fb_token');
-  const fbId  = localStorage.getItem('eco_fb_page_id');
-  if(fbTok && fbId) updateOauthBadge('connected');
-  updateFbBadge();
-  updateIgBadge();
-  // Restore manual inputs
-  const igTok = localStorage.getItem('eco_ig_token');
-  const igId  = localStorage.getItem('eco_ig_account_id');
-  if(igTok){ const el=document.getElementById('inputIgToken'); if(el) el.value='••••••••••'; }
-  if(igId) { const el=document.getElementById('inputIgAccountId'); if(el) el.value=igId; }
-  if(fbTok){ const el=document.getElementById('inputFbToken'); if(el) el.value='••••••••••'; }
-  if(fbId) { const el=document.getElementById('inputFbPageId'); if(el) el.value=fbId; }
-  // Show active FB page info
-  if(fbId && fbTok){
-    const el = document.getElementById('fbActivePage');
-    if(el) el.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(79,142,247,.08);border:1px solid var(--blue);border-radius:8px">
-      <span style="font-size:16px">📘</span>
-      <div style="font-size:13px;font-weight:600;color:var(--tx)">Página ID: ${fbId}</div>
-      <button class="btn" onclick="clearFbPage()" style="margin-left:auto;font-size:11px;color:var(--red)">✕ Desconectar</button>
-    </div>`;
-  }
-  if(igId){
-    const igArea = document.getElementById('igAccountArea');
-    const igList = document.getElementById('igAccountsList');
-    if(igArea && igList){
-      igList.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.3);border-radius:10px">
-        <span style="font-size:20px">📸</span>
-        <div style="font-size:13px;font-weight:600;color:var(--tx)">Instagram configurado · ID: ${igId}</div>
-        <span class="badge" style="background:rgba(232,121,249,.15);color:#e879f9;margin-left:auto">✓ Ativo</span>
-      </div>`;
-      igArea.style.display='block';
-    }
-  }
-}
 
 // ── Instagram Config ────────────────────────────────────
 function saveIgConfig(){
@@ -3561,7 +3408,8 @@ let currentMetaCamp  = null; // campanha atual
 function initConfigPage(){
   renderAccountsList();
   updateConfigStatus();
-  initOAuthConfig();
+  initIgConfig();
+  initFbConfig();
   // Claude key mascarado
   const k  = localStorage.getItem('eco_claude_key') || '';
   const ki = document.getElementById('inputClaudeKey');

@@ -2739,13 +2739,25 @@ function salvarGadsSheet(){
   if(!inp) return;
   const raw = inp.value.trim();
   if(!raw){ alert('Cole a URL ou ID da planilha Google Ads.'); return; }
+
+  // 1. Try to extract from full URL
+  let id = '', gid = localStorage.getItem('eco_gads_gid')||'0';
   const mId  = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  const id   = mId ? mId[1] : raw;
   const mGid = raw.match(/[?&#]gid=(\d+)/);
-  const gid  = mGid ? mGid[1] : '0';
+  if(mId){
+    id  = mId[1];
+    gid = mGid ? mGid[1] : gid; // keep existing gid if URL has none
+  } else {
+    // Not a URL — strip any display suffix like " (aba: 123456)" to get bare ID
+    id = raw.replace(/\s*\(aba:.*?\)\s*$/,'').trim();
+    const mG2 = raw.match(/aba:\s*(\d+)/);
+    if(mG2) gid = mG2[1];
+  }
+
+  if(!id){ alert('Não foi possível extrair o ID. Cole a URL completa da planilha.'); return; }
   setGadsSheetId(id);
   localStorage.setItem('eco_gads_gid', gid);
-  inp.value = id + (gid!=='0' ? ' (aba: '+gid+')' : '');
+  inp.value = id + (gid&&gid!=='0' ? ' (aba: '+gid+')' : '');
   dadosGads = []; rawGadsRows = [];
   const msg = document.getElementById('gadsMsg');
   if(msg){ msg.textContent = 'Salvo! ID: '+id.slice(0,12)+'... | aba: '+gid+'. Clique em Testar.'; msg.style.color='var(--green)'; }

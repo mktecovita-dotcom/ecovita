@@ -1121,7 +1121,7 @@ body.light .theme-label{color:var(--blue)}
         <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:10px">
           <div>
             <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:5px">ID da Planilha Google Ads</label>
-            <input type="text" id="gadsSheetId" placeholder="Ex: 1cOKKMVl19i3pnWF6jSFxmfkV_ZfU93NGkaZXFGWFlC4"
+            <input type="text" id="gadsSheetId" placeholder="Cole a URL completa do Sheets (extrai ID e aba automaticamente)"
               style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--tx);outline:none;font-family:inherit">
           </div>
           <div style="display:flex;gap:8px">
@@ -2724,28 +2724,40 @@ function salvarGadsSheet(){
   const inp = document.getElementById('gadsSheetId');
   if(!inp) return;
   const raw = inp.value.trim();
-  if(!raw){ alert('Cole o ID da planilha Google Ads.'); return; }
-  const m = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  const id = m ? m[1] : raw;
+  if(!raw){ alert('Cole a URL ou ID da planilha Google Ads.'); return; }
+  const mId  = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const id   = mId ? mId[1] : raw;
+  const mGid = raw.match(/[?&#]gid=(\d+)/);
+  const gid  = mGid ? mGid[1] : '0';
   setGadsSheetId(id);
-  inp.value = id;
-  dadosGads = []; // reset cache
+  localStorage.setItem('eco_gads_gid', gid);
+  inp.value = id + (gid!=='0' ? ' (aba: '+gid+')' : '');
+  dadosGads = [];
   const msg = document.getElementById('gadsMsg');
-  if(msg){ msg.textContent = 'ID salvo! Clique em Testar para validar a conexao.'; msg.style.color='var(--green)'; }
+  if(msg){ msg.textContent = 'Salvo! ID: '+id.slice(0,12)+'... | aba: '+gid+'. Clique em Testar.'; msg.style.color='var(--green)'; }
   updateGadsBadge();
 }
 
 async function testarGadsSheet(){
-  const id = getGadsSheetId() || (document.getElementById('gadsSheetId')||{}).value || '';
-  if(!id){ alert('Cole o ID da planilha primeiro.'); return; }
+  var id  = getGadsSheetId() || '';
+  var gid = parseInt(localStorage.getItem('eco_gads_gid')||'0')||0;
+  if(!id){
+    var inp2 = document.getElementById('gadsSheetId');
+    var raw2 = inp2 ? inp2.value.trim() : '';
+    var mId2  = raw2.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+    var mGid2 = raw2.match(/[?&#]gid=(\d+)/);
+    id  = mId2 ? mId2[1] : raw2;
+    gid = mGid2 ? parseInt(mGid2[1]) : 0;
+  }
+  if(!id){ alert('Cole a URL ou ID da planilha primeiro.'); return; }
   const btn = document.getElementById('btnTestarGads');
   const msg = document.getElementById('gadsMsg');
   if(btn){ btn.disabled=true; btn.textContent='Testando...'; }
   try{
-    const rows = await fetchCSV(id, 0);
+    const rows = await fetchCSV(id, gid);
     dadosGads = parseGAds(rows);
-    if(!dadosGads.length) throw new Error('Planilha vazia ou colunas nao encontradas.');
-    if(msg){ msg.textContent = dadosGads.length + ' campanhas carregadas com sucesso!'; msg.style.color='var(--green)'; }
+    if(!dadosGads.length) throw new Error('Nenhuma campanha encontrada. Verifique o formato da planilha (aba: '+gid+').');
+    if(msg){ msg.textContent = dadosGads.length + ' campanhas carregadas! Acesse a pagina Google Ads.'; msg.style.color='var(--green)'; }
     updateGadsBadge();
   } catch(e){
     if(msg){ msg.textContent = 'Erro: ' + e.message; msg.style.color='var(--red)'; }
@@ -2763,35 +2775,70 @@ function updateGadsBadge(){
 }
 
 function parseGAds(rows){
+  // The Google Ads Sheet export is an ad-level daily report.
+  // Columns: Day, ..., Campaign, Ad group, Status, Clicks, CTR, Avg. CPC,
+  //          Impr., Cost, Conversions, Cost / conv., Conv. value, Campaign type
+  // Numbers use European format: "1.234,56" decimals and "5,75%" for percentages.
+  // We aggregate by Campaign name and compute derived metrics.
   if(!rows||!rows.length) return [];
   function toNum(v){
-    if(!v||v==='-'||v==='--'||v==='') return 0;
-    return parseFloat(String(v).replace(/[R$\s%]/g,'').replace(/\./g,'').replace(',','.')) || 0;
+    if(!v||v==='-'||v==='--'||v===''||v===0) return 0;
+    var s = String(v).trim().replace(/[R$\s%]/g,'');
+    // European: "1.549,05" -> remove dots, replace comma
+    if(s.indexOf(',')>=0 && s.indexOf('.')>=0) s = s.replace(/\./g,'').replace(',','.');
+    else if(s.indexOf(',')>=0) s = s.replace(',','.');
+    return parseFloat(s)||0;
   }
-  function toPct(v){
-    if(!v||v==='-'||v==='') return 0;
-    return parseFloat(String(v).replace('%','').replace(',','.')) || 0;
+  function mapTipoGads(t){
+    if(!t) return 'Pesquisa';
+    t = t.toLowerCase();
+    if(t==='search'||t.indexOf('pesquisa')>=0) return 'Pesquisa';
+    if(t==='display') return 'Display';
+    if(t==='video'||t.indexOf('vídeo')>=0) return 'YouTube';
+    if(t==='shopping') return 'Shopping';
+    if(t.indexOf('performance')>=0||t.indexOf('max')>=0) return 'Performance Max';
+    return t.charAt(0).toUpperCase()+t.slice(1);
   }
-  return rows.filter(function(r){ return r['Campanha']||r['Campaign']; }).map(function(r){
-    var nome   = r['Campanha']||r['Campaign']||'';
-    var st     = r['Status da campanha']||r['Campaign status']||r['Status']||'';
-    var tipo   = r['Tipo de campanha']||r['Campaign type']||r['Tipo']||'Pesquisa';
+  // Aggregate by campaign
+  var camps = {};
+  rows.forEach(function(r){
+    var nome = r['Campaign']||r['Campanha']||'';
+    if(!nome||nome==='--'||nome==='-'||nome.toLowerCase().indexOf('total')>=0) return;
+    if(!camps[nome]){
+      var tipo = r['Campaign type']||r['Tipo de campanha']||'Search';
+      camps[nome] = { nome:nome, tipo:mapTipoGads(tipo), status:'Pausada',
+        impressoes:0, cliques:0, custo:0, conversoes:0, valorConv:0 };
+    }
+    var ag = camps[nome];
+    ag.impressoes += toNum(r['Impr.']||r['Impressões']||r['Impressions']||0);
+    ag.cliques    += toNum(r['Clicks']||r['Cliques']||0);
+    ag.custo      += toNum(r['Cost']||r['Custo']||0);
+    ag.conversoes += toNum(r['Conversions']||r['Conversões']||0);
+    ag.valorConv  += toNum(r['Conv. value']||r['Valor conv. total']||0);
+    // Mark active if any row is Enabled/Eligible
+    var st = (r['Status']||r['Ad status']||'').toLowerCase();
+    if(st==='enabled'||st==='eligible') ag.status='Ativa';
+  });
+  return Object.values(camps).map(function(ag){
+    var ctr    = ag.impressoes>0 ? ag.cliques/ag.impressoes*100 : 0;
+    var cpc    = ag.cliques>0    ? ag.custo/ag.cliques          : 0;
+    var txConv = ag.cliques>0    ? ag.conversoes/ag.cliques*100 : 0;
+    var custoC = ag.conversoes>0 ? ag.custo/ag.conversoes       : 0;
+    var roas   = ag.custo>0      ? ag.valorConv/ag.custo        : 0;
     return {
-      nome: nome,
-      status: (st.toLowerCase().indexOf('ativ') >= 0) ? 'Ativa' : 'Pausada',
-      tipo: tipo,
-      impressoes: toNum(r['Impressoes']||r['Impressões']||r['Impressions']||0),
-      cliques:    toNum(r['Cliques']||r['Clicks']||0),
-      ctr:        toPct(r['CTR']||r['Ctr']||0),
-      cpc:        toNum(r['CPC medio']||r['CPC médio']||r['Avg. CPC']||r['CPC']||0),
-      custo:      toNum(r['Custo']||r['Cost']||0),
-      conversoes: toNum(r['Conversoes']||r['Conversões']||r['Conversions']||0),
-      txConv:     toPct(r['Taxa de conv.']||r['Conv. rate']||0),
-      custoConv:  toNum(r['Custo/conv.']||r['Cost/conv.']||0),
-      valorConv:  toNum(r['Valor conv. total']||r['Conv. value']||0),
-      roas:       toNum(r['ROAS']||r['Conv. value/cost']||0),
+      nome:ag.nome, tipo:ag.tipo, status:ag.status,
+      impressoes: Math.round(ag.impressoes),
+      cliques:    Math.round(ag.cliques),
+      ctr:        parseFloat(ctr.toFixed(2)),
+      cpc:        parseFloat(cpc.toFixed(2)),
+      custo:      parseFloat(ag.custo.toFixed(2)),
+      conversoes: parseFloat(ag.conversoes.toFixed(1)),
+      txConv:     parseFloat(txConv.toFixed(2)),
+      custoConv:  parseFloat(custoC.toFixed(2)),
+      valorConv:  parseFloat(ag.valorConv.toFixed(2)),
+      roas:       parseFloat(roas.toFixed(2)),
     };
-  }).filter(function(r){ return r.nome; });
+  }).filter(function(r){ return r.cliques+r.impressoes>0; });
 }
 
 async function renderGoogleAds(){
@@ -2809,11 +2856,13 @@ async function renderGoogleAds(){
   if(!dadosGads.length){
     var tb = document.getElementById('gadsTableBody');
     if(tb) tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--mu)">Carregando dados do Google Ads...</td></tr>';
+    var gadGid = parseInt(localStorage.getItem('eco_gads_gid')||'0')||0;
     try{
-      var rows = await fetchCSV(id, 0);
+      var rows = await fetchCSV(id, gadGid);
       dadosGads = parseGAds(rows);
+      if(!dadosGads.length) throw new Error('Nenhuma campanha com dados encontrada. Verifique a planilha e o numero da aba (gid='+gadGid+').');
     } catch(e){
-      if(tb) tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--red)">Erro: '+e.message+'<br><small style="color:var(--mu)">Verifique se a planilha esta publica como Leitor.</small></td></tr>';
+      if(tb) tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--red)">Erro: '+e.message+'<br><small style="color:var(--mu)">Verifique se a planilha esta publica. Em Configuracoes, cole a URL completa com o gid.</small></td></tr>';
       return;
     }
   }
@@ -3182,7 +3231,11 @@ function initConfigPage(){
   if(ki) ki.value = k ? '••••••••••••••••' : '';
   // Google Ads
   var gadsInp = document.getElementById('gadsSheetId');
-  if(gadsInp) gadsInp.value = getGadsSheetId();
+  if(gadsInp){
+    var gadsId  = getGadsSheetId();
+    var gadsGid = localStorage.getItem('eco_gads_gid')||'0';
+    gadsInp.value = gadsId ? gadsId + (gadsGid!=='0'?' (aba: '+gadsGid+')':'') : '';
+  }
   updateGadsBadge();
 }
 

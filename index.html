@@ -840,7 +840,7 @@ body.light .theme-label{color:var(--blue)}
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
           <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><canvas id="gadsChartTipo" height="200"></canvas></div>
-          <div class="card"><div class="card-hd"><div class="card-title">🎯 CTR vs Taxa de Conversão</div></div><canvas id="gadsChartCTR" height="200"></canvas></div>
+          <div class="card"><div class="card-hd"><div class="card-title">🏆 Impr. no Topo (%)</div></div><canvas id="gadsChartCTR" height="200"></canvas></div>
         </div>
 
         <div class="card" style="margin-bottom:14px">
@@ -2807,14 +2807,17 @@ function parseGAds(rows){
     if(!camps[nome]){
       var tipo = r['Campaign type']||r['Tipo de campanha']||'Search';
       camps[nome] = { nome:nome, tipo:mapTipoGads(tipo), status:'Pausada',
-        impressoes:0, cliques:0, custo:0, conversoes:0, valorConv:0 };
+        impressoes:0, sumImprTop:0, cliques:0, custo:0, conversoes:0, valorConv:0 };
     }
     var ag = camps[nome];
-    ag.impressoes += toNum(r['Impr.']||r['Impressões']||r['Impressions']||0);
-    ag.cliques    += toNum(r['Clicks']||r['Cliques']||0);
-    ag.custo      += toNum(r['Cost']||r['Custo']||0);
-    ag.conversoes += toNum(r['Conversions']||r['Conversões']||0);
-    ag.valorConv  += toNum(r['Conv. value']||r['Valor conv. total']||0);
+    var imp = toNum(r['Impr.']||r['Impressões']||r['Impressions']||0);
+    var topPct = toNum(r['Impr. (Top) %']||r['Impr. (topo) %']||0);
+    ag.impressoes  += imp;
+    ag.sumImprTop  += topPct * imp; // weighted sum for avg
+    ag.cliques     += toNum(r['Clicks']||r['Cliques']||0);
+    ag.custo       += toNum(r['Cost']||r['Custo']||0);
+    ag.conversoes  += toNum(r['Conversions']||r['Conversões']||0);
+    ag.valorConv   += toNum(r['Conv. value']||r['Valor conv. total']||0);
     // Mark active if any row is Enabled/Eligible
     var st = (r['Status']||r['Ad status']||'').toLowerCase();
     if(st==='enabled'||st==='eligible') ag.status='Ativa';
@@ -2828,6 +2831,7 @@ function parseGAds(rows){
     return {
       nome:ag.nome, tipo:ag.tipo, status:ag.status,
       impressoes: Math.round(ag.impressoes),
+      imprTop:    ag.impressoes>0 ? parseFloat((ag.sumImprTop/ag.impressoes).toFixed(1)) : 0,
       cliques:    Math.round(ag.cliques),
       ctr:        parseFloat(ctr.toFixed(2)),
       cpc:        parseFloat(cpc.toFixed(2)),
@@ -2919,18 +2923,20 @@ async function renderGoogleAds(){
       tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.label+': R$ '+ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:2}); } } } } }
   );
 
-  // Chart: CTR vs Conversao top 8
-  var top8 = dados.slice().sort(function(a,b){ return b.custo-a.custo; }).slice(0,8);
-  var cLab = top8.map(function(r){ return r.nome.length>20?r.nome.slice(0,18)+'...':r.nome; });
+  // Chart: Impr. no Topo (%) — top 8 por impressoes
+  var top8t = dados.filter(function(r){ return r.imprTop>0; })
+               .slice().sort(function(a,b){ return b.impressoes-a.impressoes; }).slice(0,8);
+  if(!top8t.length) top8t = dados.slice().sort(function(a,b){ return b.impressoes-a.impressoes; }).slice(0,8);
+  var cLab = top8t.map(function(r){ return r.nome.length>22?r.nome.slice(0,20)+'…':r.nome; });
   mkChart('gadsChartCTR','bar',cLab,[
-    { label:'CTR (%)', data:top8.map(function(r){ return parseFloat(r.ctr.toFixed(2)); }), backgroundColor:'rgba(79,142,247,.7)', yAxisID:'y' },
-    { label:'Conv. (%)', data:top8.map(function(r){ return parseFloat(r.txConv.toFixed(2)); }), backgroundColor:'rgba(46,204,142,.7)', yAxisID:'y2' },
+    { label:'Impr. no Topo (%)', data:top8t.map(function(r){ return r.imprTop; }),
+      backgroundColor:'rgba(245,166,35,.75)', borderRadius:6, borderSkipped:false }
   ],{
-    plugins:{ legend:{ labels:{ color:clrTx, font:{size:11} } } },
+    plugins:{ legend:{ labels:{ color:clrTx, font:{size:11} } },
+      tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.raw.toFixed(1)+'%'; } } } },
     scales:{
-      x:{ ticks:{ color:clrMu, font:{size:10}, maxRotation:30 }, grid:{ color:clrGrid } },
-      y:{ position:'left', ticks:{ color:'#4f8ef7', callback:function(v){ return v+'%'; } }, grid:{ color:clrGrid } },
-      y2:{ position:'right', ticks:{ color:'#2ecc8e', callback:function(v){ return v+'%'; } }, grid:{ display:false } },
+      x:{ ticks:{ color:clrMu, font:{size:10}, maxRotation:35 }, grid:{ color:clrGrid } },
+      y:{ min:0, max:100, ticks:{ color:clrMu, callback:function(v){ return v+'%'; } }, grid:{ color:clrGrid } },
     }
   });
 

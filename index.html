@@ -431,10 +431,13 @@ body.light .theme-label{color:var(--blue)}
         <span class="nav-icon">📊</span> Dashboard
       </div>
       <div class="nav-item" onclick="goPage('campanhas')">
-        <span class="nav-icon">📣</span> Campanhas
+        <span class="nav-icon">📣</span> Campanhas Meta
       </div>
       <div class="nav-item" onclick="goPage('meta')">
         <span class="nav-icon">🎨</span> Criativos Meta
+      </div>
+      <div class="nav-item" onclick="goPage('gads')">
+        <span class="nav-icon">🔍</span> Google Ads
       </div>
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
@@ -449,7 +452,13 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('mercado')">
         <span class="nav-icon">🔍</span> Pesquisa de Mercado
       </div>
-      
+      <div class="sb-section">Conteúdo Orgânico</div>
+      <div class="nav-item" onclick="goPage('instagram')">
+        <span class="nav-icon">📸</span> Instagram Orgânico
+      </div>
+      <div class="nav-item" onclick="goPage('facebook')">
+        <span class="nav-icon">📘</span> Facebook Orgânico
+      </div>
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -780,116 +789,95 @@ body.light .theme-label{color:var(--blue)}
     </div>
 
     
-    <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
 
-<!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
+    <!-- ══════════════ PAGE: GOOGLE ADS ══════════════ -->
+    <div class="page" id="page-gads">
 
-<!-- ══════════════ PAGE: MELHORIAS ══════════════ -->
-    <div class="page" id="page-melhorias">
-      <div class="fbar">
-        <span class="fl">Objetivo:</span>
-        <select id="fMelObj" onchange="renderMelhorias()"><option value="">Todos</option></select>
-        <span class="fl">Mostrar apenas:</span>
-        <select id="fMelPrio" onchange="renderMelhorias()">
-          <option value="">Todas as campanhas</option>
-          <option value="critico">Crítico (CTR baixo + CPC alto)</option>
-          <option value="otimizar">Para otimizar</option>
-        </select>
-      </div>
-      <div id="melhoriasContent"></div>
-    </div>
-
-    <!-- ══════════════ PAGE: IA ANÁLISE ══════════════ -->
-    <div class="page" id="page-ia">
-      <div class="grid g21" style="margin-bottom:16px">
-        <div>
-          <div class="ia-box">
-            <div class="ia-header">
-              <div class="ia-icon">🤖</div>
-              <div>
-                <div class="ia-title">Análise Inteligente de Campanhas</div>
-                <div class="ia-sub">Powered by Claude · Atualizado com dados reais</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-              <button class="btn btn-ai" onclick="analisarIA('geral')">📊 Análise Geral</button>
-              <button class="btn btn-ai" onclick="analisarIA('campanhas')">📣 Top Campanhas</button>
-              <button class="btn btn-ai" onclick="analisarIA('leads')">👥 Análise de Leads</button>
-              <button class="btn btn-ai" onclick="analisarIA('orcamento')">💰 Otimização de Orçamento</button>
-              <button class="btn btn-ai" onclick="analisarIA('proximos')">🎯 Próximos Passos</button>
-            </div>
-            <div id="iaResult">
-              <div style="font-size:13px;color:var(--mu);text-align:center;padding:24px 0">
-                Selecione um tipo de análise acima para que a IA analise seus dados em tempo real.
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="card" style="margin-bottom:12px">
-            <div class="card-hd"><div class="card-title">Alertas automáticos</div><span class="badge red" id="alertCount">—</span></div>
-            <div id="alertList" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-          <div class="card">
-            <div class="card-hd"><div class="card-title">Score de saúde das campanhas</div></div>
-            <div class="cw" style="height:200px"><canvas id="cScore"></canvas></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: MERCADO ══════════════ -->
-    <div class="page" id="page-mercado">
-      <div class="mercado-form">
-        <h3>➕ Adicionar Concorrente</h3>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Nome do Concorrente</label>
-            <input type="text" id="mNome" placeholder="Ex: Construtora XYZ">
-          </div>
-          <div class="form-field">
-            <label>Cidade de Atuação</label>
-            <input type="text" id="mCidade" placeholder="Ex: Bauru, SP">
-          </div>
-          <div class="form-field">
-            <label>Ticket Médio (R$)</label>
-            <input type="number" id="mTicket" placeholder="Ex: 220000">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-field">
-            <label>CPL estimado (R$)</label>
-            <input type="number" id="mCpl" placeholder="Ex: 35">
-          </div>
-          <div class="form-field">
-            <label>Investimento mensal (R$)</label>
-            <input type="number" id="mInvest" placeholder="Ex: 15000">
-          </div>
-          <div class="form-field">
-            <label>Canais usados</label>
-            <input type="text" id="mCanais" placeholder="Ex: Meta, Google, TikTok">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-field" style="grid-column:span 3">
-            <label>Observações / Diferenciais</label>
-            <textarea id="mObs" placeholder="Ex: Foco em WhatsApp, criativo com vídeo, campanha de alcance forte…"></textarea>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-primary" onclick="addConcorrente()">Salvar concorrente</button>
-          <button class="btn btn-ai" onclick="analisarMercado()">🤖 Analisar mercado com IA</button>
-        </div>
+      <div id="gadsNotConfigured" style="display:none;text-align:center;padding:60px 20px">
+        <div style="font-size:48px;margin-bottom:16px">🔍</div>
+        <div style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px">Google Ads não conectado</div>
+        <div style="font-size:13px;color:var(--mu);margin-bottom:20px">Configure a planilha Google Ads em Configurações de API.</div>
+        <button class="btn btn-primary" onclick="goPage('config')">⚙️ Ir para Configurações</button>
       </div>
 
-      <div id="concorrentesContent">
-        <div style="font-size:13px;color:var(--mu);text-align:center;padding:32px 0">
-          Nenhum concorrente cadastrado ainda. Adicione acima para começar a análise de mercado.
+      <div id="gadsContent">
+        <div class="fbar" style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+            <span class="fl">Tipo:</span>
+            <select id="gfTipo" onchange="renderGoogleAds()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tx)">
+              <option value="">Todos</option>
+              <option value="Pesquisa">Pesquisa</option>
+              <option value="Display">Display</option>
+              <option value="YouTube">YouTube</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Performance Max">Performance Max</option>
+            </select>
+            <span class="fl">Status:</span>
+            <select id="gfStatus" onchange="renderGoogleAds()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tx)">
+              <option value="">Todos</option>
+              <option value="Ativa">Ativas</option>
+              <option value="Pausada">Pausadas</option>
+            </select>
+          </div>
+          <span id="gadsInfo" style="font-size:11px;color:var(--mu);white-space:nowrap;padding-left:12px"></span>
+        </div>
+
+        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+          <div class="kpi green"><div class="kpi-label">Gasto Total</div><div class="kpi-val" id="gk_gasto">—</div><div class="kpi-sub" id="gk_gastoS">Google Ads</div></div>
+          <div class="kpi blue"><div class="kpi-label">Cliques</div><div class="kpi-val" id="gk_cliques">—</div><div class="kpi-sub" id="gk_cliquesS">Total de cliques</div></div>
+          <div class="kpi purple"><div class="kpi-label">Impressões</div><div class="kpi-val" id="gk_imp">—</div><div class="kpi-sub" id="gk_impS">Alcance de exibição</div></div>
+          <div class="kpi amber"><div class="kpi-label">CTR Médio</div><div class="kpi-val" id="gk_ctr">—</div><div class="kpi-sub" id="gk_ctrS">Taxa de clique</div></div>
+          <div class="kpi teal"><div class="kpi-label">CPC Médio</div><div class="kpi-val" id="gk_cpc">—</div><div class="kpi-sub" id="gk_cpcS">Custo por clique</div></div>
+        </div>
+
+        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+          <div class="kpi green"><div class="kpi-label">Conversões</div><div class="kpi-val" id="gk_conv">—</div><div class="kpi-sub" id="gk_convS">Total convertido</div></div>
+          <div class="kpi blue"><div class="kpi-label">Taxa de Conv.</div><div class="kpi-val" id="gk_txconv">—</div><div class="kpi-sub" id="gk_txconvS">Cliques → Conversão</div></div>
+          <div class="kpi red"><div class="kpi-label">Custo/Conv. (CPA)</div><div class="kpi-val" id="gk_cpa">—</div><div class="kpi-sub" id="gk_cpaS">Custo por conversão</div></div>
+          <div class="kpi amber"><div class="kpi-label">ROAS</div><div class="kpi-val" id="gk_roas">—</div><div class="kpi-sub" id="gk_roasS">Retorno sobre gasto</div></div>
+          <div class="kpi purple"><div class="kpi-label">Campanhas Ativas</div><div class="kpi-val" id="gk_ativas">—</div><div class="kpi-sub" id="gk_ativasS">de total</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><canvas id="gadsChartTipo" height="200"></canvas></div>
+          <div class="card"><div class="card-hd"><div class="card-title">🎯 CTR vs Taxa de Conversão</div></div><canvas id="gadsChartCTR" height="200"></canvas></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd">
+            <div class="card-title">📋 Performance por Campanha</div>
+            <span id="gadsCampCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 campanhas</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px" id="gadsTable">
+              <thead>
+                <tr style="border-bottom:1px solid var(--bdr)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Campanha</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Status</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Gasto</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Cliques</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CTR</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CPC</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Conv.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CPA</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">ROAS</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Saúde</th>
+                </tr>
+              </thead>
+              <tbody id="gadsTableBody">
+                <tr><td colspan="11" style="text-align:center;padding:30px;color:var(--mu)">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><div class="card-title">📊 CPA por Campanha (top 10)</div></div>
+          <div id="gadsCPABars" style="display:flex;flex-direction:column;gap:8px;padding:4px 0"></div>
         </div>
       </div>
-
-      <div id="mercadoIA" style="display:none;margin-top:16px"></div>
-    </div>
+    </div><!-- /page-gads -->
 
     <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
     <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
@@ -959,7 +947,89 @@ body.light .theme-label{color:var(--blue)}
         </div>
       </div>
 
+      <!-- Bloco Instagram Orgânico -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">📸 Instagram Orgânico</div>
+          <span class="badge" id="cfgIgBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
 
+        <!-- Passo 1: Token -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">① Cole seu Token de Acesso</div>
+          <div style="font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6">
+            Acesse <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--blue)">developers.facebook.com/tools/explorer</a>
+            → selecione seu app → clique <b>Gerar Token</b> → ative:
+            <code style="background:rgba(232,121,249,.1);color:#e879f9;padding:1px 5px;border-radius:4px">instagram_basic · instagram_manage_insights · pages_show_list</code>
+          </div>
+          <input type="password" id="inputIgToken" placeholder="Cole o token aqui (EAA…)" autocomplete="new-password"
+            style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
+        </div>
+
+        <!-- Passo 2: Buscar IG Account ID -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">② Buscar seu Instagram Business Account ID</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <button class="btn btn-ai" onclick="fetchIgAccounts()" style="white-space:nowrap">🔍 Buscar páginas vinculadas</button>
+            <span style="font-size:11px;color:var(--mu)">O sistema usa o token para encontrar seu IG automaticamente</span>
+          </div>
+          <div id="igAccountsPicker" style="display:none;margin-top:8px"></div>
+          <div style="margin-top:10px">
+            <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Instagram Business Account ID</label>
+            <input type="text" id="inputIgAccountId" placeholder="Preenchido ao buscar, ou cole manualmente (17841400…)"
+              style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="saveIgConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testIgConfig()" id="btnTestIg">🔍 Testar conexão</button>
+          <button class="btn" onclick="clearIgConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="igMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+      </div>
+
+      <!-- Bloco Facebook Orgânico -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div class="card-title">📘 Facebook Orgânico</div>
+          <span class="badge" id="cfgFbBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
+        </div>
+
+        <!-- Passo 1: Token -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">① Cole seu Token de Acesso</div>
+          <div style="font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6">
+            Acesse <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--blue)">developers.facebook.com/tools/explorer</a>
+            → selecione seu app → clique <b>Gerar Token</b> → ative:
+            <code style="background:rgba(79,142,247,.1);color:var(--blue);padding:1px 5px;border-radius:4px">pages_read_engagement · pages_show_list · read_insights</code>
+          </div>
+          <input type="password" id="inputFbToken" placeholder="Cole o token aqui (EAA…)" autocomplete="new-password"
+            style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
+        </div>
+
+        <!-- Passo 2: Buscar Page ID -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">② Buscar seu Facebook Page ID</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <button class="btn btn-ai" onclick="fetchFbPages()" style="white-space:nowrap">🔍 Buscar minhas páginas</button>
+            <span style="font-size:11px;color:var(--mu)">O sistema lista suas páginas para você escolher</span>
+          </div>
+          <div id="fbPagesPicker" style="display:none;margin-top:8px"></div>
+          <div style="margin-top:10px">
+            <label style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Facebook Page ID</label>
+            <input type="text" id="inputFbPageId" placeholder="Preenchido ao buscar, ou cole manualmente (337403…)"
+              style="width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;box-sizing:border-box">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="saveFbConfig()">💾 Salvar</button>
+          <button class="btn" onclick="testFbConfig()" id="btnTestFb">🔍 Testar conexão</button>
+          <button class="btn" onclick="clearFbConfig()" style="color:var(--red)">✕ Limpar</button>
+          <span id="fbMsg" style="font-size:12px;margin-left:4px"></span>
+        </div>
+      </div>
 
       <!-- Bloco Claude API -->
       <div class="card" style="margin-bottom:14px">
@@ -992,10 +1062,10 @@ body.light .theme-label{color:var(--blue)}
       </div>
 
       <!-- Bloco Planilhas Google -->
-      <div class="card">
+      <div class="card" style="margin-bottom:14px">
         <div class="card-hd">
           <div class="card-title">📊 Google Sheets — Planilhas conectadas</div>
-          <span class="badge green">3 ativas</span>
+          <span class="badge green">3 fixas</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px">
@@ -1027,6 +1097,39 @@ body.light .theme-label{color:var(--blue)}
           As planilhas são públicas (Leitor) e lidas via CSV direto. Nenhuma credencial necessária.
           Auto-refresh às 08:00 diariamente.
         </div>
+      </div>
+
+
+      <!-- Google Ads Sheet Config -->
+      <div class="card" style="margin-top:14px">
+        <div class="card-hd">
+          <div class="card-title">🔍 Google Ads — Planilha de Dados</div>
+          <span class="badge" id="cfgGadsBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não conectada</span>
+        </div>
+        <div style="margin-bottom:14px;padding:12px 14px;background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.2);border-radius:10px;font-size:12px;line-height:1.9;color:var(--mu2)">
+          <b style="color:var(--tx);display:block;margin-bottom:6px">Como conectar (sem API, grátis):</b>
+          <b style="color:var(--blue)">1.</b> Abra uma planilha nova no Google Sheets<br>
+          <b style="color:var(--blue)">2.</b> Clique em <b>Extensões → Complementos → Instalar complementos</b> e pesquise <b>"Google Ads"</b><br>
+          <b style="color:var(--blue)">3.</b> Instale o complemento oficial e clique em <b>Extensões → Google Ads → Criar relatório</b><br>
+          <b style="color:var(--blue)">4.</b> Configure com colunas: Campanha, Status, Tipo, Impressões, Cliques, CTR, CPC médio, Custo, Conversões, Taxa de conv., Custo/conv., Valor conv. total, ROAS<br>
+          <b style="color:var(--blue)">5.</b> Execute o relatório, depois <b>Compartilhar → Qualquer pessoa com o link → Leitor</b><br>
+          <b style="color:var(--blue)">6.</b> Cole o ID da planilha abaixo e clique Salvar
+          <div style="margin-top:8px;padding:7px 10px;background:var(--bg3);border-radius:6px;font-size:11px;color:var(--mu)">
+            💡 O ID está na URL: docs.google.com/spreadsheets/d/<b style="color:var(--amber)">SEU_ID</b>/edit
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:5px">ID da Planilha Google Ads</label>
+            <input type="text" id="gadsSheetId" placeholder="Ex: 1cOKKMVl19i3pnWF6jSFxmfkV_ZfU93NGkaZXFGWFlC4"
+              style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--tx);outline:none;font-family:inherit">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="salvarGadsSheet()">Salvar</button>
+            <button class="btn" onclick="testarGadsSheet()" id="btnTestarGads">Testar</button>
+          </div>
+        </div>
+        <div id="gadsMsg" style="font-size:12px;min-height:18px"></div>
       </div>
 
     </div><!-- /page-config -->
@@ -1210,7 +1313,7 @@ function startCountdown(){
 // ═══════════════════════════════════════════════════════
 const PAGE_TITLES={
   dashboard:'Dashboard',campanhas:'Campanhas Meta',
-  investimento:'Investimento',
+  investimento:'Investimento',gads:'Google Ads',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
   config:'Configurações de API',meta:'Criativos Meta API'
@@ -1220,18 +1323,21 @@ function goPage(pg){
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',investimento:'invest',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='campanhas') initCampanhasPage();
   if(pg==='investimento') renderInvestimento();
+  if(pg==='instagram') loadInstagram();
+  if(pg==='facebook')  loadFacebook();
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
   if(pg==='mercado') renderConcorrentes();
   if(pg==='config') initConfigPage();
   if(pg==='meta') initMetaPage();
+  if(pg==='gads') renderGoogleAds();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1803,6 +1909,7 @@ const INV_DATA=[{"m":"Jan","data":[{"nome":"Cidade Alegre - Bauru","agencia":"P�
 let campanhasAPIData = []; // cache de campanhas da Meta API para esta página
 let campDemoCache    = {}; // cache de público-alvo por campanha id
 let campDemoPeriod   = 'this_month';
+let dadosGads        = []; // cache Google Ads
 
 function initCampanhasPage(){
   populateCampAccountSelect();
@@ -2026,15 +2133,14 @@ function renderCampanhasMetaAPI(all){
       <!-- Alertas automáticos -->
       ${buildCampAlerts(c, cpr, freq)}
 
-      <!-- Botões de ação -->
+      <!-- Botoes de acao -->
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-primary" style="font-size:11px;padding:5px 14px"
           onclick="irParaCriativos('${c.id}')">🎨 Ver criativos</button>
-        <button class="btn" style="font-size:11px;padding:5px 14px;background:var(--bg4);border-color:var(--purple)44;color:var(--purple)"
+        <button class="btn" style="font-size:11px;padding:5px 14px;background:var(--bg4);border-color:rgba(155,127,244,.5);color:var(--purple)"
           onclick="toggleCampDemo('${c.id}')">👥 Ver Público-Alvo</button>
         <span style="font-size:10px;color:var(--mu);margin-left:auto">${fN(c.reach)} alcance · ${fN(c.impressions)} impressões</span>
       </div>
-      <!-- Público-Alvo (lazy load) -->
       <div id="demo-${c.id}" style="display:none"></div>
     </div>`;
   }).join('');
@@ -2055,113 +2161,6 @@ function buildCampAlerts(c, cpr, freq){
     ${alerts.map(a=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;background:${a.col}14;border:1px solid ${a.col}44;border-radius:20px;color:${a.col}">
       ${a.icon} ${a.txt}
     </div>`).join('')}
-  </div>`;
-}
-
-// ── Público-Alvo por Campanha ────────────────────────────
-async function toggleCampDemo(campId){
-  const el = document.getElementById('demo-'+campId);
-  if(!el) return;
-  if(el.style.display === 'block'){ el.style.display='none'; return; }
-  el.style.display = 'block';
-  if(el.dataset.loaded) return;
-  el.innerHTML = `<div style="color:var(--mu);font-size:11px;padding:8px 0">⏳ Carregando público-alvo…</div>`;
-  const data = await loadCampDemo(campId);
-  el.dataset.loaded = '1';
-  if(!data || (!data.ageGender.length && !data.regions.length)){
-    el.innerHTML = `<div style="color:var(--mu);font-size:11px;padding:8px 0">📊 Dados de público não disponíveis para este período.</div>`;
-    return;
-  }
-  el.innerHTML = renderCampDemoHTML(data);
-}
-
-async function loadCampDemo(campId){
-  if(campDemoCache[campId]) return campDemoCache[campId];
-  if(!window.MetaAPI?.hasCredentials()) return null;
-  try{
-    const [ageGenderResp, regionsResp] = await Promise.all([
-      window.MetaAPI._get(`${campId}/insights`,{
-        fields:'impressions,reach', breakdowns:'age,gender',
-        date_preset: campDemoPeriod, limit:200,
-      }),
-      window.MetaAPI._get(`${campId}/insights`,{
-        fields:'impressions,reach', breakdowns:'region',
-        date_preset: campDemoPeriod, limit:50,
-      }),
-    ]);
-    const data = { ageGender: ageGenderResp.data||[], regions: regionsResp.data||[] };
-    campDemoCache[campId] = data;
-    return data;
-  } catch(e){
-    console.warn('Demo fetch:', e.message);
-    return null;
-  }
-}
-
-function renderCampDemoHTML(data){
-  // ── Gênero ──
-  const gMap  = {male:'👨 Masc.',female:'👩 Fem.',unknown:'❓ Outros'};
-  const gCors = {male:'var(--blue)',female:'var(--pink)',unknown:'var(--mu)'};
-  const gTot  = {};
-  const aTot  = {};
-  data.ageGender.forEach(d=>{
-    const imp = parseInt(d.impressions)||0;
-    gTot[d.gender] = (gTot[d.gender]||0)+imp;
-    aTot[d.age]    = (aTot[d.age]   ||0)+imp;
-  });
-  const totImp = Object.values(gTot).reduce((s,v)=>s+v,0);
-  const gHTML = Object.entries(gTot).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([g,v])=>{
-    const pct=(totImp>0?(v/totImp*100):0).toFixed(0);
-    const col=gCors[g]||'var(--mu)';
-    return `<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
-      <span style="font-size:11px;color:var(--tx);min-width:80px">${gMap[g]||g}</span>
-      <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px"><div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div></div>
-      <span style="font-size:11px;color:${col};min-width:32px;text-align:right;font-weight:600">${pct}%</span>
-    </div>`;
-  }).join('') || '<span style="font-size:11px;color:var(--mu)">Sem dados</span>';
-
-  // ── Faixa Etária ──
-  const ageOrder = ['13-17','18-24','25-34','35-44','45-54','55-64','65+'];
-  const ageRows  = ageOrder.map(a=>[a,aTot[a]||0]).filter(([,v])=>v>0);
-  const maxAge   = Math.max(1,...ageRows.map(([,v])=>v));
-  const aHTML = ageRows.map(([age,v])=>{
-    const barW=(v/maxAge*100).toFixed(0);
-    const pct=(totImp>0?(v/totImp*100):0).toFixed(0);
-    return `<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
-      <span style="font-size:11px;color:var(--tx);min-width:42px">${age}</span>
-      <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px"><div style="width:${barW}%;height:100%;background:var(--purple);border-radius:3px"></div></div>
-      <span style="font-size:11px;color:var(--mu);min-width:32px;text-align:right">${pct}%</span>
-    </div>`;
-  }).join('') || '<span style="font-size:11px;color:var(--mu)">Sem dados</span>';
-
-  // ── Regiões/Cidades (top 5) ──
-  const topReg   = [...data.regions].sort((a,b)=>(parseInt(b.impressions)||0)-(parseInt(a.impressions)||0)).slice(0,5);
-  const maxReg   = Math.max(1,...topReg.map(r=>parseInt(r.impressions)||0));
-  const totRegImp= data.regions.reduce((s,r)=>s+(parseInt(r.impressions)||0),0);
-  const rHTML = topReg.map(r=>{
-    const imp=parseInt(r.impressions)||0;
-    const pct=(totRegImp>0?(imp/totRegImp*100):0).toFixed(0);
-    const barW=(imp/maxReg*100).toFixed(0);
-    return `<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
-      <span style="font-size:11px;color:var(--tx);min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.region||'—'}">${r.region||'—'}</span>
-      <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px"><div style="width:${barW}%;height:100%;background:var(--teal);border-radius:3px"></div></div>
-      <span style="font-size:11px;color:var(--mu);min-width:32px;text-align:right">${pct}%</span>
-    </div>`;
-  }).join('') || '<span style="font-size:11px;color:var(--mu)">Sem dados de região</span>';
-
-  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:14px 0;border-top:1px solid var(--bdr);margin-top:8px">
-    <div>
-      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Gênero</div>
-      ${gHTML}
-    </div>
-    <div>
-      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Faixa Etária</div>
-      ${aHTML}
-    </div>
-    <div>
-      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Cidades / Regiões</div>
-      ${rHTML}
-    </div>
   </div>`;
 }
 
@@ -2714,6 +2713,319 @@ function formatarTextoIA(texto){
     || texto;
 }
 
+
+// ═══════════════════════════════════════════════════════
+// GOOGLE ADS
+// ═══════════════════════════════════════════════════════
+function getGadsSheetId(){ return localStorage.getItem('eco_gads_sheet')||''; }
+function setGadsSheetId(id){ localStorage.setItem('eco_gads_sheet', id.trim()); }
+
+function salvarGadsSheet(){
+  const inp = document.getElementById('gadsSheetId');
+  if(!inp) return;
+  const raw = inp.value.trim();
+  if(!raw){ alert('Cole o ID da planilha Google Ads.'); return; }
+  const m = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const id = m ? m[1] : raw;
+  setGadsSheetId(id);
+  inp.value = id;
+  dadosGads = []; // reset cache
+  const msg = document.getElementById('gadsMsg');
+  if(msg){ msg.textContent = 'ID salvo! Clique em Testar para validar a conexao.'; msg.style.color='var(--green)'; }
+  updateGadsBadge();
+}
+
+async function testarGadsSheet(){
+  const id = getGadsSheetId() || (document.getElementById('gadsSheetId')||{}).value || '';
+  if(!id){ alert('Cole o ID da planilha primeiro.'); return; }
+  const btn = document.getElementById('btnTestarGads');
+  const msg = document.getElementById('gadsMsg');
+  if(btn){ btn.disabled=true; btn.textContent='Testando...'; }
+  try{
+    const rows = await fetchCSV(id, 0);
+    dadosGads = parseGAds(rows);
+    if(!dadosGads.length) throw new Error('Planilha vazia ou colunas nao encontradas.');
+    if(msg){ msg.textContent = dadosGads.length + ' campanhas carregadas com sucesso!'; msg.style.color='var(--green)'; }
+    updateGadsBadge();
+  } catch(e){
+    if(msg){ msg.textContent = 'Erro: ' + e.message; msg.style.color='var(--red)'; }
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='Testar'; }
+  }
+}
+
+function updateGadsBadge(){
+  const id = getGadsSheetId();
+  const b  = document.getElementById('cfgGadsBadge');
+  if(!b) return;
+  if(id){ b.textContent='Conectada'; b.className='badge green'; b.removeAttribute('style'); }
+  else  { b.textContent='Nao conectada'; b.className='badge'; b.style.cssText='background:rgba(107,122,158,.12);color:var(--mu)'; }
+}
+
+function parseGAds(rows){
+  if(!rows||!rows.length) return [];
+  function toNum(v){
+    if(!v||v==='-'||v==='--'||v==='') return 0;
+    return parseFloat(String(v).replace(/[R$\s%]/g,'').replace(/\./g,'').replace(',','.')) || 0;
+  }
+  function toPct(v){
+    if(!v||v==='-'||v==='') return 0;
+    return parseFloat(String(v).replace('%','').replace(',','.')) || 0;
+  }
+  return rows.filter(function(r){ return r['Campanha']||r['Campaign']; }).map(function(r){
+    var nome   = r['Campanha']||r['Campaign']||'';
+    var st     = r['Status da campanha']||r['Campaign status']||r['Status']||'';
+    var tipo   = r['Tipo de campanha']||r['Campaign type']||r['Tipo']||'Pesquisa';
+    return {
+      nome: nome,
+      status: (st.toLowerCase().indexOf('ativ') >= 0) ? 'Ativa' : 'Pausada',
+      tipo: tipo,
+      impressoes: toNum(r['Impressoes']||r['Impressões']||r['Impressions']||0),
+      cliques:    toNum(r['Cliques']||r['Clicks']||0),
+      ctr:        toPct(r['CTR']||r['Ctr']||0),
+      cpc:        toNum(r['CPC medio']||r['CPC médio']||r['Avg. CPC']||r['CPC']||0),
+      custo:      toNum(r['Custo']||r['Cost']||0),
+      conversoes: toNum(r['Conversoes']||r['Conversões']||r['Conversions']||0),
+      txConv:     toPct(r['Taxa de conv.']||r['Conv. rate']||0),
+      custoConv:  toNum(r['Custo/conv.']||r['Cost/conv.']||0),
+      valorConv:  toNum(r['Valor conv. total']||r['Conv. value']||0),
+      roas:       toNum(r['ROAS']||r['Conv. value/cost']||0),
+    };
+  }).filter(function(r){ return r.nome; });
+}
+
+async function renderGoogleAds(){
+  var id      = getGadsSheetId();
+  var notCfg  = document.getElementById('gadsNotConfigured');
+  var content = document.getElementById('gadsContent');
+  if(!id){
+    if(notCfg) notCfg.style.display='block';
+    if(content) content.style.display='none';
+    return;
+  }
+  if(notCfg) notCfg.style.display='none';
+  if(content) content.style.display='block';
+
+  if(!dadosGads.length){
+    var tb = document.getElementById('gadsTableBody');
+    if(tb) tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--mu)">Carregando dados do Google Ads...</td></tr>';
+    try{
+      var rows = await fetchCSV(id, 0);
+      dadosGads = parseGAds(rows);
+    } catch(e){
+      if(tb) tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--red)">Erro: '+e.message+'<br><small style="color:var(--mu)">Verifique se a planilha esta publica como Leitor.</small></td></tr>';
+      return;
+    }
+  }
+
+  var fTipo   = (document.getElementById('gfTipo')||{}).value   || '';
+  var fStatus = (document.getElementById('gfStatus')||{}).value || '';
+  var dados   = dadosGads.filter(function(r){
+    return (!fTipo   || r.tipo.toLowerCase().indexOf(fTipo.toLowerCase())>=0) &&
+           (!fStatus || r.status === fStatus);
+  });
+
+  var infoEl = document.getElementById('gadsInfo');
+  if(infoEl) infoEl.textContent = dados.length + ' campanha' + (dados.length!==1?'s':'') + (fTipo?' · '+fTipo:'') + (fStatus?' · '+fStatus:'');
+  var ccEl = document.getElementById('gadsCampCount');
+  if(ccEl) ccEl.textContent = dados.length + ' campanha' + (dados.length!==1?'s':'');
+
+  // KPIs
+  var ativas   = dados.filter(function(r){ return r.status==='Ativa'; }).length;
+  var totGasto = dados.reduce(function(s,r){ return s+r.custo; },0);
+  var totCliq  = dados.reduce(function(s,r){ return s+r.cliques; },0);
+  var totImp   = dados.reduce(function(s,r){ return s+r.impressoes; },0);
+  var totConv  = dados.reduce(function(s,r){ return s+r.conversoes; },0);
+  var totValor = dados.reduce(function(s,r){ return s+r.valorConv; },0);
+  var ctrMed   = totImp>0 ? totCliq/totImp*100 : 0;
+  var cpcMed   = totCliq>0 ? totGasto/totCliq : 0;
+  var cpa      = totConv>0 ? totGasto/totConv : 0;
+  var txConvM  = totCliq>0 ? totConv/totCliq*100 : 0;
+  var roasG    = totGasto>0 ? totValor/totGasto : 0;
+
+  sid('gk_gasto',   fBRL(totGasto,true));   sid('gk_gastoS',   dados.length+' campanhas');
+  sid('gk_cliques', fN(totCliq));            sid('gk_cliquesS', fN(totImp)+' impressoes');
+  sid('gk_imp',     fN(totImp));             sid('gk_impS',     ctrMed.toFixed(2)+'% CTR geral');
+  sid('gk_ctr',     ctrMed.toFixed(2)+'%'); sid('gk_ctrS',     ctrMed>=3?'Bom (>=3%)':ctrMed>=1?'Regular':'Baixo (<1%)');
+  sid('gk_cpc',     fBRL(cpcMed));           sid('gk_cpcS',     fN(totCliq)+' cliques');
+  sid('gk_conv',    fN(totConv));            sid('gk_convS',    totValor>0?'Valor: '+fBRL(totValor,true):'total');
+  sid('gk_txconv',  txConvM.toFixed(2)+'%');sid('gk_txconvS',  txConvM>=3?'Bom (>=3%)':'Otimizar');
+  sid('gk_cpa',     cpa>0?fBRL(cpa):'--');  sid('gk_cpaS',     cpa>0&&cpa<150?'Eficiente':'Otimizar');
+  sid('gk_roas',    roasG>0?roasG.toFixed(1)+'x':'--'); sid('gk_roasS', roasG>=3?'Bom (>=3x)':'Revisar');
+  sid('gk_ativas',  String(ativas));         sid('gk_ativasS',  'de '+dados.length+' total');
+
+  // Chart: Gasto por Tipo
+  var tipoMap = {};
+  dados.forEach(function(r){ tipoMap[r.tipo]=(tipoMap[r.tipo]||0)+r.custo; });
+  var tipoLab  = Object.keys(tipoMap);
+  var tipoCors = ['#4f8ef7','#2ecc8e','#f5a623','#9b7ff4','#26c6da','#e879a0'];
+  var isLight  = document.body.classList.contains('light');
+  var clrMu    = isLight?'#6b7280':'#6b7a9e';
+  var clrTx    = isLight?'#1a2332':'#e2e8f0';
+  var clrGrid  = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  mkChart('gadsChartTipo','doughnut',tipoLab,
+    [{ data:tipoLab.map(function(t){ return tipoMap[t]; }), backgroundColor:tipoCors.slice(0,tipoLab.length), borderWidth:2, borderColor:'var(--bg2)' }],
+    { plugins:{ legend:{ position:'right', labels:{ color:clrTx, font:{size:11} } },
+      tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.label+': R$ '+ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:2}); } } } } }
+  );
+
+  // Chart: CTR vs Conversao top 8
+  var top8 = dados.slice().sort(function(a,b){ return b.custo-a.custo; }).slice(0,8);
+  var cLab = top8.map(function(r){ return r.nome.length>20?r.nome.slice(0,18)+'...':r.nome; });
+  mkChart('gadsChartCTR','bar',cLab,[
+    { label:'CTR (%)', data:top8.map(function(r){ return parseFloat(r.ctr.toFixed(2)); }), backgroundColor:'rgba(79,142,247,.7)', yAxisID:'y' },
+    { label:'Conv. (%)', data:top8.map(function(r){ return parseFloat(r.txConv.toFixed(2)); }), backgroundColor:'rgba(46,204,142,.7)', yAxisID:'y2' },
+  ],{
+    plugins:{ legend:{ labels:{ color:clrTx, font:{size:11} } } },
+    scales:{
+      x:{ ticks:{ color:clrMu, font:{size:10}, maxRotation:30 }, grid:{ color:clrGrid } },
+      y:{ position:'left', ticks:{ color:'#4f8ef7', callback:function(v){ return v+'%'; } }, grid:{ color:clrGrid } },
+      y2:{ position:'right', ticks:{ color:'#2ecc8e', callback:function(v){ return v+'%'; } }, grid:{ display:false } },
+    }
+  });
+
+  // Tabela
+  var TIPO_COR = { 'Pesquisa':'var(--blue)', 'Display':'var(--teal)', 'YouTube':'var(--red)', 'Shopping':'var(--amber)', 'Performance Max':'var(--purple)' };
+  var tb2 = document.getElementById('gadsTableBody');
+  if(tb2){
+    var sorted = dados.slice().sort(function(a,b){ return b.custo-a.custo; });
+    if(!sorted.length){ tb2.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--mu)">Nenhuma campanha com estes filtros.</td></tr>'; }
+    else {
+      tb2.innerHTML = sorted.map(function(r){
+        var cpa2    = r.conversoes>0 ? r.custo/r.conversoes : 0;
+        var score   = 70;
+        if(r.ctr<1&&r.ctr>0) score-=25; else if(r.ctr<3&&r.ctr>0) score-=10;
+        if(r.cpc>8)  score-=15;
+        if(cpa2>200&&r.conversoes>0) score-=15;
+        if(!r.conversoes&&r.status==='Ativa'&&r.custo>0) score-=20;
+        score=Math.max(0,Math.min(100,score));
+        var scCol   = score>=70?'var(--green)':score>=50?'var(--amber)':'var(--red)';
+        var tipoCor = TIPO_COR[r.tipo]||'var(--mu)';
+        return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background=\'var(--bg3)\'" onmouseout="this.style.background=\'\'">'
+          +'<td style="padding:9px 10px;font-size:12px;font-weight:500;color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.nome+'">'+r.nome+'</td>'
+          +'<td style="padding:9px 10px;text-align:center"><span style="background:'+tipoCor+'18;color:'+tipoCor+';font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px">'+r.tipo+'</span></td>'
+          +'<td style="padding:9px 10px;text-align:center"><span style="font-size:11px;color:'+(r.status==='Ativa'?'var(--green)':'var(--mu)')+'">● '+r.status+'</span></td>'
+          +'<td style="padding:9px 10px;text-align:right;font-weight:600;color:var(--tx)">'+(r.custo>0?fBRL(r.custo):'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:right;color:var(--tx)">'+(r.cliques>0?fN(r.cliques):'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:right;color:'+(r.ctr>=3?'var(--green)':r.ctr>=1?'var(--amber)':'var(--red)')+'">'+( r.ctr>0?r.ctr.toFixed(2)+'%':'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:right;color:var(--tx)">'+(r.cpc>0?fBRL(r.cpc):'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:right;color:var(--green);font-weight:600">'+(r.conversoes>0?fN(r.conversoes):'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:right;color:'+(cpa2>0&&cpa2<150?'var(--green)':cpa2>0?'var(--amber)':'var(--mu)')+'">'+( cpa2>0?fBRL(cpa2):'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:right;color:'+(r.roas>=3?'var(--green)':r.roas>=1?'var(--amber)':'var(--red)')+'">'+( r.roas>0?r.roas.toFixed(1)+'x':'—')+'</td>'
+          +'<td style="padding:9px 10px;text-align:center"><span style="font-size:11px;font-weight:700;color:'+scCol+'">'+score+'</span>'
+          +'<div style="width:36px;height:3px;background:var(--bg4);border-radius:2px;margin:2px auto 0"><div style="width:'+score+'%;height:100%;background:'+scCol+';border-radius:2px"></div></div></td>'
+          +'</tr>';
+      }).join('');
+    }
+  }
+
+  // CPA Bars top 10
+  var comConv = dados.filter(function(r){ return r.conversoes>0; })
+    .map(function(r){ return { nome:r.nome, cpa2:r.custo/r.conversoes, conv:r.conversoes }; })
+    .sort(function(a,b){ return a.cpa2-b.cpa2; }).slice(0,10);
+  var maxCPA = comConv.length ? Math.max.apply(null, comConv.map(function(r){ return r.cpa2; })) : 1;
+  var barsEl = document.getElementById('gadsCPABars');
+  if(barsEl){
+    barsEl.innerHTML = comConv.length ? comConv.map(function(r){
+      var pct = (r.cpa2/maxCPA*100).toFixed(0);
+      var cor = r.cpa2<100?'var(--green)':r.cpa2<200?'var(--amber)':'var(--red)';
+      return '<div style="display:flex;align-items:center;gap:10px;font-size:12px">'
+        +'<span style="min-width:180px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+r.nome+'">'+r.nome+'</span>'
+        +'<div style="flex:1;height:10px;background:var(--bg4);border-radius:5px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+cor+';border-radius:5px"></div></div>'
+        +'<span style="min-width:70px;text-align:right;font-weight:600;color:'+cor+'">'+fBRL(r.cpa2)+'</span>'
+        +'<span style="min-width:40px;color:var(--mu);font-size:11px">'+fN(r.conv)+' conv.</span>'
+        +'</div>';
+    }).join('') : '<div style="color:var(--mu);font-size:12px;padding:12px 0">Nenhuma campanha com conversoes registradas.</div>';
+  }
+}
+
+
+// ─── Publico-Alvo por Campanha ─────────────────────────
+async function toggleCampDemo(campId){
+  var el = document.getElementById('demo-'+campId);
+  if(!el) return;
+  if(el.style.display==='block'){ el.style.display='none'; return; }
+  el.style.display='block';
+  if(el.dataset.loaded) return;
+  el.innerHTML='<div style="color:var(--mu);font-size:11px;padding:8px 0">Carregando publico-alvo...</div>';
+  var data = await loadCampDemo(campId);
+  el.dataset.loaded='1';
+  if(!data||(!data.ageGender.length&&!data.regions.length)){
+    el.innerHTML='<div style="color:var(--mu);font-size:11px;padding:8px 0">Dados de publico nao disponiveis para este periodo.</div>';
+    return;
+  }
+  el.innerHTML=renderCampDemoHTML(data);
+}
+
+async function loadCampDemo(campId){
+  if(campDemoCache[campId]) return campDemoCache[campId];
+  if(!window.MetaAPI||!window.MetaAPI.hasCredentials()) return null;
+  try{
+    var agR = await window.MetaAPI._get(campId+'/insights',{ fields:'impressions,reach', breakdowns:'age,gender', date_preset:campDemoPeriod, limit:200 });
+    var rgR = await window.MetaAPI._get(campId+'/insights',{ fields:'impressions,reach', breakdowns:'region',     date_preset:campDemoPeriod, limit:50  });
+    var data = { ageGender: agR.data||[], regions: rgR.data||[] };
+    campDemoCache[campId]=data;
+    return data;
+  } catch(e){ console.warn('Demo fetch:',e.message); return null; }
+}
+
+function renderCampDemoHTML(data){
+  var gMap ={male:'Masculino',female:'Feminino',unknown:'Outros'};
+  var gCors={male:'var(--blue)',female:'var(--pink)',unknown:'var(--mu)'};
+  var gTot={}, aTot={};
+  data.ageGender.forEach(function(d){
+    var imp=parseInt(d.impressions)||0;
+    gTot[d.gender]=(gTot[d.gender]||0)+imp;
+    aTot[d.age]=(aTot[d.age]||0)+imp;
+  });
+  var totImp=Object.values(gTot).reduce(function(s,v){ return s+v; },0);
+  var gHTML=Object.entries(gTot).filter(function(e){ return e[1]>0; }).sort(function(a,b){ return b[1]-a[1]; }).map(function(e){
+    var g=e[0],v=e[1];
+    var pct=(totImp>0?(v/totImp*100):0).toFixed(0);
+    var col=gCors[g]||'var(--mu)';
+    return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
+      +'<span style="font-size:11px;color:var(--tx);min-width:80px">'+(gMap[g]||g)+'</span>'
+      +'<div style="flex:1;height:6px;background:var(--bg4);border-radius:3px"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px"></div></div>'
+      +'<span style="font-size:11px;color:'+col+';min-width:32px;text-align:right;font-weight:600">'+pct+'%</span>'
+      +'</div>';
+  }).join('')||'<span style="font-size:11px;color:var(--mu)">Sem dados</span>';
+
+  var ageOrder=['13-17','18-24','25-34','35-44','45-54','55-64','65+'];
+  var ageRows=ageOrder.map(function(a){ return [a,aTot[a]||0]; }).filter(function(e){ return e[1]>0; });
+  var maxAge=Math.max.apply(null,[1].concat(ageRows.map(function(e){ return e[1]; })));
+  var aHTML=ageRows.map(function(e){
+    var age=e[0],v=e[1];
+    var barW=(v/maxAge*100).toFixed(0);
+    var pct=(totImp>0?(v/totImp*100):0).toFixed(0);
+    return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
+      +'<span style="font-size:11px;color:var(--tx);min-width:42px">'+age+'</span>'
+      +'<div style="flex:1;height:6px;background:var(--bg4);border-radius:3px"><div style="width:'+barW+'%;height:100%;background:var(--purple);border-radius:3px"></div></div>'
+      +'<span style="font-size:11px;color:var(--mu);min-width:32px;text-align:right">'+pct+'%</span>'
+      +'</div>';
+  }).join('')||'<span style="font-size:11px;color:var(--mu)">Sem dados</span>';
+
+  var topReg=data.regions.slice().sort(function(a,b){ return (parseInt(b.impressions)||0)-(parseInt(a.impressions)||0); }).slice(0,5);
+  var maxReg=Math.max.apply(null,[1].concat(topReg.map(function(r){ return parseInt(r.impressions)||0; })));
+  var totRegImp=data.regions.reduce(function(s,r){ return s+(parseInt(r.impressions)||0); },0);
+  var rHTML=topReg.map(function(r){
+    var imp=parseInt(r.impressions)||0;
+    var pct=(totRegImp>0?(imp/totRegImp*100):0).toFixed(0);
+    var barW=(imp/maxReg*100).toFixed(0);
+    return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
+      +'<span style="font-size:11px;color:var(--tx);min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+(r.region||'')+'">'+( r.region||'—')+'</span>'
+      +'<div style="flex:1;height:6px;background:var(--bg4);border-radius:3px"><div style="width:'+barW+'%;height:100%;background:var(--teal);border-radius:3px"></div></div>'
+      +'<span style="font-size:11px;color:var(--mu);min-width:32px;text-align:right">'+pct+'%</span>'
+      +'</div>';
+  }).join('')||'<span style="font-size:11px;color:var(--mu)">Sem dados de regiao</span>';
+
+  return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:14px 0;border-top:1px solid var(--bdr);margin-top:8px">'
+    +'<div><div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Genero</div>'+gHTML+'</div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Faixa Etaria</div>'+aHTML+'</div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Cidades / Regioes</div>'+rHTML+'</div>'
+    +'</div>';
+}
+
 // ═══════════════════════════════════════════════════════
 // MERCADO
 // ═══════════════════════════════════════════════════════
@@ -2818,12 +3130,6 @@ Forneça: 1) Posicionamento da Ecovita no mercado 2) Vantagens e desvantagens vs
 }
 
 // ═══════════════════════════════════════════════════════
-// SOCIAL ORGÂNICO — Instagram & Facebook
-// ═══════════════════════════════════════════════════════
-
-// ── Config helpers ──────────────────────────────────────
-
-// ═══════════════════════════════════════════════════════
 // LOAD ALL
 // ═══════════════════════════════════════════════════════
 function setLoading(on,msg=''){
@@ -2859,7 +3165,6 @@ async function loadAll(){
   setLoading(false);
 }
 
-
 // ═══════════════════════════════════════════════════════
 // PAGE: CRIATIVOS META API — MULTI-CONTA
 // ═══════════════════════════════════════════════════════
@@ -2875,6 +3180,10 @@ function initConfigPage(){
   const k  = localStorage.getItem('eco_claude_key') || '';
   const ki = document.getElementById('inputClaudeKey');
   if(ki) ki.value = k ? '••••••••••••••••' : '';
+  // Google Ads
+  var gadsInp = document.getElementById('gadsSheetId');
+  if(gadsInp) gadsInp.value = getGadsSheetId();
+  updateGadsBadge();
 }
 
 function updateConfigStatus(){
@@ -3082,7 +3391,7 @@ async function loadMetaCampaigns(){
 
   const period = document.getElementById('fMetaPeriod')?.value || 'this_month';
   campDemoPeriod = period;
-  campDemoCache  = {}; // limpa cache ao mudar período
+  campDemoCache  = {};
 
   try{
     const camps = await window.MetaAPI.getCampaigns({ datePreset: period });

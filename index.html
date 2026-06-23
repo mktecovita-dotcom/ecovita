@@ -818,6 +818,11 @@ body.light .theme-label{color:var(--blue)}
               <option value="Ativa">Ativas</option>
               <option value="Pausada">Pausadas</option>
             </select>
+            <span class="fl" style="margin-left:8px">De:</span>
+            <input type="date" id="gfDateIni" onchange="applyGadsDate()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <span class="fl">Até:</span>
+            <input type="date" id="gfDateFim" onchange="applyGadsDate()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <button class="btn" onclick="clearGadsDate()" style="padding:5px 10px;font-size:11px">✕ Limpar</button>
           </div>
           <span id="gadsInfo" style="font-size:11px;color:var(--mu);white-space:nowrap;padding-left:12px"></span>
         </div>
@@ -839,8 +844,8 @@ body.light .theme-label{color:var(--blue)}
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><canvas id="gadsChartTipo" height="200"></canvas></div>
-          <div class="card"><div class="card-hd"><div class="card-title">🏆 Impr. no Topo (%)</div></div><canvas id="gadsChartCTR" height="200"></canvas></div>
+          <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartTipo"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">🏆 Impr. no Topo (%)</div></div><div style="height:200px;position:relative"><canvas id="gadsChartCTR"></canvas></div></div>
         </div>
 
         <div class="card" style="margin-bottom:14px">
@@ -1909,7 +1914,8 @@ const INV_DATA=[{"m":"Jan","data":[{"nome":"Cidade Alegre - Bauru","agencia":"P�
 let campanhasAPIData = []; // cache de campanhas da Meta API para esta página
 let campDemoCache    = {}; // cache de público-alvo por campanha id
 let campDemoPeriod   = 'this_month';
-let dadosGads        = []; // cache Google Ads
+let dadosGads        = []; // cache Google Ads (aggregated)
+let rawGadsRows      = []; // raw rows for date filtering
 
 function initCampanhasPage(){
   populateCampAccountSelect();
@@ -2732,7 +2738,7 @@ function salvarGadsSheet(){
   setGadsSheetId(id);
   localStorage.setItem('eco_gads_gid', gid);
   inp.value = id + (gid!=='0' ? ' (aba: '+gid+')' : '');
-  dadosGads = [];
+  dadosGads = []; rawGadsRows = [];
   const msg = document.getElementById('gadsMsg');
   if(msg){ msg.textContent = 'Salvo! ID: '+id.slice(0,12)+'... | aba: '+gid+'. Clique em Testar.'; msg.style.color='var(--green)'; }
   updateGadsBadge();
@@ -2755,6 +2761,7 @@ async function testarGadsSheet(){
   if(btn){ btn.disabled=true; btn.textContent='Testando...'; }
   try{
     const rows = await fetchCSV(id, gid);
+    rawGadsRows = rows;
     dadosGads = parseGAds(rows);
     if(!dadosGads.length) throw new Error('Nenhuma campanha encontrada. Verifique o formato da planilha (aba: '+gid+').');
     if(msg){ msg.textContent = dadosGads.length + ' campanhas carregadas! Acesse a pagina Google Ads.'; msg.style.color='var(--green)'; }
@@ -2766,6 +2773,34 @@ async function testarGadsSheet(){
   }
 }
 
+function applyGadsDate(){
+  var ini = document.getElementById('gfDateIni');
+  var fim = document.getElementById('gfDateFim');
+  if(!rawGadsRows.length){ return; }
+  var d0 = ini ? ini.value : '';
+  var d1 = fim ? fim.value : '';
+  if(!d0 && !d1){
+    dadosGads = parseGAds(rawGadsRows);
+  } else {
+    var filtered = rawGadsRows.filter(function(r){
+      var day = r['Day']||r['Data']||'';
+      if(!day||day==='-'||day==='--') return false;
+      if(d0 && day < d0) return false;
+      if(d1 && day > d1) return false;
+      return true;
+    });
+    dadosGads = parseGAds(filtered);
+  }
+  renderGoogleAds();
+}
+function clearGadsDate(){
+  var ini = document.getElementById('gfDateIni');
+  var fim = document.getElementById('gfDateFim');
+  if(ini) ini.value = '';
+  if(fim) fim.value = '';
+  if(rawGadsRows.length){ dadosGads = parseGAds(rawGadsRows); }
+  renderGoogleAds();
+}
 function updateGadsBadge(){
   const id = getGadsSheetId();
   const b  = document.getElementById('cfgGadsBadge');
@@ -2863,6 +2898,7 @@ async function renderGoogleAds(){
     var gadGid = parseInt(localStorage.getItem('eco_gads_gid')||'0')||0;
     try{
       var rows = await fetchCSV(id, gadGid);
+      rawGadsRows = rows;
       dadosGads = parseGAds(rows);
       if(!dadosGads.length) throw new Error('Nenhuma campanha com dados encontrada. Verifique a planilha e o numero da aba (gid='+gadGid+').');
     } catch(e){
@@ -2919,7 +2955,8 @@ async function renderGoogleAds(){
 
   mkChart('gadsChartTipo','doughnut',tipoLab,
     [{ data:tipoLab.map(function(t){ return tipoMap[t]; }), backgroundColor:tipoCors.slice(0,tipoLab.length), borderWidth:2, borderColor:'var(--bg2)' }],
-    { plugins:{ legend:{ position:'right', labels:{ color:clrTx, font:{size:11} } },
+    { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'right', labels:{ color:clrTx, font:{size:11} } },
       tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.label+': R$ '+ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:2}); } } } } }
   );
 
@@ -2932,6 +2969,7 @@ async function renderGoogleAds(){
     { label:'Impr. no Topo (%)', data:top8t.map(function(r){ return r.imprTop; }),
       backgroundColor:'rgba(245,166,35,.75)', borderRadius:6, borderSkipped:false }
   ],{
+    responsive:true, maintainAspectRatio:false,
     plugins:{ legend:{ labels:{ color:clrTx, font:{size:11} } },
       tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.raw.toFixed(1)+'%'; } } } },
     scales:{

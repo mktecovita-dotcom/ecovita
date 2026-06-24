@@ -828,7 +828,7 @@ body.light .theme-label{color:var(--blue)}
         </div>
 
         <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-          <div class="kpi green"><div class="kpi-label">Gasto Total</div><div class="kpi-val" id="gk_gasto">—</div><div class="kpi-sub" id="gk_gastoS">Google Ads</div></div>
+          <div class="kpi green"><div class="kpi-label">Investimento Total</div><div class="kpi-val" id="gk_gasto">—</div><div class="kpi-sub" id="gk_gastoS">Google Ads</div></div>
           <div class="kpi blue"><div class="kpi-label">Cliques</div><div class="kpi-val" id="gk_cliques">—</div><div class="kpi-sub" id="gk_cliquesS">Total de cliques</div></div>
           <div class="kpi purple"><div class="kpi-label">Impressões</div><div class="kpi-val" id="gk_imp">—</div><div class="kpi-sub" id="gk_impS">Alcance de exibição</div></div>
           <div class="kpi amber"><div class="kpi-label">CTR Médio</div><div class="kpi-val" id="gk_ctr">—</div><div class="kpi-sub" id="gk_ctrS">Taxa de clique</div></div>
@@ -839,13 +839,24 @@ body.light .theme-label{color:var(--blue)}
           <div class="kpi green"><div class="kpi-label">Conversões</div><div class="kpi-val" id="gk_conv">—</div><div class="kpi-sub" id="gk_convS">Total convertido</div></div>
           <div class="kpi blue"><div class="kpi-label">Taxa de Conv.</div><div class="kpi-val" id="gk_txconv">—</div><div class="kpi-sub" id="gk_txconvS">Cliques → Conversão</div></div>
           <div class="kpi red"><div class="kpi-label">Custo/Conv. (CPA)</div><div class="kpi-val" id="gk_cpa">—</div><div class="kpi-sub" id="gk_cpaS">Custo por conversão</div></div>
-          <div class="kpi amber"><div class="kpi-label">ROAS</div><div class="kpi-val" id="gk_roas">—</div><div class="kpi-sub" id="gk_roasS">Retorno sobre gasto</div></div>
+          <div class="kpi amber"><div class="kpi-label">Impr. no Topo (%)</div><div class="kpi-val" id="gk_roas">—</div><div class="kpi-sub" id="gk_roasS">Share of top impressions</div></div>
           <div class="kpi purple"><div class="kpi-label">Campanhas Ativas</div><div class="kpi-val" id="gk_ativas">—</div><div class="kpi-sub" id="gk_ativasS">de total</div></div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
           <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartTipo"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">🏆 Impr. no Topo (%)</div></div><div style="height:200px;position:relative"><canvas id="gadsChartCTR"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">👆 Cliques por Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartCTR"></canvas></div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🥇 Posição Absoluta no Topo (%)</div></div>
+            <div style="height:200px;position:relative"><canvas id="gadsChartAbsTop"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📈 CTR por Campanha</div></div>
+            <div style="height:200px;position:relative"><canvas id="gadsChartCTR2"></canvas></div>
+          </div>
         </div>
 
         <div class="card" style="margin-bottom:14px">
@@ -2862,17 +2873,20 @@ function parseGAds(rows){
     if(!camps[nome]){
       var tipo = r['Campaign type']||r['Tipo de campanha']||'Search';
       camps[nome] = { nome:nome, tipo:mapTipoGads(tipo), status:'Pausada',
-        impressoes:0, sumImprTop:0, cliques:0, custo:0, conversoes:0, valorConv:0 };
+        impressoes:0, sumImprTop:0, sumAbsTop:0, cliques:0, custo:0, conversoes:0, valorConv:0, engagements:0 };
     }
     var ag = camps[nome];
-    var imp = toNum(r['Impr.']||r['Impressões']||r['Impressions']||0);
+    var imp    = toNum(r['Impr.']||r['Impressões']||r['Impressions']||0);
     var topPct = toNum(r['Impr. (Top) %']||r['Impr. (topo) %']||0);
+    var absPct = toNum(r['Impr. (Abs. Top) %']||0);
     ag.impressoes  += imp;
-    ag.sumImprTop  += topPct * imp; // weighted sum for avg
+    ag.sumImprTop  += topPct * imp;
+    ag.sumAbsTop   += absPct * imp;
     ag.cliques     += toNum(r['Clicks']||r['Cliques']||0);
     ag.custo       += toNum(r['Cost']||r['Custo']||0);
     ag.conversoes  += toNum(r['Conversions']||r['Conversões']||0);
     ag.valorConv   += toNum(r['Conv. value']||r['Valor conv. total']||0);
+    ag.engagements += toNum(r['Engagements']||0);
     // Mark active if any row is Enabled/Eligible
     var st = (r['Status']||r['Ad status']||'').toLowerCase();
     if(st==='enabled'||st==='eligible') ag.status='Ativa';
@@ -2887,7 +2901,9 @@ function parseGAds(rows){
       nome:ag.nome, tipo:ag.tipo, status:ag.status,
       impressoes: Math.round(ag.impressoes),
       imprTop:    ag.impressoes>0 ? parseFloat((ag.sumImprTop/ag.impressoes).toFixed(1)) : 0,
+      absTop:     ag.impressoes>0 ? parseFloat((ag.sumAbsTop/ag.impressoes).toFixed(1)) : 0,
       cliques:    Math.round(ag.cliques),
+      engagements: Math.round(ag.engagements),
       ctr:        parseFloat(ctr.toFixed(2)),
       cpc:        parseFloat(cpc.toFixed(2)),
       custo:      parseFloat(ag.custo.toFixed(2)),
@@ -2960,7 +2976,11 @@ async function renderGoogleAds(){
   sid('gk_conv',    fN(totConv));            sid('gk_convS',    totValor>0?'Valor: '+fBRL(totValor,true):'total');
   sid('gk_txconv',  txConvM.toFixed(2)+'%');sid('gk_txconvS',  txConvM>=3?'Bom (>=3%)':'Otimizar');
   sid('gk_cpa',     cpa>0?fBRL(cpa):'--');  sid('gk_cpaS',     cpa>0&&cpa<150?'Eficiente':'Otimizar');
-  sid('gk_roas',    roasG>0?roasG.toFixed(1)+'x':'--'); sid('gk_roasS', roasG>=3?'Bom (>=3x)':'Revisar');
+  // Weighted avg Impr.(Top)% across filtered campaigns
+  var totImprTopW = dados.reduce(function(s,r){ return s+r.imprTop*r.impressoes; },0);
+  var imprTopGlob = totImp>0 ? totImprTopW/totImp : 0;
+  sid('gk_roas',   imprTopGlob>0?imprTopGlob.toFixed(1)+'%':'--');
+  sid('gk_roasS',  imprTopGlob>=70?'Excelente (>=70%)':imprTopGlob>=50?'Bom (>=50%)':imprTopGlob>0?'Otimizar':'—');
   sid('gk_ativas',  String(ativas));         sid('gk_ativasS',  'de '+dados.length+' total');
 
   // Chart: Gasto por Tipo
@@ -2980,23 +3000,57 @@ async function renderGoogleAds(){
       tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.label+': R$ '+ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:2}); } } } } }
   );
 
-  // Chart: Impr. no Topo (%) — top 8 por impressoes
-  var top8t = dados.filter(function(r){ return r.imprTop>0; })
-               .slice().sort(function(a,b){ return b.impressoes-a.impressoes; }).slice(0,8);
-  if(!top8t.length) top8t = dados.slice().sort(function(a,b){ return b.impressoes-a.impressoes; }).slice(0,8);
-  var cLab = top8t.map(function(r){ return r.nome.length>22?r.nome.slice(0,20)+'…':r.nome; });
+  // Chart: Cliques por Campanha — horizontal bar, top 8
+  var top8c = dados.slice().sort(function(a,b){ return b.cliques-a.cliques; }).slice(0,8);
+  var cLab  = top8c.map(function(r){ return r.nome.length>24?r.nome.slice(0,22)+'…':r.nome; });
   mkChart('gadsChartCTR','bar',cLab,[
-    { label:'Impr. no Topo (%)', data:top8t.map(function(r){ return r.imprTop; }),
-      backgroundColor:'rgba(245,166,35,.75)', borderRadius:6, borderSkipped:false }
+    { label:'Cliques', data:top8c.map(function(r){ return r.cliques; }),
+      backgroundColor:'rgba(79,142,247,.75)', borderRadius:4, borderSkipped:false }
   ],{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ labels:{ color:clrTx, font:{size:11} } },
-      tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.raw.toFixed(1)+'%'; } } } },
+    responsive:true, maintainAspectRatio:false, indexAxis:'y',
+    plugins:{ legend:{ display:false },
+      tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.raw.toLocaleString('pt-BR')+' cliques'; } } } },
     scales:{
-      x:{ ticks:{ color:clrMu, font:{size:10}, maxRotation:35 }, grid:{ color:clrGrid } },
-      y:{ min:0, max:100, ticks:{ color:clrMu, callback:function(v){ return v+'%'; } }, grid:{ color:clrGrid } },
+      x:{ ticks:{ color:clrMu, font:{size:10} }, grid:{ color:clrGrid } },
+      y:{ ticks:{ color:clrTx, font:{size:10} }, grid:{ display:false } },
     }
   });
+
+  // Chart: Impr. Abs. Top % — top 8
+  var top8abs = dados.filter(function(r){ return r.absTop>0; })
+                 .slice().sort(function(a,b){ return b.absTop-a.absTop; }).slice(0,8);
+  if(top8abs.length){
+    mkChart('gadsChartAbsTop','bar',
+      top8abs.map(function(r){ return r.nome.length>24?r.nome.slice(0,22)+'…':r.nome; }),
+      [{ label:'Abs. Top %', data:top8abs.map(function(r){ return r.absTop; }),
+         backgroundColor:'rgba(232,121,160,.75)', borderRadius:4, borderSkipped:false }],
+      { responsive:true, maintainAspectRatio:false, indexAxis:'y',
+        plugins:{ legend:{ display:false },
+          tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.raw.toFixed(1)+'%'; } } } },
+        scales:{
+          x:{ min:0, max:100, ticks:{ color:clrMu, font:{size:10}, callback:function(v){ return v+'%'; } }, grid:{ color:clrGrid } },
+          y:{ ticks:{ color:clrTx, font:{size:10} }, grid:{ display:false } }
+        }
+      }
+    );
+  }
+
+  // Chart: CTR por Campanha — top 8 por cliques
+  var top8ctr = dados.slice().sort(function(a,b){ return b.cliques-a.cliques; }).slice(0,8);
+  mkChart('gadsChartCTR2','bar',
+    top8ctr.map(function(r){ return r.nome.length>24?r.nome.slice(0,22)+'…':r.nome; }),
+    [{ label:'CTR (%)', data:top8ctr.map(function(r){ return r.ctr; }),
+       backgroundColor:top8ctr.map(function(r){ return r.ctr>=3?'rgba(46,204,142,.75)':r.ctr>=1?'rgba(245,166,35,.75)':'rgba(232,121,160,.75)'; }),
+       borderRadius:4, borderSkipped:false }],
+    { responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{ display:false },
+        tooltip:{ callbacks:{ label:function(ctx){ return ' '+ctx.raw.toFixed(2)+'%'; } } } },
+      scales:{
+        x:{ ticks:{ color:clrMu, font:{size:10}, callback:function(v){ return v+'%'; } }, grid:{ color:clrGrid } },
+        y:{ ticks:{ color:clrTx, font:{size:10} }, grid:{ display:false } }
+      }
+    }
+  );
 
   // Tabela
   var TIPO_COR = { 'Pesquisa':'var(--blue)', 'Display':'var(--teal)', 'YouTube':'var(--red)', 'Shopping':'var(--amber)', 'Performance Max':'var(--purple)' };

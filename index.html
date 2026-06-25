@@ -1150,6 +1150,231 @@ body.light .theme-label{color:var(--blue)}
 
     </div><!-- /page-config -->
 
+
+    <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
+    <div class="page" id="page-instagram">
+      <!-- Seletor de arquivos -->
+      <div id="igFileZone" style="background:linear-gradient(135deg,rgba(232,121,160,.12),rgba(155,127,244,.08));border:2px dashed rgba(232,121,160,.4);border-radius:14px;padding:24px;text-align:center;margin-bottom:18px">
+        <div style="font-size:28px;margin-bottom:8px">📸</div>
+        <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Selecione os arquivos CSV do Instagram</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Arquivos com <strong>"Postagem"</strong> e <strong>"Story"</strong> no nome — da pasta <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Organico/</code></div>
+        <label style="cursor:pointer">
+          <input type="file" id="igFilePicker" multiple accept=".csv" style="display:none" onchange="onIgFiles(this.files)">
+          <span class="btn btn-primary" style="pointer-events:none">📂 Selecionar arquivos CSV</span>
+        </label>
+        <div id="igFileStatus" style="font-size:12px;color:var(--mu);margin-top:10px"></div>
+      </div>
+
+      <div id="igContent" style="display:none">
+        <!-- Filtros -->
+        <div class="fbar" style="margin-bottom:18px">
+          <span class="fl">De:</span>
+          <input type="date" id="igDateDe" onchange="renderInstagram()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+          <span class="fl">Até:</span>
+          <input type="date" id="igDateAte" onchange="renderInstagram()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+          <button class="btn" onclick="igClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
+          <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
+          <button class="btn" id="btnIgCompare" onclick="toggleIgCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
+          <button class="btn" onclick="document.getElementById('igFileZone').style.display='block';document.getElementById('igContent').style.display='none'" style="font-size:11px;padding:5px 10px;margin-left:auto">📂 Trocar arquivos</button>
+        </div>
+
+        <!-- Painel de comparação -->
+        <div id="igComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período A</div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="date" id="igCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+                <span style="color:var(--mu);font-size:11px">até</span>
+                <input type="date" id="igCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período B</div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="date" id="igCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+                <span style="color:var(--mu);font-size:11px">até</span>
+                <input type="date" id="igCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="renderIgCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
+          <div id="igCompareResult" style="margin-top:16px"></div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+          <div class="kpi pink"><div class="kpi-label">Visualizações</div><div class="kpi-val" id="ig_views">—</div><div class="kpi-sub" id="ig_viewsS">Posts + Stories</div></div>
+          <div class="kpi purple"><div class="kpi-label">Alcance Total</div><div class="kpi-val" id="ig_reach">—</div><div class="kpi-sub" id="ig_reachS">Pessoas únicas</div></div>
+          <div class="kpi blue"><div class="kpi-label">Engajamento</div><div class="kpi-val" id="ig_eng">—</div><div class="kpi-sub" id="ig_engS">Curtidas+coment.+salv.+comp.</div></div>
+          <div class="kpi green"><div class="kpi-label">Taxa de Eng.</div><div class="kpi-val" id="ig_txeng">—</div><div class="kpi-sub" id="ig_txengS">Eng. / Alcance</div></div>
+          <div class="kpi amber"><div class="kpi-label">Seguimentos</div><div class="kpi-val" id="ig_seg">—</div><div class="kpi-sub" id="ig_segS">Novos seguidores</div></div>
+        </div>
+        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+          <div class="kpi blue"><div class="kpi-label">Posts</div><div class="kpi-val" id="ig_posts">—</div><div class="kpi-sub" id="ig_postsS">Publicações</div></div>
+          <div class="kpi purple"><div class="kpi-label">Stories</div><div class="kpi-val" id="ig_stories">—</div><div class="kpi-sub" id="ig_storiesS">Stories</div></div>
+          <div class="kpi pink"><div class="kpi-label">Média Views/Post</div><div class="kpi-val" id="ig_avgPost">—</div><div class="kpi-sub">Por publicação</div></div>
+          <div class="kpi amber"><div class="kpi-label">Média Views/Story</div><div class="kpi-val" id="ig_avgStory">—</div><div class="kpi-sub">Por story</div></div>
+          <div class="kpi green"><div class="kpi-label">Melhor Dia</div><div class="kpi-val" id="ig_bestDay">—</div><div class="kpi-sub" id="ig_bestDayS">Por views</div></div>
+        </div>
+
+        <!-- Gráficos row 1 -->
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="igChartTipo"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">📅 Views por Dia</div></div><div style="height:200px;position:relative"><canvas id="igChartDia"></canvas></div></div>
+        </div>
+
+        <!-- Gráficos row 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><div class="card-title">🏆 Top Posts — Views</div></div><div style="height:220px;position:relative"><canvas id="igChartTopPosts"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">📖 Top Stories — Views</div></div><div style="height:220px;position:relative"><canvas id="igChartTopStories"></canvas></div></div>
+        </div>
+
+        <!-- Tabela Posts -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd">
+            <div class="card-title">📋 Posts e Reels</div>
+            <span id="igPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="border-bottom:1px solid var(--bdr)">
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Salv.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Eng.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Tx Eng.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg.</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
+              </tr></thead>
+              <tbody id="igPostBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tabela Stories -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">📖 Stories</div>
+            <span id="igStoryCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="border-bottom:1px solid var(--bdr)">
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data/Hora</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Respostas</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Navegação</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Visitas Perfil</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg.</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
+              </tr></thead>
+              <tbody id="igStoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
+    <div class="page" id="page-facebook">
+      <!-- Seletor de arquivos -->
+      <div id="fbFileZone" style="background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(46,204,142,.08));border:2px dashed rgba(79,142,247,.4);border-radius:14px;padding:24px;text-align:center;margin-bottom:18px">
+        <div style="font-size:28px;margin-bottom:8px">📘</div>
+        <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Selecione o arquivo CSV do Facebook</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Arquivo com <strong>"Facebook"</strong> no nome — da pasta <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Organico/</code></div>
+        <label style="cursor:pointer">
+          <input type="file" id="fbFilePicker" multiple accept=".csv" style="display:none" onchange="onFbFiles(this.files)">
+          <span class="btn btn-primary" style="pointer-events:none">📂 Selecionar arquivo CSV</span>
+        </label>
+        <div id="fbFileStatus" style="font-size:12px;color:var(--mu);margin-top:10px"></div>
+      </div>
+
+      <div id="fbContent" style="display:none">
+        <!-- Filtros -->
+        <div class="fbar" style="margin-bottom:18px">
+          <span class="fl">De:</span>
+          <input type="date" id="fbDateDe" onchange="renderFacebook()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+          <span class="fl">Até:</span>
+          <input type="date" id="fbDateAte" onchange="renderFacebook()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+          <button class="btn" onclick="fbClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
+          <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
+          <button class="btn" id="btnFbCompare" onclick="toggleFbCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
+          <button class="btn" onclick="document.getElementById('fbFileZone').style.display='block';document.getElementById('fbContent').style.display='none'" style="font-size:11px;padding:5px 10px;margin-left:auto">📂 Trocar arquivo</button>
+        </div>
+
+        <!-- Painel de comparação -->
+        <div id="fbComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período A</div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="date" id="fbCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+                <span style="color:var(--mu);font-size:11px">até</span>
+                <input type="date" id="fbCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período B</div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="date" id="fbCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+                <span style="color:var(--mu);font-size:11px">até</span>
+                <input type="date" id="fbCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="renderFbCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
+          <div id="fbCompareResult" style="margin-top:16px"></div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+          <div class="kpi blue"><div class="kpi-label">Total de Posts</div><div class="kpi-val" id="fb_posts">—</div><div class="kpi-sub" id="fb_postsS">Publicações</div></div>
+          <div class="kpi green"><div class="kpi-label">Reações + Eng.</div><div class="kpi-val" id="fb_eng">—</div><div class="kpi-sub" id="fb_engS">React.+coment.+comp.</div></div>
+          <div class="kpi amber"><div class="kpi-label">Méd. Eng./Post</div><div class="kpi-val" id="fb_avgEng">—</div><div class="kpi-sub">Média por publicação</div></div>
+          <div class="kpi red"><div class="kpi-label">Feedbacks Neg.</div><div class="kpi-val" id="fb_neg">—</div><div class="kpi-sub" id="fb_negS">Ocultações/denúncias</div></div>
+          <div class="kpi purple"><div class="kpi-label">Tipos de Post</div><div class="kpi-val" id="fb_tipos">—</div><div class="kpi-sub" id="fb_tiposS">Formatos publicados</div></div>
+        </div>
+
+        <!-- Gráficos -->
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="fbChartTipo"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento por Post — Top 10</div></div><div style="height:200px;position:relative"><canvas id="fbChartEng"></canvas></div></div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">📋 Posts Facebook</div>
+            <span id="fbPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="border-bottom:1px solid var(--bdr)">
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Título</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">React.+Eng.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Feedback Neg.</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
+              </tr></thead>
+              <tbody id="fbPostBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
     <div class="page" id="page-meta">
 
@@ -1332,7 +1557,8 @@ const PAGE_TITLES={
   investimento:'Investimento',gads:'Google Ads',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
-  config:'Configurações de API',meta:'Criativos Meta API'
+  config:'Configurações de API',meta:'Criativos Meta API',
+  instagram:'Instagram Orgânico',facebook:'Facebook Orgânico'
 };
 function goPage(pg){
   paginaAtual=pg;
@@ -1345,8 +1571,8 @@ function goPage(pg){
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='campanhas') initCampanhasPage();
   if(pg==='investimento') renderInvestimento();
-  if(pg==='instagram') loadInstagram();
-  if(pg==='facebook')  loadFacebook();
+  if(pg==='instagram') loadOrganico('instagram');
+  if(pg==='facebook')  loadOrganico('facebook');
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -3833,6 +4059,415 @@ async function analyzeAllMetaCampaigns(){
 }
 
 // ──────────────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════
+// ORGÂNICO: Instagram + Facebook — leitura de CSV local
+// ══════════════════════════════════════════════════════════
+var rawPostagens = [];  // Instagram posts
+var rawStories   = [];  // Instagram stories
+var rawFacebook  = [];  // Facebook posts
+
+// Converter "MM/DD/YYYY HH:MM" → "YYYY-MM-DD"
+function orgParseDate(s){
+  if(!s) return '';
+  var parts = s.trim().split(' ')[0].split('/');
+  if(parts.length!==3) return '';
+  return parts[2]+'-'+parts[0].padStart(2,'0')+'-'+parts[1].padStart(2,'0');
+}
+
+function orgN(v){ return parseInt(String(v||'0').replace(/[^0-9.-]/g,''))||0; }
+
+function orgInRange(dateStr, de, ate){
+  if(!dateStr) return true;
+  if(de  && dateStr < de)  return false;
+  if(ate && dateStr > ate) return false;
+  return true;
+}
+
+// Ler arquivo como texto
+function readFile(file){
+  return new Promise(function(res,rej){
+    var fr = new FileReader();
+    fr.onload = function(e){ res(e.target.result); };
+    fr.onerror = rej;
+    fr.readAsText(file, 'UTF-8');
+  });
+}
+
+// Parse CSV simples (reutiliza splitL do sistema)
+function orgParseCSV(text){
+  var lines = text.replace(//g,'').split('
+').filter(function(l){ return l.trim(); });
+  if(lines.length<2) return [];
+  // Find real header (first cell = known column name)
+  var hIdx = 0;
+  var anchors = ['Identificação do post','Horário de publicação','Título','Data'];
+  for(var i=0;i<Math.min(lines.length,10);i++){
+    var fc = splitL(lines[i])[0].replace(/^"|"$/g,'').trim();
+    if(anchors.some(function(a){ return fc===a||fc.indexOf(a)===0; })){ hIdx=i; break; }
+  }
+  var hs = splitL(lines[hIdx]).map(function(h){ return h.replace(/^"|"$/g,'').trim(); });
+  return lines.slice(hIdx+1).map(function(l){
+    var v=splitL(l); var o={};
+    hs.forEach(function(h,i){ o[h]=(v[i]||'').replace(/^"|"$/g,'').trim(); });
+    return o;
+  }).filter(function(r){ return Object.values(r).some(function(v){ return v; }); });
+}
+
+// Processar arquivos Instagram
+async function onIgFiles(files){
+  rawPostagens=[]; rawStories=[];
+  var names=[];
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    var txt = await readFile(f);
+    var rows = orgParseCSV(txt);
+    var nm = f.name;
+    if(nm.toLowerCase().indexOf('story')>=0||nm.toLowerCase().indexOf('storie')>=0){
+      rawStories = rawStories.concat(rows);
+      names.push('📖 '+nm);
+    } else if(nm.toLowerCase().indexOf('postagem')>=0||nm.toLowerCase().indexOf('post')>=0){
+      rawPostagens = rawPostagens.concat(rows);
+      names.push('📸 '+nm);
+    }
+  }
+  var st = document.getElementById('igFileStatus');
+  if(st) st.textContent = 'Carregados: '+names.join(', ')+' | '+rawPostagens.length+' posts · '+rawStories.length+' stories';
+  if(rawPostagens.length||rawStories.length){
+    document.getElementById('igFileZone').style.display='none';
+    document.getElementById('igContent').style.display='block';
+    renderInstagram();
+  }
+}
+
+// Processar arquivos Facebook
+async function onFbFiles(files){
+  rawFacebook=[];
+  var names=[];
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    var txt = await readFile(f);
+    var rows = orgParseCSV(txt);
+    rawFacebook = rawFacebook.concat(rows);
+    names.push(f.name);
+  }
+  var st = document.getElementById('fbFileStatus');
+  if(st) st.textContent = 'Carregado: '+names.join(', ')+' | '+rawFacebook.length+' posts';
+  if(rawFacebook.length){
+    document.getElementById('fbFileZone').style.display='none';
+    document.getElementById('fbContent').style.display='block';
+    renderFacebook();
+  }
+}
+
+function loadOrganico(pg){
+  // Pages load via file picker — nothing to auto-load
+}
+
+// ── RENDER INSTAGRAM ──
+function renderInstagram(){
+  var de  = (document.getElementById('igDateDe')||{}).value||'';
+  var ate = (document.getElementById('igDateAte')||{}).value||'';
+
+  var posts   = rawPostagens.filter(function(r){
+    var d = orgParseDate(r['Horário de publicação']);
+    return orgInRange(d,de,ate);
+  });
+  var stories = rawStories.filter(function(r){
+    var d = orgParseDate(r['Horário de publicação']);
+    return orgInRange(d,de,ate);
+  });
+
+  // KPIs
+  var vPosts   = posts.reduce(function(s,r){ return s+orgN(r['Visualizações']); },0);
+  var vStories = stories.reduce(function(s,r){ return s+orgN(r['Visualizações']); },0);
+  var totViews = vPosts+vStories;
+  var totAlc   = posts.reduce(function(s,r){ return s+orgN(r['Alcance']); },0)
+               + stories.reduce(function(s,r){ return s+orgN(r['Alcance']); },0);
+  var totEng   = posts.reduce(function(s,r){ return s+orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']); },0)
+               + stories.reduce(function(s,r){ return s+orgN(r['Curtidas'])+orgN(r['Compartilhamentos'])+orgN(r['Respostas']); },0);
+  var totSeg   = posts.reduce(function(s,r){ return s+orgN(r['Seguimentos']); },0)
+               + stories.reduce(function(s,r){ return s+orgN(r['Seguimentos']); },0);
+  var txEng    = totAlc>0 ? (totEng/totAlc*100).toFixed(2)+'%' : '—';
+
+  // Best day
+  var dayMap={};
+  posts.forEach(function(r){ var d=orgParseDate(r['Horário de publicação']); if(d) dayMap[d]=(dayMap[d]||0)+orgN(r['Visualizações']); });
+  stories.forEach(function(r){ var d=orgParseDate(r['Horário de publicação']); if(d) dayMap[d]=(dayMap[d]||0)+orgN(r['Visualizações']); });
+  var bestDay='—', bestViews=0;
+  Object.keys(dayMap).forEach(function(d){ if(dayMap[d]>bestViews){ bestViews=dayMap[d]; bestDay=d; } });
+  if(bestDay!=='—'){ var p=bestDay.split('-'); bestDay=p[2]+'/'+p[1]; }
+
+  sid('ig_views',  fN(totViews));  sid('ig_viewsS', fN(vPosts)+' posts · '+fN(vStories)+' stories');
+  sid('ig_reach',  fN(totAlc));    sid('ig_reachS', 'Soma dos alcances');
+  sid('ig_eng',    fN(totEng));    sid('ig_engS',   'Curtidas+coment.+salv.+comp.+resp.');
+  sid('ig_txeng',  txEng);         sid('ig_txengS', txEng!='—'?(parseFloat(txEng)>=3?'Bom (≥3%)':'Otimizar'):'—');
+  sid('ig_seg',    fN(totSeg));    sid('ig_segS',   'Novos seguidores');
+  sid('ig_posts',  String(posts.length));   sid('ig_postsS', 'No período');
+  sid('ig_stories',String(stories.length)); sid('ig_storiesS','No período');
+  sid('ig_avgPost', posts.length>0?fN(Math.round(vPosts/posts.length)):'—');
+  sid('ig_avgStory',stories.length>0?fN(Math.round(vStories/stories.length)):'—');
+  sid('ig_bestDay', bestDay); sid('ig_bestDayS', bestViews>0?fN(bestViews)+' views':'—');
+
+  var isLight=document.body.classList.contains('light');
+  var clrMu=isLight?'#6b7280':'#6b7a9e', clrTx=isLight?'#1a2332':'#e2e8f0', clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  // Chart: Posts por Tipo
+  var tipoMap={};
+  posts.forEach(function(r){ var t=(r['Tipo de post']||'Outro').replace(' do Instagram',''); tipoMap[t]=(tipoMap[t]||0)+1; });
+  var tipoLab=Object.keys(tipoMap);
+  mkChart('igChartTipo','doughnut',tipoLab,
+    [{data:tipoLab.map(function(t){ return tipoMap[t]; }),backgroundColor:['#e879a0','#9b7ff4','#4f8ef7','#2ecc8e','#f5a623'],borderWidth:2,borderColor:'var(--bg2)'}],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{position:'right',labels:{color:clrTx,font:{size:11}}},
+              tooltip:{callbacks:{label:function(ctx){ return ' '+ctx.label+': '+ctx.raw; }}}}});
+
+  // Chart: Views por Dia (linha)
+  var days=Object.keys(dayMap).sort();
+  mkChart('igChartDia','line',days.map(function(d){ var p=d.split('-'); return p[2]+'/'+p[1]; }),
+    [{label:'Views',data:days.map(function(d){ return dayMap[d]; }),
+      borderColor:'#e879a0',backgroundColor:'rgba(232,121,160,.12)',borderWidth:2,pointRadius:4,tension:.3,fill:true}],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},
+             y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+
+  // Chart: Top Posts
+  var topPosts=posts.slice().sort(function(a,b){ return orgN(b['Visualizações'])-orgN(a['Visualizações']); }).slice(0,8);
+  mkChart('igChartTopPosts','bar',
+    topPosts.map(function(r){ var desc=(r['Descrição']||'').slice(0,30)||orgParseDate(r['Horário de publicação']); return desc+'…'; }),
+    [{label:'Views',data:topPosts.map(function(r){ return orgN(r['Visualizações']); }),
+      backgroundColor:'rgba(232,121,160,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
+     plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},
+             y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Chart: Top Stories
+  var topStories=stories.slice().sort(function(a,b){ return orgN(b['Visualizações'])-orgN(a['Visualizações']); }).slice(0,8);
+  mkChart('igChartTopStories','bar',
+    topStories.map(function(r){ var h=r['Horário de publicação']||''; return h.slice(0,16); }),
+    [{label:'Views',data:topStories.map(function(r){ return orgN(r['Visualizações']); }),
+      backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
+     plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},
+             y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Tabela Posts
+  var postCount = document.getElementById('igPostCount');
+  if(postCount) postCount.textContent=posts.length+' posts';
+  var pb=document.getElementById('igPostBody');
+  if(pb){
+    var sorted=posts.slice().sort(function(a,b){ return orgN(b['Visualizações'])-orgN(a['Visualizações']); });
+    pb.innerHTML=sorted.map(function(r,i){
+      var d=r['Horário de publicação']||''; var dShort=d.slice(0,10);
+      var tipo=(r['Tipo de post']||'').replace(' do Instagram','');
+      var eng=orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
+      var alc=orgN(r['Alcance']); var tx=alc>0?(eng/alc*100).toFixed(1)+'%':'—';
+      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">'
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+d.slice(0,16)+'</td>'
+        +'<td style="padding:8px 10px"><span style="background:rgba(232,121,160,.15);color:#e879a0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+tipo+'</span></td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(alc)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--tx)">'+fN(orgN(r['Curtidas']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--tx)">'+fN(orgN(r['Comentários']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--tx)">'+fN(orgN(r['Compartilhamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--tx)">'+fN(orgN(r['Salvamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:600;color:var(--green)">'+fN(eng)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:'+(parseFloat(tx)>=3?'var(--green)':parseFloat(tx)>=1?'var(--amber)':'var(--red)')+'">'+tx+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+fN(orgN(r['Seguimentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(r['Link permanente']?'<a href="'+r['Link permanente']+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  // Tabela Stories
+  var stCount = document.getElementById('igStoryCount');
+  if(stCount) stCount.textContent=stories.length+' stories';
+  var sb=document.getElementById('igStoryBody');
+  if(sb){
+    var sortedS=stories.slice().sort(function(a,b){ return orgN(b['Visualizações'])-orgN(a['Visualizações']); });
+    sb.innerHTML=sortedS.map(function(r){
+      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">'
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Alcance']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Curtidas']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Compartilhamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Respostas']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Navegação']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+fN(orgN(r['Visitas ao perfil']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--green)">'+fN(orgN(r['Seguimentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(r['Link permanente']?'<a href="'+r['Link permanente']+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+}
+
+// ── COMPARATIVO INSTAGRAM ──
+function toggleIgCompare(){
+  var p=document.getElementById('igComparePanel');
+  if(p) p.style.display=p.style.display==='none'?'block':'none';
+}
+function igClearDates(){
+  ['igDateDe','igDateAte'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
+  renderInstagram();
+}
+function igCalcKPIs(posts,stories){
+  var vP=posts.reduce(function(s,r){ return s+orgN(r['Visualizações']); },0);
+  var vS=stories.reduce(function(s,r){ return s+orgN(r['Visualizações']); },0);
+  var alc=posts.reduce(function(s,r){ return s+orgN(r['Alcance']); },0)+stories.reduce(function(s,r){ return s+orgN(r['Alcance']); },0);
+  var eng=posts.reduce(function(s,r){ return s+orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']); },0)
+          +stories.reduce(function(s,r){ return s+orgN(r['Curtidas'])+orgN(r['Compartilhamentos'])+orgN(r['Respostas']); },0);
+  var seg=posts.reduce(function(s,r){ return s+orgN(r['Seguimentos']); },0)+stories.reduce(function(s,r){ return s+orgN(r['Seguimentos']); },0);
+  return {views:vP+vS,alcance:alc,engajamento:eng,seguimentos:seg,posts:posts.length,stories:stories.length,txEng:alc>0?+(eng/alc*100).toFixed(2):0};
+}
+function renderIgCompare(){
+  var a1=(document.getElementById('igCmpA1')||{}).value||'',a2=(document.getElementById('igCmpA2')||{}).value||'';
+  var b1=(document.getElementById('igCmpB1')||{}).value||'',b2=(document.getElementById('igCmpB2')||{}).value||'';
+  var pA=rawPostagens.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),a1,a2); });
+  var sA=rawStories.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),a1,a2); });
+  var pB=rawPostagens.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),b1,b2); });
+  var sB=rawStories.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),b1,b2); });
+  var kA=igCalcKPIs(pA,sA), kB=igCalcKPIs(pB,sB);
+  var metrics=[
+    {label:'Views',ka:kA.views,kb:kB.views,fmt:fN},
+    {label:'Alcance',ka:kA.alcance,kb:kB.alcance,fmt:fN},
+    {label:'Engajamento',ka:kA.engajamento,kb:kB.engajamento,fmt:fN},
+    {label:'Taxa Eng. (%)',ka:kA.txEng,kb:kB.txEng,fmt:function(v){ return v.toFixed(2)+'%'; }},
+    {label:'Seguimentos',ka:kA.seguimentos,kb:kB.seguimentos,fmt:fN},
+    {label:'Posts',ka:kA.posts,kb:kB.posts,fmt:String},
+    {label:'Stories',ka:kA.stories,kb:kB.stories,fmt:String},
+  ];
+  var rows=metrics.map(function(m){
+    var diff=m.kb-m.ka, pct=m.ka>0?(diff/m.ka*100):0;
+    var col=diff>0?'var(--green)':diff<0?'var(--red)':'var(--mu)';
+    var arrow=diff>0?'▲':diff<0?'▼':'—';
+    return '<tr style="border-bottom:1px solid var(--bdr)">'
+      +'<td style="padding:8px 10px;font-weight:600;color:var(--tx)">'+m.label+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+m.fmt(m.ka)+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+m.fmt(m.kb)+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:'+col+';font-weight:700">'+arrow+' '+Math.abs(pct).toFixed(1)+'%</td>'
+      +'</tr>';
+  }).join('');
+  var el=document.getElementById('igCompareResult');
+  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead><tr style="border-bottom:2px solid var(--bdr)">'
+    +'<th style="padding:8px 10px;text-align:left;color:var(--mu)">Métrica</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--blue)">Período A ('+a1+' → '+a2+')</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--purple)">Período B ('+b1+' → '+b2+')</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu)">Variação</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+// ── RENDER FACEBOOK ──
+function renderFacebook(){
+  var de  = (document.getElementById('fbDateDe')||{}).value||'';
+  var ate = (document.getElementById('fbDateAte')||{}).value||'';
+  var posts = rawFacebook.filter(function(r){
+    var d=orgParseDate(r['Horário de publicação']);
+    return orgInRange(d,de,ate);
+  });
+
+  var totEng  = posts.reduce(function(s,r){ return s+orgN(r['Reações, comentários e compartilhamentos']); },0);
+  var totNeg  = posts.reduce(function(s,r){ return s+orgN(r['Feedbacks negativos dos usuários']); },0);
+  var tipoMap = {};
+  posts.forEach(function(r){ var t=r['Tipo de post']||'Outro'; tipoMap[t]=(tipoMap[t]||0)+1; });
+
+  sid('fb_posts',  String(posts.length));  sid('fb_postsS', 'No período');
+  sid('fb_eng',    fN(totEng));            sid('fb_engS',   'Total de interações');
+  sid('fb_avgEng', posts.length>0?fN(Math.round(totEng/posts.length)):'—');
+  sid('fb_neg',    String(totNeg));        sid('fb_negS',   totNeg>0?'Atenção':'Nenhum negativo');
+  sid('fb_tipos',  String(Object.keys(tipoMap).length)); sid('fb_tiposS',Object.keys(tipoMap).join(', '));
+
+  var isLight=document.body.classList.contains('light');
+  var clrMu=isLight?'#6b7280':'#6b7a9e', clrTx=isLight?'#1a2332':'#e2e8f0', clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  // Chart: Tipo
+  var tipoLab=Object.keys(tipoMap);
+  mkChart('fbChartTipo','doughnut',tipoLab,
+    [{data:tipoLab.map(function(t){ return tipoMap[t]; }),backgroundColor:['#4f8ef7','#2ecc8e','#f5a623','#9b7ff4','#26c6da'],borderWidth:2,borderColor:'var(--bg2)'}],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{position:'right',labels:{color:clrTx,font:{size:11}}}}});
+
+  // Chart: Engajamento top 10
+  var top10=posts.slice().sort(function(a,b){ return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']); }).slice(0,10);
+  mkChart('fbChartEng','bar',
+    top10.map(function(r){ var t=(r['Título']||r['Horário de publicação']||'').slice(0,25); return t; }),
+    [{label:'Engajamento',data:top10.map(function(r){ return orgN(r['Reações, comentários e compartilhamentos']); }),
+      backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
+     plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},
+             y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Tabela
+  var pc=document.getElementById('fbPostCount');
+  if(pc) pc.textContent=posts.length+' posts';
+  var pb=document.getElementById('fbPostBody');
+  if(pb){
+    var sorted=posts.slice().sort(function(a,b){ return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']); });
+    pb.innerHTML=sorted.map(function(r){
+      var neg=orgN(r['Feedbacks negativos dos usuários']);
+      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">'
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
+        +'<td style="padding:8px 10px"><span style="background:rgba(79,142,247,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+(r['Tipo de post']||'—')+'</span></td>'
+        +'<td style="padding:8px 10px;color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Título']||'')+'">'+(r['Título']||'—')+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--green)">'+fN(orgN(r['Reações, comentários e compartilhamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:'+(neg>0?'var(--red)':'var(--mu)')+'">'+neg+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(r['Link permanente']&&r['Link permanente']!=='N/A'?'<a href="'+r['Link permanente']+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+}
+
+function toggleFbCompare(){
+  var p=document.getElementById('fbComparePanel');
+  if(p) p.style.display=p.style.display==='none'?'block':'none';
+}
+function fbClearDates(){
+  ['fbDateDe','fbDateAte'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
+  renderFacebook();
+}
+function fbCalcKPIs(posts){
+  return {
+    posts:posts.length,
+    eng:posts.reduce(function(s,r){ return s+orgN(r['Reações, comentários e compartilhamentos']); },0),
+    neg:posts.reduce(function(s,r){ return s+orgN(r['Feedbacks negativos dos usuários']); },0),
+  };
+}
+function renderFbCompare(){
+  var a1=(document.getElementById('fbCmpA1')||{}).value||'',a2=(document.getElementById('fbCmpA2')||{}).value||'';
+  var b1=(document.getElementById('fbCmpB1')||{}).value||'',b2=(document.getElementById('fbCmpB2')||{}).value||'';
+  var pA=rawFacebook.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),a1,a2); });
+  var pB=rawFacebook.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),b1,b2); });
+  var kA=fbCalcKPIs(pA), kB=fbCalcKPIs(pB);
+  var metrics=[
+    {label:'Posts',ka:kA.posts,kb:kB.posts},
+    {label:'Engajamento total',ka:kA.eng,kb:kB.eng},
+    {label:'Feedbacks negativos',ka:kA.neg,kb:kB.neg},
+  ];
+  var rows=metrics.map(function(m){
+    var diff=m.kb-m.ka, pct=m.ka>0?(diff/m.ka*100):0;
+    var col=diff>0?(m.label.indexOf('negativo')>=0?'var(--red)':'var(--green)'):(diff<0?(m.label.indexOf('negativo')>=0?'var(--green)':'var(--red)'):'var(--mu)');
+    var arrow=diff>0?'▲':diff<0?'▼':'—';
+    return '<tr style="border-bottom:1px solid var(--bdr)">'
+      +'<td style="padding:8px 10px;font-weight:600;color:var(--tx)">'+m.label+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+fN(m.ka)+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+fN(m.kb)+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:'+col+';font-weight:700">'+arrow+' '+Math.abs(pct).toFixed(1)+'%</td>'
+      +'</tr>';
+  }).join('');
+  var el=document.getElementById('fbCompareResult');
+  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead><tr style="border-bottom:2px solid var(--bdr)">'
+    +'<th style="padding:8px 10px;text-align:left;color:var(--mu)">Métrica</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--blue)">Período A ('+a1+' → '+a2+')</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--purple)">Período B ('+b1+' → '+b2+')</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu)">Variação</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>';
+}
 
 // Menu mobile
 document.querySelector('.topbar')?.addEventListener('click', e=>{

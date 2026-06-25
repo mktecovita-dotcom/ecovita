@@ -4096,8 +4096,7 @@ function readFile(file){
 
 // Parse CSV simples (reutiliza splitL do sistema)
 function orgParseCSV(text){
-  var lines = text.replace(//g,'').split('
-').filter(function(l){ return l.trim(); });
+  var lines = text.replace(/\r/g,'').split('\n').filter(function(l){ return l.trim(); });
   if(lines.length<2) return [];
   // Find real header (first cell = known column name)
   var hIdx = 0;
@@ -4265,7 +4264,7 @@ function renderInstagram(){
       var tipo=(r['Tipo de post']||'').replace(' do Instagram','');
       var eng=orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
       var alc=orgN(r['Alcance']); var tx=alc>0?(eng/alc*100).toFixed(1)+'%':'—';
-      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">'
+      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover=\"this.style.background=\'var(--bg3)\'\" onmouseout=\"this.style.background=\'\'\">'
         +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+d.slice(0,16)+'</td>'
         +'<td style="padding:8px 10px"><span style="background:rgba(232,121,160,.15);color:#e879a0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+tipo+'</span></td>'
         +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
@@ -4289,7 +4288,7 @@ function renderInstagram(){
   if(sb){
     var sortedS=stories.slice().sort(function(a,b){ return orgN(b['Visualizações'])-orgN(a['Visualizações']); });
     sb.innerHTML=sortedS.map(function(r){
-      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">'
+      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover=\"this.style.background=\'var(--bg3)\'\" onmouseout=\"this.style.background=\'\'\">'
         +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
         +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
         +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Alcance']))+'</td>'
@@ -4410,7 +4409,7 @@ function renderFacebook(){
     var sorted=posts.slice().sort(function(a,b){ return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']); });
     pb.innerHTML=sorted.map(function(r){
       var neg=orgN(r['Feedbacks negativos dos usuários']);
-      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">'
+      return '<tr style="border-bottom:1px solid var(--bdr)" onmouseover=\"this.style.background=\'var(--bg3)\'\" onmouseout=\"this.style.background=\'\'\">'
         +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
         +'<td style="padding:8px 10px"><span style="background:rgba(79,142,247,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+(r['Tipo de post']||'—')+'</span></td>'
         +'<td style="padding:8px 10px;color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Título']||'')+'">'+(r['Título']||'—')+'</td>'

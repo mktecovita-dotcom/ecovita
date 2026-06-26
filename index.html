@@ -1198,7 +1198,7 @@ body.light .theme-label{color:var(--blue)}
         <span id="fbStatus" style="font-size:11px;color:var(--mu);margin-left:8px"></span>
       </div>
       <div id="fbLoading" style="display:none;text-align:center;padding:40px"><div style="font-size:22px;margin-bottom:8px">⏳</div><div style="font-size:13px;color:var(--mu)">Carregando dados…</div></div>
-      <div id="fbError"   style="display:none" class="ebox"></div>
+      <div id="fbError" style="display:none" class="ebox"></div>
 
       <!-- Comparativo -->
       <div id="fbComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
@@ -1226,27 +1226,56 @@ body.light .theme-label{color:var(--blue)}
       </div>
 
       <div id="fbBody" style="display:none">
+        <!-- KPIs linha 1 -->
         <div class="kpi-grid kpi-5" style="margin-bottom:14px">
           <div class="kpi blue"><div class="kpi-label">Total de Posts</div><div class="kpi-val" id="fb_posts">—</div><div class="kpi-sub" id="fb_postsS">No período</div></div>
           <div class="kpi green"><div class="kpi-label">Engajamento</div><div class="kpi-val" id="fb_eng">—</div><div class="kpi-sub">Reações+coment.+comp.</div></div>
-          <div class="kpi amber"><div class="kpi-label">Méd. Eng./Post</div><div class="kpi-val" id="fb_avgEng">—</div><div class="kpi-sub">Média por post</div></div>
-          <div class="kpi red"><div class="kpi-label">Feedbacks Neg.</div><div class="kpi-val" id="fb_neg">—</div><div class="kpi-sub" id="fb_negS">Ocultações</div></div>
-          <div class="kpi purple"><div class="kpi-label">Tipos de Post</div><div class="kpi-val" id="fb_tipos">—</div><div class="kpi-sub" id="fb_tiposS">Formatos</div></div>
+          <div class="kpi amber"><div class="kpi-label">Méd. Eng./Post</div><div class="kpi-val" id="fb_avgEng">—</div><div class="kpi-sub">Por publicação</div></div>
+          <div class="kpi purple"><div class="kpi-label">Views 3s (Total)</div><div class="kpi-val" id="fb_views3s">—</div><div class="kpi-sub">Visualizações de vídeo</div></div>
+          <div class="kpi red"><div class="kpi-label">Feedbacks Neg.</div><div class="kpi-val" id="fb_neg">—</div><div class="kpi-sub" id="fb_negS">Ocultações/denúncias</div></div>
         </div>
+        <!-- KPIs linha 2 -->
+        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+          <div class="kpi blue"><div class="kpi-label">Tipos de Post</div><div class="kpi-val" id="fb_tipos">—</div><div class="kpi-sub" id="fb_tiposS">Formatos</div></div>
+          <div class="kpi green"><div class="kpi-label">Duração Média</div><div class="kpi-val" id="fb_durAvg">—</div><div class="kpi-sub">Segundos por vídeo</div></div>
+          <div class="kpi amber"><div class="kpi-label">Posts Cruzados</div><div class="kpi-val" id="fb_crosspost">—</div><div class="kpi-sub">Reels/Instagram</div></div>
+          <div class="kpi purple"><div class="kpi-label">Principal País</div><div class="kpi-val" id="fb_topPais">—</div><div class="kpi-sub" id="fb_topPaisS">Views 3s</div></div>
+          <div class="kpi pink"><div class="kpi-label">Principal Demo</div><div class="kpi-val" id="fb_topDemo">—</div><div class="kpi-sub" id="fb_topDemoS">Views 3s</div></div>
+        </div>
+
+        <!-- Charts linha 1 -->
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
           <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="fbChartTipo"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento — Top 10</div></div><div style="height:200px;position:relative"><canvas id="fbChartEng"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento — Top 10 Posts</div></div><div style="height:200px;position:relative"><canvas id="fbChartEng"></canvas></div></div>
         </div>
+        <!-- Charts linha 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><div class="card-title">🌎 Views 3s por País — Top 10</div></div><div style="height:220px;position:relative"><canvas id="fbChartPais"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">👥 Views 3s por Faixa Etária e Gênero</div></div><div style="height:220px;position:relative"><canvas id="fbChartDemo"></canvas></div></div>
+        </div>
+        <!-- Chart linha 3 -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd"><div class="card-title">📈 Views 3s — Top 10 Posts</div></div>
+          <div style="height:200px;position:relative"><canvas id="fbChartViews"></canvas></div>
+        </div>
+
+        <!-- Tabela -->
         <div class="card">
-          <div class="card-hd"><div class="card-title">📋 Posts Facebook</div><span id="fbPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span></div>
+          <div class="card-hd">
+            <div class="card-title">📋 Posts Facebook</div>
+            <span id="fbPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+          </div>
           <div style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:12px">
               <thead><tr style="border-bottom:1px solid var(--bdr)">
                 <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
                 <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
                 <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Título</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Eng.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Feedback Neg.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Duração</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Engajamento</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views 3s</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Feed. Neg.</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Cruzado</th>
                 <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
               </tr></thead>
               <tbody id="fbPostBody"></tbody>
@@ -1255,6 +1284,8 @@ body.light .theme-label{color:var(--blue)}
         </div>
       </div>
     </div>
+
+
 
     <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
     <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
@@ -1914,27 +1945,32 @@ async function fetchCSV(id,gid=0){
   return parseCSV(await r.text());
 }
 // Real-header keywords: if a row starts with one of these it's the actual column header
-var CSV_HEADER_ANCHORS = ['Day','Campaign','Campanha','Date','Data','Empreendimento','Identificação do post','Horário de publicação','Título'];
+var CSV_HEADER_ANCHORS = ['Day','Campaign','Campanha','Date','Data','Empreendimento','Identificação do post','Identificação da Página','Horário de publicação','Título'];
 function parseCSV(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(lines.length<2) return[];
-  // Find the real header row: first row whose first cell matches a known anchor
+  const sep=detectSep(text);
   let headerIdx=0;
   for(let i=0;i<Math.min(lines.length,20);i++){
-    const firstCell=splitL(lines[i])[0].replace(/^"|"$/g,'').trim();
+    const firstCell=splitL(lines[i],sep)[0].replace(/^"|"$/g,'').trim();
     if(CSV_HEADER_ANCHORS.some(k=>firstCell===k)){headerIdx=i;break;}
   }
-  const hs=splitL(lines[headerIdx]).map(h=>h.replace(/^"|"$/g,'').trim());
+  const hs=splitL(lines[headerIdx],sep).map(h=>h.replace(/^"|"$/g,'').trim());
   return lines.slice(headerIdx+1).map(l=>{
-    const v=splitL(l); const o={};
+    const v=splitL(l,sep); const o={};
     hs.forEach((h,i)=>{o[h]=(v[i]||'').replace(/^"|"$/g,'').trim();});
     return o;
   }).filter(r=>Object.values(r).some(v=>v&&v!=='--'&&v!=='-'));
 }
-function splitL(line){
+function splitL(line,sep){
+  sep=sep||',';
   const r=[];let c='',q=false;
-  for(const ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}
+  for(const ch of line){if(ch==='"'){q=!q;}else if(ch===sep&&!q){r.push(c);c='';}else{c+=ch;}}
   r.push(c);return r;
+}
+function detectSep(text){
+  const first=(text.split(/\r?\n/)[0])||'';
+  return(first.split(';').length>first.split(',').length)?';':',';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4646,7 +4682,6 @@ function applyFbFilter(){
   var posts=rawFacebook.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),de,ate); });
   renderFacebook(posts);
 }
-
 function fbClearDates(){
   var d1=document.getElementById('fbDateDe'),d2=document.getElementById('fbDateAte');
   if(d1) d1.value=''; if(d2) d2.value='';
@@ -4657,52 +4692,131 @@ function toggleFbCompare(){
   if(p) p.style.display=p.style.display==='none'?'block':'none';
 }
 
+function fbViews3s(r){
+  var total=0;
+  Object.keys(r).forEach(function(k){
+    if(k.indexOf('Visualizações de 3 segundos')>=0) total+=orgN(r[k]);
+  });
+  return total;
+}
+function fbViewsByCountry(posts){
+  var map={};
+  posts.forEach(function(p){
+    Object.keys(p).forEach(function(k){
+      var m=k.match(/Visualizações de 3 segundos do vídeo por país \((.+?) \(\w+\)\)/);
+      if(m){ var v=orgN(p[k]); if(v>0) map[m[1]]=(map[m[1]]||0)+v; }
+    });
+  });
+  return map;
+}
+function fbViewsByDemo(posts){
+  var map={};
+  posts.forEach(function(p){
+    Object.keys(p).forEach(function(k){
+      var m=k.match(/Visualizações de 3 segundos do vídeo por público mais relevante \(([FM]), (\d+[\-\+]\d*)\)/);
+      if(m){ var label=m[1]+' '+m[2]; var v=orgN(p[k]); if(v>0) map[label]=(map[label]||0)+v; }
+    });
+  });
+  return map;
+}
+
 function renderFacebook(posts){
   var body=document.getElementById('fbBody');
   if(body) body.style.display='block';
 
-  var totEng=0,totNeg=0;
-  var tipoMap={};
+  var totEng=0,totNeg=0,totViews=0,totDur=0,crossPosts=0,tipoMap={};
   posts.forEach(function(r){
-    totEng+=orgN(r['Reações, comentários e compartilhamentos']);
-    totNeg+=orgN(r['Feedbacks negativos dos usuários']);
+    totEng    +=orgN(r['Reações, comentários e compartilhamentos']);
+    totNeg    +=orgN(r['Feedbacks negativos dos usuários']);
+    totViews  +=fbViews3s(r);
+    totDur    +=orgN(r['Duração (s)']);
+    crossPosts+=(r['É um post cruzado']==='1')?1:0;
     var t=r['Tipo de post']||'Outro'; tipoMap[t]=(tipoMap[t]||0)+1;
   });
 
-  sid('fb_posts',  String(posts.length));   sid('fb_postsS','No período');
+  var paisMap=fbViewsByCountry(posts);
+  var demoMap=fbViewsByDemo(posts);
+  var topPais=Object.keys(paisMap).sort(function(a,b){return paisMap[b]-paisMap[a];})[0]||'—';
+  var topDemo=Object.keys(demoMap).sort(function(a,b){return demoMap[b]-demoMap[a];})[0]||'—';
+
+  sid('fb_posts',  String(posts.length));
   sid('fb_eng',    fN(totEng));
   sid('fb_avgEng', posts.length?fN(Math.round(totEng/posts.length)):'—');
-  sid('fb_neg',    String(totNeg));          sid('fb_negS',totNeg>0?'⚠️ Atenção':'Nenhum negativo');
+  sid('fb_views3s',fN(totViews));
+  sid('fb_neg',    String(totNeg)); sid('fb_negS',totNeg>0?'⚠️ Atenção':'Nenhum negativo');
   sid('fb_tipos',  String(Object.keys(tipoMap).length)); sid('fb_tiposS',Object.keys(tipoMap).join(', '));
+  sid('fb_durAvg', posts.length?String(Math.round(totDur/posts.length))+'s':'—');
+  sid('fb_crosspost',String(crossPosts));
+  sid('fb_topPais',topPais);  sid('fb_topPaisS',topPais!=='—'?fN(paisMap[topPais])+' views':'—');
+  sid('fb_topDemo',topDemo);  sid('fb_topDemoS',topDemo!=='—'?fN(demoMap[topDemo])+' views':'—');
 
   var pc=document.getElementById('fbPostCount'); if(pc) pc.textContent=posts.length+' posts';
 
   var isLight=document.body.classList.contains('light');
   var clrMu=isLight?'#6b7280':'#6b7a9e',clrTx=isLight?'#1a2332':'#e2e8f0',clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+  var pal=['#4f8ef7','#2ecc8e','#f5a623','#9b7ff4','#e879a0','#26c6da','#ff7043'];
 
+  // Tipos
   var tl=Object.keys(tipoMap);
   mkChart('fbChartTipo','doughnut',tl,
-    [{data:tl.map(function(t){return tipoMap[t];}),backgroundColor:['#4f8ef7','#2ecc8e','#f5a623','#9b7ff4','#e879a0'],borderWidth:2,borderColor:'var(--bg2)'}],
+    [{data:tl.map(function(t){return tipoMap[t];}),backgroundColor:pal,borderWidth:2,borderColor:'var(--bg2)'}],
     {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:clrTx,font:{size:11}}}}});
 
-  var sortedE=posts.slice().sort(function(a,b){return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']);}).slice(0,10);
+  // Top 10 engajamento
+  var sortE=posts.slice().sort(function(a,b){return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']);}).slice(0,10);
   mkChart('fbChartEng','bar',
-    sortedE.map(function(r){return (r['Horário de publicação']||'').slice(0,10);}),
-    [{label:'Engajamento',data:sortedE.map(function(r){return orgN(r['Reações, comentários e compartilhamentos']);}),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
+    sortE.map(function(r){return(r['Título']||r['Horário de publicação']||'').slice(0,25);}),
+    [{label:'Engajamento',data:sortE.map(function(r){return orgN(r['Reações, comentários e compartilhamentos']);}),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
     {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
      scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
 
+  // Top 10 países
+  var topPs=Object.keys(paisMap).sort(function(a,b){return paisMap[b]-paisMap[a];}).slice(0,10);
+  mkChart('fbChartPais','bar',topPs,
+    [{label:'Views 3s',data:topPs.map(function(p){return paisMap[p];}),backgroundColor:'rgba(46,204,142,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
+
+  // Demo (faixa etária × gênero)
+  var demoKs=Object.keys(demoMap);
+  var faixas=[...new Set(demoKs.map(function(k){return k.slice(2);}))].sort(function(a,b){return parseInt(a)-parseInt(b);});
+  mkChart('fbChartDemo','bar',faixas,
+    [
+      {label:'Feminino', data:faixas.map(function(f){return demoMap['F '+f]||0;}),backgroundColor:'rgba(232,121,160,.8)',borderRadius:4},
+      {label:'Masculino',data:faixas.map(function(f){return demoMap['M '+f]||0;}),backgroundColor:'rgba(79,142,247,.8)',borderRadius:4},
+    ],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{position:'top',labels:{color:clrTx,font:{size:11}}}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+
+  // Top 10 views por post
+  var sortV=posts.filter(function(r){return fbViews3s(r)>0;}).sort(function(a,b){return fbViews3s(b)-fbViews3s(a);}).slice(0,10);
+  mkChart('fbChartViews','bar',
+    sortV.map(function(r){return(r['Título']||r['Horário de publicação']||'').slice(0,25);}),
+    [{label:'Views 3s',data:sortV.map(function(r){return fbViews3s(r);}),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
+
+  // Tabela
   var pb=document.getElementById('fbPostBody');
   if(pb){
-    pb.innerHTML=posts.slice().sort(function(a,b){return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']);}).map(function(r){
+    pb.innerHTML=posts.slice().sort(function(a,b){
+      return orgN(b['Reações, comentários e compartilhamentos'])-orgN(a['Reações, comentários e compartilhamentos']);
+    }).map(function(r){
       var neg=orgN(r['Feedbacks negativos dos usuários']);
+      var v3=fbViews3s(r);
+      var cross=(r['É um post cruzado']==='1');
+      var link=r['Link permanente']||'';
       return '<tr style="border-bottom:1px solid var(--bdr)">'
         +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
         +'<td style="padding:8px 10px"><span style="background:rgba(79,142,247,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+(r['Tipo de post']||'—')+'</span></td>'
-        +'<td style="padding:8px 10px;color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Título']||'')+'">'+((r['Título']||'—').slice(0,50))+'</td>'
+        +'<td style="padding:8px 10px;color:var(--tx);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Título']||'')+'">'+(r['Título']||'—').slice(0,40)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+(orgN(r['Duração (s)'])>0?orgN(r['Duração (s)'])+'s':'—')+'</td>'
         +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--green)">'+fN(orgN(r['Reações, comentários e compartilhamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+fN(v3)+'</td>'
         +'<td style="padding:8px 10px;text-align:right;color:'+(neg>0?'var(--red)':'var(--mu)')+'">'+neg+'</td>'
-        +'<td style="padding:8px 10px;text-align:center">'+(r['Link permanente']&&r['Link permanente']!=='N/A'?'<a href="'+r['Link permanente']+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(cross?'<span style="color:var(--amber)">✓</span>':'—')+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(link&&link!=='N/A'?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
         +'</tr>';
     }).join('');
   }
@@ -4710,18 +4824,25 @@ function renderFacebook(posts){
 
 // ─── COMPARATIVO FACEBOOK ────────────────────────────────
 function renderFbCompare(){
-  var a1=(document.getElementById('fbCmpA1')||{}).value||'',a2=(document.getElementById('fbCmpA2')||{}).value||'';
-  var b1=(document.getElementById('fbCmpB1')||{}).value||'',b2=(document.getElementById('fbCmpB2')||{}).value||'';
-  function filt(arr,d0,d1){ return arr.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),d0,d1); }); }
-  function calc(arr){ var e=0,n=0; arr.forEach(function(r){e+=orgN(r['Reações, comentários e compartilhamentos']);n+=orgN(r['Feedbacks negativos dos usuários']);}); return {posts:arr.length,eng:e,neg:n}; }
-  var kA=calc(filt(rawFacebook,a1,a2)), kB=calc(filt(rawFacebook,b1,b2));
-  var metrics=[
-    {l:'Posts',a:kA.posts,b:kB.posts,neg:false},
-    {l:'Engajamento',a:kA.eng,b:kB.eng,neg:false},
-    {l:'Feedback Negativo',a:kA.neg,b:kB.neg,neg:true},
+  var a1=(document.getElementById('fbCmpA1')||{}).value||'';
+  var a2=(document.getElementById('fbCmpA2')||{}).value||'';
+  var b1=(document.getElementById('fbCmpB1')||{}).value||'';
+  var b2=(document.getElementById('fbCmpB2')||{}).value||'';
+  function filt(d0,d1){ return rawFacebook.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),d0,d1); }); }
+  function calc(arr){
+    var e=0,n=0,v=0;
+    arr.forEach(function(r){ e+=orgN(r['Reações, comentários e compartilhamentos']); n+=orgN(r['Feedbacks negativos dos usuários']); v+=fbViews3s(r); });
+    return {posts:arr.length,eng:e,neg:n,views:v};
+  }
+  var kA=calc(filt(a1,a2)), kB=calc(filt(b1,b2));
+  var ms=[
+    {l:'Posts',         a:kA.posts, b:kB.posts, neg:false},
+    {l:'Engajamento',   a:kA.eng,   b:kB.eng,   neg:false},
+    {l:'Views 3s',      a:kA.views, b:kB.views, neg:false},
+    {l:'Feed. Negativo',a:kA.neg,   b:kB.neg,   neg:true},
   ];
-  var rows=metrics.map(function(m){
-    var diff=m.b-m.a,pct=m.a>0?(diff/m.a*100):0;
+  var rows=ms.map(function(m){
+    var diff=m.b-m.a, pct=m.a>0?(diff/m.a*100):0;
     var col=diff>0?(m.neg?'var(--red)':'var(--green)'):(diff<0?(m.neg?'var(--green)':'var(--red)'):'var(--mu)');
     return '<tr style="border-bottom:1px solid var(--bdr)">'
       +'<td style="padding:8px 10px;font-weight:600;color:var(--tx)">'+m.l+'</td>'
@@ -4731,13 +4852,15 @@ function renderFbCompare(){
       +'</tr>';
   }).join('');
   var el=document.getElementById('fbCompareResult');
-  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:2px solid var(--bdr)">'
+  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead><tr style="border-bottom:2px solid var(--bdr)">'
     +'<th style="padding:8px 10px;text-align:left;color:var(--mu)">Métrica</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--blue)">A ('+a1+' → '+a2+')</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--purple)">B ('+b1+' → '+b2+')</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--mu)">Variação</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 }
+
 
 // ─── goPage hook ─────────────────────────────────────────
 function loadOrganico(pg){

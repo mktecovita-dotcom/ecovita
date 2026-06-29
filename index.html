@@ -1079,7 +1079,39 @@ body.light .theme-label{color:var(--blue)}
         <input type="date" id="igDateAte" onchange="applyIgFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
         <button class="btn" onclick="igClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
         <button class="btn btn-primary" onclick="loadInstagram()" style="font-size:11px;padding:5px 14px">🔄 Atualizar</button>
+        <div style="width:1px;background:var(--bdr);height:20px;margin:0 4px"></div>
+        <button class="btn" onclick="toggleIgCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
+        <button class="btn" onclick="igSetMesAnterior()" style="font-size:11px;padding:5px 12px" title="Preenche comparação com mês anterior automaticamente">📅 Mês anterior</button>
         <span id="igStatus" style="font-size:11px;color:var(--mu);margin-left:8px"></span>
+      </div>
+
+      <!-- Painel de comparação -->
+      <div id="igComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;margin-bottom:8px">Período A</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="igCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              <span style="color:var(--mu);font-size:11px">até</span>
+              <input type="date" id="igCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:8px">Período B</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="igCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              <span style="color:var(--mu);font-size:11px">até</span>
+              <input type="date" id="igCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="renderIgCompare()" style="font-size:12px">Comparar</button>
+          <button class="btn" onclick="igFillCurrentVsPrev()" style="font-size:11px;padding:5px 12px">📅 Mês atual vs. mês anterior</button>
+          <button class="btn" onclick="igFillFilterVsPrev()" style="font-size:11px;padding:5px 12px">🔍 Filtro atual vs. período anterior</button>
+        </div>
+        <div id="igCompareResult" style="margin-top:16px"></div>
       </div>
 
       <div id="igLoading" style="display:none;text-align:center;padding:40px">
@@ -4379,6 +4411,148 @@ function renderStories(stories){
         +'</tr>';
     }).join('');
   }
+}
+
+
+// ─── COMPARE INSTAGRAM ───────────────────────────────────
+function toggleIgCompare(){
+  var p=document.getElementById('igComparePanel');
+  if(p) p.style.display=p.style.display==='none'?'block':'none';
+}
+
+// Preenche automaticamente: Período A = mês atual, Período B = mês anterior
+function igFillCurrentVsPrev(){
+  var now=new Date();
+  var y=now.getFullYear(), m=now.getMonth(); // m = 0-indexed
+  // Mês atual: 1st to today
+  var a1=y+'-'+String(m+1).padStart(2,'0')+'-01';
+  var a2=now.toISOString().slice(0,10);
+  // Mês anterior: 1st to last day
+  var pm=m===0?12:m, py=m===0?y-1:y;
+  var lastDay=new Date(y,m,0).getDate(); // last day of prev month
+  var b1=py+'-'+String(pm).padStart(2,'0')+'-01';
+  var b2=py+'-'+String(pm).padStart(2,'0')+'-'+String(lastDay).padStart(2,'0');
+  var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v;};
+  f('igCmpA1',a1); f('igCmpA2',a2); f('igCmpB1',b1); f('igCmpB2',b2);
+}
+
+// Preenche automaticamente: Período A = filtro atual, Período B = período equivalente anterior
+function igFillFilterVsPrev(){
+  var de=(document.getElementById('igDateDe')||{}).value||'';
+  var ate=(document.getElementById('igDateAte')||{}).value||'';
+  if(!de||!ate){ igFillCurrentVsPrev(); return; }
+  var d1=new Date(de), d2=new Date(ate);
+  var diff=d2-d1; // ms
+  var b2=new Date(d1.getTime()-86400000); // day before period A
+  var b1=new Date(b2.getTime()-diff);
+  var fmt=function(d){return d.toISOString().slice(0,10);};
+  var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v;};
+  f('igCmpA1',de); f('igCmpA2',ate); f('igCmpB1',fmt(b1)); f('igCmpB2',fmt(b2));
+}
+
+// Atalho rápido: preenche Período B com mês anterior e abre painel
+function igSetMesAnterior(){
+  var p=document.getElementById('igComparePanel');
+  if(p) p.style.display='block';
+  igFillCurrentVsPrev();
+  renderIgCompare();
+}
+
+function renderIgCompare(){
+  var a1=(document.getElementById('igCmpA1')||{}).value||'';
+  var a2=(document.getElementById('igCmpA2')||{}).value||'';
+  var b1=(document.getElementById('igCmpB1')||{}).value||'';
+  var b2=(document.getElementById('igCmpB2')||{}).value||'';
+  if(!a1||!a2||!b1||!b2){
+    var el=document.getElementById('igCompareResult');
+    if(el) el.innerHTML='<div style="color:var(--mu);font-size:12px;padding:8px">⚠️ Preencha os dois períodos para comparar.</div>';
+    return;
+  }
+
+  function filtPost(d0,d1){ return rawPostagens.filter(function(r){ return orgInRange(orgParseDate(r['Data de publicação']),d0,d1); }); }
+  function filtStory(d0,d1){ return rawStories.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),d0,d1); }); }
+
+  function calcPost(arr){
+    var views=0,alc=0,eng=0,seg=0,salv=0,likes=0,coment=0,shares=0;
+    arr.forEach(function(r){
+      views +=orgN(r['Visualizações']); alc+=orgN(r['Alcance']);
+      seg   +=orgN(r['Seguidores ganhos']); salv+=orgN(r['Salvamentos']);
+      likes +=orgN(r['Curtidas']); coment+=orgN(r['Comentários']); shares+=orgN(r['Compartilhamentos']);
+      var e=orgN(r['Engajamentos'])||orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
+      eng+=e;
+    });
+    return {posts:arr.length,views:views,alc:alc,eng:eng,seg:seg,salv:salv,likes:likes,coment:coment,shares:shares,
+            txEng:alc>0?(eng/alc*100):0};
+  }
+  function calcStory(arr){
+    var views=0,alc=0,vp=0,seg=0,likes=0,shares=0,replies=0,linkClicks=0;
+    arr.forEach(function(r){
+      views +=orgN(r['Visualizações']); alc+=orgN(r['Alcance']);
+      vp    +=orgN(r['Visitas ao perfil']); seg+=orgN(r['Seguimentos']);
+      likes +=orgN(r['Curtidas']); shares+=orgN(r['Compartilhamentos']);
+      replies+=orgN(r['Respostas']); linkClicks+=orgN(r['Cliques no link']);
+    });
+    return {stories:arr.length,views:views,alc:alc,vp:vp,seg:seg,likes:likes,shares:shares,replies:replies,linkClicks:linkClicks,
+            ret:views>0?(alc/views*100):0};
+  }
+
+  var pA=calcPost(filtPost(a1,a2)),  pB=calcPost(filtPost(b1,b2));
+  var sA=calcStory(filtStory(a1,a2)), sB=calcStory(filtStory(b1,b2));
+
+  function row(label,a,b,neg,fmt){
+    fmt=fmt||function(v){return fN(v);};
+    var diff=b-a, pct=a>0?(diff/a*100):0;
+    var up=diff>=0;
+    var col=(up?(neg?'var(--red)':'var(--green)'):(neg?'var(--green)':'var(--red)'));
+    var arrow=up?'▲':'▼';
+    return '<tr style="border-bottom:1px solid var(--bdr)">'
+      +'<td style="padding:7px 10px;color:var(--tx);font-size:12px">'+label+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;color:var(--pink);font-size:12px">'+fmt(a)+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;color:var(--purple);font-size:12px">'+fmt(b)+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;color:'+col+'">'
+      +arrow+' '+Math.abs(pct).toFixed(1)+'%</td>'
+      +'<td style="padding:7px 10px;text-align:right;font-size:11px;color:var(--mu)">'+(diff>=0?'+':'')+fN(Math.round(diff))+'</td>'
+      +'</tr>';
+  }
+  function pct1(v){return v.toFixed(1)+'%';}
+
+  var thead='<thead><tr style="border-bottom:2px solid var(--bdr)">'
+    +'<th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:11px;font-weight:700">Métrica</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--pink);font-size:11px;font-weight:700">A: '+a1+' → '+a2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--purple);font-size:11px;font-weight:700">B: '+b1+' → '+b2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px;font-weight:700">Variação</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px;font-weight:700">Diferença</th>'
+    +'</tr></thead>';
+
+  var postRows=row('📸 Posts',pA.posts,pB.posts,false)
+    +row('👁️ Visualizações',pA.views,pB.views,false)
+    +row('🎯 Alcance',pA.alc,pB.alc,false)
+    +row('💬 Engajamentos',pA.eng,pB.eng,false)
+    +row('📊 Taxa de Eng. (%)',pA.txEng,pB.txEng,false,pct1)
+    +row('🌱 Seguidores Ganhos',pA.seg,pB.seg,false)
+    +row('💾 Salvamentos',pA.salv,pB.salv,false)
+    +row('❤️ Curtidas',pA.likes,pB.likes,false)
+    +row('💬 Comentários',pA.coment,pB.coment,false)
+    +row('🔁 Compartilhamentos',pA.shares,pB.shares,false);
+
+  var storyRows=row('🎬 Stories',sA.stories,sB.stories,false)
+    +row('👁️ Visualizações',sA.views,sB.views,false)
+    +row('🎯 Alcance',sA.alc,sB.alc,false)
+    +row('🔁 Taxa Retenção (%)',sA.ret,sB.ret,false,pct1)
+    +row('📲 Visitas ao Perfil',sA.vp,sB.vp,false)
+    +row('🌱 Seguimentos',sA.seg,sB.seg,false)
+    +row('❤️ Curtidas',sA.likes,sB.likes,false)
+    +row('🔁 Compartilhamentos',sA.shares,sB.shares,false)
+    +row('💬 Respostas',sA.replies,sB.replies,false)
+    +row('🔗 Cliques no Link',sA.linkClicks,sB.linkClicks,false);
+
+  var tStyle='width:100%;border-collapse:collapse';
+  var el=document.getElementById('igCompareResult');
+  if(el) el.innerHTML=
+    '<div style="font-size:12px;font-weight:700;color:var(--pink);margin-bottom:6px;padding:2px 0;border-bottom:1px solid var(--bdr)">📸 Postagens</div>'
+    +'<table style="'+tStyle+'">'+thead+'<tbody>'+postRows+'</tbody></table>'
+    +'<div style="font-size:12px;font-weight:700;color:var(--purple);margin:14px 0 6px;padding:2px 0;border-bottom:1px solid var(--bdr)">🎬 Stories</div>'
+    +'<table style="'+tStyle+'">'+thead+'<tbody>'+storyRows+'</tbody></table>';
 }
 
 

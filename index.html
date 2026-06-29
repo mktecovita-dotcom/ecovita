@@ -1071,117 +1071,188 @@ body.light .theme-label{color:var(--blue)}
 
     <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
     <div class="page" id="page-instagram">
-      <!-- Filtros -->
-      <div class="fbar" style="margin-bottom:18px">
+      <!-- Barra de filtros -->
+      <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
         <span class="fl">De:</span>
         <input type="date" id="igDateDe" onchange="applyIgFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
         <span class="fl">Até:</span>
         <input type="date" id="igDateAte" onchange="applyIgFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
         <button class="btn" onclick="igClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
         <button class="btn btn-primary" onclick="loadInstagram()" style="font-size:11px;padding:5px 14px">🔄 Atualizar</button>
-        <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
-        <button class="btn" onclick="toggleIgCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
         <span id="igStatus" style="font-size:11px;color:var(--mu);margin-left:8px"></span>
       </div>
-      <!-- Erro / Loading -->
-      <div id="igLoading" style="display:none;text-align:center;padding:40px"><div style="font-size:22px;margin-bottom:8px">⏳</div><div style="font-size:13px;color:var(--mu)">Carregando dados…</div></div>
-      <div id="igError"   style="display:none" class="ebox"></div>
 
-      <!-- Comparativo -->
-      <div id="igComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
-        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:8px">Período A</div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input type="date" id="igCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              <span style="color:var(--mu);font-size:11px">até</span>
-              <input type="date" id="igCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+      <div id="igLoading" style="display:none;text-align:center;padding:40px">
+        <div style="font-size:22px;margin-bottom:8px">⏳</div>
+        <div style="font-size:13px;color:var(--mu)">Carregando dados…</div>
+      </div>
+      <div id="igError" style="display:none" class="ebox"></div>
+
+      <!-- Sub-abas: Postagens | Stories -->
+      <div id="igMainBody" style="display:none">
+        <div style="display:flex;gap:4px;margin-bottom:18px;border-bottom:2px solid var(--bdr);padding-bottom:0">
+          <button id="igTabBtnPost" onclick="igSwitchTab('postagens')"
+            style="padding:9px 22px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;color:var(--pink);border-bottom:3px solid var(--pink);margin-bottom:-2px;transition:all .2s">
+            📸 Postagens
+          </button>
+          <button id="igTabBtnStory" onclick="igSwitchTab('stories')"
+            style="padding:9px 22px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;color:var(--mu);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s">
+            🎬 Stories
+          </button>
+          <span id="igPostCount"  style="margin-left:auto;font-size:11px;color:var(--mu);align-self:center;padding-right:4px"></span>
+          <span id="igStoryCount" style="font-size:11px;color:var(--mu);align-self:center;padding-right:4px"></span>
+        </div>
+
+        <!-- ─── TAB: POSTAGENS ─────────────────────────────── -->
+        <div id="igTabPostagens">
+          <!-- KPIs linha 1 -->
+          <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+            <div class="kpi pink"><div class="kpi-label">Total Posts</div><div class="kpi-val" id="igp_posts">—</div><div class="kpi-sub" id="igp_postsS">No período</div></div>
+            <div class="kpi purple"><div class="kpi-label">Visualizações</div><div class="kpi-val" id="igp_views">—</div><div class="kpi-sub">Total acumulado</div></div>
+            <div class="kpi blue"><div class="kpi-label">Alcance</div><div class="kpi-val" id="igp_reach">—</div><div class="kpi-sub">Pessoas únicas</div></div>
+            <div class="kpi green"><div class="kpi-label">Engajamentos</div><div class="kpi-val" id="igp_eng">—</div><div class="kpi-sub">Curtidas+coment.+salv.+comp.</div></div>
+            <div class="kpi amber"><div class="kpi-label">Taxa Eng. Média</div><div class="kpi-val" id="igp_txeng">—</div><div class="kpi-sub" id="igp_txengS">Eng/Alcance %</div></div>
+          </div>
+          <!-- KPIs linha 2 -->
+          <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+            <div class="kpi green"><div class="kpi-label">Seguidores Ganhos</div><div class="kpi-val" id="igp_seg">—</div><div class="kpi-sub">🌱 Crescimento orgânico</div></div>
+            <div class="kpi blue"><div class="kpi-label">Salvamentos</div><div class="kpi-val" id="igp_salv">—</div><div class="kpi-sub">Potencial viral</div></div>
+            <div class="kpi pink"><div class="kpi-label">Curtidas</div><div class="kpi-val" id="igp_likes">—</div><div class="kpi-sub">Total de curtidas</div></div>
+            <div class="kpi purple"><div class="kpi-label">Comentários</div><div class="kpi-val" id="igp_coments">—</div><div class="kpi-sub">Interações diretas</div></div>
+            <div class="kpi amber"><div class="kpi-label">Compartilhamentos</div><div class="kpi-val" id="igp_shares">—</div><div class="kpi-sub">Alcance orgânico</div></div>
+          </div>
+
+          <!-- Charts linha 1 -->
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="card">
+              <div class="card-hd"><div class="card-title">📈 Tendência de Visualizações — Crescimento Orgânico</div></div>
+              <div style="height:200px;position:relative"><canvas id="igpChartTrend"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">📊 Posts por Tipo de Conteúdo</div></div>
+              <div style="height:200px;position:relative"><canvas id="igpChartTipo"></canvas></div>
             </div>
           </div>
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:8px">Período B</div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input type="date" id="igCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              <span style="color:var(--mu);font-size:11px">até</span>
-              <input type="date" id="igCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+          <!-- Charts linha 2 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="card">
+              <div class="card-hd"><div class="card-title">👥 Top 10 — Seguidores Ganhos</div></div>
+              <div style="height:220px;position:relative"><canvas id="igpChartSeg"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">💾 Top 10 — Salvamentos</div></div>
+              <div style="height:220px;position:relative"><canvas id="igpChartSalv"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">🔥 Top 10 — Engajamento</div></div>
+              <div style="height:220px;position:relative"><canvas id="igpChartEng"></canvas></div>
             </div>
           </div>
-        </div>
-        <button class="btn btn-primary" onclick="renderIgCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
-        <div id="igCompareResult" style="margin-top:16px"></div>
-      </div>
 
-      <div id="igBody" style="display:none">
-        <!-- KPIs row 1 -->
-        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-          <div class="kpi pink"><div class="kpi-label">Visualizações</div><div class="kpi-val" id="ig_views">—</div><div class="kpi-sub" id="ig_viewsS">Posts + Stories</div></div>
-          <div class="kpi purple"><div class="kpi-label">Alcance Total</div><div class="kpi-val" id="ig_reach">—</div><div class="kpi-sub">Soma dos alcances</div></div>
-          <div class="kpi blue"><div class="kpi-label">Engajamento</div><div class="kpi-val" id="ig_eng">—</div><div class="kpi-sub">Curtidas+coment.+salv.+comp.</div></div>
-          <div class="kpi green"><div class="kpi-label">Taxa de Eng.</div><div class="kpi-val" id="ig_txeng">—</div><div class="kpi-sub" id="ig_txengS">Eng./Alcance</div></div>
-          <div class="kpi amber"><div class="kpi-label">Seguimentos</div><div class="kpi-val" id="ig_seg">—</div><div class="kpi-sub">Novos seguidores</div></div>
-        </div>
-        <!-- KPIs row 2 -->
-        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
-          <div class="kpi blue"><div class="kpi-label">Posts</div><div class="kpi-val" id="ig_posts">—</div><div class="kpi-sub" id="ig_postsS">Publicações</div></div>
-          <div class="kpi purple"><div class="kpi-label">Stories</div><div class="kpi-val" id="ig_stories">—</div><div class="kpi-sub" id="ig_storiesS">Stories</div></div>
-          <div class="kpi pink"><div class="kpi-label">Média Views/Post</div><div class="kpi-val" id="ig_avgPost">—</div><div class="kpi-sub">Por publicação</div></div>
-          <div class="kpi amber"><div class="kpi-label">Média Views/Story</div><div class="kpi-val" id="ig_avgStory">—</div><div class="kpi-sub">Por story</div></div>
-          <div class="kpi green"><div class="kpi-label">Curtidas</div><div class="kpi-val" id="ig_likes">—</div><div class="kpi-sub">Total</div></div>
-        </div>
-        <!-- Charts row 1 -->
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="igChartTipo"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">👁️ Top 10 Posts — Views</div></div><div style="height:200px;position:relative"><canvas id="igChartTopPosts"></canvas></div></div>
-        </div>
-        <!-- Charts row 2 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento por Post — Top 10</div></div><div style="height:200px;position:relative"><canvas id="igChartEng"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">📖 Top 10 Stories — Views</div></div><div style="height:200px;position:relative"><canvas id="igChartTopStories"></canvas></div></div>
-        </div>
-        <!-- Tabela Posts -->
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-hd"><div class="card-title">📋 Posts e Reels</div><span id="igPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span></div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead><tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Salv.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg.</th>
-                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-              </tr></thead>
-              <tbody id="igPostBody"></tbody>
-            </table>
+          <!-- Tabela postagens -->
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-title">📋 Todas as Postagens</div>
+              <span id="igpTableCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead><tr style="border-bottom:1px solid var(--bdr)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Salv.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg. Ganhos</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Engaj.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Tx. Eng.</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
+                </tr></thead>
+                <tbody id="igpPostBody"></tbody>
+              </table>
+            </div>
           </div>
-        </div>
-        <!-- Tabela Stories -->
-        <div class="card">
-          <div class="card-hd"><div class="card-title">📖 Stories</div><span id="igStoryCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span></div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead><tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data/Hora</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Respostas</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Visitas Perfil</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg.</th>
-                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-              </tr></thead>
-              <tbody id="igStoryBody"></tbody>
-            </table>
+        </div><!-- /igTabPostagens -->
+
+        <!-- ─── TAB: STORIES ──────────────────────────────── -->
+        <div id="igTabStories" style="display:none">
+          <!-- KPIs linha 1 -->
+          <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+            <div class="kpi purple"><div class="kpi-label">Total Stories</div><div class="kpi-val" id="igs_total">—</div><div class="kpi-sub" id="igs_totalS">No período</div></div>
+            <div class="kpi pink"><div class="kpi-label">Visualizações</div><div class="kpi-val" id="igs_views">—</div><div class="kpi-sub">Total acumulado</div></div>
+            <div class="kpi blue"><div class="kpi-label">Alcance</div><div class="kpi-val" id="igs_reach">—</div><div class="kpi-sub">Pessoas únicas</div></div>
+            <div class="kpi green"><div class="kpi-label">Visitas ao Perfil</div><div class="kpi-val" id="igs_profVisit">—</div><div class="kpi-sub">🌱 Interesse gerado</div></div>
+            <div class="kpi amber"><div class="kpi-label">Seguimentos</div><div class="kpi-val" id="igs_seg">—</div><div class="kpi-sub">🌱 Novos seguidores</div></div>
           </div>
-        </div>
-      </div>
-    </div>
+          <!-- KPIs linha 2 -->
+          <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+            <div class="kpi pink"><div class="kpi-label">Curtidas</div><div class="kpi-val" id="igs_likes">—</div><div class="kpi-sub">Total de reações</div></div>
+            <div class="kpi blue"><div class="kpi-label">Compartilhamentos</div><div class="kpi-val" id="igs_shares">—</div><div class="kpi-sub">Alcance orgânico</div></div>
+            <div class="kpi purple"><div class="kpi-label">Respostas</div><div class="kpi-val" id="igs_replies">—</div><div class="kpi-sub">Conversas diretas</div></div>
+            <div class="kpi amber"><div class="kpi-label">Cliques no Link</div><div class="kpi-val" id="igs_linkClicks">—</div><div class="kpi-sub">CTA direto</div></div>
+            <div class="kpi green"><div class="kpi-label">Taxa de Retenção</div><div class="kpi-val" id="igs_retention">—</div><div class="kpi-sub" id="igs_retentionS">Alcance/Views %</div></div>
+          </div>
+
+          <!-- Charts linha 1 -->
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="card">
+              <div class="card-hd"><div class="card-title">📈 Tendência de Visualizações de Stories</div></div>
+              <div style="height:200px;position:relative"><canvas id="igsChartTrend"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">🎯 Distribuição de Ações</div></div>
+              <div style="height:200px;position:relative"><canvas id="igsChartAcoes"></canvas></div>
+            </div>
+          </div>
+          <!-- Charts linha 2 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="card">
+              <div class="card-hd"><div class="card-title">👁️ Top 10 Stories — Visualizações</div></div>
+              <div style="height:220px;position:relative"><canvas id="igsChartTopViews"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">📲 Top 10 — Visitas + Seguimentos</div></div>
+              <div style="height:220px;position:relative"><canvas id="igsChartGrowth"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">🔁 Top 10 — Taxa de Retenção (%)</div></div>
+              <div style="height:220px;position:relative"><canvas id="igsChartRetention"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Tabela stories -->
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-title">📋 Todos os Stories</div>
+              <span id="igsTableCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead><tr style="border-bottom:1px solid var(--bdr)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Retenção %</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Respostas</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Vis. Perfil</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seguimentos</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Cliques Link</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
+                </tr></thead>
+                <tbody id="igsStoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- /igTabStories -->
+
+      </div><!-- /igMainBody -->
+    </div><!-- /page-instagram -->
+
 
     <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
     <div class="page" id="page-facebook">
@@ -1286,447 +1357,6 @@ body.light .theme-label{color:var(--blue)}
     </div>
 
 
-
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
-
-
-
-    <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
-    <div class="page" id="page-instagram">
-      <div id="igNoCreds" style="display:none;text-align:center;padding:60px 20px">
-        <div style="font-size:40px;margin-bottom:12px">📸</div>
-        <div style="font-size:16px;font-weight:700;color:var(--tx);margin-bottom:8px">Token não configurado</div>
-        <div style="font-size:13px;color:var(--mu);margin-bottom:20px">Configure o token do Instagram Orgânico na página de Configurações.</div>
-        <button class="btn btn-primary" onclick="goPage('config')">⚙️ Configurar agora</button>
-      </div>
-      <div id="igMain">
-        <!-- Filtros -->
-        <div class="fbar" style="margin-bottom:18px">
-          <span class="fl">De:</span>
-          <input type="date" id="igDateDe" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <span class="fl">Até:</span>
-          <input type="date" id="igDateAte" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <button class="btn" onclick="igClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
-          <button class="btn btn-primary" onclick="loadInstagramData()" style="font-size:11px;padding:5px 14px">🔄 Buscar dados</button>
-          <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
-          <button class="btn" id="btnIgCompare" onclick="toggleIgCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
-        </div>
-        <!-- Loading -->
-        <div id="igLoading" style="display:none;text-align:center;padding:40px">
-          <div style="font-size:24px;margin-bottom:8px">⏳</div>
-          <div style="font-size:13px;color:var(--mu)" id="igLoadingMsg">Buscando posts…</div>
-        </div>
-        <!-- Erro -->
-        <div id="igError" style="display:none" class="ebox"></div>
-
-        <!-- Comparativo -->
-        <div id="igComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:8px">Período A</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="igCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="igCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:8px">Período B</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="igCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="igCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="renderIgCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
-          <div id="igCompareResult" style="margin-top:16px"></div>
-        </div>
-
-        <!-- KPIs -->
-        <div id="igKPIs" style="display:none">
-          <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-            <div class="kpi pink"><div class="kpi-label">Visualizações</div><div class="kpi-val" id="ig_views">—</div><div class="kpi-sub" id="ig_viewsS">Posts + Reels</div></div>
-            <div class="kpi purple"><div class="kpi-label">Alcance Total</div><div class="kpi-val" id="ig_reach">—</div><div class="kpi-sub">Pessoas únicas</div></div>
-            <div class="kpi blue"><div class="kpi-label">Engajamento</div><div class="kpi-val" id="ig_eng">—</div><div class="kpi-sub">Curtidas+coment.+salv.</div></div>
-            <div class="kpi green"><div class="kpi-label">Taxa de Eng.</div><div class="kpi-val" id="ig_txeng">—</div><div class="kpi-sub">Eng. / Alcance</div></div>
-            <div class="kpi amber"><div class="kpi-label">Publicações</div><div class="kpi-val" id="ig_posts">—</div><div class="kpi-sub" id="ig_postsS">No período</div></div>
-          </div>
-          <div class="kpi-grid kpi-5" style="margin-bottom:20px">
-            <div class="kpi blue"><div class="kpi-label">Curtidas</div><div class="kpi-val" id="ig_likes">—</div><div class="kpi-sub">Total</div></div>
-            <div class="kpi purple"><div class="kpi-label">Comentários</div><div class="kpi-val" id="ig_comments">—</div><div class="kpi-sub">Total</div></div>
-            <div class="kpi pink"><div class="kpi-label">Salvamentos</div><div class="kpi-val" id="ig_saves">—</div><div class="kpi-sub">Total</div></div>
-            <div class="kpi amber"><div class="kpi-label">Média Views</div><div class="kpi-val" id="ig_avgViews">—</div><div class="kpi-sub">Por publicação</div></div>
-            <div class="kpi green"><div class="kpi-label">Melhor Tipo</div><div class="kpi-val" id="ig_bestType">—</div><div class="kpi-sub" id="ig_bestTypeS">Por engajamento</div></div>
-          </div>
-
-          <!-- Gráficos row 1 -->
-          <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
-            <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="igChartTipo"></canvas></div></div>
-            <div class="card"><div class="card-hd"><div class="card-title">👁️ Alcance por Post — Top 10</div></div><div style="height:200px;position:relative"><canvas id="igChartTopPosts"></canvas></div></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-            <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento por Post — Top 10</div></div><div style="height:200px;position:relative"><canvas id="igChartEng"></canvas></div></div>
-            <div class="card"><div class="card-hd"><div class="card-title">❤️ Curtidas vs 💬 Comentários</div></div><div style="height:200px;position:relative"><canvas id="igChartLikesComments"></canvas></div></div>
-          </div>
-
-          <!-- Tabela -->
-          <div class="card">
-            <div class="card-hd">
-              <div class="card-title">📋 Publicações</div>
-              <span id="igPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
-            </div>
-            <div style="overflow-x:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:12px">
-                <thead><tr style="border-bottom:1px solid var(--bdr)">
-                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views/Impr.</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Salv.</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Eng.</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Tx Eng.</th>
-                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-                </tr></thead>
-                <tbody id="igPostBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
-    <div class="page" id="page-facebook">
-      <div id="fbNoCreds" style="display:none;text-align:center;padding:60px 20px">
-        <div style="font-size:40px;margin-bottom:12px">📘</div>
-        <div style="font-size:16px;font-weight:700;color:var(--tx);margin-bottom:8px">Token não configurado</div>
-        <div style="font-size:13px;color:var(--mu);margin-bottom:20px">Configure o token do Facebook Orgânico na página de Configurações.</div>
-        <button class="btn btn-primary" onclick="goPage('config')">⚙️ Configurar agora</button>
-      </div>
-      <div id="fbMain">
-        <!-- Filtros -->
-        <div class="fbar" style="margin-bottom:18px">
-          <span class="fl">De:</span>
-          <input type="date" id="fbDateDe" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <span class="fl">Até:</span>
-          <input type="date" id="fbDateAte" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <button class="btn" onclick="fbClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
-          <button class="btn btn-primary" onclick="loadFacebookData()" style="font-size:11px;padding:5px 14px">🔄 Buscar dados</button>
-          <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
-          <button class="btn" id="btnFbCompare" onclick="toggleFbCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
-        </div>
-        <!-- Loading -->
-        <div id="fbLoading" style="display:none;text-align:center;padding:40px">
-          <div style="font-size:24px;margin-bottom:8px">⏳</div>
-          <div style="font-size:13px;color:var(--mu)" id="fbLoadingMsg">Buscando posts…</div>
-        </div>
-        <!-- Erro -->
-        <div id="fbError" style="display:none" class="ebox"></div>
-
-        <!-- Comparativo -->
-        <div id="fbComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:8px">Período A</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="fbCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="fbCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:8px">Período B</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="fbCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="fbCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="renderFbCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
-          <div id="fbCompareResult" style="margin-top:16px"></div>
-        </div>
-
-        <!-- KPIs -->
-        <div id="fbKPIs" style="display:none">
-          <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-            <div class="kpi blue"><div class="kpi-label">Total de Posts</div><div class="kpi-val" id="fb_posts">—</div><div class="kpi-sub" id="fb_postsS">No período</div></div>
-            <div class="kpi green"><div class="kpi-label">Alcance Total</div><div class="kpi-val" id="fb_reach">—</div><div class="kpi-sub">Pessoas alcançadas</div></div>
-            <div class="kpi amber"><div class="kpi-label">Engajamento</div><div class="kpi-val" id="fb_eng">—</div><div class="kpi-sub">Reações+coment.+comp.</div></div>
-            <div class="kpi purple"><div class="kpi-label">Méd. Eng./Post</div><div class="kpi-val" id="fb_avgEng">—</div><div class="kpi-sub">Por publicação</div></div>
-            <div class="kpi red"><div class="kpi-label">Feedbacks Neg.</div><div class="kpi-val" id="fb_neg">—</div><div class="kpi-sub" id="fb_negS">Ocultações</div></div>
-          </div>
-
-          <!-- Gráficos -->
-          <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
-            <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="fbChartTipo"></canvas></div></div>
-            <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento — Top 10 Posts</div></div><div style="height:200px;position:relative"><canvas id="fbChartEng"></canvas></div></div>
-          </div>
-          <div class="card" style="margin-bottom:14px">
-            <div class="card-hd"><div class="card-title">👁️ Alcance — Top 10 Posts</div></div>
-            <div style="height:200px;position:relative"><canvas id="fbChartReach"></canvas></div>
-          </div>
-
-          <!-- Tabela -->
-          <div class="card">
-            <div class="card-hd">
-              <div class="card-title">📋 Posts Facebook</div>
-              <span id="fbPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
-            </div>
-            <div style="overflow-x:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:12px">
-                <thead><tr style="border-bottom:1px solid var(--bdr)">
-                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Mensagem</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Engajamento</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Impressões</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Feedback Neg.</th>
-                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-                </tr></thead>
-                <tbody id="fbPostBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <!-- ══════════════ PAGE: CONFIGURAÇÕES DE API ══════════════ -->
-
-
-
-    <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
-    <div class="page" id="page-instagram">
-      <!-- Seletor de arquivos -->
-      <div id="igFileZone" style="background:linear-gradient(135deg,rgba(232,121,160,.12),rgba(155,127,244,.08));border:2px dashed rgba(232,121,160,.4);border-radius:14px;padding:24px;text-align:center;margin-bottom:18px">
-        <div style="font-size:28px;margin-bottom:8px">📸</div>
-        <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Selecione os arquivos CSV do Instagram</div>
-        <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Arquivos com <strong>"Postagem"</strong> e <strong>"Story"</strong> no nome — da pasta <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Organico/</code></div>
-        <label style="cursor:pointer">
-          <input type="file" id="igFilePicker" multiple accept=".csv" style="display:none" onchange="onIgFiles(this.files)">
-          <span class="btn btn-primary" style="pointer-events:none">📂 Selecionar arquivos CSV</span>
-        </label>
-        <div id="igFileStatus" style="font-size:12px;color:var(--mu);margin-top:10px"></div>
-      </div>
-
-      <div id="igContent" style="display:none">
-        <!-- Filtros -->
-        <div class="fbar" style="margin-bottom:18px">
-          <span class="fl">De:</span>
-          <input type="date" id="igDateDe" onchange="renderInstagram()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <span class="fl">Até:</span>
-          <input type="date" id="igDateAte" onchange="renderInstagram()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <button class="btn" onclick="igClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
-          <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
-          <button class="btn" id="btnIgCompare" onclick="toggleIgCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
-          <button class="btn" onclick="document.getElementById('igFileZone').style.display='block';document.getElementById('igContent').style.display='none'" style="font-size:11px;padding:5px 10px;margin-left:auto">📂 Trocar arquivos</button>
-        </div>
-
-        <!-- Painel de comparação -->
-        <div id="igComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período A</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="igCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="igCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período B</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="igCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="igCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="renderIgCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
-          <div id="igCompareResult" style="margin-top:16px"></div>
-        </div>
-
-        <!-- KPIs -->
-        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-          <div class="kpi pink"><div class="kpi-label">Visualizações</div><div class="kpi-val" id="ig_views">—</div><div class="kpi-sub" id="ig_viewsS">Posts + Stories</div></div>
-          <div class="kpi purple"><div class="kpi-label">Alcance Total</div><div class="kpi-val" id="ig_reach">—</div><div class="kpi-sub" id="ig_reachS">Pessoas únicas</div></div>
-          <div class="kpi blue"><div class="kpi-label">Engajamento</div><div class="kpi-val" id="ig_eng">—</div><div class="kpi-sub" id="ig_engS">Curtidas+coment.+salv.+comp.</div></div>
-          <div class="kpi green"><div class="kpi-label">Taxa de Eng.</div><div class="kpi-val" id="ig_txeng">—</div><div class="kpi-sub" id="ig_txengS">Eng. / Alcance</div></div>
-          <div class="kpi amber"><div class="kpi-label">Seguimentos</div><div class="kpi-val" id="ig_seg">—</div><div class="kpi-sub" id="ig_segS">Novos seguidores</div></div>
-        </div>
-        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
-          <div class="kpi blue"><div class="kpi-label">Posts</div><div class="kpi-val" id="ig_posts">—</div><div class="kpi-sub" id="ig_postsS">Publicações</div></div>
-          <div class="kpi purple"><div class="kpi-label">Stories</div><div class="kpi-val" id="ig_stories">—</div><div class="kpi-sub" id="ig_storiesS">Stories</div></div>
-          <div class="kpi pink"><div class="kpi-label">Média Views/Post</div><div class="kpi-val" id="ig_avgPost">—</div><div class="kpi-sub">Por publicação</div></div>
-          <div class="kpi amber"><div class="kpi-label">Média Views/Story</div><div class="kpi-val" id="ig_avgStory">—</div><div class="kpi-sub">Por story</div></div>
-          <div class="kpi green"><div class="kpi-label">Melhor Dia</div><div class="kpi-val" id="ig_bestDay">—</div><div class="kpi-sub" id="ig_bestDayS">Por views</div></div>
-        </div>
-
-        <!-- Gráficos row 1 -->
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="igChartTipo"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">📅 Views por Dia</div></div><div style="height:200px;position:relative"><canvas id="igChartDia"></canvas></div></div>
-        </div>
-
-        <!-- Gráficos row 2 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">🏆 Top Posts — Views</div></div><div style="height:220px;position:relative"><canvas id="igChartTopPosts"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">📖 Top Stories — Views</div></div><div style="height:220px;position:relative"><canvas id="igChartTopStories"></canvas></div></div>
-        </div>
-
-        <!-- Tabela Posts -->
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-hd">
-            <div class="card-title">📋 Posts e Reels</div>
-            <span id="igPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
-          </div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead><tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Salv.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Eng.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Tx Eng.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg.</th>
-                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-              </tr></thead>
-              <tbody id="igPostBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Tabela Stories -->
-        <div class="card">
-          <div class="card-hd">
-            <div class="card-title">📖 Stories</div>
-            <span id="igStoryCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
-          </div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead><tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data/Hora</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Alcance</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Curtidas</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Comp.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Respostas</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Navegação</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Visitas Perfil</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Seg.</th>
-                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-              </tr></thead>
-              <tbody id="igStoryBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
-    <div class="page" id="page-facebook">
-      <!-- Seletor de arquivos -->
-      <div id="fbFileZone" style="background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(46,204,142,.08));border:2px dashed rgba(79,142,247,.4);border-radius:14px;padding:24px;text-align:center;margin-bottom:18px">
-        <div style="font-size:28px;margin-bottom:8px">📘</div>
-        <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Selecione o arquivo CSV do Facebook</div>
-        <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Arquivo com <strong>"Facebook"</strong> no nome — da pasta <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Organico/</code></div>
-        <label style="cursor:pointer">
-          <input type="file" id="fbFilePicker" multiple accept=".csv" style="display:none" onchange="onFbFiles(this.files)">
-          <span class="btn btn-primary" style="pointer-events:none">📂 Selecionar arquivo CSV</span>
-        </label>
-        <div id="fbFileStatus" style="font-size:12px;color:var(--mu);margin-top:10px"></div>
-      </div>
-
-      <div id="fbContent" style="display:none">
-        <!-- Filtros -->
-        <div class="fbar" style="margin-bottom:18px">
-          <span class="fl">De:</span>
-          <input type="date" id="fbDateDe" onchange="renderFacebook()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <span class="fl">Até:</span>
-          <input type="date" id="fbDateAte" onchange="renderFacebook()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <button class="btn" onclick="fbClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
-          <div style="width:1px;background:var(--bdr);margin:0 6px;height:20px"></div>
-          <button class="btn" id="btnFbCompare" onclick="toggleFbCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
-          <button class="btn" onclick="document.getElementById('fbFileZone').style.display='block';document.getElementById('fbContent').style.display='none'" style="font-size:11px;padding:5px 10px;margin-left:auto">📂 Trocar arquivo</button>
-        </div>
-
-        <!-- Painel de comparação -->
-        <div id="fbComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período A</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="fbCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="fbCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Período B</div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input type="date" id="fbCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-                <span style="color:var(--mu);font-size:11px">até</span>
-                <input type="date" id="fbCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="renderFbCompare()" style="margin-top:14px;font-size:12px">Comparar</button>
-          <div id="fbCompareResult" style="margin-top:16px"></div>
-        </div>
-
-        <!-- KPIs -->
-        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-          <div class="kpi blue"><div class="kpi-label">Total de Posts</div><div class="kpi-val" id="fb_posts">—</div><div class="kpi-sub" id="fb_postsS">Publicações</div></div>
-          <div class="kpi green"><div class="kpi-label">Reações + Eng.</div><div class="kpi-val" id="fb_eng">—</div><div class="kpi-sub" id="fb_engS">React.+coment.+comp.</div></div>
-          <div class="kpi amber"><div class="kpi-label">Méd. Eng./Post</div><div class="kpi-val" id="fb_avgEng">—</div><div class="kpi-sub">Média por publicação</div></div>
-          <div class="kpi red"><div class="kpi-label">Feedbacks Neg.</div><div class="kpi-val" id="fb_neg">—</div><div class="kpi-sub" id="fb_negS">Ocultações/denúncias</div></div>
-          <div class="kpi purple"><div class="kpi-label">Tipos de Post</div><div class="kpi-val" id="fb_tipos">—</div><div class="kpi-sub" id="fb_tiposS">Formatos publicados</div></div>
-        </div>
-
-        <!-- Gráficos -->
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">🎬 Posts por Tipo</div></div><div style="height:200px;position:relative"><canvas id="fbChartTipo"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">💬 Engajamento por Post — Top 10</div></div><div style="height:200px;position:relative"><canvas id="fbChartEng"></canvas></div></div>
-        </div>
-
-        <!-- Tabela -->
-        <div class="card">
-          <div class="card-hd">
-            <div class="card-title">📋 Posts Facebook</div>
-            <span id="fbPostCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
-          </div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead><tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
-                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Título</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">React.+Eng.</th>
-                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Feedback Neg.</th>
-                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
-              </tr></thead>
-              <tbody id="fbPostBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
     <div class="page" id="page-meta">
@@ -1945,7 +1575,7 @@ async function fetchCSV(id,gid=0){
   return parseCSV(await r.text());
 }
 // Real-header keywords: if a row starts with one of these it's the actual column header
-var CSV_HEADER_ANCHORS = ['Day','Campaign','Campanha','Date','Data','Empreendimento','Identificação do post','Identificação da Página','Horário de publicação','Título'];
+var CSV_HEADER_ANCHORS = ['Day','Campaign','Campanha','Date','Data','Empreendimento','Conta','Identificação do post','Identificação da Página','Horário de publicação','Título','Data de publicação'];
 function parseCSV(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(lines.length<2) return[];
@@ -4438,9 +4068,13 @@ function orgN(v){ return parseInt(String(v||'0').replace(/[^0-9.-]/g,''))||0; }
 // "MM/DD/YYYY HH:MM" ou "MM/DD/YYYY" → "YYYY-MM-DD"
 function orgParseDate(s){
   if(!s) return '';
-  var p = s.trim().split(' ')[0].split('/');
-  if(p.length!==3) return '';
-  return p[2]+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0');
+  var raw=s.trim().split(' ')[0];
+  // YYYY-MM-DD already in correct format
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  // MM/DD/YYYY
+  var p=raw.split('/');
+  if(p.length===3) return p[2]+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0');
+  return '';
 }
 
 function orgInRange(d, de, ate){
@@ -4452,10 +4086,10 @@ function orgInRange(d, de, ate){
 
 // ─── LOAD INSTAGRAM ───────────────────────────────────────
 async function loadInstagram(){
-  var loading = document.getElementById('igLoading');
-  var body    = document.getElementById('igBody');
-  var errEl   = document.getElementById('igError');
-  var st      = document.getElementById('igStatus');
+  var loading=document.getElementById('igLoading');
+  var body=document.getElementById('igMainBody');
+  var errEl=document.getElementById('igError');
+  var st=document.getElementById('igStatus');
   if(loading) loading.style.display='block';
   if(body)    body.style.display='none';
   if(errEl)   errEl.style.display='none';
@@ -4480,178 +4114,273 @@ async function loadInstagram(){
 function applyIgFilter(){
   var de  = (document.getElementById('igDateDe')||{}).value||'';
   var ate = (document.getElementById('igDateAte')||{}).value||'';
-  var posts   = rawPostagens.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),de,ate); });
+  // Postagens: campo "Data de publicação"; Stories: "Horário de publicação"
+  var posts   = rawPostagens.filter(function(r){ return orgInRange(orgParseDate(r['Data de publicação']),de,ate); });
   var stories = rawStories.filter(function(r){   return orgInRange(orgParseDate(r['Horário de publicação']),de,ate); });
-  renderInstagram(posts, stories);
+  var body=document.getElementById('igMainBody');
+  if(body) body.style.display='block';
+  var pc=document.getElementById('igPostCount');   if(pc)  pc.textContent=posts.length+' posts';
+  var sc=document.getElementById('igStoryCount');  if(sc)  sc.textContent='· '+stories.length+' stories';
+  renderPostagens(posts);
+  renderStories(stories);
 }
 
 function igClearDates(){
-  var d1=document.getElementById('igDateDe'), d2=document.getElementById('igDateAte');
+  var d1=document.getElementById('igDateDe'),d2=document.getElementById('igDateAte');
   if(d1) d1.value=''; if(d2) d2.value='';
   applyIgFilter();
 }
-function toggleIgCompare(){
-  var p=document.getElementById('igComparePanel');
-  if(p) p.style.display=p.style.display==='none'?'block':'none';
+
+function igSwitchTab(tab){
+  var tabP=document.getElementById('igTabPostagens');
+  var tabS=document.getElementById('igTabStories');
+  var btnP=document.getElementById('igTabBtnPost');
+  var btnS=document.getElementById('igTabBtnStory');
+  if(tab==='postagens'){
+    if(tabP) tabP.style.display='block'; if(tabS) tabS.style.display='none';
+    if(btnP){ btnP.style.color='var(--pink)';   btnP.style.borderBottomColor='var(--pink)'; }
+    if(btnS){ btnS.style.color='var(--mu)';     btnS.style.borderBottomColor='transparent'; }
+  } else {
+    if(tabP) tabP.style.display='none';  if(tabS) tabS.style.display='block';
+    if(btnP){ btnP.style.color='var(--mu)';     btnP.style.borderBottomColor='transparent'; }
+    if(btnS){ btnS.style.color='var(--purple)'; btnS.style.borderBottomColor='var(--purple)'; }
+  }
 }
 
-function renderInstagram(posts, stories){
-  var body = document.getElementById('igBody');
-  if(body) body.style.display='block';
-
-  var vP=0,vS=0,alcP=0,alcS=0,eng=0,seg=0,likes=0;
-  posts.forEach(function(r){
-    vP    += orgN(r['Visualizações']);
-    alcP  += orgN(r['Alcance']);
-    likes += orgN(r['Curtidas']);
-    eng   += orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
-    seg   += orgN(r['Seguimentos']);
-  });
-  stories.forEach(function(r){
-    vS  += orgN(r['Visualizações']);
-    alcS+= orgN(r['Alcance']);
-    eng += orgN(r['Curtidas'])+orgN(r['Compartilhamentos'])+orgN(r['Respostas']);
-    seg += orgN(r['Seguimentos']);
-  });
-  var totAlc  = alcP+alcS;
-  var txEng   = totAlc>0?(eng/totAlc*100).toFixed(2)+'%':'—';
-
-  sid('ig_views',    fN(vP+vS));        sid('ig_viewsS', fN(vP)+' posts · '+fN(vS)+' stories');
-  sid('ig_reach',    fN(totAlc));
-  sid('ig_eng',      fN(eng));
-  sid('ig_txeng',    txEng);            sid('ig_txengS', txEng!=='—'?(parseFloat(txEng)>=3?'Bom (≥3%)':'Otimizar'):'—');
-  sid('ig_seg',      fN(seg));
-  sid('ig_posts',    String(posts.length));    sid('ig_postsS',  'No período');
-  sid('ig_stories',  String(stories.length)); sid('ig_storiesS','No período');
-  sid('ig_avgPost',  posts.length?fN(Math.round(vP/posts.length)):'—');
-  sid('ig_avgStory', stories.length?fN(Math.round(vS/stories.length)):'—');
-  sid('ig_likes',    fN(likes));
-
-  var pc=document.getElementById('igPostCount');   if(pc)   pc.textContent=posts.length+' posts';
-  var sc=document.getElementById('igStoryCount');  if(sc)   sc.textContent=stories.length+' stories';
-
+// ─── POSTAGENS ────────────────────────────────────────────
+function renderPostagens(posts){
   var isLight=document.body.classList.contains('light');
-  var clrMu=isLight?'#6b7280':'#6b7a9e', clrTx=isLight?'#1a2332':'#e2e8f0', clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+  var clrMu=isLight?'#6b7280':'#6b7a9e',clrTx=isLight?'#1a2332':'#e2e8f0',clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
 
-  // Chart: Tipo
+  var totViews=0,totAlc=0,totEng=0,totSeg=0,totSalv=0,totLikes=0,totComent=0,totShares=0;
   var tipoMap={};
-  posts.forEach(function(r){ var t=(r['Tipo de post']||'Post').replace(' do Instagram',''); tipoMap[t]=(tipoMap[t]||0)+1; });
+  posts.forEach(function(r){
+    totViews  +=orgN(r['Visualizações']);
+    totAlc    +=orgN(r['Alcance']);
+    totSeg    +=orgN(r['Seguidores ganhos']);
+    totSalv   +=orgN(r['Salvamentos']);
+    totLikes  +=orgN(r['Curtidas']);
+    totComent +=orgN(r['Comentários']);
+    totShares +=orgN(r['Compartilhamentos']);
+    var e=orgN(r['Engajamentos']);
+    if(!e) e=orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
+    totEng+=e;
+    var t=(r['Tipo de post']||'Post').replace(' do Instagram','').replace(' do instagram','');
+    tipoMap[t]=(tipoMap[t]||0)+1;
+  });
+  var txEngAvg=totAlc>0?(totEng/totAlc*100):0;
+
+  sid('igp_posts',    String(posts.length)); sid('igp_postsS','No período');
+  sid('igp_views',    fN(totViews));
+  sid('igp_reach',    fN(totAlc));
+  sid('igp_eng',      fN(totEng));
+  sid('igp_txeng',    txEngAvg.toFixed(2)+'%');
+  sid('igp_txengS',   txEngAvg>=3?'✅ Bom (≥3%)':'⚠️ Abaixo de 3%');
+  sid('igp_seg',      fN(totSeg));
+  sid('igp_salv',     fN(totSalv));
+  sid('igp_likes',    fN(totLikes));
+  sid('igp_coments',  fN(totComent));
+  sid('igp_shares',   fN(totShares));
+
+  var tc=document.getElementById('igpTableCount'); if(tc) tc.textContent=posts.length+' posts';
+
+  // Chart: Tendência de visualizações (line por data)
+  var byDate={};
+  posts.forEach(function(r){
+    var d=orgParseDate(r['Data de publicação'])||'';
+    if(d) byDate[d]=(byDate[d]||0)+orgN(r['Visualizações']);
+  });
+  var dkeys=Object.keys(byDate).sort();
+  mkChart('igpChartTrend','line',dkeys,
+    [{label:'Visualizações',data:dkeys.map(function(d){return byDate[d];}),borderColor:'#e879a0',backgroundColor:'rgba(232,121,160,.15)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#e879a0'}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+
+  // Chart: Tipos de post (donut)
   var tl=Object.keys(tipoMap);
-  mkChart('igChartTipo','doughnut',tl,
+  mkChart('igpChartTipo','doughnut',tl,
     [{data:tl.map(function(t){return tipoMap[t];}),backgroundColor:['#e879a0','#9b7ff4','#4f8ef7','#2ecc8e','#f5a623'],borderWidth:2,borderColor:'var(--bg2)'}],
-    {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:clrTx,font:{size:11}}}}});
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:clrTx,font:{size:10},boxWidth:10}}}});
 
-  // Chart: Top posts por views
-  var sortedP=posts.slice().sort(function(a,b){return orgN(b['Visualizações'])-orgN(a['Visualizações']);}).slice(0,10);
-  mkChart('igChartTopPosts','bar',
-    sortedP.map(function(r){return (r['Horário de publicação']||'').slice(0,10);}),
-    [{label:'Views',data:sortedP.map(function(r){return orgN(r['Visualizações']);}),backgroundColor:'rgba(232,121,160,.75)',borderRadius:4,borderSkipped:false}],
+  // Chart: Top 10 por seguidores ganhos
+  var sortSeg=posts.filter(function(r){return orgN(r['Seguidores ganhos'])>0;})
+    .sort(function(a,b){return orgN(b['Seguidores ganhos'])-orgN(a['Seguidores ganhos']);}).slice(0,10);
+  mkChart('igpChartSeg','bar',
+    sortSeg.map(function(r){return orgParseDate(r['Data de publicação'])||'';}),
+    [{label:'Seg. Ganhos',data:sortSeg.map(function(r){return orgN(r['Seguidores ganhos']);}),backgroundColor:'rgba(46,204,142,.75)',borderRadius:4,borderSkipped:false}],
     {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
      scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
 
-  // Chart: Engajamento top posts
-  var sortedE=posts.slice().sort(function(a,b){
-    var ea=orgN(a['Curtidas'])+orgN(a['Comentários'])+orgN(a['Salvamentos'])+orgN(a['Compartilhamentos']);
-    var eb=orgN(b['Curtidas'])+orgN(b['Comentários'])+orgN(b['Salvamentos'])+orgN(b['Compartilhamentos']);
-    return eb-ea;
+  // Chart: Top 10 por salvamentos
+  var sortSalv=posts.filter(function(r){return orgN(r['Salvamentos'])>0;})
+    .sort(function(a,b){return orgN(b['Salvamentos'])-orgN(a['Salvamentos']);}).slice(0,10);
+  mkChart('igpChartSalv','bar',
+    sortSalv.map(function(r){return orgParseDate(r['Data de publicação'])||'';}),
+    [{label:'Salvamentos',data:sortSalv.map(function(r){return orgN(r['Salvamentos']);}),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
+
+  // Chart: Top 10 por engajamento
+  var sortEng=posts.slice().sort(function(a,b){
+    var eA=orgN(a['Engajamentos'])||orgN(a['Curtidas'])+orgN(a['Comentários'])+orgN(a['Salvamentos'])+orgN(a['Compartilhamentos']);
+    var eB=orgN(b['Engajamentos'])||orgN(b['Curtidas'])+orgN(b['Comentários'])+orgN(b['Salvamentos'])+orgN(b['Compartilhamentos']);
+    return eB-eA;
   }).slice(0,10);
-  mkChart('igChartEng','bar',
-    sortedE.map(function(r){return (r['Horário de publicação']||'').slice(0,10);}),
-    [{label:'Engajamento',data:sortedE.map(function(r){return orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);}),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}],
+  mkChart('igpChartEng','bar',
+    sortEng.map(function(r){return orgParseDate(r['Data de publicação'])||'';}),
+    [{label:'Engajamento',data:sortEng.map(function(r){
+      return orgN(r['Engajamentos'])||orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
+    }),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}],
     {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
      scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
 
-  // Chart: Top stories
-  var sortedS=stories.slice().sort(function(a,b){return orgN(b['Visualizações'])-orgN(a['Visualizações']);}).slice(0,10);
-  mkChart('igChartTopStories','bar',
-    sortedS.map(function(r){return (r['Horário de publicação']||'').slice(0,16);}),
-    [{label:'Views',data:sortedS.map(function(r){return orgN(r['Visualizações']);}),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
-    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
-     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
-
-  // Tabela Posts
-  var pb=document.getElementById('igPostBody');
+  // Tabela
+  var pb=document.getElementById('igpPostBody');
   if(pb){
-    pb.innerHTML=posts.slice().sort(function(a,b){return orgN(b['Visualizações'])-orgN(a['Visualizações']);}).map(function(r){
-      var eng2=orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
-      var alc=orgN(r['Alcance']); var tx=alc>0?(eng2/alc*100).toFixed(1)+'%':'—';
-      var tipo=(r['Tipo de post']||'').replace(' do Instagram','');
-      var col=parseFloat(tx)>=3?'var(--green)':parseFloat(tx)>=1?'var(--amber)':'var(--red)';
+    pb.innerHTML=posts.slice().sort(function(a,b){
+      var eA=orgN(a['Engajamentos'])||orgN(a['Curtidas'])+orgN(a['Comentários'])+orgN(a['Salvamentos'])+orgN(a['Compartilhamentos']);
+      var eB=orgN(b['Engajamentos'])||orgN(b['Curtidas'])+orgN(b['Comentários'])+orgN(b['Salvamentos'])+orgN(b['Compartilhamentos']);
+      return eB-eA;
+    }).map(function(r){
+      var e=orgN(r['Engajamentos'])||orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']);
+      var alc=orgN(r['Alcance']);
+      var tx=alc>0?(e/alc*100).toFixed(1)+'%':'—';
+      var link=r['Link']||'';
+      var seg=orgN(r['Seguidores ganhos']);
       return '<tr style="border-bottom:1px solid var(--bdr)">'
-        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
-        +'<td style="padding:8px 10px"><span style="background:rgba(232,121,160,.15);color:#e879a0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+tipo+'</span></td>'
-        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(alc)+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Curtidas']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Comentários']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Salvamentos']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Compartilhamentos']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+fN(orgN(r['Seguimentos']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:center">'+(r['Link permanente']?'<a href="'+r['Link permanente']+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+orgParseDate(r['Data de publicação'])+'</td>'
+        +'<td style="padding:8px 10px"><span style="background:rgba(232,121,160,.15);color:var(--pink);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+(r['Tipo de post']||'—').replace(' do Instagram','').replace(' do instagram','')+'</span></td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Alcance']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--pink)">'+fN(orgN(r['Curtidas']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Comentários']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Compartilhamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+fN(orgN(r['Salvamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:'+(seg>0?'var(--green)':'var(--mu)')+'">'+fN(seg)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--purple)">'+fN(e)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--amber)">'+tx+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(link?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
         +'</tr>';
     }).join('');
   }
+}
 
-  // Tabela Stories
-  var sb=document.getElementById('igStoryBody');
+// ─── STORIES ─────────────────────────────────────────────
+function renderStories(stories){
+  var isLight=document.body.classList.contains('light');
+  var clrMu=isLight?'#6b7280':'#6b7a9e',clrTx=isLight?'#1a2332':'#e2e8f0',clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  var totViews=0,totAlc=0,totLikes=0,totShares=0,totReplies=0,totProfVisit=0,totSeg=0,totLinkClicks=0;
+  stories.forEach(function(r){
+    totViews     +=orgN(r['Visualizações']);
+    totAlc       +=orgN(r['Alcance']);
+    totLikes     +=orgN(r['Curtidas']);
+    totShares    +=orgN(r['Compartilhamentos']);
+    totReplies   +=orgN(r['Respostas']);
+    totProfVisit +=orgN(r['Visitas ao perfil']);
+    totSeg       +=orgN(r['Seguimentos']);
+    totLinkClicks+=orgN(r['Cliques no link']);
+  });
+  var retAvg=totViews>0?(totAlc/totViews*100):0;
+
+  sid('igs_total',      String(stories.length)); sid('igs_totalS','No período');
+  sid('igs_views',      fN(totViews));
+  sid('igs_reach',      fN(totAlc));
+  sid('igs_profVisit',  fN(totProfVisit));
+  sid('igs_seg',        fN(totSeg));
+  sid('igs_likes',      fN(totLikes));
+  sid('igs_shares',     fN(totShares));
+  sid('igs_replies',    fN(totReplies));
+  sid('igs_linkClicks', fN(totLinkClicks));
+  sid('igs_retention',  retAvg.toFixed(1)+'%');
+  sid('igs_retentionS', retAvg>=70?'✅ Boa retenção':'⚠️ Melhorar retenção');
+
+  var tc=document.getElementById('igsTableCount'); if(tc) tc.textContent=stories.length+' stories';
+
+  // Chart: Tendência de views por data (line)
+  var byDate={};
+  stories.forEach(function(r){
+    var d=orgParseDate(r['Horário de publicação'])||'';
+    if(d) byDate[d]=(byDate[d]||0)+orgN(r['Visualizações']);
+  });
+  var dkeys=Object.keys(byDate).sort();
+  mkChart('igsChartTrend','line',dkeys,
+    [{label:'Visualizações',data:dkeys.map(function(d){return byDate[d];}),borderColor:'#9b7ff4',backgroundColor:'rgba(155,127,244,.15)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#9b7ff4'}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+
+  // Chart: Distribuição de ações (donut)
+  mkChart('igsChartAcoes','doughnut',
+    ['Curtidas','Compartilhamentos','Respostas','Cliques no link','Visitas ao perfil'],
+    [{data:[totLikes,totShares,totReplies,totLinkClicks,totProfVisit],
+      backgroundColor:['#e879a0','#4f8ef7','#9b7ff4','#f5a623','#2ecc8e'],borderWidth:2,borderColor:'var(--bg2)'}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:clrTx,font:{size:10},boxWidth:10}}}});
+
+  // Chart: Top 10 por views
+  var sortV=stories.slice().sort(function(a,b){return orgN(b['Visualizações'])-orgN(a['Visualizações']);}).slice(0,10);
+  mkChart('igsChartTopViews','bar',
+    sortV.map(function(r){return (r['Horário de publicação']||'').slice(0,10);}),
+    [{label:'Views',data:sortV.map(function(r){return orgN(r['Visualizações']);}),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
+
+  // Chart: Top 10 visitas ao perfil + seguimentos (barras agrupadas - CRESCIMENTO)
+  var sortGrowth=stories.filter(function(r){
+    return orgN(r['Visitas ao perfil'])>0||orgN(r['Seguimentos'])>0;
+  }).sort(function(a,b){
+    return (orgN(b['Visitas ao perfil'])+orgN(b['Seguimentos']))-(orgN(a['Visitas ao perfil'])+orgN(a['Seguimentos']));
+  }).slice(0,10);
+  mkChart('igsChartGrowth','bar',
+    sortGrowth.map(function(r){return (r['Horário de publicação']||'').slice(0,10);}),
+    [
+      {label:'Visitas Perfil',data:sortGrowth.map(function(r){return orgN(r['Visitas ao perfil']);}),backgroundColor:'rgba(46,204,142,.8)',borderRadius:4},
+      {label:'Seguimentos',   data:sortGrowth.map(function(r){return orgN(r['Seguimentos']);}),backgroundColor:'rgba(245,166,35,.8)',borderRadius:4},
+    ],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{position:'top',labels:{color:clrTx,font:{size:10}}}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+
+  // Chart: Top 10 taxa de retenção
+  var sortRet=stories.filter(function(r){return orgN(r['Visualizações'])>0;})
+    .sort(function(a,b){
+      var rA=orgN(a['Alcance'])/orgN(a['Visualizações']);
+      var rB=orgN(b['Alcance'])/orgN(b['Visualizações']);
+      return rB-rA;
+    }).slice(0,10);
+  mkChart('igsChartRetention','bar',
+    sortRet.map(function(r){return (r['Horário de publicação']||'').slice(0,10);}),
+    [{label:'Retenção %',data:sortRet.map(function(r){
+      return orgN(r['Visualizações'])>0?+(orgN(r['Alcance'])/orgN(r['Visualizações'])*100).toFixed(1):0;
+    }),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v+'%';}},grid:{color:clrGrid},max:100},
+             y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
+
+  // Tabela
+  var sb=document.getElementById('igsStoryBody');
   if(sb){
     sb.innerHTML=stories.slice().sort(function(a,b){return orgN(b['Visualizações'])-orgN(a['Visualizações']);}).map(function(r){
+      var v=orgN(r['Visualizações']), alc=orgN(r['Alcance']);
+      var ret=v>0?(alc/v*100).toFixed(1)+'%':'—';
+      var seg=orgN(r['Seguimentos']), vp=orgN(r['Visitas ao perfil']);
+      var link=r['Link permanente']||'';
       return '<tr style="border-bottom:1px solid var(--bdr)">'
         +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+(r['Horário de publicação']||'').slice(0,16)+'</td>'
-        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Alcance']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Curtidas']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Compartilhamentos']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right">'+fN(orgN(r['Respostas']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+fN(orgN(r['Visitas ao perfil']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:right;color:var(--green)">'+fN(orgN(r['Seguimentos']))+'</td>'
-        +'<td style="padding:8px 10px;text-align:center">'+(r['Link permanente']?'<a href="'+r['Link permanente']+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--purple)">'+fN(v)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+fN(alc)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--amber)">'+ret+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--pink)">'+fN(orgN(r['Curtidas']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Compartilhamentos']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Respostas']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:'+(vp>0?'var(--green)':'var(--mu)')+'">'+fN(vp)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:'+(seg>0?'var(--amber)':'var(--mu)')+'">'+fN(seg)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Cliques no link']))+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(link&&link!=='N/A'?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
         +'</tr>';
     }).join('');
   }
 }
 
-// ─── COMPARATIVO INSTAGRAM ────────────────────────────────
-function igCalcKPIs(posts, stories){
-  var vP=0,vS=0,alc=0,eng=0,seg=0;
-  posts.forEach(function(r){ vP+=orgN(r['Visualizações']); alc+=orgN(r['Alcance']); eng+=orgN(r['Curtidas'])+orgN(r['Comentários'])+orgN(r['Salvamentos'])+orgN(r['Compartilhamentos']); seg+=orgN(r['Seguimentos']); });
-  stories.forEach(function(r){ vS+=orgN(r['Visualizações']); alc+=orgN(r['Alcance']); eng+=orgN(r['Curtidas'])+orgN(r['Compartilhamentos'])+orgN(r['Respostas']); seg+=orgN(r['Seguimentos']); });
-  return {views:vP+vS,alcance:alc,eng:eng,seg:seg,posts:posts.length,stories:stories.length,txEng:alc>0?+(eng/alc*100).toFixed(2):0};
-}
-
-function renderIgCompare(){
-  var a1=(document.getElementById('igCmpA1')||{}).value||'',a2=(document.getElementById('igCmpA2')||{}).value||'';
-  var b1=(document.getElementById('igCmpB1')||{}).value||'',b2=(document.getElementById('igCmpB2')||{}).value||'';
-  function filt(arr,d0,d1){ return arr.filter(function(r){ return orgInRange(orgParseDate(r['Horário de publicação']),d0,d1); }); }
-  var kA=igCalcKPIs(filt(rawPostagens,a1,a2),filt(rawStories,a1,a2));
-  var kB=igCalcKPIs(filt(rawPostagens,b1,b2),filt(rawStories,b1,b2));
-  var metrics=[
-    {l:'Views',a:kA.views,b:kB.views},
-    {l:'Alcance',a:kA.alcance,b:kB.alcance},
-    {l:'Engajamento',a:kA.eng,b:kB.eng},
-    {l:'Taxa Eng. (%)',a:kA.txEng,b:kB.txEng,pct:true},
-    {l:'Seguimentos',a:kA.seg,b:kB.seg},
-    {l:'Posts',a:kA.posts,b:kB.posts},
-    {l:'Stories',a:kA.stories,b:kB.stories},
-  ];
-  var rows=metrics.map(function(m){
-    var diff=m.b-m.a,pct=m.a>0?(diff/m.a*100):0;
-    var col=diff>0?'var(--green)':diff<0?'var(--red)':'var(--mu)';
-    return '<tr style="border-bottom:1px solid var(--bdr)">'
-      +'<td style="padding:8px 10px;font-weight:600;color:var(--tx)">'+m.l+'</td>'
-      +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+(m.pct?m.a.toFixed(2)+'%':fN(m.a))+'</td>'
-      +'<td style="padding:8px 10px;text-align:right;color:var(--purple)">'+(m.pct?m.b.toFixed(2)+'%':fN(m.b))+'</td>'
-      +'<td style="padding:8px 10px;text-align:right;color:'+col+';font-weight:700">'+(diff>=0?'▲':'▼')+' '+Math.abs(pct).toFixed(1)+'%</td>'
-      +'</tr>';
-  }).join('');
-  var el=document.getElementById('igCompareResult');
-  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:2px solid var(--bdr)">'
-    +'<th style="padding:8px 10px;text-align:left;color:var(--mu)">Métrica</th>'
-    +'<th style="padding:8px 10px;text-align:right;color:var(--blue)">A ('+a1+' → '+a2+')</th>'
-    +'<th style="padding:8px 10px;text-align:right;color:var(--purple)">B ('+b1+' → '+b2+')</th>'
-    +'<th style="padding:8px 10px;text-align:right;color:var(--mu)">Variação</th>'
-    +'</tr></thead><tbody>'+rows+'</tbody></table>';
-}
 
 // ─── LOAD FACEBOOK ────────────────────────────────────────
 async function loadFacebook(){

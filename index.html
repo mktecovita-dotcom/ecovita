@@ -459,6 +459,9 @@ body.light .theme-label{color:var(--blue)}
       <div class="nav-item" onclick="goPage('facebook')">
         <span class="nav-icon">📘</span> Facebook Orgânico
       </div>
+      <div class="nav-item" onclick="goPage('tiktok')">
+        <span class="nav-icon">🎵</span> TikTok Orgânico
+      </div>
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -1417,6 +1420,129 @@ body.light .theme-label{color:var(--blue)}
       </div>
     </div>
 
+    <!-- ══════════════ PAGE: TIKTOK ORGÂNICO ══════════════ -->
+    <div class="page" id="page-tiktok">
+      <!-- Filtros -->
+      <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <span class="fl">De:</span>
+        <input type="date" id="tkDateDe" onchange="applyTkFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+        <span class="fl">Até:</span>
+        <input type="date" id="tkDateAte" onchange="applyTkFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+        <button class="btn" onclick="tkClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
+        <button class="btn btn-primary" onclick="loadTiktok()" style="font-size:11px;padding:5px 14px">🔄 Atualizar</button>
+        <div style="width:1px;background:var(--bdr);height:20px;margin:0 4px"></div>
+        <button class="btn" onclick="toggleTkCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
+        <button class="btn" onclick="tkSetMesAnterior()" style="font-size:11px;padding:5px 12px" title="Mês atual vs. mês anterior">📅 Mês anterior</button>
+        <span id="tkStatus" style="font-size:11px;color:var(--mu);margin-left:8px"></span>
+      </div>
+
+      <div id="tkLoading" style="display:none;text-align:center;padding:40px">
+        <div style="font-size:22px;margin-bottom:8px">⏳</div>
+        <div style="font-size:13px;color:var(--mu)">Carregando dados…</div>
+      </div>
+      <div id="tkError" style="display:none" class="ebox"></div>
+
+      <!-- Painel comparação -->
+      <div id="tkComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;margin-bottom:8px">Período A</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="tkCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              <span style="color:var(--mu);font-size:11px">até</span>
+              <input type="date" id="tkCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:8px">Período B</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="tkCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              <span style="color:var(--mu);font-size:11px">até</span>
+              <input type="date" id="tkCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="renderTkCompare()" style="font-size:12px">Comparar</button>
+          <button class="btn" onclick="tkFillCurrentVsPrev()" style="font-size:11px;padding:5px 12px">📅 Mês atual vs. mês anterior</button>
+          <button class="btn" onclick="tkFillFilterVsPrev()" style="font-size:11px;padding:5px 12px">🔍 Filtro atual vs. período anterior</button>
+        </div>
+        <div id="tkCompareResult" style="margin-top:16px"></div>
+      </div>
+
+      <div id="tkBody" style="display:none">
+        <!-- KPIs -->
+        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+          <div class="kpi pink"><div class="kpi-label">Total Vídeos</div><div class="kpi-val" id="tk_videos">—</div><div class="kpi-sub" id="tk_videosS">No período</div></div>
+          <div class="kpi purple"><div class="kpi-label">Total Views</div><div class="kpi-val" id="tk_views">—</div><div class="kpi-sub">Visualizações acumuladas</div></div>
+          <div class="kpi green"><div class="kpi-label">Total Likes</div><div class="kpi-val" id="tk_likes">—</div><div class="kpi-sub">Curtidas acumuladas</div></div>
+          <div class="kpi blue"><div class="kpi-label">Comentários</div><div class="kpi-val" id="tk_coments">—</div><div class="kpi-sub">Total de comentários</div></div>
+          <div class="kpi amber"><div class="kpi-label">Total Ações</div><div class="kpi-val" id="tk_acoes">—</div><div class="kpi-sub">Salv.+comp.+outros</div></div>
+        </div>
+        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+          <div class="kpi purple"><div class="kpi-label">Média Views/Vídeo</div><div class="kpi-val" id="tk_avgViews">—</div><div class="kpi-sub">Alcance médio</div></div>
+          <div class="kpi pink"><div class="kpi-label">Média Likes/Vídeo</div><div class="kpi-val" id="tk_avgLikes">—</div><div class="kpi-sub">Curtidas médias</div></div>
+          <div class="kpi green"><div class="kpi-label">Taxa de Engaj.</div><div class="kpi-val" id="tk_txeng">—</div><div class="kpi-sub" id="tk_txengS">Eng/Views %</div></div>
+          <div class="kpi blue"><div class="kpi-label">Melhor Vídeo</div><div class="kpi-val" id="tk_topViews">—</div><div class="kpi-sub" id="tk_topViewsS">views</div></div>
+          <div class="kpi amber"><div class="kpi-label">+ Engajamento</div><div class="kpi-val" id="tk_topEng">—</div><div class="kpi-sub" id="tk_topEngS">likes+coment+ações</div></div>
+        </div>
+
+        <!-- Charts linha 1 -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📈 Views por Data de Publicação — Crescimento Orgânico</div></div>
+            <div style="height:200px;position:relative"><canvas id="tkChartTrend"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🎯 Distribuição de Engajamento</div></div>
+            <div style="height:200px;position:relative"><canvas id="tkChartDist"></canvas></div>
+          </div>
+        </div>
+        <!-- Charts linha 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🔥 Top 10 Vídeos — Views</div></div>
+            <div style="height:240px;position:relative"><canvas id="tkChartTopViews"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">❤️ Top 10 Vídeos — Likes</div></div>
+            <div style="height:240px;position:relative"><canvas id="tkChartTopLikes"></canvas></div>
+          </div>
+        </div>
+        <!-- Chart linha 3 -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd"><div class="card-title">📊 Taxa de Engajamento por Vídeo (Likes+Coment.+Ações / Views %)</div></div>
+          <div style="height:200px;position:relative"><canvas id="tkChartEngRate"></canvas></div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">📋 Todos os Vídeos</div>
+            <span id="tkVideoCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="border-bottom:1px solid var(--bdr)">
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600;max-width:220px">Título</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Likes</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Ações</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Engaj.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Tx. Eng.</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
+              </tr></thead>
+              <tbody id="tkVideoBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page-tiktok -->
+
+
     <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
     <div class="page" id="page-meta">
 
@@ -1600,14 +1726,14 @@ const PAGE_TITLES={
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
   config:'Configurações de API',meta:'Criativos Meta API',
-  instagram:'Instagram Orgânico',facebook:'Facebook Orgânico'
+  instagram:'Instagram Orgânico',facebook:'Facebook Orgânico',tiktok:'TikTok Orgânico'
 };
 function goPage(pg){
   paginaAtual=pg;
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
@@ -1615,6 +1741,7 @@ function goPage(pg){
   if(pg==='investimento') renderInvestimento();
   if(pg==='instagram') loadOrganico('instagram');
   if(pg==='facebook')  loadOrganico('facebook');
+  if(pg==='tiktok')    loadOrganico('tiktok');
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -1634,7 +1761,7 @@ async function fetchCSV(id,gid=0){
   return parseCSV(await r.text());
 }
 // Real-header keywords: if a row starts with one of these it's the actual column header
-var CSV_HEADER_ANCHORS = ['Day','Campaign','Campanha','Date','Data','Empreendimento','Conta','ID do Post','Identificação do post','Identificação da Página','Horário de publicação','Título','Data de publicação','Data de Publicação'];
+var CSV_HEADER_ANCHORS = ['Day','Campaign','Campanha','Date','Data','Empreendimento','Conta','ID do Post','Identificação do post','Identificação da Página','Horário de publicação','Título','Data de publicação','Data de Publicação','Time'];
 function parseCSV(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(lines.length<2) return[];
@@ -4115,11 +4242,13 @@ async function analyzeAllMetaCampaigns(){
 var IG_POSTAGEM_SHEET = '19QMQyPql1E5ATAId6mIRD19R4uvC0TzSga0touU1eSU';
 var IG_STORY_SHEET    = '1HAQGVR1JO7Zz-kyQ2w5TfQZI5N3yCg-7OQBHKjX1-Sc';
 var FB_SHEET          = '1BSM1EKWac4q1cAcanBHEYzXmChiL1yhvpME0LeMnxrk';
+var TK_SHEET          = '1Pl4meOJiRtxVRJjMmYC4KggfaFl6pDB2UYvo-evt7rk';
 
 // Cache de dados brutos
 var rawPostagens = [];
 var rawStories   = [];
 var rawFacebook  = [];
+var rawTiktok    = [];
 
 // ─── Helpers ──────────────────────────────────────────────
 function orgN(v){ return parseInt(String(v||'0').replace(/[^0-9.-]/g,''))||0; }
@@ -4847,9 +4976,273 @@ function renderFbCompare(){
 
 
 // ─── goPage hook ─────────────────────────────────────────
+// ─── TIKTOK ───────────────────────────────────────────────
+// Converte "19 de junho" / "19 de junho de 2026" → "YYYY-MM-DD"
+var TK_MESES={'janeiro':'01','fevereiro':'02','março':'03','marco':'03','abril':'04',
+  'maio':'05','junho':'06','julho':'07','agosto':'08','setembro':'09','outubro':'10',
+  'novembro':'11','dezembro':'12'};
+function ttkParseDate(s){
+  if(!s) return '';
+  s=String(s).trim().toLowerCase();
+  // Already ISO
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // "19 de junho" or "19 de junho de 2026"
+  var m=s.match(/^(\d{1,2})\s+de\s+(\w+)(?:\s+de\s+(\d{4}))?/);
+  if(m){
+    var day=m[1].padStart(2,'0');
+    var mon=TK_MESES[m[2]]||'01';
+    var yr=m[3]||String(new Date().getFullYear());
+    return yr+'-'+mon+'-'+day;
+  }
+  return '';
+}
+
+async function loadTiktok(){
+  var loading=document.getElementById('tkLoading');
+  var body=document.getElementById('tkBody');
+  var errEl=document.getElementById('tkError');
+  var st=document.getElementById('tkStatus');
+  if(loading) loading.style.display='block';
+  if(body)    body.style.display='none';
+  if(errEl)   errEl.style.display='none';
+  if(st)      st.textContent='Carregando…';
+  try {
+    var csv=await fetchCSV(TK_SHEET,'0');
+    rawTiktok=csv;
+    if(loading) loading.style.display='none';
+    if(st) st.textContent=rawTiktok.length+' vídeos';
+    applyTkFilter();
+  } catch(e){
+    if(loading) loading.style.display='none';
+    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
+    if(st) st.textContent='';
+  }
+}
+
+function applyTkFilter(){
+  var de=(document.getElementById('tkDateDe')||{}).value||'';
+  var ate=(document.getElementById('tkDateAte')||{}).value||'';
+  var vids=rawTiktok.filter(function(r){ return orgInRange(ttkParseDate(r['Dia da publicação']),de,ate); });
+  var body=document.getElementById('tkBody');
+  if(body) body.style.display='block';
+  renderTiktok(vids);
+}
+function tkClearDates(){
+  var d1=document.getElementById('tkDateDe'),d2=document.getElementById('tkDateAte');
+  if(d1) d1.value=''; if(d2) d2.value='';
+  applyTkFilter();
+}
+function toggleTkCompare(){
+  var p=document.getElementById('tkComparePanel');
+  if(p) p.style.display=p.style.display==='none'?'block':'none';
+}
+function tkFillCurrentVsPrev(){
+  var now=new Date();
+  var y=now.getFullYear(),m=now.getMonth();
+  var a1=y+'-'+String(m+1).padStart(2,'0')+'-01';
+  var a2=now.toISOString().slice(0,10);
+  var pm=m===0?12:m,py=m===0?y-1:y;
+  var lastDay=new Date(y,m,0).getDate();
+  var b1=py+'-'+String(pm).padStart(2,'0')+'-01';
+  var b2=py+'-'+String(pm).padStart(2,'0')+'-'+String(lastDay).padStart(2,'0');
+  var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v;};
+  f('tkCmpA1',a1);f('tkCmpA2',a2);f('tkCmpB1',b1);f('tkCmpB2',b2);
+}
+function tkFillFilterVsPrev(){
+  var de=(document.getElementById('tkDateDe')||{}).value||'';
+  var ate=(document.getElementById('tkDateAte')||{}).value||'';
+  if(!de||!ate){tkFillCurrentVsPrev();return;}
+  var d1=new Date(de),d2=new Date(ate),diff=d2-d1;
+  var b2=new Date(d1.getTime()-86400000),b1=new Date(b2.getTime()-diff);
+  var fmt=function(d){return d.toISOString().slice(0,10);};
+  var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v;};
+  f('tkCmpA1',de);f('tkCmpA2',ate);f('tkCmpB1',fmt(b1));f('tkCmpB2',fmt(b2));
+}
+function tkSetMesAnterior(){
+  var p=document.getElementById('tkComparePanel');
+  if(p) p.style.display='block';
+  tkFillCurrentVsPrev();
+  renderTkCompare();
+}
+
+function renderTiktok(vids){
+  var isLight=document.body.classList.contains('light');
+  var clrMu=isLight?'#6b7280':'#6b7a9e',clrTx=isLight?'#1a2332':'#e2e8f0',clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  var totViews=0,totLikes=0,totComent=0,totAcoes=0;
+  vids.forEach(function(r){
+    totViews +=orgN(r['Total views']);
+    totLikes +=orgN(r['Total likes']);
+    totComent+=orgN(r['Total de comentários']);
+    totAcoes +=orgN(r['Total ações']);
+  });
+  var totEng=totLikes+totComent+totAcoes;
+  var txEng=totViews>0?(totEng/totViews*100):0;
+  var sortV=vids.slice().sort(function(a,b){return orgN(b['Total views'])-orgN(a['Total views']);});
+  var topV=sortV[0]||{};
+  var sortE=vids.slice().sort(function(a,b){
+    var eA=orgN(a['Total likes'])+orgN(a['Total de comentários'])+orgN(a['Total ações']);
+    var eB=orgN(b['Total likes'])+orgN(b['Total de comentários'])+orgN(b['Total ações']);
+    return eB-eA;
+  });
+  var topE=sortE[0]||{};
+  var topEng=orgN(topE['Total likes'])+orgN(topE['Total de comentários'])+orgN(topE['Total ações']);
+
+  sid('tk_videos',  String(vids.length));  sid('tk_videosS','No período');
+  sid('tk_views',   fN(totViews));
+  sid('tk_likes',   fN(totLikes));
+  sid('tk_coments', fN(totComent));
+  sid('tk_acoes',   fN(totAcoes));
+  sid('tk_avgViews',vids.length?fN(Math.round(totViews/vids.length)):'—');
+  sid('tk_avgLikes',vids.length?fN(Math.round(totLikes/vids.length)):'—');
+  sid('tk_txeng',   txEng.toFixed(2)+'%');
+  sid('tk_txengS',  txEng>=5?'✅ Excelente (≥5%)':txEng>=2?'✅ Bom (≥2%)':'⚠️ Otimizar');
+  sid('tk_topViews',fN(orgN(topV['Total views'])));
+  sid('tk_topViewsS',(topV['Título do Vídeo']||'').slice(0,30)+'…');
+  sid('tk_topEng',  fN(topEng));
+  sid('tk_topEngS', (topE['Título do Vídeo']||'').slice(0,30)+'…');
+
+  var vc=document.getElementById('tkVideoCount'); if(vc) vc.textContent=vids.length+' vídeos';
+
+  // Chart: Tendência de views por data de publicação (line)
+  var byDate={};
+  vids.forEach(function(r){
+    var d=ttkParseDate(r['Dia da publicação'])||'';
+    if(d) byDate[d]=(byDate[d]||0)+orgN(r['Total views']);
+  });
+  var dkeys=Object.keys(byDate).sort();
+  if(dkeys.length>1){
+    mkChart('tkChartTrend','line',dkeys,
+      [{label:'Views',data:dkeys.map(function(d){return byDate[d];}),borderColor:'#e879a0',backgroundColor:'rgba(232,121,160,.15)',fill:true,tension:.35,pointRadius:5,pointBackgroundColor:'#e879a0'}],
+      {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+       scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+  } else {
+    // poucos pontos → usar bar
+    mkChart('tkChartTrend','bar',dkeys.length?dkeys:['Sem data'],
+      [{label:'Views',data:dkeys.length?dkeys.map(function(d){return byDate[d];}):[totViews],backgroundColor:'rgba(232,121,160,.75)',borderRadius:6}],
+      {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+       scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{display:false}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+  }
+
+  // Chart: Distribuição de engajamento (donut)
+  mkChart('tkChartDist','doughnut',
+    ['Likes','Comentários','Ações'],
+    [{data:[totLikes,totComent,totAcoes],backgroundColor:['#e879a0','#9b7ff4','#f5a623'],borderWidth:2,borderColor:'var(--bg2)'}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:clrTx,font:{size:11},boxWidth:10}}}});
+
+  // Chart: Top 10 por views (horizontal bar)
+  var top10V=sortV.slice(0,10);
+  mkChart('tkChartTopViews','bar',
+    top10V.map(function(r){return (r['Título do Vídeo']||'—').slice(0,28);}),
+    [{label:'Views',data:top10V.map(function(r){return orgN(r['Total views']);}),backgroundColor:'rgba(155,127,244,.8)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Chart: Top 10 por likes (horizontal bar)
+  var top10L=vids.slice().sort(function(a,b){return orgN(b['Total likes'])-orgN(a['Total likes']);}).slice(0,10);
+  mkChart('tkChartTopLikes','bar',
+    top10L.map(function(r){return (r['Título do Vídeo']||'—').slice(0,28);}),
+    [{label:'Likes',data:top10L.map(function(r){return orgN(r['Total likes']);}),backgroundColor:'rgba(232,121,160,.8)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Chart: Taxa de engajamento por vídeo (bar vertical, top 10)
+  var top10Eng=sortE.slice(0,10);
+  mkChart('tkChartEngRate','bar',
+    top10Eng.map(function(r){return (r['Título do Vídeo']||'—').slice(0,22);}),
+    [{label:'Tx. Eng. %',data:top10Eng.map(function(r){
+      var v=orgN(r['Total views']);
+      var e=orgN(r['Total likes'])+orgN(r['Total de comentários'])+orgN(r['Total ações']);
+      return v>0?+(e/v*100).toFixed(2):0;
+    }),backgroundColor:'rgba(79,142,247,.8)',borderRadius:6}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+     tooltip:{callbacks:{label:function(ctx){return ctx.raw+'%';}}}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
+             y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v+'%';}},grid:{color:clrGrid}}}});
+
+  // Tabela
+  var vb=document.getElementById('tkVideoBody');
+  if(vb){
+    vb.innerHTML=vids.slice().sort(function(a,b){return orgN(b['Total views'])-orgN(a['Total views']);}).map(function(r){
+      var v=orgN(r['Total views']),l=orgN(r['Total likes']),c=orgN(r['Total de comentários']),a=orgN(r['Total ações']);
+      var e=l+c+a, tx=v>0?(e/v*100).toFixed(2)+'%':'—';
+      var link=r['Video link']||'';
+      var titulo=(r['Título do Vídeo']||'—');
+      return '<tr style="border-bottom:1px solid var(--bdr)">'
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px;white-space:nowrap">'+ttkParseDate(r['Dia da publicação'])+'</td>'
+        +'<td style="padding:8px 10px;color:var(--tx);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+titulo+'">'+titulo.slice(0,50)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--purple)">'+fN(v)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--pink)">'+fN(l)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(c)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--amber)">'+fN(a)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:600;color:var(--green)">'+fN(e)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+tx+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(link?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+}
+
+// ─── COMPARATIVO TIKTOK ──────────────────────────────────
+function renderTkCompare(){
+  var a1=(document.getElementById('tkCmpA1')||{}).value||'';
+  var a2=(document.getElementById('tkCmpA2')||{}).value||'';
+  var b1=(document.getElementById('tkCmpB1')||{}).value||'';
+  var b2=(document.getElementById('tkCmpB2')||{}).value||'';
+  if(!a1||!a2||!b1||!b2){
+    var el=document.getElementById('tkCompareResult');
+    if(el) el.innerHTML='<div style="color:var(--mu);font-size:12px;padding:8px">⚠️ Preencha os dois períodos.</div>';
+    return;
+  }
+  function filt(d0,d1){ return rawTiktok.filter(function(r){ return orgInRange(ttkParseDate(r['Dia da publicação']),d0,d1); }); }
+  function calc(arr){
+    var views=0,likes=0,coment=0,acoes=0;
+    arr.forEach(function(r){
+      views +=orgN(r['Total views']); likes +=orgN(r['Total likes']);
+      coment+=orgN(r['Total de comentários']); acoes+=orgN(r['Total ações']);
+    });
+    var eng=likes+coment+acoes;
+    return {vids:arr.length,views:views,likes:likes,coment:coment,acoes:acoes,eng:eng,
+            txEng:views>0?(eng/views*100):0,avgViews:arr.length?Math.round(views/arr.length):0};
+  }
+  var kA=calc(filt(a1,a2)), kB=calc(filt(b1,b2));
+  function row(label,a,b,neg,fmt){
+    fmt=fmt||function(v){return fN(v);};
+    var diff=b-a,pct=a>0?(diff/a*100):0,up=diff>=0;
+    var col=up?(neg?'var(--red)':'var(--green)'):(neg?'var(--green)':'var(--red)');
+    return '<tr style="border-bottom:1px solid var(--bdr)">'
+      +'<td style="padding:7px 10px;color:var(--tx);font-size:12px">'+label+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;color:var(--pink);font-size:12px">'+fmt(a)+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;color:var(--purple);font-size:12px">'+fmt(b)+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;color:'+col+'">'+(up?'▲':'▼')+' '+Math.abs(pct).toFixed(1)+'%</td>'
+      +'<td style="padding:7px 10px;text-align:right;font-size:11px;color:var(--mu)">'+(diff>=0?'+':'')+fN(Math.round(diff))+'</td>'
+      +'</tr>';
+  }
+  var pct1=function(v){return v.toFixed(2)+'%';};
+  var thead='<thead><tr style="border-bottom:2px solid var(--bdr)">'
+    +'<th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:11px">Métrica</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--pink);font-size:11px">A: '+a1+' → '+a2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--purple);font-size:11px">B: '+b1+' → '+b2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Variação</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Diferença</th>'
+    +'</tr></thead>';
+  var rows=row('🎵 Vídeos',kA.vids,kB.vids,false)
+    +row('👁️ Views',kA.views,kB.views,false)
+    +row('📊 Média Views/Vídeo',kA.avgViews,kB.avgViews,false)
+    +row('❤️ Likes',kA.likes,kB.likes,false)
+    +row('💬 Comentários',kA.coment,kB.coment,false)
+    +row('⚡ Ações',kA.acoes,kB.acoes,false)
+    +row('🔥 Engajamento Total',kA.eng,kB.eng,false)
+    +row('📈 Taxa de Eng. (%)',kA.txEng,kB.txEng,false,pct1);
+  var el=document.getElementById('tkCompareResult');
+  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+'<tbody>'+rows+'</tbody></table>';
+}
+
+
 function loadOrganico(pg){
   if(pg==='instagram' && !rawPostagens.length) loadInstagram();
   if(pg==='facebook'  && !rawFacebook.length)  loadFacebook();
+  if(pg==='tiktok'    && !rawTiktok.length)    loadTiktok();
 }
 
 // Menu mobile

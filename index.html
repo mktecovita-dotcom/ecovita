@@ -4839,7 +4839,8 @@ function renderFacebook(posts){
     if(d) byDate[d]=(byDate[d]||0)+orgN(r['Visualizações']);
   });
   var dkeys=Object.keys(byDate).sort();
-  mkChart('fbChartTrend','line',dkeys,
+  var dkeysDisplay=dkeys.map(function(d){return fmtDate(d);});
+  mkChart('fbChartTrend','line',dkeysDisplay,
     [{label:'Visualizações',data:dkeys.map(function(d){return byDate[d];}),borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.15)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#4f8ef7'}],
     {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
      scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
@@ -4857,7 +4858,7 @@ function renderFacebook(posts){
     return eB-eA;
   }).slice(0,10);
   mkChart('fbChartEng','bar',
-    sortE.map(function(r){return fbParseDate(r['Data de Publicação'])||'';}),
+    sortE.map(function(r){return fmtDate(fbParseDate(r['Data de Publicação']));}),
     [{label:'Engajamento',data:sortE.map(function(r){return orgN(r['Engajamento Total'])||orgN(r['Reações'])+orgN(r['Comentários'])+orgN(r['Compartilhamentos']);}),backgroundColor:'rgba(79,142,247,.75)',borderRadius:4,borderSkipped:false}],
     {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
      scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
@@ -4866,7 +4867,7 @@ function renderFacebook(posts){
   var sortC=posts.filter(function(r){return orgN(r['Cliques no Link'])>0;}).sort(function(a,b){return orgN(b['Cliques no Link'])-orgN(a['Cliques no Link']);}).slice(0,10);
   if(sortC.length>0){
     mkChart('fbChartCliques','bar',
-      sortC.map(function(r){return fbParseDate(r['Data de Publicação'])||'';}),
+      sortC.map(function(r){return fmtDate(fbParseDate(r['Data de Publicação']));}),
       [{label:'Cliques no Link',data:sortC.map(function(r){return orgN(r['Cliques no Link']);}),backgroundColor:'rgba(46,204,142,.75)',borderRadius:4,borderSkipped:false}],
       {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
        scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
@@ -4881,7 +4882,7 @@ function renderFacebook(posts){
   // Chart: Top 10 alcance
   var sortAlc=posts.slice().sort(function(a,b){return orgN(b['Alcance'])-orgN(a['Alcance']);}).slice(0,10);
   mkChart('fbChartAlcance','bar',
-    sortAlc.map(function(r){return fbParseDate(r['Data de Publicação'])||'';}),
+    sortAlc.map(function(r){return fmtDate(fbParseDate(r['Data de Publicação']));}),
     [{label:'Alcance',data:sortAlc.map(function(r){return orgN(r['Alcance']);}),backgroundColor:'rgba(155,127,244,.75)',borderRadius:4,borderSkipped:false}],
     {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
      scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}}});
@@ -4898,7 +4899,7 @@ function renderFacebook(posts){
       var alc=orgN(r['Alcance']), tx=alc>0?(e/alc*100).toFixed(1)+'%':'—';
       var link=r['Link']||'';
       return '<tr style="border-bottom:1px solid var(--bdr)">'
-        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+fbParseDate(r['Data de Publicação'])+'</td>'
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px">'+fmtDate(fbParseDate(r['Data de Publicação']))+'</td>'
         +'<td style="padding:8px 10px"><span style="background:rgba(79,142,247,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">'+(r['Tipo de Post']||'—')+'</span></td>'
         +'<td style="padding:8px 10px;text-align:right;color:var(--tx)">'+fN(orgN(r['Visualizações']))+'</td>'
         +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(orgN(r['Alcance']))+'</td>'

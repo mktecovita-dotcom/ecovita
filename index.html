@@ -1543,6 +1543,143 @@ body.light .theme-label{color:var(--blue)}
     </div><!-- /page-tiktok -->
 
 
+    <!-- ══════════════ PAGE: O QUE MELHORAR ══════════════ -->
+    <div class="page" id="page-melhorias">
+      <div class="card">
+        <div class="card-hd">
+          <div>
+            <div style="font-size:15px;font-weight:700">🔧 O que Melhorar</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Diagnóstico automático das campanhas Meta Ads com score de saúde</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="fMelObj" class="sel" onchange="renderMelhorias()" style="font-size:12px;padding:5px 10px">
+              <option value="">Todos os objetivos</option>
+              <option value="Cadastro">Cadastro</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Alcance">Alcance</option>
+              <option value="Mensagens">Mensagens</option>
+            </select>
+            <select id="fMelPrio" class="sel" onchange="renderMelhorias()" style="font-size:12px;padding:5px 10px">
+              <option value="">Todas as prioridades</option>
+              <option value="critico">🚨 Crítico (score &lt;50)</option>
+              <option value="otimizar">⚠️ Otimizar (score 50–79)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--mu)">Score de saúde:</span>
+          <span class="ia-chip alert">🚨 Crítico &lt;50</span>
+          <span class="ia-chip warn">⚠️ Otimizar 50–79</span>
+          <span class="ia-chip ok">✅ Saudável ≥80</span>
+        </div>
+        <div id="melhoriasContent">
+          <div style="text-align:center;padding:40px;color:var(--mu);font-size:13px">Carregando dados das campanhas…</div>
+        </div>
+      </div>
+    </div><!-- /page-melhorias -->
+
+
+    <!-- ══════════════ PAGE: ANÁLISE POR IA ══════════════ -->
+    <div class="page" id="page-ia">
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div>
+            <div style="font-size:15px;font-weight:700">🚨 Alertas Automáticos</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Detecção em tempo real de campanhas com problemas — sem consumo de crédito</div>
+          </div>
+          <span id="alertCount" style="font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;background:rgba(240,101,101,.12);color:var(--red)">0 alertas</span>
+        </div>
+        <div id="alertList">
+          <div style="font-size:13px;color:var(--mu);padding:8px 0">Carregando campanhas…</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div style="font-size:14px;font-weight:600">📊 Score de Performance por Objetivo</div>
+        </div>
+        <div style="height:220px;position:relative">
+          <canvas id="cScore"></canvas>
+        </div>
+      </div>
+      <div class="ia-box">
+        <div class="ia-header">
+          <div class="ia-icon">🤖</div>
+          <div>
+            <div class="ia-title">Análise Profunda com IA (Claude API)</div>
+            <div class="ia-sub">Conecte sua chave Anthropic em Configurações para ativar</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn btn-primary" onclick="analisarIA('geral')" style="font-size:12px">📊 Análise Geral</button>
+          <button class="btn" onclick="analisarIA('campanhas')" style="font-size:12px">📣 Campanhas</button>
+          <button class="btn" onclick="analisarIA('leads')" style="font-size:12px">👥 Leads</button>
+          <button class="btn" onclick="analisarIA('orcamento')" style="font-size:12px">💰 Orçamento</button>
+          <button class="btn" onclick="analisarIA('proximos')" style="font-size:12px">🎯 Próximos Passos</button>
+        </div>
+        <div id="iaResult" style="font-size:13px;color:var(--mu);padding:8px 0">
+          Selecione um tipo de análise acima. A IA usará todos os dados carregados no sistema.
+        </div>
+      </div>
+    </div><!-- /page-ia -->
+
+
+    <!-- ══════════════ PAGE: PESQUISA DE MERCADO ══════════════ -->
+    <div class="page" id="page-mercado">
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <div>
+            <div style="font-size:15px;font-weight:700">🔍 Pesquisa de Mercado</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Cadastre concorrentes para comparar posicionamento e estratégias</div>
+          </div>
+        </div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Nome do concorrente *</label>
+            <input id="mNome" class="inp" placeholder="Ex: Construtora XYZ" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Cidade</label>
+            <input id="mCidade" class="inp" placeholder="Ex: Florianópolis" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Canais de mídia</label>
+            <input id="mCanais" class="inp" placeholder="Ex: Meta, Google, TikTok" style="width:100%;box-sizing:border-box">
+          </div>
+        </div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">CPL estimado (R$)</label>
+            <input id="mCpl" class="inp" type="number" placeholder="0" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Invest mensal estimado (R$)</label>
+            <input id="mInvest" class="inp" type="number" placeholder="0" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Ticket médio (R$)</label>
+            <input id="mTicket" class="inp" type="number" placeholder="0" style="width:100%;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Observações / diferenciais</label>
+          <textarea id="mObs" class="inp" rows="2" placeholder="Ex: Foco em apartamentos compactos, grande presença no Instagram..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="addConcorrente()" style="font-size:13px">+ Adicionar Concorrente</button>
+          <a href="https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&media_type=all" target="_blank" class="btn" style="font-size:12px;text-decoration:none">🔎 Biblioteca de Anúncios Meta</a>
+        </div>
+      </div>
+      <div id="concorrentesContent" style="margin-bottom:14px">
+        <div style="text-align:center;padding:32px;color:var(--mu);font-size:13px">Nenhum concorrente cadastrado ainda.</div>
+      </div>
+      <div id="mercadoIA" style="display:none"></div>
+      <div style="text-align:center">
+        <button class="btn btn-primary" onclick="analisarMercado()" style="font-size:13px;padding:10px 24px">🤖 Analisar Mercado com IA</button>
+        <div style="font-size:11px;color:var(--mu);margin-top:6px">Requer chave Anthropic configurada ou usa análise local</div>
+      </div>
+    </div><!-- /page-mercado -->
+
+
     <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
     <div class="page" id="page-meta">
 

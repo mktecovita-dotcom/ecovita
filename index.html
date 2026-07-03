@@ -545,24 +545,28 @@ body.light .theme-label{color:var(--blue)}
         <div class="kpi amber"><div class="kpi-label">ROAS Médio</div><div class="kpi-val amber" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
       </div>
 
-      <!-- KPI Row 2: Leads linha 1 -->
+      <!-- KPI Row 2: Leads — 2 linhas com divisor visual -->
       <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        👥 Leads por Objetivo
+        👥 Leads
         <div style="flex:1;height:1px;background:var(--bdr)"></div>
       </div>
-      <div class="kpi-grid kpi-4" style="margin-bottom:10px">
-        <div class="kpi" style="border-top-color:#25D366"><div class="kpi-label">Leads WhatsApp</div><div class="kpi-val" style="color:#25D366" id="kWpp">—</div><div class="kpi-sub" id="kWpps"></div></div>
-        <div class="kpi blue"><div class="kpi-label">Leads Cadastro</div><div class="kpi-val blue" id="kCad">—</div><div class="kpi-sub" id="kCads"></div></div>
-        <div class="kpi purple"><div class="kpi-label">Leads Meta</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
-      </div>
-
-      <!-- KPI Row 2: Leads linha 2 -->
-      <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px">
-        <div class="kpi blue"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
-        <div class="kpi orange"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
-        <div class="kpi red"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:16px">
+        <!-- Linha 1: por objetivo -->
+        <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">POR OBJETIVO · META ADS</div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;gap:8px">
+          <div class="kpi" style="border-top-color:#25D366;margin:0"><div class="kpi-label">Leads WhatsApp</div><div class="kpi-val" style="color:#25D366" id="kWpp">—</div><div class="kpi-sub" id="kWpps"></div></div>
+          <div class="kpi blue" style="margin:0"><div class="kpi-label">Leads Cadastro</div><div class="kpi-val blue" id="kCad">—</div><div class="kpi-sub" id="kCads"></div></div>
+          <div class="kpi purple" style="margin:0"><div class="kpi-label">Leads Meta Total</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
+        </div>
+        <!-- Linha 2: CRM -->
+        <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">BASE CRM · CVCRM</div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);gap:8px">
+          <div class="kpi blue" style="margin:0"><div class="kpi-label">Leads Novos Online</div><div class="kpi-val blue" id="k7">—</div><div class="kpi-sub" id="k7s"></div></div>
+          <div class="kpi orange" style="margin:0"><div class="kpi-label">Leads Reimpactados</div><div class="kpi-val" style="color:var(--orange)" id="k8">—</div><div class="kpi-sub" id="k8s"></div></div>
+          <div class="kpi green" style="margin:0"><div class="kpi-label">Total de Leads ON</div><div class="kpi-val green" id="k6">—</div><div class="kpi-sub" id="k6s"></div></div>
+          <div class="kpi red" style="margin:0"><div class="kpi-label">Taxa Reimpacto</div><div class="kpi-val red" id="k10">—</div><div class="kpi-sub" id="k10s"></div></div>
+          <div class="kpi teal" style="margin:0"><div class="kpi-label">Leads CRM Online</div><div class="kpi-val teal" id="k11">—</div><div class="kpi-sub" id="k11s"></div></div>
+        </div>
       </div>
 
       <div class="grid g53">

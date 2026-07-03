@@ -1625,58 +1625,55 @@ body.light .theme-label{color:var(--blue)}
 
     <!-- ══════════════ PAGE: PESQUISA DE MERCADO ══════════════ -->
     <div class="page" id="page-mercado">
+
+      <!-- Barra de busca -->
       <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
+        <div class="card-hd" style="margin-bottom:14px">
           <div>
             <div style="font-size:15px;font-weight:700">🔍 Pesquisa de Mercado</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:3px">Cadastre concorrentes para comparar posicionamento e estratégias</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Digite o nome do concorrente — a IA pesquisa anúncios ativos, canais, empreendimentos e posicionamento</div>
           </div>
         </div>
-        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Nome do concorrente *</label>
-            <input id="mNome" class="inp" placeholder="Ex: Construtora XYZ" style="width:100%;box-sizing:border-box">
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:5px">Nome do concorrente</label>
+            <input id="mNomeBusca" class="inp" placeholder="Ex: Diálogo Construções, Habitacional XYZ…" style="width:100%;box-sizing:border-box"
+              onkeydown="if(event.key==='Enter') pesquisarConcorrente()">
           </div>
-          <div>
-            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Cidade</label>
-            <input id="mCidade" class="inp" placeholder="Ex: Florianópolis" style="width:100%;box-sizing:border-box">
+          <div style="min-width:160px">
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:5px">Estado (opcional)</label>
+            <select id="mEstadoBusca" class="sel" style="font-size:13px;padding:8px 10px;width:100%">
+              <option value="">Todos</option>
+              <option value="SC">SC — Santa Catarina</option>
+              <option value="PR">PR — Paraná</option>
+              <option value="RS">RS — Rio Grande do Sul</option>
+              <option value="SP">SP — São Paulo</option>
+              <option value="RJ">RJ — Rio de Janeiro</option>
+              <option value="MG">MG — Minas Gerais</option>
+              <option value="GO">GO — Goiás</option>
+              <option value="DF">DF — Distrito Federal</option>
+            </select>
           </div>
-          <div>
-            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Canais de mídia</label>
-            <input id="mCanais" class="inp" placeholder="Ex: Meta, Google, TikTok" style="width:100%;box-sizing:border-box">
-          </div>
+          <button class="btn btn-primary" onclick="pesquisarConcorrente()" style="font-size:13px;padding:9px 22px;white-space:nowrap">
+            🔍 Pesquisar
+          </button>
+          <a id="mLibraryLink" href="https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&media_type=all" target="_blank"
+            class="btn" style="font-size:12px;text-decoration:none;white-space:nowrap;padding:9px 14px">
+            📚 Biblioteca Meta
+          </a>
         </div>
-        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">CPL estimado (R$)</label>
-            <input id="mCpl" class="inp" type="number" placeholder="0" style="width:100%;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Invest mensal estimado (R$)</label>
-            <input id="mInvest" class="inp" type="number" placeholder="0" style="width:100%;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Ticket médio (R$)</label>
-            <input id="mTicket" class="inp" type="number" placeholder="0" style="width:100%;box-sizing:border-box">
-          </div>
-        </div>
-        <div style="margin-bottom:12px">
-          <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:4px">Observações / diferenciais</label>
-          <textarea id="mObs" class="inp" rows="2" placeholder="Ex: Foco em apartamentos compactos, grande presença no Instagram..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="addConcorrente()" style="font-size:13px">+ Adicionar Concorrente</button>
-          <a href="https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&media_type=all" target="_blank" class="btn" style="font-size:12px;text-decoration:none">🔎 Biblioteca de Anúncios Meta</a>
-        </div>
+        <div id="mBuscaStatus" style="font-size:11px;color:var(--mu);margin-top:8px;display:none"></div>
       </div>
-      <div id="concorrentesContent" style="margin-bottom:14px">
-        <div style="text-align:center;padding:32px;color:var(--mu);font-size:13px">Nenhum concorrente cadastrado ainda.</div>
-      </div>
+
+      <!-- Resultado: anúncios encontrados -->
+      <div id="mAdsResult" style="display:none;margin-bottom:14px"></div>
+
+      <!-- Resultado: análise por IA -->
       <div id="mercadoIA" style="display:none"></div>
-      <div style="text-align:center">
-        <button class="btn btn-primary" onclick="analisarMercado()" style="font-size:13px;padding:10px 24px">🤖 Analisar Mercado com IA</button>
-        <div style="font-size:11px;color:var(--mu);margin-top:6px">Requer chave Anthropic configurada ou usa análise local</div>
-      </div>
+
+      <!-- Histórico de pesquisas -->
+      <div id="mHistorico" style="margin-top:4px"></div>
+
     </div><!-- /page-mercado -->
 
 
@@ -1882,7 +1879,7 @@ function goPage(pg){
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
-  if(pg==='mercado') renderConcorrentes();
+  if(pg==='mercado') renderMercadoHistorico();
   if(pg==='config') initConfigPage();
   if(pg==='meta') initMetaPage();
   if(pg==='gads') renderGoogleAds();
@@ -3275,6 +3272,199 @@ function formatarTextoIA(texto){
     || texto;
 }
 
+
+// ═══════════════════════════════════════════════════════
+// PESQUISA DE MERCADO — AUTO (Ad Library + IA)
+// ═══════════════════════════════════════════════════════
+var mercadoHistorico = JSON.parse(localStorage.getItem('eco_mercado_hist')||'[]');
+
+function renderMercadoHistorico(){
+  const el=document.getElementById('mHistorico');
+  if(!el||!mercadoHistorico.length) return;
+  el.innerHTML=`<div style="font-size:11px;color:var(--mu);margin-bottom:6px">Pesquisas recentes:</div>`+
+    mercadoHistorico.slice(-5).reverse().map(h=>`
+      <span onclick="document.getElementById('mNomeBusca').value='${h}';pesquisarConcorrente()"
+        style="display:inline-block;cursor:pointer;font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--bdr);margin:3px;color:var(--mu2)">
+        ${h}
+      </span>`).join('');
+}
+
+async function pesquisarConcorrente(){
+  const nome = (document.getElementById('mNomeBusca')?.value||'').trim();
+  if(!nome){ alert('Informe o nome do concorrente'); return; }
+  const estado = document.getElementById('mEstadoBusca')?.value||'';
+
+  // Atualiza link da biblioteca Meta
+  const libLink = document.getElementById('mLibraryLink');
+  if(libLink) libLink.href=`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&q=${encodeURIComponent(nome)}&search_type=keyword_unordered&media_type=all`;
+
+  // Status
+  const statusEl=document.getElementById('mBuscaStatus');
+  const adsEl=document.getElementById('mAdsResult');
+  const iaEl=document.getElementById('mercadoIA');
+  if(statusEl){statusEl.style.display='block';statusEl.textContent='🔍 Buscando anúncios na Biblioteca Meta…';}
+  if(adsEl){adsEl.style.display='block';adsEl.innerHTML=`<div class="ia-box"><div class="ia-loading">📡 Consultando Biblioteca de Anúncios<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div></div>`;}
+  if(iaEl){iaEl.style.display='none';}
+
+  // Salva no histórico
+  if(!mercadoHistorico.includes(nome)){
+    mercadoHistorico.push(nome);
+    if(mercadoHistorico.length>10) mercadoHistorico.shift();
+    localStorage.setItem('eco_mercado_hist',JSON.stringify(mercadoHistorico));
+    renderMercadoHistorico();
+  }
+
+  // 1. Busca na Ad Library via Meta API
+  let adsFound=[];
+  let pagesFound=[];
+  let hasMetaToken=false;
+  try{
+    if(window.MetaAPI?.hasCredentials()){
+      hasMetaToken=true;
+      if(statusEl) statusEl.textContent='📡 Buscando anúncios ativos do concorrente…';
+      const r=await window.MetaAPI._get('ads_archive',{
+        search_terms: nome,
+        ad_type: 'ALL',
+        ad_reached_countries: 'BR',
+        fields: 'id,page_name,page_id,publisher_platforms,ad_creative_bodies,ad_delivery_start_time,ad_delivery_stop_time,ad_snapshot_url,impressions,spend,delivery_by_region',
+        limit: 25
+      });
+      adsFound=r.data||[];
+      // Agrupa por página
+      const pMap={};
+      adsFound.forEach(ad=>{
+        const pg=ad.page_name||'Desconhecido';
+        if(!pMap[pg]) pMap[pg]={nome:pg,id:ad.page_id,plataformas:new Set(),anuncios:0,regioes:new Set(),textos:[]};
+        pMap[pg].anuncios++;
+        (ad.publisher_platforms||[]).forEach(p=>pMap[pg].plataformas.add(p));
+        if(ad.delivery_by_region) Object.keys(ad.delivery_by_region).forEach(r=>pMap[pg].regioes.add(r));
+        if(ad.ad_creative_bodies?.[0]) pMap[pg].textos.push(ad.ad_creative_bodies[0].slice(0,120));
+      });
+      pagesFound=Object.values(pMap);
+    }
+  }catch(e){
+    console.warn('Ad Library error:',e);
+  }
+
+  // 2. Renderiza anúncios encontrados
+  if(adsEl){
+    if(adsFound.length>0){
+      adsEl.innerHTML=`
+        <div class="card">
+          <div class="card-hd" style="margin-bottom:12px">
+            <div style="font-size:14px;font-weight:600">📣 Anúncios encontrados na Biblioteca Meta</div>
+            <span class="ia-chip ok">${adsFound.length} anúncios ativos</span>
+          </div>
+          ${pagesFound.map(pg=>`
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--bdr)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+                <div>
+                  <div style="font-size:13px;font-weight:600">${pg.nome}</div>
+                  ${pg.id?`<a href="https://www.facebook.com/ads/library/?id=${pg.id}&country=BR" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none">Ver na Biblioteca →</a>`:''}
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <span class="ia-chip ok">${pg.anuncios} anúncio${pg.anuncios!==1?'s':''}</span>
+                  ${[...pg.plataformas].map(p=>`<span class="ia-chip warn">${p==='facebook'?'📘 Facebook':p==='instagram'?'📸 Instagram':p==='messenger'?'💬 Messenger':p==='audience_network'?'📡 Audience Network':p}</span>`).join('')}
+                </div>
+              </div>
+              ${pg.regioes.size>0?`<div style="font-size:11px;color:var(--mu);margin-bottom:6px">📍 Regiões: ${[...pg.regioes].slice(0,6).join(', ')}${pg.regioes.size>6?` +${pg.regioes.size-6}`:''}}</div>`:''}
+              ${pg.textos.length>0?`<div style="font-size:12px;color:var(--mu2);background:var(--bg2);border-radius:6px;padding:8px;font-style:italic;border-left:3px solid var(--purple)">"${pg.textos[0]}"</div>`:''}
+            </div>`).join('')}
+        </div>`;
+    } else {
+      adsEl.innerHTML=`<div class="card" style="text-align:center;padding:20px">
+        <div style="font-size:13px;color:var(--mu)">
+          ${hasMetaToken
+            ? `Nenhum anúncio encontrado na Biblioteca Meta para "<strong>${nome}</strong>". Pode indicar que o concorrente não está veiculando anúncios no momento.`
+            : `Token Meta não configurado — conecte uma conta em <a href="#" onclick="goPage('config')" style="color:var(--blue)">Configurações</a> para buscar anúncios automaticamente.`}
+        </div>
+      </div>`;
+    }
+  }
+
+  // 3. Análise por IA
+  if(statusEl) statusEl.textContent='🤖 Gerando análise de mercado com IA…';
+  if(iaEl) {iaEl.style.display='block';iaEl.innerHTML=`<div class="ia-box"><div class="ia-loading">🤖 Analisando ${nome} com IA<div class="ia-dots"><span>.</span><span>.</span><span>.</span></div></div></div>`;}
+
+  const invEco=dadosRoas.reduce((s,r)=>s+r.investTotal,0);
+  const lmeta=dadosRoas.reduce((s,r)=>s+r.leadsMeta,0);
+  const cplEco=lmeta>0?invEco/lmeta:0;
+
+  const adsResumo=pagesFound.map(pg=>`Página: ${pg.nome} | ${pg.anuncios} anúncios | Plataformas: ${[...pg.plataformas].join(', ')} | Regiões: ${[...pg.regioes].slice(0,4).join(', ')} | Copy: "${pg.textos[0]||'—'}"`).join('\n');
+
+  const prompt=`Você é especialista em inteligência competitiva para construtoras e incorporadoras brasileiras. Analise o concorrente abaixo com base nos dados públicos disponíveis e no que você sabe sobre o mercado imobiliário:
+
+CONCORRENTE: ${nome}${estado?` (estado: ${estado})`:''}
+
+DADOS DA BIBLIOTECA DE ANÚNCIOS META (dados reais coletados agora):
+${adsResumo||'Nenhum anúncio encontrado na biblioteca Meta no momento.'}
+
+ECOVITA (para comparação):
+- Investimento mensal: ${fBRL(invEco)}
+- Leads Meta: ${lmeta}
+- CPL: ${fBRL(cplEco)}
+
+Com base no que você sabe sobre ${nome} e nos dados de anúncios acima, forneça:
+
+1. **Quem é ${nome}**: segmento, porte, tempo de mercado, foco
+2. **Onde atuam**: estados, cidades, tipos de empreendimento (popular, médio padrão, alto padrão)
+3. **Canais de marketing**: quais plataformas usam, estratégia digital aparente
+4. **Posicionamento**: como se comunicam, diferenciais percebidos
+5. **Comparativo com Ecovita**: pontos onde a Ecovita pode ter vantagem ou desvantagem
+6. **3 estratégias** para a Ecovita se diferenciar ou superar esse concorrente
+
+Seja específico, direto e prático. Use emojis para organizar os tópicos.`;
+
+  try{
+    const claudeKey=localStorage.getItem('eco_claude_key')||'';
+    if(!claudeKey) throw new Error('NO_KEY');
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    if(!resp.ok) throw new Error('API_ERR');
+    const data=await resp.json();
+    const texto=data.content?.map(b=>b.text||'').join('')||'';
+    if(iaEl) iaEl.innerHTML=`<div class="ia-box">
+      <div class="ia-header">
+        <div class="ia-icon">🔍</div>
+        <div>
+          <div class="ia-title">Inteligência Competitiva — ${nome}</div>
+          <div class="ia-sub">Análise gerada por IA com dados públicos + Biblioteca Meta</div>
+        </div>
+      </div>
+      <div class="ia-result">${formatarTextoIA(texto)}</div>
+    </div>`;
+  }catch(e){
+    // Análise local fallback
+    const local=`<h4>🏢 ${nome}</h4>
+<p>Construtora/incorporadora brasileira${estado?' com atuação em '+estado:''}.</p>
+${adsFound.length>0?`<h4>📣 Presença em Anúncios</h4>
+<p>A empresa está <strong>ativa na publicidade digital</strong> com <strong>${adsFound.length} anúncios</strong> na Biblioteca Meta. ${pagesFound.length>1?`Usa ${pagesFound.length} páginas diferentes para anunciar.`:''}</p>
+<ul>
+  ${[...new Set(adsFound.flatMap(a=>a.publisher_platforms||[]))].map(p=>`<li>Presente no <strong>${p==='facebook'?'Facebook':p==='instagram'?'Instagram':p}</strong></li>`).join('')}
+</ul>`:`<h4>📣 Presença Digital</h4><p>Nenhum anúncio ativo encontrado na Biblioteca Meta no momento — pode indicar estratégia focada em canais orgânicos ou offline.</p>`}
+<h4>🎯 Estratégias para a Ecovita</h4>
+<ul>
+  <li>Monitorar os criativos do concorrente mensalmente via Biblioteca de Anúncios Meta</li>
+  <li>Identificar regiões onde o concorrente tem pouca presença e fortalecer aí</li>
+  <li>Usar diferenciais como qualidade de atendimento e velocidade de entrega como argumento contra construtoras maiores</li>
+</ul>
+<p style="margin-top:10px;font-size:11px;color:var(--mu)">💡 Configure sua chave Anthropic em Configurações para uma análise muito mais completa.</p>`;
+    if(iaEl) iaEl.innerHTML=`<div class="ia-box">
+      <div class="ia-header">
+        <div class="ia-icon">🔍</div>
+        <div>
+          <div class="ia-title">Análise — ${nome}</div>
+          <div class="ia-sub">Análise local baseada nos dados coletados</div>
+        </div>
+      </div>
+      <div class="ia-result">${local}</div>
+    </div>`;
+  }
+  if(statusEl){ statusEl.style.display='none'; }
+}
 
 // ═══════════════════════════════════════════════════════
 // GOOGLE ADS

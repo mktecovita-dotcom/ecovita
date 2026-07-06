@@ -779,8 +779,8 @@ body.light .theme-label{color:var(--blue)}
           <div class="cw" style="height:200px"><canvas id="cInvMetaGoogle"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">Saldo de Segurança por empreendimento</div></div>
-          <div class="cw" style="height:200px"><canvas id="cInvSeguranca"></canvas></div>
+          <div class="card-hd"><div class="card-title">Total Investido por empreendimento (Meta + Google + Agência)</div></div>
+          <div class="cw" style="height:200px"><canvas id="cInvTotalInv"></canvas></div>
         </div>
       </div>
 
@@ -795,7 +795,7 @@ body.light .theme-label{color:var(--blue)}
               <th>Inv. Patrocinado</th>
               <th>Meta Total</th>
               <th>Google</th>
-              <th>Segurança</th>
+              <th>Total Investido</th>
               <th>Imposto Meta</th>
               <th>Real. Meta</th>
               <th>Real. Google</th>
@@ -1053,6 +1053,36 @@ body.light .theme-label{color:var(--blue)}
         </div>
       </div>
 
+
+      <!-- Investimento Sheet Config -->
+      <div class="card" style="margin-top:14px">
+        <div class="card-hd">
+          <div class="card-title">💰 Investimentos — Planilha de Dados (aba 2026)</div>
+          <span class="badge" id="cfgInvBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Verificando…</span>
+        </div>
+        <div style="margin-bottom:14px;padding:12px 14px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:10px;font-size:12px;line-height:1.8;color:var(--mu2)">
+          <b style="color:var(--tx);display:block;margin-bottom:4px">Como encontrar o GID da aba "2026":</b>
+          <b style="color:var(--green)">1.</b> Abra a planilha de investimentos no Google Sheets<br>
+          <b style="color:var(--green)">2.</b> Clique na aba <b>"2026"</b> na parte inferior<br>
+          <b style="color:var(--green)">3.</b> Olhe a URL — ela terá <b style="color:var(--amber)">#gid=XXXXXXXX</b> no final<br>
+          <b style="color:var(--green)">4.</b> Copie apenas os números e cole no campo abaixo<br>
+          <div style="margin-top:6px;padding:6px 10px;background:var(--bg3);border-radius:6px;font-size:11px;color:var(--mu)">
+            💡 Planilha configurada: <code style="color:var(--green);font-size:10px">1UFUJRdByPVf87iYl64fnsohCSvPVA6PoAIEQOoOlWHk</code>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--mu);display:block;margin-bottom:5px">GID da aba "2026" (número após #gid= na URL)</label>
+            <input type="text" id="invSheetGid" placeholder="Ex: 123456789"
+              style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--tx);outline:none;font-family:inherit">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="salvarInvGid()">Salvar</button>
+            <button class="btn" onclick="loadInvestimento(true)">↻ Atualizar</button>
+          </div>
+        </div>
+        <div id="invConfigMsg" style="font-size:12px;min-height:18px"></div>
+      </div>
 
       <!-- Google Ads Sheet Config -->
       <div class="card" style="margin-top:14px">
@@ -1889,7 +1919,7 @@ function goPage(pg){
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='campanhas') initCampanhasPage();
-  if(pg==='investimento') renderInvestimento();
+  if(pg==='investimento') loadInvestimento();
   if(pg==='instagram') loadOrganico('instagram');
   if(pg==='facebook')  loadOrganico('facebook');
   if(pg==='tiktok')    loadOrganico('tiktok');
@@ -2802,7 +2832,8 @@ function renderInvestimento(){
   })();
 
   const empFilt = document.getElementById('fInvEmp')?.value || '';
-  const mesData = INV_DATA.find(m=>m.m===mesVal);
+  const fonte   = invLiveData || INV_DATA;
+  const mesData = fonte.find(m=>m.m===mesVal);
   if(!mesData) return;
 
   // Populate empreendimento filter
@@ -2826,6 +2857,7 @@ function renderInvestimento(){
   const totReal   = dados.reduce((s,e)=>s+e.real_total,0);
   const totImp    = dados.reduce((s,e)=>s+e.imposto,0);
   const totSeg    = dados.reduce((s,e)=>s+e.seguranca,0);
+  const totTotalInv = dados.reduce((s,e)=>s+(e.total_inv||e.real_meta+e.real_google+e.agencia_fee),0);
   const totMeta   = dados.reduce((s,e)=>s+e.meta_total,0);
   const totGoogle = dados.reduce((s,e)=>s+e.google,0);
   const totWhats  = dados.reduce((s,e)=>s+e.meta_whats,0);
@@ -2836,7 +2868,7 @@ function renderInvestimento(){
 
   sid('iv1',isBRL(totOrc));   sid('iv1s',`Fee agência: ${isBRL(totFee)}`);
   sid('iv2',isBRL(totPat));   sid('iv2s',`Meta: ${isBRL(totMeta)} · Google: ${isBRL(totGoogle)}`);
-  sid('iv3',isBRL(totReal));  sid('iv3s',`Meta: ${isBRL(totRMeta)} · Google: ${isBRL(totRGoogle)}`);
+  sid('iv3',isBRL(totReal));  sid('iv3s',`Total Investido: ${isBRL(totTotalInv)}`);
   sid('iv4',pctExec.toFixed(1)+'%'); sid('iv4s',`Restante: ${isBRL(totPat-totReal)}`);
   sid('iv5',isBRL(totImp));   sid('iv5s',`= 12,15% sobre ${isBRL(totMeta)}`);
   sid('iv6',isBRL(totFee));   sid('iv6s',`${dados.filter(e=>e.agencia_fee>0).length} empreendimentos`);
@@ -2873,9 +2905,9 @@ function renderInvestimento(){
   });
 
   // ── Chart 2: Donut distribuição prevista ──
-  const distLabels = ['Meta WhatsApp','Meta Cadastro','Google','Segurança'];
-  const distVals   = [totWhats,totCad,totGoogle,totSeg];
-  const distCores  = ['rgba(16,185,129,.85)','rgba(79,142,247,.85)','rgba(251,146,60,.85)','rgba(168,85,247,.85)'];
+  const distLabels = ['Meta WhatsApp','Meta Cadastro','Google','Agência'];
+  const distVals   = [totWhats,totCad,totGoogle,totFee];
+  const distCores  = ['rgba(16,185,129,.85)','rgba(79,142,247,.85)','rgba(251,146,60,.85)','rgba(245,158,11,.85)'];
   document.getElementById('invLegDist').innerHTML = distLabels.map((l,i)=>`<div class="leg"><div class="lsq" style="background:${distCores[i]}"></div>${l}: ${isBRL(distVals[i])}</div>`).join('');
   dc('cInvDist');
   const ctxD = document.getElementById('cInvDist')?.getContext('2d');
@@ -2909,23 +2941,28 @@ function renderInvestimento(){
       }}
   });
 
-  // ── Chart 4: Saldo de Segurança ──
-  const seg_h = Math.max(nomes.length * barH + 60, 180);
-  const segEl = document.getElementById('cInvSeguranca');
-  if(segEl) segEl.parentElement.style.height = seg_h+'px';
-  dc('cInvSeguranca');
-  const ctxSeg = segEl?.getContext('2d');
-  if(ctxSeg) charts.cInvSeguranca = new Chart(ctxSeg,{
+  // ── Chart 4: Total Investido (Meta + Google + Agência) ──
+  const ti_h = Math.max(nomes.length * barH + 60, 180);
+  const tiEl = document.getElementById('cInvTotalInv');
+  if(tiEl) tiEl.parentElement.style.height = ti_h+'px';
+  dc('cInvTotalInv');
+  const ctxTI = tiEl?.getContext('2d');
+  if(ctxTI) charts.cInvTotalInv = new Chart(ctxTI,{
     type:'bar',
     data:{
       labels:nomes,
-      datasets:[{label:'Segurança',data:dados.map(e=>e.seguranca),backgroundColor:'rgba(168,85,247,.75)',borderRadius:4,borderSkipped:false,barThickness:barH}]
+      datasets:[
+        {label:'Meta',   data:dados.map(e=>e.real_meta),  backgroundColor:'rgba(79,142,247,.8)',  borderRadius:4,borderSkipped:false,barThickness:Math.floor(barH*0.7)},
+        {label:'Google', data:dados.map(e=>e.real_google),backgroundColor:'rgba(251,146,60,.8)', borderRadius:4,borderSkipped:false,barThickness:Math.floor(barH*0.7)},
+        {label:'Agência',data:dados.map(e=>e.agencia_fee),backgroundColor:'rgba(245,158,11,.8)', borderRadius:4,borderSkipped:false,barThickness:Math.floor(barH*0.7)}
+      ]
     },
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-      plugins:{legend:{display:false}},
+      plugins:{legend:{display:true,position:'top',labels:{color:clrMu,font:{size:11},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{footer:function(items){const tot=items.reduce((s,i)=>s+i.raw,0);return`Total: R$${tot.toLocaleString('pt-BR',{minimumFractionDigits:0})}`;}}}},
       scales:{
-        x:{grid:{color:clrGrid},ticks:xTickOpts},
-        y:{grid:{display:false},ticks:{color:clrTx,font:{size:11}}}
+        x:{stacked:false,grid:{color:clrGrid},ticks:xTickOpts},
+        y:{stacked:false,grid:{display:false},ticks:{color:clrTx,font:{size:11}}}
       }}
   });
 
@@ -2946,7 +2983,7 @@ function renderInvestimento(){
       <td>${B(e.inv_pat)}</td>
       <td style="color:#4f8ef7">${B(e.meta_total)}</td>
       <td style="color:#fb923c">${B(e.google)}</td>
-      <td style="color:#a855f7">${B(e.seguranca)}</td>
+      <td style="color:var(--green);font-weight:600">${B(e.total_inv||e.real_meta+e.real_google+e.agencia_fee)}</td>
       <td style="color:#f472b6">${B(e.imposto)}</td>
       <td>${B(e.real_meta)}</td>
       <td>${B(e.real_google)}</td>
@@ -3496,6 +3533,117 @@ ${adsFound.length>0?`<h4>📣 Presença em Anúncios</h4>
     </div>`;
   }
   if(statusEl){ statusEl.style.display='none'; }
+}
+
+// ═══════════════════════════════════════════════════════
+// INVESTIMENTO — GOOGLE SHEETS LIVE
+// ═══════════════════════════════════════════════════════
+var SH_INV_ID  = '1UFUJRdByPVf87iYl64fnsohCSvPVA6PoAIEQOoOlWHk';
+var invLiveData = null; // [{m:'Jan', data:[...]}] — carregado do Sheets
+
+function getInvGid(){ return localStorage.getItem('eco_inv_gid')||'0'; }
+function setInvGid(v){ localStorage.setItem('eco_inv_gid', v.trim()); }
+
+function salvarInvGid(){
+  const el = document.getElementById('invSheetGid');
+  if(!el) return;
+  const v = el.value.trim();
+  if(!v){ setCredMsg('invConfigMsg','⚠️ Informe o GID da aba.','var(--amber)'); return; }
+  setInvGid(v);
+  setCredMsg('invConfigMsg','✅ GID salvo! Clique em ↻ Atualizar.','var(--green)');
+}
+
+function setCredMsg(id, txt, color){
+  const el = document.getElementById(id);
+  if(el){ el.textContent = txt; el.style.color = color; }
+}
+
+function parseInvCSV(text){
+  const MESES_MAP = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun',
+                     '07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
+  const toN = v => { const n = parseFloat(String(v||'').replace(/,/g,'.')); return isNaN(n)?0:n; };
+  const lines = text.split(/\r?\n/);
+  const sep = text.includes(';') ? ';' : ',';
+
+  const result = [];
+  let curMes = null;
+  let curData = [];
+
+  for(const raw of lines){
+    const cols = splitL(raw, sep);
+    const c0 = String(cols[0]||'').replace(/^"|"$/g,'').trim();
+    const c1 = String(cols[1]||'').replace(/^"|"$/g,'').trim();
+
+    // Linha de cabeçalho de mês: col A tem data (YYYY-MM-DD ou similar)
+    if(c0 && /^\d{4}-\d{2}-\d{2}/.test(c0)){
+      if(curMes && curData.length) result.push({m:curMes, data:curData});
+      const mm = c0.slice(5,7);
+      curMes = MESES_MAP[mm] || 'Jan';
+      curData = [];
+      continue;
+    }
+
+    // Pula linhas sem nome de empreendimento, totais, cabeçalhos repetidos, coeficientes
+    if(!c1) continue;
+    const c1l = c1.toLowerCase();
+    if(c1l === 'empreendimentos' || c1l === 'empreendimentos ' || c1l.startsWith('total') || c1l === 'empreendimento') continue;
+    if(!isNaN(parseFloat(c0)) && c0 !== '') continue; // linha de coeficientes (col A é número)
+    if(!curMes) continue;
+
+    // Cols (0-indexed): B=1 nome, C=2 agência, D=3 orçamento, E=4 fee, F=5 inv_pat,
+    // G=6 meta_total, H=7 meta_whats, I=8 meta_cad, J=9 google, K=10 vazio,
+    // L=11 segurança, M=12 imposto, N=13 real_meta, O=14 real_google, P=15 real_total,
+    // Q=16 pct_usado, R=17, S=18 flex, T=19, U=20 total_inv
+    const get = (i) => toN(String(cols[i]||'').replace(/^"|"$/g,'').trim());
+    const pctRaw = get(16);
+
+    curData.push({
+      nome:        c1,
+      agencia:     String(cols[2]||'').replace(/^"|"$/g,'').trim(),
+      orcamento:   get(3),
+      agencia_fee: get(4),
+      inv_pat:     get(5),
+      meta_total:  get(6),
+      meta_whats:  get(7),
+      meta_cad:    get(8),
+      google:      get(9),
+      seguranca:   get(11),
+      imposto:     get(12),
+      real_meta:   get(13),
+      real_google: get(14),
+      real_total:  get(15),
+      pct:         pctRaw > 1 ? Math.round(pctRaw) : Math.round(pctRaw * 100), // % pode vir como 0.77 ou 77
+      total_inv:   get(20)
+    });
+  }
+  if(curMes && curData.length) result.push({m:curMes, data:curData});
+  return result;
+}
+
+async function loadInvestimento(force){
+  if(invLiveData && !force) return; // já carregado
+  const badge = document.getElementById('cfgInvBadge');
+  const msg   = document.getElementById('invConfigMsg');
+  if(badge) badge.textContent = '⏳ Carregando…';
+  try{
+    const gid = getInvGid();
+    const url = `https://docs.google.com/spreadsheets/d/${SH_INV_ID}/export?format=csv&gid=${gid}`;
+    const r   = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const text = await r.text();
+    const parsed = parseInvCSV(text);
+    if(!parsed.length) throw new Error('Nenhum dado encontrado. Verifique o GID da aba.');
+    invLiveData = parsed;
+    if(badge){ badge.textContent = `✅ ${parsed.length} meses`; badge.style.color='var(--green)'; }
+    if(msg)  { msg.textContent = `Dados carregados: ${parsed.length} meses, aba gid=${gid}`; msg.style.color='var(--green)'; }
+    renderInvestimento();
+  }catch(e){
+    if(badge){ badge.textContent = '❌ Erro'; badge.style.color='var(--red)'; }
+    if(msg)  { msg.textContent = `Erro: ${e.message}. Configure o GID correto acima.`; msg.style.color='var(--red)'; }
+    // Fallback: usa INV_DATA hardcoded
+    if(!invLiveData) invLiveData = INV_DATA;
+    renderInvestimento();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4106,6 +4254,11 @@ function initConfigPage(){
   const k  = localStorage.getItem('eco_claude_key') || '';
   const ki = document.getElementById('inputClaudeKey');
   if(ki) ki.value = k ? '••••••••••••••••' : '';
+  // Investimento GID
+  var invInp = document.getElementById('invSheetGid');
+  if(invInp) invInp.value = getInvGid() !== '0' ? getInvGid() : '';
+  var invBadge = document.getElementById('cfgInvBadge');
+  if(invBadge){ invBadge.textContent = invLiveData ? '✅ Conectado' : 'Não carregado'; invBadge.style.color = invLiveData ? 'var(--green)' : ''; }
   // Google Ads
   var gadsInp = document.getElementById('gadsSheetId');
   if(gadsInp){

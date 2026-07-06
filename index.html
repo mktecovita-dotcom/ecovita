@@ -3586,9 +3586,13 @@ function parseInvCSV(text){
     'junho':'Jun','julho':'Jul','agosto':'Ago','setembro':'Set','outubro':'Out',
     'novembro':'Nov','dezembro':'Dez'
   };
-  const toN = v => { const n = parseFloat(String(v||'').replace(/,/g,'.')); return isNaN(n)?0:n; };
+  // toBRL já definida globalmente — trata "12.000,00" corretamente (BRL format)
+  const toN = v => toBRL(v);
   const lines = text.split(/\r?\n/);
-  const sep = text.includes(';') ? ';' : ',';
+  const sep = detectSep(text); // detecta ; ou , automaticamente
+  // Debug: mostra as 10 primeiras linhas brutas do CSV
+  console.log('[InvCSV] Sep:', sep, '| Primeiras linhas brutas:');
+  lines.slice(0,10).forEach((l,i)=>console.log(`  [${i}]`, l.slice(0,120)));
 
   const result = [];
   let curMes = null;
@@ -3639,6 +3643,7 @@ function parseInvCSV(text){
     // L=11 segurança, M=12 imposto, N=13 real_meta, O=14 real_google, P=15 real_total,
     // Q=16 pct_usado, R=17, S=18 flex, T=19, U=20 total_inv
     const get = (i) => toN(String(cols[i]||'').replace(/^"|"$/g,'').trim());
+    // pct pode vir como "77,9%", "77.9", "0,779" ou "0.779"
     const pctRaw = get(16);
 
     curData.push({
@@ -3683,6 +3688,9 @@ async function loadInvestimento(force){
       throw new Error('Nenhum dado encontrado. Verifique o GID da aba. Preview: ' + preview.slice(0,120));
     }
     invLiveData = parsed;
+    // Debug: loga primeira linha de dados para diagnóstico de colunas
+    if(parsed[0]?.data[0]) console.log('[InvCSV] Primeira linha de dados:', parsed[0].data[0]);
+    console.log('[InvCSV] Meses carregados:', parsed.map(m=>m.m));
     if(badge){ badge.textContent = `✅ ${parsed.length} meses`; badge.style.color='var(--green)'; }
     if(msg)  { msg.textContent = `Dados carregados: ${parsed.length} meses, aba gid=${gid}`; msg.style.color='var(--green)'; }
     renderInvestimento();
@@ -5817,7 +5825,7 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 });
 
 // Enter no login
-document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginPass.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 </script>
 </body>
 </html>

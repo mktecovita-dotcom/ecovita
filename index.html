@@ -754,11 +754,15 @@ body.light .theme-label{color:var(--blue)}
         <span class="fl" id="infoInv" style="margin-left:auto;font-size:11px;color:var(--mu)"></span>
       </div>
 
-      <div class="kpi-grid" style="grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:16px">
+      <!-- KPI Linha 1: Planejamento -->
+      <div class="kpi-grid kpi-4" style="margin-bottom:10px">
         <div class="kpi blue"><div class="kpi-label">Orçamento Previsto</div><div class="kpi-val blue" id="iv1">—</div><div class="kpi-sub" id="iv1s"></div></div>
         <div class="kpi teal"><div class="kpi-label">Inv. Patrocinado</div><div class="kpi-val teal" id="iv2">—</div><div class="kpi-sub" id="iv2s"></div></div>
         <div class="kpi green"><div class="kpi-label">Realizado Total</div><div class="kpi-val green" id="iv3">—</div><div class="kpi-sub" id="iv3s"></div></div>
         <div class="kpi amber"><div class="kpi-label">% Executado</div><div class="kpi-val amber" id="iv4">—</div><div class="kpi-sub" id="iv4s"></div></div>
+      </div>
+      <!-- KPI Linha 2: Custos -->
+      <div class="kpi-grid kpi-3" style="margin-bottom:16px">
         <div class="kpi purple"><div class="kpi-label">Impostos Meta (CBS+IBF)</div><div class="kpi-val purple" id="iv5">—</div><div class="kpi-sub" id="iv5s"></div></div>
         <div class="kpi pink"><div class="kpi-label">Gasto com Agências</div><div class="kpi-val pink" id="iv6">—</div><div class="kpi-sub" id="iv6s"></div></div>
         <div class="kpi" style="border-top-color:#10b981"><div class="kpi-label">Total Investido</div><div class="kpi-val" style="color:#10b981" id="iv7">—</div><div class="kpi-sub" id="iv7s"></div></div>
@@ -3554,7 +3558,7 @@ ${adsFound.length>0?`<h4>📣 Presença em Anúncios</h4>
 var SH_INV_ID  = '1UFUJRdByPVf87iYl64fnsohCSvPVA6PoAIEQOoOlWHk';
 var invLiveData = null; // [{m:'Jan', data:[...]}] — carregado do Sheets
 
-function getInvGid(){ return localStorage.getItem('eco_inv_gid')||'0'; }
+function getInvGid(){ return localStorage.getItem('eco_inv_gid')||'302081442'; }
 function setInvGid(v){ localStorage.setItem('eco_inv_gid', v.trim()); }
 
 function salvarInvGid(){
@@ -3574,6 +3578,14 @@ function setCredMsg(id, txt, color){
 function parseInvCSV(text){
   const MESES_MAP = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun',
                      '07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
+  // Mapa de abreviações PT (como "jan.-26", "fev.-26") e nomes completos
+  const MESES_ABREV = {
+    'jan':'Jan','fev':'Fev','mar':'Mar','abr':'Abr','mai':'Mai','jun':'Jun',
+    'jul':'Jul','ago':'Ago','set':'Set','out':'Out','nov':'Nov','dez':'Dez',
+    'janeiro':'Jan','fevereiro':'Fev','março':'Mar','abril':'Abr','maio':'Mai',
+    'junho':'Jun','julho':'Jul','agosto':'Ago','setembro':'Set','outubro':'Out',
+    'novembro':'Nov','dezembro':'Dez'
+  };
   const toN = v => { const n = parseFloat(String(v||'').replace(/,/g,'.')); return isNaN(n)?0:n; };
   const lines = text.split(/\r?\n/);
   const sep = text.includes(';') ? ';' : ',';
@@ -3587,35 +3599,30 @@ function parseInvCSV(text){
     const c0 = String(cols[0]||'').replace(/^"|"$/g,'').trim();
     const c1 = String(cols[1]||'').replace(/^"|"$/g,'').trim();
 
-    // Linha de cabeçalho de mês — detecta vários formatos de data:
-    // YYYY-MM-DD | DD/MM/YYYY | M/D/YYYY | MM/DD/YYYY
+    // Linha de cabeçalho de mês — detecta múltiplos formatos:
     let mesDetectado = null;
     if(c0){
+      // Formato YYYY-MM-DD
       if(/^\d{4}-\d{2}-\d{2}/.test(c0)){
         mesDetectado = MESES_MAP[c0.slice(5,7)];
-      } else if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(c0)){
-        // DD/MM/YYYY (BR) ou MM/DD/YYYY (US) — inferimos pelo contexto (BR é padrão Sheets PT)
+      }
+      // Formato DD/MM/YYYY ou MM/DD/YYYY
+      else if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(c0)){
         const parts = c0.split('/');
-        // Tenta DD/MM/YYYY primeiro (formato PT-BR)
-        const mm = parts[1] && parts[1].length<=2 ? parts[1].padStart(2,'0') : null;
+        const mm = parts[1]?.padStart(2,'0');
         if(mm) mesDetectado = MESES_MAP[mm];
+      }
+      // Formato "jan.-26", "jan-26", "jan. 26", "jan/26" — gerado pelo Google Sheets PT-BR
+      else {
+        const m = c0.toLowerCase().match(/^([a-záéíóúâêîôûãõç]+)[\.\-\/\s]/);
+        if(m) mesDetectado = MESES_ABREV[m[1]] || null;
+        // Também testa nome completo sem separador (ex: "janeiro")
+        if(!mesDetectado) mesDetectado = MESES_ABREV[c0.toLowerCase()] || null;
       }
     }
     if(mesDetectado){
       if(curMes && curData.length) result.push({m:curMes, data:curData});
       curMes = mesDetectado;
-      curData = [];
-      continue;
-    }
-
-    // Fallback: col B contém nome do mês por extenso (ex: "Janeiro")
-    const MESES_PT = {'janeiro':'Jan','fevereiro':'Fev','março':'Mar','abril':'Abr','maio':'Mai',
-                      'junho':'Jun','julho':'Jul','agosto':'Ago','setembro':'Set','outubro':'Out',
-                      'novembro':'Nov','dezembro':'Dez'};
-    const c0lower = c0.toLowerCase();
-    if(MESES_PT[c0lower]){
-      if(curMes && curData.length) result.push({m:curMes, data:curData});
-      curMes = MESES_PT[c0lower];
       curData = [];
       continue;
     }

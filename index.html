@@ -393,6 +393,27 @@ body.light .theme-icon-light{opacity:1}
 body.light .theme-thumb{transform:translateX(20px);background:var(--blue)}
 .theme-label{font-size:12px;color:var(--mu);font-weight:500;transition:color .2s}
 body.light .theme-label{color:var(--blue)}
+
+/* ── MODO TV ────────────────────────────────────────── */
+body.tv-mode .sidebar{display:none!important}
+body.tv-mode .topbar{display:none!important}
+body.tv-mode .content{margin-left:0!important;padding-top:0!important}
+body.tv-mode .page.active{padding:24px!important}
+#tvOverlay{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));
+  padding:18px 32px 22px;pointer-events:none}
+body.tv-mode #tvOverlay{display:flex;align-items:flex-end;justify-content:space-between}
+#tvOverlay .tv-pages{display:flex;gap:10px;align-items:center}
+#tvOverlay .tv-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.3);transition:all .4s}
+#tvOverlay .tv-dot.active{background:var(--blue);width:28px;border-radius:5px}
+#tvOverlay .tv-info{font-size:13px;color:rgba(255,255,255,.7);text-align:right}
+#tvOverlay .tv-bar-wrap{width:200px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:6px}
+#tvOverlay .tv-bar{height:100%;background:var(--blue);border-radius:2px;transition:width linear}
+#tvExitBtn{display:none;position:fixed;top:16px;right:16px;z-index:10000;
+  background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;
+  padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;pointer-events:all;
+  backdrop-filter:blur(4px)}
+body.tv-mode #tvExitBtn{display:block}
 </style>
 </head>
 <body>
@@ -501,6 +522,7 @@ body.light .theme-label{color:var(--blue)}
       </div>
       <span class="tb-badge" id="tbBadge">Carregando…</span>
       <button class="btn btn-primary" id="btnR" onclick="loadAll()">↻ Atualizar</button>
+      <button class="btn" id="btnTV" onclick="toggleTVMode()" title="Modo Apresentação">📺 TV</button>
       <button class="btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
@@ -5860,7 +5882,6 @@ function renderTkCompare(){
     +'<th style="padding:8px 10px;text-align:right;color:var(--pink);font-size:11px">A: '+a1+' → '+a2+'</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--purple);font-size:11px">B: '+b1+' → '+b2+'</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Variação</th>'
-    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Variação</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Diferença</th>'
     +'</tr></thead>';
   var rows=row('🎵 Vídeos',kA.vids,kB.vids,false)
@@ -5894,6 +5915,93 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 
 // Enter no login
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ── MODO TV ──────────────────────────────────────────────────────────────
+const TV_PAGES = ['dashboard','campanhas','investimento','melhorias','ia'];
+const TV_LABELS = {
+  'dashboard':'Dashboard','campanhas':'Campanhas','investimento':'Investimento',
+  'melhorias':'O que Melhorar','ia':'Análise por IA'
+};
+const TV_INTERVAL = 30; // segundos por página
+let tvActive = false, tvTimer = null, tvIdx = 0, tvSec = 0;
+
+function toggleTVMode(){
+  tvActive ? exitTVMode() : enterTVMode();
+}
+
+function enterTVMode(){
+  tvActive = true;
+  document.body.classList.add('tv-mode');
+  document.getElementById('btnTV').textContent = '⏹ Sair TV';
+  document.fullscreenElement || document.documentElement.requestFullscreen?.().catch(()=>{});
+  tvIdx = TV_PAGES.indexOf(document.querySelector('.page.active')?.id?.replace('page-',''));
+  if(tvIdx < 0) tvIdx = 0;
+  buildTVOverlay();
+  tvTick();
+  tvTimer = setInterval(tvTick, 1000);
+  document.addEventListener('keydown', tvKeyHandler);
+}
+
+function exitTVMode(){
+  tvActive = false;
+  clearInterval(tvTimer); tvTimer = null;
+  document.body.classList.remove('tv-mode');
+  const btn = document.getElementById('btnTV');
+  if(btn) btn.textContent = '📺 TV';
+  document.fullscreenElement && document.exitFullscreen?.();
+  document.removeEventListener('keydown', tvKeyHandler);
+}
+
+function tvKeyHandler(e){
+  if(e.key==='Escape'){ exitTVMode(); return; }
+  if(e.key==='ArrowRight'||e.key===' '){ tvIdx=(tvIdx+1)%TV_PAGES.length; tvSec=0; }
+  if(e.key==='ArrowLeft'){ tvIdx=(tvIdx-1+TV_PAGES.length)%TV_PAGES.length; tvSec=0; }
+}
+
+function buildTVOverlay(){
+  let el = document.getElementById('tvOverlay');
+  if(!el){
+    el = document.createElement('div'); el.id='tvOverlay';
+    document.body.appendChild(el);
+  }
+  const dots = TV_PAGES.map((_,i)=>`<div class="tv-dot${i===tvIdx?' active':''}" id="tvDot${i}"></div>`).join('');
+  el.innerHTML = `
+    <div class="tv-pages">${dots}</div>
+    <div class="tv-info">
+      <div id="tvLabel" style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">${TV_LABELS[TV_PAGES[tvIdx]]}</div>
+      <div id="tvTimer" style="font-size:12px">Próxima em ${TV_INTERVAL}s</div>
+      <div class="tv-bar-wrap"><div class="tv-bar" id="tvBar" style="width:0%"></div></div>
+    </div>`;
+  let exitBtn = document.getElementById('tvExitBtn');
+  if(!exitBtn){
+    exitBtn = document.createElement('button'); exitBtn.id='tvExitBtn';
+    exitBtn.textContent='✕ Sair TV'; exitBtn.onclick=exitTVMode;
+    document.body.appendChild(exitBtn);
+  }
+}
+
+function tvJump(){
+  goPage(TV_PAGES[tvIdx]);
+  const label = document.getElementById('tvLabel');
+  if(label) label.textContent = TV_LABELS[TV_PAGES[tvIdx]];
+  TV_PAGES.forEach((_,i)=>{
+    const d=document.getElementById('tvDot'+i);
+    if(d){ d.className='tv-dot'+(i===tvIdx?' active':''); }
+  });
+  buildTVOverlay();
+}
+
+function tvTick(){
+  if(!tvActive) return;
+  if(tvSec===0) tvJump();
+  const pct = (tvSec/TV_INTERVAL)*100;
+  const bar=document.getElementById('tvBar');
+  const tim=document.getElementById('tvTimer');
+  if(bar) bar.style.width=pct+'%';
+  if(tim) tim.textContent='Próxima em '+(TV_INTERVAL-tvSec)+'s';
+  tvSec++;
+  if(tvSec>TV_INTERVAL){ tvIdx=(tvIdx+1)%TV_PAGES.length; tvSec=0; }
+}
 </script>
 </body>
 </html>

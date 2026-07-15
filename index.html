@@ -399,6 +399,24 @@ body.tv-mode .sidebar{display:none!important}
 body.tv-mode .topbar{display:none!important}
 body.tv-mode .content{margin-left:0!important;padding-top:0!important}
 body.tv-mode .page.active{padding:24px!important}
+/* Ocultar tudo no dashboard em modo TV */
+body.tv-mode #page-dashboard .ebox,
+body.tv-mode #page-dashboard .fbar,
+body.tv-mode #page-dashboard .sec,
+body.tv-mode #page-dashboard .twrap,
+body.tv-mode #page-dashboard .card:not([id^="tvS"]) { display:none!important }
+/* Ocultar grids não pertencentes ao slide atual */
+body.tv-mode #page-dashboard [id^="tvS"]{ display:none!important }
+/* Slide 1 */
+body.tv-mode.tv-s1 #tvS1fin,
+body.tv-mode.tv-s1 #tvS1finKpi,
+body.tv-mode.tv-s1 #tvS1leadLbl,
+body.tv-mode.tv-s1 #tvS1leadKpi,
+body.tv-mode.tv-s1 #tvS1charts { display:block!important }
+body.tv-mode.tv-s1 #tvS1charts { display:grid!important }
+/* Slide 2 */
+body.tv-mode.tv-s2 #tvS2funil { display:grid!important }
+body.tv-mode.tv-s2 #tvS2origem { display:block!important }
 #tvOverlay{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:linear-gradient(transparent,rgba(0,0,0,.85));
   padding:18px 32px 22px;pointer-events:none}
@@ -556,11 +574,11 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
 
       <!-- KPI Row 1: Financeiro -->
-      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+      <div id="tvS1fin" style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
         💰 Financeiro
         <div style="flex:1;height:1px;background:var(--bdr)"></div>
       </div>
-      <div class="kpi-grid kpi-4" style="margin-bottom:16px">
+      <div id="tvS1finKpi" class="kpi-grid kpi-4" style="margin-bottom:16px">
         <div class="kpi blue"><div class="kpi-label">Investimento Total</div><div class="kpi-val blue" id="k1">—</div><div class="kpi-sub" id="k1s"></div></div>
         <div class="kpi green"><div class="kpi-label">Receita Gerada</div><div class="kpi-val green" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
         <div class="kpi teal"><div class="kpi-label">Vendas</div><div class="kpi-val teal" id="k5">—</div><div class="kpi-sub" id="k5s"></div></div>
@@ -568,11 +586,11 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
 
       <!-- KPI Row 2: Leads — 2 linhas com divisor visual -->
-      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+      <div id="tvS1leadLbl" style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
         👥 Leads
         <div style="flex:1;height:1px;background:var(--bdr)"></div>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:16px">
+      <div id="tvS1leadKpi" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:16px">
         <!-- Linha 1: por objetivo -->
         <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">POR OBJETIVO · META ADS</div>
         <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;gap:8px">
@@ -591,7 +609,7 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
 
-      <div class="grid g53">
+      <div id="tvS1charts" class="grid g53">
         <div class="card">
           <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
           <div class="legend">
@@ -623,7 +641,7 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
 
-      <div class="grid g2" style="margin-bottom:12px">
+      <div id="tvS2funil" class="grid g2" style="margin-bottom:12px">
         <div class="card">
           <div class="card-hd"><div class="card-title">Funil por Origem — Leads & Conversão</div><span class="badge blue">CVCRM Online</span></div>
           <div id="funilList" class="bar-row"></div>
@@ -643,7 +661,7 @@ body.tv-mode #tvExitBtn{display:block}
           </div>
           <div class="cw" style="height:220px"><canvas id="cLeads"></canvas></div>
         </div>
-        <div class="card">
+        <div class="card" id="tvS2origem">
           <div class="card-hd"><div class="card-title">Leads por Origem Online</div></div>
           <div class="legend" id="legOrigemOnline"></div>
           <div class="cw" style="height:220px"><canvas id="cOrigemOnline"></canvas></div>
@@ -5917,12 +5935,11 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
 // ── MODO TV ──────────────────────────────────────────────────────────────
-const TV_PAGES = ['dashboard','campanhas','investimento','melhorias','ia'];
-const TV_LABELS = {
-  'dashboard':'Dashboard','campanhas':'Campanhas','investimento':'Investimento',
-  'melhorias':'O que Melhorar','ia':'Análise por IA'
-};
-const TV_INTERVAL = 30; // segundos por página
+const TV_SLIDES = [
+  { cls:'tv-s1', label:'📊 Financeiro & Leads' },
+  { cls:'tv-s2', label:'🔵 Funil & Origens'    }
+];
+const TV_INTERVAL = 30; // segundos por slide
 let tvActive = false, tvTimer = null, tvIdx = 0, tvSec = 0;
 
 function toggleTVMode(){
@@ -5931,11 +5948,11 @@ function toggleTVMode(){
 
 function enterTVMode(){
   tvActive = true;
+  tvIdx = 0; tvSec = 0;
   document.body.classList.add('tv-mode');
   document.getElementById('btnTV').textContent = '⏹ Sair TV';
   document.fullscreenElement || document.documentElement.requestFullscreen?.().catch(()=>{});
-  tvIdx = TV_PAGES.indexOf(document.querySelector('.page.active')?.id?.replace('page-',''));
-  if(tvIdx < 0) tvIdx = 0;
+  goPage('dashboard');
   buildTVOverlay();
   tvTick();
   tvTimer = setInterval(tvTick, 1000);
@@ -5945,6 +5962,7 @@ function enterTVMode(){
 function exitTVMode(){
   tvActive = false;
   clearInterval(tvTimer); tvTimer = null;
+  TV_SLIDES.forEach(s => document.body.classList.remove(s.cls));
   document.body.classList.remove('tv-mode');
   const btn = document.getElementById('btnTV');
   if(btn) btn.textContent = '📺 TV';
@@ -5954,53 +5972,51 @@ function exitTVMode(){
 
 function tvKeyHandler(e){
   if(e.key==='Escape'){ exitTVMode(); return; }
-  if(e.key==='ArrowRight'||e.key===' '){ tvIdx=(tvIdx+1)%TV_PAGES.length; tvSec=0; }
-  if(e.key==='ArrowLeft'){ tvIdx=(tvIdx-1+TV_PAGES.length)%TV_PAGES.length; tvSec=0; }
+  if(e.key==='ArrowRight'||e.key===' '){ tvIdx=(tvIdx+1)%TV_SLIDES.length; tvSec=0; tvJump(); }
+  if(e.key==='ArrowLeft'){ tvIdx=(tvIdx-1+TV_SLIDES.length)%TV_SLIDES.length; tvSec=0; tvJump(); }
 }
 
 function buildTVOverlay(){
   let el = document.getElementById('tvOverlay');
-  if(!el){
-    el = document.createElement('div'); el.id='tvOverlay';
-    document.body.appendChild(el);
-  }
-  const dots = TV_PAGES.map((_,i)=>`<div class="tv-dot${i===tvIdx?' active':''}" id="tvDot${i}"></div>`).join('');
+  if(!el){ el=document.createElement('div'); el.id='tvOverlay'; document.body.appendChild(el); }
+  const dots = TV_SLIDES.map((_,i)=>`<div class="tv-dot${i===tvIdx?' active':''}" id="tvDot${i}"></div>`).join('');
   el.innerHTML = `
     <div class="tv-pages">${dots}</div>
     <div class="tv-info">
-      <div id="tvLabel" style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">${TV_LABELS[TV_PAGES[tvIdx]]}</div>
-      <div id="tvTimer" style="font-size:12px">Próxima em ${TV_INTERVAL}s</div>
+      <div id="tvLabel" style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">${TV_SLIDES[tvIdx].label}</div>
+      <div id="tvTimer" style="font-size:12px">Próximo em ${TV_INTERVAL}s</div>
       <div class="tv-bar-wrap"><div class="tv-bar" id="tvBar" style="width:0%"></div></div>
     </div>`;
   let exitBtn = document.getElementById('tvExitBtn');
   if(!exitBtn){
-    exitBtn = document.createElement('button'); exitBtn.id='tvExitBtn';
+    exitBtn=document.createElement('button'); exitBtn.id='tvExitBtn';
     exitBtn.textContent='✕ Sair TV'; exitBtn.onclick=exitTVMode;
     document.body.appendChild(exitBtn);
   }
 }
 
 function tvJump(){
-  goPage(TV_PAGES[tvIdx]);
-  const label = document.getElementById('tvLabel');
-  if(label) label.textContent = TV_LABELS[TV_PAGES[tvIdx]];
-  TV_PAGES.forEach((_,i)=>{
+  // Troca a classe de slide no body
+  TV_SLIDES.forEach((s,i)=> document.body.classList.toggle(s.cls, i===tvIdx));
+  // Atualiza label e dots
+  const label=document.getElementById('tvLabel');
+  if(label) label.textContent=TV_SLIDES[tvIdx].label;
+  TV_SLIDES.forEach((_,i)=>{
     const d=document.getElementById('tvDot'+i);
-    if(d){ d.className='tv-dot'+(i===tvIdx?' active':''); }
+    if(d) d.className='tv-dot'+(i===tvIdx?' active':'');
   });
-  buildTVOverlay();
 }
 
 function tvTick(){
   if(!tvActive) return;
   if(tvSec===0) tvJump();
-  const pct = (tvSec/TV_INTERVAL)*100;
+  const pct=(tvSec/TV_INTERVAL)*100;
   const bar=document.getElementById('tvBar');
   const tim=document.getElementById('tvTimer');
   if(bar) bar.style.width=pct+'%';
-  if(tim) tim.textContent='Próxima em '+(TV_INTERVAL-tvSec)+'s';
+  if(tim) tim.textContent='Próximo em '+(TV_INTERVAL-tvSec)+'s';
   tvSec++;
-  if(tvSec>TV_INTERVAL){ tvIdx=(tvIdx+1)%TV_PAGES.length; tvSec=0; }
+  if(tvSec>TV_INTERVAL){ tvIdx=(tvIdx+1)%TV_SLIDES.length; tvSec=0; }
 }
 </script>
 </body>

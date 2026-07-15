@@ -2034,6 +2034,29 @@ function parseRoas(rows){
   }).filter(Boolean);
 }
 
+// ── Extrai nome do empreendimento do nome da campanha Meta ──
+// Formato: "Empreendimento - Cidade - Objetivo-Agencia"
+// Ex: "Cidade Alegre -Bauru-Whatsapp–fmd-v2" → "Cidade Alegre"
+function extractEmpMeta(nome){
+  if(!nome) return '';
+  // Separa no primeiro " -" ou " –" (espaço antes do traço = separador de segmento)
+  const part = nome.split(/\s+[-–]/)[0];
+  return part.trim();
+}
+
+// ── Normaliza nome do empreendimento do CVCRM ──
+// Formato: "Residencial Monte Verde - Módulo III" → "Monte Verde"
+// Remove: "Residencial " prefix, "- Módulo X", algarismos romanos no fim
+function normalizeEmpCRM(raw){
+  if(!raw) return '';
+  return raw
+    .replace(/^Residencial\s+/i, '')               // remove "Residencial "
+    .replace(/\s*[-–]\s*Módulo\s+\S+/i, '')        // remove "- Módulo III"
+    .replace(/\s*[-–]\s*(I{1,3}|IV|VI{0,3}|IX|X{1,3})$/i, '') // remove "- III" no fim
+    .replace(/\s+(I{1,3}|IV|VI{0,3}|IX|X{1,3})$/i, '')        // remove " III" no fim
+    .trim();
+}
+
 function parseMeta(rows){
   return rows.filter(r=>r['Nome da campanha']&&r['Valor usado (BRL)']).map(r=>{
     // Parse de "Término dos relatórios" — formato DD/MM/YYYY
@@ -2042,7 +2065,7 @@ function parseMeta(rows){
     const m = termRaw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
     if(m) dataTermino = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
     return {
-      nome:r['Nome da campanha']||'',emp:r['Empreendimento']||'',objetivo:r['Objetivo']||'',
+      nome:r['Nome da campanha']||'',emp:extractEmpMeta(r['Nome da campanha']||''),objetivo:r['Objetivo']||'',
       cidade:r['Cidade']||'',status:r['Veiculação da campanha']||'',
       valor:toN(r['Valor usado (BRL)']),resultados:toN(r['Resultados']),
       alcance:toN(r['Alcance']),impressoes:toN(r['Impressões']),
@@ -2092,7 +2115,7 @@ function parseLeads(rows){
 
     return {
       situacao       : (r['Situação']||'').trim(),
-      emp            : (r['Primeiro Empreendimento']||'').replace('Residencial ','').trim(),
+      emp            : normalizeEmpCRM(r['Primeiro Empreendimento']||''),
       primeiraOrigem : p,
       ultimaOrigem   : u,
       online         : isOnline(p),
@@ -2197,8 +2220,12 @@ function popularFiltros(){
     vals.forEach(v=>s.appendChild(new Option(v,v)));
   }
 
-  // Filtro empreendimento do Dashboard
-  fill('fEmp', emps);
+  // Filtro empreendimento do Dashboard — união de todas as fontes
+  const empsRoas  = dadosRoas.map(r=>r.emp).filter(Boolean);
+  const empsMeta  = campsMeta.map(c=>c.emp).filter(Boolean);
+  const empsLeads = leadsCV.map(l=>l.emp).filter(Boolean);
+  const empsAll   = [...new Set([...empsRoas, ...empsMeta, ...empsLeads])].sort();
+  fill('fEmp', empsAll);
 
   // Filtros das outras páginas
   fill('fCampObj',objs); fill('fCampEmp',cemps);
@@ -2258,14 +2285,21 @@ function barRows(container,items,maxVal,corFn){
 // ═══════════════════════════════════════════════════════
 function renderDashboard(){
   const d  = filteredRoas();
-  const lf = filteredLeads(); // leads filtrados por dataUltima
+  let   lf = filteredLeads(); // leads filtrados por dataUltima
 
   // ── Filtro de Objetivo (WhatsApp / Cadastro) ──
   const fObjVal = (document.getElementById('fObj')?.value||'').toLowerCase();
+  // ── Filtro de Empreendimento ──
+  const fEmpVal = (document.getElementById('fEmp')?.value||'').trim();
+
+  // Aplica filtro de empreendimento nos leads CVCRM
+  if(fEmpVal) lf = lf.filter(l => l.emp === fEmpVal);
 
   // ── Leads Meta: soma Resultados da Planilha 2 filtrado por "Término dos relatórios" ──
   // Exclui campanhas com "Alcance" no nome (objetivo de alcance não gera leads)
-  const metaFiltradoBase = filteredMetaByDate().filter(c=>!c.nome.toLowerCase().includes('alcance'));
+  let metaFiltradoBase = filteredMetaByDate().filter(c=>!c.nome.toLowerCase().includes('alcance'));
+  // Aplica filtro de empreendimento nas campanhas Meta
+  if(fEmpVal) metaFiltradoBase = metaFiltradoBase.filter(c => c.emp === fEmpVal);
   // Aplica filtro de objetivo se selecionado
   const metaFiltrado = fObjVal
     ? metaFiltradoBase.filter(c=>c.nome.toLowerCase().includes(fObjVal))

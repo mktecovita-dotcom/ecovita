@@ -2016,7 +2016,8 @@ function parseRoas(rows){
     const data=g(r,'Data','data','DATA','Mês','Mes','MÊS');
     const pts=data.split('/');
     const mes=pts.length>=3?`${pts[1].padStart(2,'0')}/${pts[2].substring(0,4)}`:'';
-    const emp=(g(r,'Empreendimentos','Empreendimento','empreendimento','Emp')||'').trim();
+    const empRaw=(g(r,'Empreendimentos','Empreendimento','empreendimento','Emp')||'').trim();
+    const emp = matchEmpCanonical(empRaw) || empRaw; // tenta canônico, fallback ao bruto
     if(!emp||!mes||emp.toLowerCase().includes('google')||emp.toLowerCase()==='total') return null;
     return{mes,emp,
       investTotal:toBRL(g(r,'Investimento Total','Investimento total','Invest. Total','investimento total')),
@@ -2034,27 +2035,59 @@ function parseRoas(rows){
   }).filter(Boolean);
 }
 
-// ── Extrai nome do empreendimento do nome da campanha Meta ──
-// Formato: "Empreendimento - Cidade - Objetivo-Agencia"
-// Ex: "Cidade Alegre -Bauru-Whatsapp–fmd-v2" → "Cidade Alegre"
-function extractEmpMeta(nome){
-  if(!nome) return '';
-  // Separa no primeiro " -" ou " –" (espaço antes do traço = separador de segmento)
-  const part = nome.split(/\s+[-–]/)[0];
-  return part.trim();
+// ══════════════════════════════════════════════════════════
+// MAPEAMENTO CANÔNICO DE EMPREENDIMENTOS
+// Cada entrada tem: name (nome oficial) + keys (palavras únicas para match)
+// Para adicionar novo empreendimento: inclua no array abaixo
+// ══════════════════════════════════════════════════════════
+const EMPREENDIMENTOS_CANONICAL = [
+  { name:'Parque Aviação',     keys:['aviacao','aviação'] },
+  { name:'Villaggios',         keys:['villaggios','villaggio'] },
+  { name:'Beija Flor',         keys:['beija','flor'] },
+  { name:'Monte Verde',        keys:['monte','verde'] },
+  { name:'Altos da Serra',     keys:['altos','serra'] },
+  { name:'Piemonte',           keys:['piemonte'] },
+  { name:'Jardim dos Ipês',    keys:['jardim','ipes','ipês','ipe'] },
+  { name:'Cidade Alegre',      keys:['cidade','alegre'] },
+  { name:'Nova Quinta',        keys:['nova','quinta'] },
+  { name:'Olga Nasser',        keys:['olga'] },                    // cobre "nascer" e "nasser"
+  { name:'Guiomar Novaes',     keys:['guiomar'] },
+  { name:'Jardim Corumbataí',  keys:['corumbatai','corumbataí'] },
+  { name:'Raiz Di Verona',     keys:['verona'] },
+];
+
+// Normaliza string: minúsculo, sem acentos, sem espaços duplos
+function _normEmpStr(s){
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ').trim();
 }
 
-// ── Normaliza nome do empreendimento do CVCRM ──
-// Formato: "Residencial Monte Verde - Módulo III" → "Monte Verde"
-// Remove: "Residencial " prefix, "- Módulo X", algarismos romanos no fim
-function normalizeEmpCRM(raw){
+// Tenta casar qualquer string bruta com o mapeamento canônico.
+// Retorna o nome canônico ou '' se não encontrado.
+function matchEmpCanonical(raw){
   if(!raw) return '';
-  return raw
-    .replace(/^Residencial\s+/i, '')               // remove "Residencial "
-    .replace(/\s*[-–]\s*Módulo\s+\S+/i, '')        // remove "- Módulo III"
-    .replace(/\s*[-–]\s*(I{1,3}|IV|VI{0,3}|IX|X{1,3})$/i, '') // remove "- III" no fim
-    .replace(/\s+(I{1,3}|IV|VI{0,3}|IX|X{1,3})$/i, '')        // remove " III" no fim
-    .trim();
+  const rn = _normEmpStr(raw);
+  for(const emp of EMPREENDIMENTOS_CANONICAL){
+    // Todos as keys do empreendimento devem estar presentes na string
+    if(emp.keys.every(k => rn.includes(_normEmpStr(k)))){
+      return emp.name;
+    }
+  }
+  return '';
+}
+
+// Wrapper para nome de campanha Meta:
+// "Cidade Alegre -Bauru-Whatsapp–fmd-v2" → "Cidade Alegre"
+function extractEmpMeta(nome){
+  return matchEmpCanonical(nome);
+}
+
+// Wrapper para leads CVCRM:
+// "Residencial Monte Verde - Módulo III" → "Monte Verde"
+function normalizeEmpCRM(raw){
+  return matchEmpCanonical(raw);
 }
 
 function parseMeta(rows){
@@ -5826,6 +5859,7 @@ function renderTkCompare(){
     +'<th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:11px">Métrica</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--pink);font-size:11px">A: '+a1+' → '+a2+'</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--purple);font-size:11px">B: '+b1+' → '+b2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Variação</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Variação</th>'
     +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Diferença</th>'
     +'</tr></thead>';

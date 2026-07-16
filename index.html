@@ -449,6 +449,20 @@ body.tv-mode #tvScreen .bar-label{font-size:12px}
 body.tv-mode #tvScreen .bar-val{font-size:12px}
 body.tv-mode #tvScreen .bar-sub{font-size:11px}
 body.tv-mode #tvScreen .bar-item{margin-bottom:10px}
+/* Destaques */
+.tvs-highlights{display:flex;align-items:center;gap:0;background:var(--bg2);
+  border:1px solid var(--bdr);border-radius:12px;padding:12px 20px;flex-shrink:0}
+.tvs-hl-trophy{font-size:28px;margin-right:14px;flex-shrink:0}
+.tvs-hl-label{font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;
+  letter-spacing:.14em;margin-bottom:6px}
+.tvs-hl-items{display:flex;gap:0;flex:1}
+.tvs-hl-item{display:flex;align-items:center;gap:8px;flex:1;padding:0 16px;
+  border-left:1px solid var(--bdr)}
+.tvs-hl-item:first-child{border-left:none;padding-left:0}
+.tvs-hl-icon{font-size:16px;flex-shrink:0}
+.tvs-hl-text{font-size:12px;color:var(--tx);line-height:1.35}
+.tvs-hl-bold{font-weight:700;font-size:13px}
+.tvs-hl-cmp{font-size:10px;color:var(--mu);margin-top:1px}
 #tvOverlay{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:linear-gradient(transparent,rgba(0,0,0,.85));
   padding:18px 32px 22px;pointer-events:none}
@@ -2670,6 +2684,32 @@ function renderDashboard(){
       <td>${fN(r.lm)}</td><td>${fN(r.lc)}</td><td>${fN(r.wc)}</td><td>${fN(r.fc)}</td><td>${fN(r.wb)}</td>
       <td>${fN(r.qv)}</td><td style="padding-right:18px"><span class="spill ${sc}">${st}</span></td></tr>`;
   }).join(''):'<tr><td colspan="11" style="padding:16px 18px;color:#8b9ab0">Sem dados — verifique conexão com a planilha ROAS</td></tr>';
+
+  // ── Cache TV: calcula período anterior para destaques ──
+  (()=>{
+    const durMs = (de && ate) ? (ate - de + 86400000) : 30*86400000;
+    const prevAte = de ? new Date(de.getTime() - 86400000) : null;
+    const prevDe  = prevAte ? new Date(prevAte.getTime() - durMs + 86400000) : null;
+    const inPrev  = dt => dt && prevDe && prevAte && dt>=prevDe && dt<=prevAte;
+    const prevMeta= campsMeta.filter(c=>c.dataTermino&&inPrev(c.dataTermino)&&!c.nome.toLowerCase().includes('alcance'));
+    const lmetaPrev = prevMeta.reduce((s,c)=>s+c.resultados,0);
+    const prevInv   = dadosRoas.filter(r=>{
+      if(!prevDe||!prevAte) return false;
+      const[mm,yy]=r.mes.split('/');
+      const md=new Date(parseInt(yy),parseInt(mm)-1,1);
+      return md>=new Date(prevDe.getFullYear(),prevDe.getMonth(),1)&&md<=new Date(prevAte.getFullYear(),prevAte.getMonth(),1);
+    }).reduce((s,r)=>s+r.investTotal,0);
+    const cplPrev    = lmetaPrev>0 ? prevInv/lmetaPrev : 0;
+    const prevLeads  = leadsCV.filter(l=>l.dataUltima&&inPrev(l.dataUltima));
+    const prevON     = prevLeads.filter(l=>l.online);
+    const prevReimp  = prevLeads.filter(l=>l.reimpactado&&l.online);
+    const totalONPrev= prevLeads.filter(l=>l.online&&!l.reimpactado).length+prevReimp.length;
+    const txRPrev    = prevON.length>0?prevReimp.length/prevON.length*100:0;
+    window.tvDataCache = {
+      cpl, cplPrev, lmeta, lmetaPrev, totalON, totalONPrev, txR, txRPrev,
+      hasPrev:!!(prevDe&&prevAte)
+    };
+  })();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6029,6 +6069,48 @@ function buildTVScreen(){
   const funilHtml = document.getElementById('funilList')?.innerHTML||'<span style="color:var(--mu);font-size:12px">Sem dados</span>';
   const sitHtml   = document.getElementById('sitList')?.innerHTML||'<span style="color:var(--mu);font-size:12px">Sem dados</span>';
 
+  // Destaques — lê do cache gerado pelo renderDashboard
+  const tc = window.tvDataCache || {};
+  const pct = (cur,prev) => prev>0 ? ((cur-prev)/prev*100) : null;
+  const fmtPct = (v,neg) => {
+    if(v===null) return '<span style="color:var(--mu)">sem comparativo</span>';
+    const up=v>=0; const clr=up?(neg?'var(--red)':'var(--green)'):(neg?'var(--green)':'var(--red)');
+    return `<span style="color:${clr}">${up?'▲':'▼'} ${Math.abs(v).toFixed(1)}% vs período anterior</span>`;
+  };
+  const cplPct    = pct(tc.cpl,    tc.cplPrev);
+  const lmPct     = pct(tc.lmeta,  tc.lmetaPrev);
+  const onPct     = pct(tc.totalON,tc.totalONPrev);
+  const txPct     = pct(tc.txR,    tc.txRPrev);
+  const cplFmt    = tc.cpl>0 ? fBRL(tc.cpl) : '—';
+  const hlItems = [
+    { icon:'💰', title:'CPL · Custo por Lead',
+      val: cplFmt,
+      cmp: fmtPct(cplPct!==null?-cplPct:null,false), // CPL menor = melhor → inverter sinal
+      note:'Investimento ÷ Leads Meta' },
+    { icon:'📣', title:'Leads Meta',
+      val: tc.lmeta!=null?fN(tc.lmeta):'—',
+      cmp: fmtPct(lmPct,false),
+      note:'Resultados período' },
+    { icon:'👥', title:'Leads CVCRM Online',
+      val: tc.totalON!=null?fN(tc.totalON):'—',
+      cmp: fmtPct(onPct,false),
+      note:'Novos + Reimpactados' },
+    { icon:'🔄', title:'Taxa de Reimpacto',
+      val: tc.txR!=null?tc.txR.toFixed(1)+'%':'—',
+      cmp: fmtPct(txPct,true), // taxa alta = atenção → neg
+      note:'% leads que voltaram' },
+  ];
+  const hlHtml = hlItems.map(h=>`
+    <div class="tvs-hl-item">
+      <div class="tvs-hl-icon">${h.icon}</div>
+      <div>
+        <div class="tvs-hl-text" style="color:var(--mu);font-size:10px;text-transform:uppercase;letter-spacing:.07em">${h.title}</div>
+        <div class="tvs-hl-bold" style="color:var(--tx)">${h.val}</div>
+        <div class="tvs-hl-cmp">${h.cmp}</div>
+        <div class="tvs-hl-cmp" style="color:var(--mu)">${h.note}</div>
+      </div>
+    </div>`).join('');
+
   scr.innerHTML = `
   <div class="tvs-hd">
     <div class="tvs-brand">
@@ -6097,6 +6179,13 @@ function buildTVScreen(){
     <div class="tvs-card">
       <div class="tvs-card-title">🟣 Situação dos Leads Online</div>
       <div class="bar-row">${sitHtml}</div>
+    </div>
+  </div>
+  <div class="tvs-highlights">
+    <div class="tvs-hl-trophy">🏆</div>
+    <div style="flex:1">
+      <div class="tvs-hl-label">Destaques do Período</div>
+      <div class="tvs-hl-items">${hlHtml}</div>
     </div>
   </div>`;
 }

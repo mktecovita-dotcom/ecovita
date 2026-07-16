@@ -397,26 +397,58 @@ body.light .theme-label{color:var(--blue)}
 /* ── MODO TV ────────────────────────────────────────── */
 body.tv-mode .sidebar{display:none!important}
 body.tv-mode .topbar{display:none!important}
-body.tv-mode .content{margin-left:0!important;padding-top:0!important}
-body.tv-mode .page.active{padding:24px!important}
-/* Ocultar tudo no dashboard em modo TV */
-body.tv-mode #page-dashboard .ebox,
-body.tv-mode #page-dashboard .fbar,
-body.tv-mode #page-dashboard .sec,
-body.tv-mode #page-dashboard .twrap,
-body.tv-mode #page-dashboard .card:not([id^="tvS"]) { display:none!important }
-/* Ocultar grids não pertencentes ao slide atual */
-body.tv-mode #page-dashboard [id^="tvS"]{ display:none!important }
-/* Slide 1 */
-body.tv-mode.tv-s1 #tvS1fin,
-body.tv-mode.tv-s1 #tvS1finKpi,
-body.tv-mode.tv-s1 #tvS1leadLbl,
-body.tv-mode.tv-s1 #tvS1leadKpi,
-body.tv-mode.tv-s1 #tvS1charts { display:block!important }
-body.tv-mode.tv-s1 #tvS1charts { display:grid!important }
-/* Slide 2 */
-body.tv-mode.tv-s2 #tvS2funil { display:grid!important }
-body.tv-mode.tv-s2 #tvS2origem { display:block!important }
+body.tv-mode .content{display:none!important}
+/* TV Screen full */
+#tvScreen{display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);
+  padding:28px 40px 24px;flex-direction:column;gap:14px;overflow:hidden}
+body.tv-mode #tvScreen{display:flex}
+/* Header */
+.tvs-hd{display:flex;align-items:center;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--bdr)}
+.tvs-brand{display:flex;flex-direction:column}
+.tvs-brand-name{font-size:20px;font-weight:900;color:var(--tx);letter-spacing:.04em}
+.tvs-brand-sub{font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.tvs-sep{width:1px;height:36px;background:var(--bdr)}
+.tvs-period{font-size:13px;color:var(--mu)}
+.tvs-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.tvs-timer{font-size:11px;color:var(--mu)}
+.tvs-prog{width:110px;height:3px;background:var(--bdr);border-radius:2px;overflow:hidden}
+.tvs-prog-bar{height:100%;background:var(--blue);width:0%;transition:width 1s linear}
+.tvs-exit-btn{background:transparent;border:1px solid var(--bdr);color:var(--mu);
+  padding:5px 14px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit}
+.tvs-exit-btn:hover{border-color:var(--blue);color:var(--blue)}
+/* Row 1 – 4 KPI Financeiros */
+.tvs-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tvs-kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;
+  padding:18px 22px;display:flex;align-items:center;gap:16px;
+  border-top:3px solid var(--c)}
+.tvs-kpi-icon{font-size:38px;line-height:1;flex-shrink:0}
+.tvs-kpi-lbl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.tvs-kpi-val{font-size:26px;font-weight:900;color:var(--c);line-height:1.1}
+.tvs-kpi-sub{font-size:11px;color:var(--mu);margin-top:3px}
+/* Row 2 – Leads */
+.tvs-leads-row{display:grid;grid-template-columns:1fr 1.6fr;gap:14px}
+.tvs-leads-box{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:14px 20px}
+.tvs-leads-title{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.tvs-mini-row{display:grid;gap:10px}
+.tvs-mini-row.g3{grid-template-columns:repeat(3,1fr)}
+.tvs-mini-row.g5{grid-template-columns:repeat(5,1fr)}
+.tvs-mini{text-align:center;background:var(--bg3);border-radius:10px;padding:10px 6px}
+.tvs-mini-lbl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.tvs-mini-val{font-size:21px;font-weight:800}
+.tvs-mini-sub{font-size:10px;color:var(--mu);margin-top:2px}
+/* Row 3 – Funil + Situação */
+.tvs-bot-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0}
+.tvs-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;
+  padding:16px 20px;overflow:hidden;display:flex;flex-direction:column}
+.tvs-card-title{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:12px}
+.tvs-card .bar-row{flex:1;overflow:hidden}
+/* TV bar-row scaling */
+body.tv-mode #tvScreen .bar-label{font-size:12px}
+body.tv-mode #tvScreen .bar-val{font-size:12px}
+body.tv-mode #tvScreen .bar-sub{font-size:11px}
+body.tv-mode #tvScreen .bar-item{margin-bottom:10px}
 #tvOverlay{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:linear-gradient(transparent,rgba(0,0,0,.85));
   padding:18px 32px 22px;pointer-events:none}
@@ -5934,90 +5966,151 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 // Enter no login
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-// ── MODO TV ──────────────────────────────────────────────────────────────
-const TV_SLIDES = [
-  { cls:'tv-s1', label:'📊 Financeiro & Leads' },
-  { cls:'tv-s2', label:'🔵 Funil & Origens'    }
-];
-const TV_INTERVAL = 30; // segundos por slide
-let tvActive = false, tvTimer = null, tvIdx = 0, tvSec = 0;
+// Cria o container da TV Screen no DOM
+(function(){
+  if(!document.getElementById('tvScreen')){
+    const d=document.createElement('div'); d.id='tvScreen';
+    document.body.appendChild(d);
+  }
+})();
 
-function toggleTVMode(){
-  tvActive ? exitTVMode() : enterTVMode();
-}
+// ── MODO TV ──────────────────────────────────────────────────────────────
+const TV_REFRESH = 60; // segundos para re-ler os dados
+let tvActive = false, tvTimer = null, tvSec = 0;
+
+function toggleTVMode(){ tvActive ? exitTVMode() : enterTVMode(); }
 
 function enterTVMode(){
-  tvActive = true;
-  tvIdx = 0; tvSec = 0;
+  tvActive = true; tvSec = 0;
   document.body.classList.add('tv-mode');
-  document.getElementById('btnTV').textContent = '⏹ Sair TV';
-  document.fullscreenElement || document.documentElement.requestFullscreen?.().catch(()=>{});
+  const btn = document.getElementById('btnTV');
+  if(btn) btn.textContent = '⏹ Sair TV';
+  document.documentElement.requestFullscreen?.().catch(()=>{});
+  // Garante que o dashboard está ativo e renderizado
   goPage('dashboard');
-  buildTVOverlay();
-  tvTick();
+  setTimeout(()=>{ buildTVScreen(); }, 100);
   tvTimer = setInterval(tvTick, 1000);
-  document.addEventListener('keydown', tvKeyHandler);
+  document.addEventListener('keydown', tvKeyEsc);
 }
 
 function exitTVMode(){
   tvActive = false;
   clearInterval(tvTimer); tvTimer = null;
-  TV_SLIDES.forEach(s => document.body.classList.remove(s.cls));
   document.body.classList.remove('tv-mode');
   const btn = document.getElementById('btnTV');
   if(btn) btn.textContent = '📺 TV';
   document.fullscreenElement && document.exitFullscreen?.();
-  document.removeEventListener('keydown', tvKeyHandler);
+  document.removeEventListener('keydown', tvKeyEsc);
 }
 
-function tvKeyHandler(e){
-  if(e.key==='Escape'){ exitTVMode(); return; }
-  if(e.key==='ArrowRight'||e.key===' '){ tvIdx=(tvIdx+1)%TV_SLIDES.length; tvSec=0; tvJump(); }
-  if(e.key==='ArrowLeft'){ tvIdx=(tvIdx-1+TV_SLIDES.length)%TV_SLIDES.length; tvSec=0; tvJump(); }
-}
-
-function buildTVOverlay(){
-  let el = document.getElementById('tvOverlay');
-  if(!el){ el=document.createElement('div'); el.id='tvOverlay'; document.body.appendChild(el); }
-  const dots = TV_SLIDES.map((_,i)=>`<div class="tv-dot${i===tvIdx?' active':''}" id="tvDot${i}"></div>`).join('');
-  el.innerHTML = `
-    <div class="tv-pages">${dots}</div>
-    <div class="tv-info">
-      <div id="tvLabel" style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">${TV_SLIDES[tvIdx].label}</div>
-      <div id="tvTimer" style="font-size:12px">Próximo em ${TV_INTERVAL}s</div>
-      <div class="tv-bar-wrap"><div class="tv-bar" id="tvBar" style="width:0%"></div></div>
-    </div>`;
-  let exitBtn = document.getElementById('tvExitBtn');
-  if(!exitBtn){
-    exitBtn=document.createElement('button'); exitBtn.id='tvExitBtn';
-    exitBtn.textContent='✕ Sair TV'; exitBtn.onclick=exitTVMode;
-    document.body.appendChild(exitBtn);
-  }
-}
-
-function tvJump(){
-  // Troca a classe de slide no body
-  TV_SLIDES.forEach((s,i)=> document.body.classList.toggle(s.cls, i===tvIdx));
-  // Atualiza label e dots
-  const label=document.getElementById('tvLabel');
-  if(label) label.textContent=TV_SLIDES[tvIdx].label;
-  TV_SLIDES.forEach((_,i)=>{
-    const d=document.getElementById('tvDot'+i);
-    if(d) d.className='tv-dot'+(i===tvIdx?' active':'');
-  });
-}
+function tvKeyEsc(e){ if(e.key==='Escape') exitTVMode(); }
 
 function tvTick(){
   if(!tvActive) return;
-  if(tvSec===0) tvJump();
-  const pct=(tvSec/TV_INTERVAL)*100;
-  const bar=document.getElementById('tvBar');
-  const tim=document.getElementById('tvTimer');
-  if(bar) bar.style.width=pct+'%';
-  if(tim) tim.textContent='Próximo em '+(TV_INTERVAL-tvSec)+'s';
   tvSec++;
-  if(tvSec>TV_INTERVAL){ tvIdx=(tvIdx+1)%TV_SLIDES.length; tvSec=0; }
+  const bar = document.getElementById('tvProgBar');
+  if(bar) bar.style.width = (tvSec/TV_REFRESH*100)+'%';
+  const lbl = document.getElementById('tvTimerLbl');
+  if(lbl) lbl.textContent = 'Atualiza em '+(TV_REFRESH-tvSec)+'s';
+  if(tvSec >= TV_REFRESH){ tvSec=0; buildTVScreen(); }
 }
+
+function tvG(id){ return (document.getElementById(id)||{}).textContent||'—'; }
+
+function buildTVScreen(){
+  const scr = document.getElementById('tvScreen');
+  if(!scr) return;
+
+  const de  = document.getElementById('fDataDe')?.value||'';
+  const ate = document.getElementById('fDataAte')?.value||'';
+  const fmt = s => s ? s.split('-').reverse().join('/') : '';
+  const period = (de||ate) ? `📅 ${fmt(de)} — ${fmt(ate)}` : '📅 Período completo';
+
+  const funilHtml = document.getElementById('funilList')?.innerHTML||'<span style="color:var(--mu);font-size:12px">Sem dados</span>';
+  const sitHtml   = document.getElementById('sitList')?.innerHTML||'<span style="color:var(--mu);font-size:12px">Sem dados</span>';
+
+  scr.innerHTML = `
+  <div class="tvs-hd">
+    <div class="tvs-brand">
+      <div class="tvs-brand-name">ECOVITA</div>
+      <div class="tvs-brand-sub">Tráfego Pago · Dashboard</div>
+    </div>
+    <div class="tvs-sep"></div>
+    <div class="tvs-period">${period}</div>
+    <div class="tvs-right">
+      <span class="tvs-timer" id="tvTimerLbl">Atualiza em ${TV_REFRESH}s</span>
+      <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
+      <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
+    </div>
+  </div>
+  <div class="tvs-kpi-row">
+    <div class="tvs-kpi" style="--c:var(--blue)">
+      <div class="tvs-kpi-icon">💰</div>
+      <div><div class="tvs-kpi-lbl">Investimento Total</div>
+           <div class="tvs-kpi-val">${tvG('k1')}</div>
+           <div class="tvs-kpi-sub">${tvG('k1s')}</div></div>
+    </div>
+    <div class="tvs-kpi" style="--c:var(--green)">
+      <div class="tvs-kpi-icon">📈</div>
+      <div><div class="tvs-kpi-lbl">Receita Gerada</div>
+           <div class="tvs-kpi-val">${tvG('k2')}</div>
+           <div class="tvs-kpi-sub">${tvG('k2s')}</div></div>
+    </div>
+    <div class="tvs-kpi" style="--c:var(--teal)">
+      <div class="tvs-kpi-icon">🏠</div>
+      <div><div class="tvs-kpi-lbl">Vendas</div>
+           <div class="tvs-kpi-val">${tvG('k5')}</div>
+           <div class="tvs-kpi-sub">${tvG('k5s')}</div></div>
+    </div>
+    <div class="tvs-kpi" style="--c:var(--amber)">
+      <div class="tvs-kpi-icon">⚡</div>
+      <div><div class="tvs-kpi-lbl">ROAS Médio</div>
+           <div class="tvs-kpi-val">${tvG('k3')}</div>
+           <div class="tvs-kpi-sub">${tvG('k3s')}</div></div>
+    </div>
+  </div>
+  <div class="tvs-leads-row">
+    <div class="tvs-leads-box">
+      <div class="tvs-leads-title">📣 Meta Ads · Leads</div>
+      <div class="tvs-mini-row g3">
+        <div class="tvs-mini"><div class="tvs-mini-lbl">WhatsApp</div><div class="tvs-mini-val" style="color:#25D366">${tvG('kWpp')}</div><div class="tvs-mini-sub">${tvG('kWpps')}</div></div>
+        <div class="tvs-mini"><div class="tvs-mini-lbl">Cadastro</div><div class="tvs-mini-val" style="color:var(--blue)">${tvG('kCad')}</div><div class="tvs-mini-sub">${tvG('kCads')}</div></div>
+        <div class="tvs-mini"><div class="tvs-mini-lbl">Total Meta</div><div class="tvs-mini-val" style="color:var(--purple)">${tvG('k4')}</div><div class="tvs-mini-sub">${tvG('k4s')}</div></div>
+      </div>
+    </div>
+    <div class="tvs-leads-box">
+      <div class="tvs-leads-title">👥 CVCRM · Base de Leads</div>
+      <div class="tvs-mini-row g5">
+        <div class="tvs-mini"><div class="tvs-mini-lbl">Leads Novos Online</div><div class="tvs-mini-val" style="color:var(--blue)">${tvG('k7')}</div><div class="tvs-mini-sub">${tvG('k7s')}</div></div>
+        <div class="tvs-mini"><div class="tvs-mini-lbl">Reimpactados</div><div class="tvs-mini-val" style="color:var(--orange)">${tvG('k8')}</div><div class="tvs-mini-sub">${tvG('k8s')}</div></div>
+        <div class="tvs-mini"><div class="tvs-mini-lbl">Total Leads ON</div><div class="tvs-mini-val" style="color:var(--green)">${tvG('k6')}</div><div class="tvs-mini-sub">${tvG('k6s')}</div></div>
+        <div class="tvs-mini"><div class="tvs-mini-lbl">Taxa Reimpacto</div><div class="tvs-mini-val" style="color:var(--red)">${tvG('k10')}</div><div class="tvs-mini-sub">${tvG('k10s')}</div></div>
+        <div class="tvs-mini"><div class="tvs-mini-lbl">CRM Online</div><div class="tvs-mini-val" style="color:var(--teal)">${tvG('k11')}</div><div class="tvs-mini-sub">${tvG('k11s')}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tvs-bot-row">
+    <div class="tvs-card">
+      <div class="tvs-card-title">🔵 Funil por Origem — Leads &amp; Conversão</div>
+      <div class="bar-row">${funilHtml}</div>
+    </div>
+    <div class="tvs-card">
+      <div class="tvs-card-title">🟣 Situação dos Leads Online</div>
+      <div class="bar-row">${sitHtml}</div>
+    </div>
+  </div>`;
+}
+
+// Enter no login
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// Cria o container da TV Screen no DOM
+(function(){
+  if(!document.getElementById('tvScreen')){
+    const d=document.createElement('div'); d.id='tvScreen';
+    document.body.appendChild(d);
+  }
+})();
 </script>
 </body>
 </html>

@@ -855,6 +855,19 @@ body.tv-mode #tvExitBtn{display:block}
         <div class="kpi" style="border-top-color:#10b981"><div class="kpi-label">Total Investido</div><div class="kpi-val" style="color:#10b981" id="iv7">—</div><div class="kpi-sub" id="iv7s"></div></div>
       </div>
 
+      <!-- Gráfico: Investimento por Empreendimento e Objetivo -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd">
+          <div class="card-title">Investimento por empreendimento e objetivo</div>
+          <div class="legend">
+            <div class="leg"><div class="lsq" style="background:var(--green)"></div>WhatsApp</div>
+            <div class="leg"><div class="lsq" style="background:var(--amber)"></div>Cadastro</div>
+            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Alcance / Outros</div>
+          </div>
+        </div>
+        <div class="cw" style="height:280px"><canvas id="cInvEmpObj"></canvas></div>
+      </div>
+
       <div class="grid g53">
         <div class="card">
           <div class="card-hd"><div class="card-title">Previsto vs Realizado por empreendimento</div></div>
@@ -3078,6 +3091,59 @@ function renderInvestimento(){
   const xGridOpts = {color:clrGrid};
   const barH = 22; // altura fixa por barra
   const nomes = dados.map(e=>e.nome.replace(' - ',' · '));
+
+  // ── Chart: Investimento por empreendimento e objetivo (empilhado) ──
+  const empObjNomes = dados
+    .filter(e=>e.meta_whats>0||e.meta_cad>0||(e.meta_total-e.meta_whats-e.meta_cad)>0)
+    .map(e=>e.nome.split(' - ')[0]); // só nome do empreendimento, sem cidade
+  const empObjDados = dados.filter(e=>e.meta_whats>0||e.meta_cad>0||(e.meta_total-e.meta_whats-e.meta_cad)>0);
+  dc('cInvEmpObj');
+  const ctxEO = document.getElementById('cInvEmpObj')?.getContext('2d');
+  if(ctxEO && empObjDados.length){
+    const algAlc = empObjDados.map(e=>Math.max(0,e.meta_total-e.meta_whats-e.meta_cad));
+    const temAlc = algAlc.some(v=>v>0);
+    const datasets = [
+      { label:'WhatsApp',
+        data: empObjDados.map(e=>e.meta_whats),
+        backgroundColor:'rgba(46,204,142,.85)',
+        borderColor:'rgba(46,204,142,1)', borderWidth:1, borderRadius:3 },
+      { label:'Cadastro',
+        data: empObjDados.map(e=>e.meta_cad),
+        backgroundColor:'rgba(245,166,35,.85)',
+        borderColor:'rgba(245,166,35,1)', borderWidth:1, borderRadius:3 },
+    ];
+    if(temAlc) datasets.push({
+      label:'Alcance / Outros',
+      data: algAlc,
+      backgroundColor:'rgba(155,127,244,.85)',
+      borderColor:'rgba(155,127,244,1)', borderWidth:1, borderRadius:3 });
+    charts.cInvEmpObj = new Chart(ctxEO,{
+      type:'bar',
+      data:{ labels:empObjNomes, datasets },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label: ctx=>`${ctx.dataset.label}: R$ ${ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}`
+            }
+          },
+          datalabels:{
+            display: ctx => ctx.raw > 500,
+            color:'#fff', font:{size:10,weight:'600'},
+            formatter: v => v>=1000?'R$'+(v/1000).toFixed(0)+'k':'R$'+Math.round(v),
+            anchor:'center', align:'center'
+          }
+        },
+        scales:{
+          x:{ stacked:true, grid:{display:false}, ticks:{color:clrTx,font:{size:10}} },
+          y:{ stacked:true, grid:{color:clrGrid},
+              ticks:{color:clrMu,font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'} }
+        }
+      }
+    });
+  }
 
   // ── Chart 1: Previsto vs Realizado ──
   const pr_h = Math.max(nomes.length * barH * 2 + 60, 180);

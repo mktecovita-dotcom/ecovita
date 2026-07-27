@@ -3145,8 +3145,20 @@ function renderInvestimento(){
         plugins:{
           legend:{display:false},
           tooltip:{
+            mode:'index', intersect:false,
             callbacks:{
-              label: ctx=>`${ctx.dataset.label}: R$ ${ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}`
+              title: items => items[0]?.label || '',
+              label: ctx => {
+                if(!ctx.raw && ctx.raw!==0) return null;
+                const fBR = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+                return `  ${ctx.dataset.label}    ${fBR(ctx.raw)}`;
+              },
+              afterBody: items => {
+                const total = items.reduce((s,i)=>s+(i.raw||0),0);
+                if(!total) return [];
+                const fBR = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+                return ['','Total    '+fBR(total)];
+              }
             }
           },
           datalabels:{

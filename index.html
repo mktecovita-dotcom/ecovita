@@ -3106,10 +3106,14 @@ function renderInvestimento(){
   campsDoMes.forEach(c=>{
     if(!c.emp) return;
     if(!empObjMap[c.emp]) empObjMap[c.emp]={whats:0,cad:0,alc:0};
-    const obj=(c.objetivo||'').toLowerCase();
-    if(obj==='whatsapp') empObjMap[c.emp].whats+=c.valor;
-    else if(obj==='cadastro') empObjMap[c.emp].cad+=c.valor;
-    else empObjMap[c.emp].alc+=c.valor;
+    // Usa mesma lógica do detectarObjetivo: testa nome da campanha E campo objetivo
+    const chk = ((c.objetivo||'')+(c.nome||'')).toLowerCase();
+    if(chk.includes('whatsapp')||chk.includes('wpp')||chk.includes('whats')||chk.includes('mensagen')||chk.includes('message'))
+      empObjMap[c.emp].whats+=c.valor;
+    else if(chk.includes('cadastro')||chk.includes('lead')||chk.includes('form')||chk.includes('conversao')||chk.includes('conversão'))
+      empObjMap[c.emp].cad+=c.valor;
+    else
+      empObjMap[c.emp].alc+=c.valor;
   });
   const empObjEmps = Object.keys(empObjMap)
     .filter(e=>(empObjMap[e].whats+empObjMap[e].cad+empObjMap[e].alc)>0)

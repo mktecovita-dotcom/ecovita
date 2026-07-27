@@ -79,6 +79,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .content{margin-left:var(--sidebar);padding-top:56px;min-height:100vh}
 .page{display:none;padding:24px;max-width:1440px;margin:0 auto}
 .page.active{display:block}
+#page-gads.active{padding:16px 16px 0;max-width:100%}
 
 /* FILTER BAR */
 .fbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px}
@@ -924,9 +925,9 @@ body.tv-mode #tvExitBtn{display:block}
     <!-- ══════════════ PAGE: GOOGLE ADS ══════════════ -->
     <div class="page" id="page-gads">
 
-      <div id="gadsContent" style="display:flex;flex-direction:column;height:calc(100vh - 60px)">
+      <div id="gadsContent" style="display:flex;flex-direction:column;height:calc(100vh - 170px)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0">
-          <div style="font-size:13px;font-weight:600;color:var(--tx)">🔍 Google Ads — Looker Studio</div>
+          <div style="font-size:13px;font-weight:600;color:var(--tx)">🔍 Google Ads</div>
           <a href="https://datastudio.google.com/reporting/12f939a6-9b61-474f-86fa-8762ef2e1051" target="_blank"
              style="font-size:11px;color:var(--mu);text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--bdr);border-radius:8px;transition:all .2s"
              onmouseover="this.style.color='var(--blue)';this.style.borderColor='var(--blue)'"

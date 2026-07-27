@@ -3092,34 +3092,50 @@ function renderInvestimento(){
   const barH = 22; // altura fixa por barra
   const nomes = dados.map(e=>e.nome.replace(' - ',' · '));
 
-  // ── Chart: Investimento por empreendimento e objetivo (empilhado) ──
-  const empObjNomes = dados
-    .filter(e=>e.meta_whats>0||e.meta_cad>0||(e.meta_total-e.meta_whats-e.meta_cad)>0)
-    .map(e=>e.nome.split(' - ')[0]); // só nome do empreendimento, sem cidade
-  const empObjDados = dados.filter(e=>e.meta_whats>0||e.meta_cad>0||(e.meta_total-e.meta_whats-e.meta_cad)>0);
+  // ── Chart: Investimento por empreendimento e objetivo (empilhado) — fonte: campsMeta ──
+  const mNamesInv = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesIdxInv = mNamesInv.indexOf(mesVal);
+  const anoNumInv = parseInt(document.getElementById('fInvAno')?.value || new Date().getFullYear());
+  // Filtra campsMeta pelo mês/ano selecionado via dataTermino
+  const campsDoMes = campsMeta.filter(c=>{
+    if(!c.dataTermino) return false;
+    return c.dataTermino.getMonth()===mesIdxInv && c.dataTermino.getFullYear()===anoNumInv;
+  });
+  // Agrega por empreendimento e objetivo
+  const empObjMap = {};
+  campsDoMes.forEach(c=>{
+    if(!c.emp) return;
+    if(!empObjMap[c.emp]) empObjMap[c.emp]={whats:0,cad:0,alc:0};
+    const obj=(c.objetivo||'').toLowerCase();
+    if(obj==='whatsapp') empObjMap[c.emp].whats+=c.valor;
+    else if(obj==='cadastro') empObjMap[c.emp].cad+=c.valor;
+    else empObjMap[c.emp].alc+=c.valor;
+  });
+  const empObjEmps = Object.keys(empObjMap)
+    .filter(e=>(empObjMap[e].whats+empObjMap[e].cad+empObjMap[e].alc)>0)
+    .sort();
   dc('cInvEmpObj');
   const ctxEO = document.getElementById('cInvEmpObj')?.getContext('2d');
-  if(ctxEO && empObjDados.length){
-    const algAlc = empObjDados.map(e=>Math.max(0,e.meta_total-e.meta_whats-e.meta_cad));
-    const temAlc = algAlc.some(v=>v>0);
+  if(ctxEO && empObjEmps.length){
+    const temAlc = empObjEmps.some(e=>empObjMap[e].alc>0);
     const datasets = [
       { label:'WhatsApp',
-        data: empObjDados.map(e=>e.meta_whats),
+        data: empObjEmps.map(e=>empObjMap[e].whats),
         backgroundColor:'rgba(46,204,142,.85)',
         borderColor:'rgba(46,204,142,1)', borderWidth:1, borderRadius:3 },
       { label:'Cadastro',
-        data: empObjDados.map(e=>e.meta_cad),
+        data: empObjEmps.map(e=>empObjMap[e].cad),
         backgroundColor:'rgba(245,166,35,.85)',
         borderColor:'rgba(245,166,35,1)', borderWidth:1, borderRadius:3 },
     ];
     if(temAlc) datasets.push({
       label:'Alcance / Outros',
-      data: algAlc,
+      data: empObjEmps.map(e=>empObjMap[e].alc),
       backgroundColor:'rgba(155,127,244,.85)',
       borderColor:'rgba(155,127,244,1)', borderWidth:1, borderRadius:3 });
     charts.cInvEmpObj = new Chart(ctxEO,{
       type:'bar',
-      data:{ labels:empObjNomes, datasets },
+      data:{ labels:empObjEmps, datasets },
       options:{
         responsive:true, maintainAspectRatio:false,
         plugins:{

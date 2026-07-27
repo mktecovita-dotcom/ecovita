@@ -924,105 +924,22 @@ body.tv-mode #tvExitBtn{display:block}
     <!-- ══════════════ PAGE: GOOGLE ADS ══════════════ -->
     <div class="page" id="page-gads">
 
-      <div id="gadsNotConfigured" style="display:none;text-align:center;padding:60px 20px">
-        <div style="font-size:48px;margin-bottom:16px">🔍</div>
-        <div style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px">Google Ads não conectado</div>
-        <div style="font-size:13px;color:var(--mu);margin-bottom:20px">Configure a planilha Google Ads em Configurações de API.</div>
-        <button class="btn btn-primary" onclick="goPage('config')">⚙️ Ir para Configurações</button>
-      </div>
-
-      <div id="gadsContent">
-        <div class="fbar" style="margin-bottom:20px">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
-            <span class="fl">Tipo:</span>
-            <select id="gfTipo" onchange="renderGoogleAds()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tx)">
-              <option value="">Todos</option>
-              <option value="Pesquisa">Pesquisa</option>
-              <option value="Display">Display</option>
-              <option value="YouTube">YouTube</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Performance Max">Performance Max</option>
-            </select>
-            <span class="fl">Status:</span>
-            <select id="gfStatus" onchange="renderGoogleAds()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tx)">
-              <option value="">Todos</option>
-              <option value="Ativa">Ativas</option>
-              <option value="Pausada">Pausadas</option>
-            </select>
-            <span class="fl" style="margin-left:8px">De:</span>
-            <input type="date" id="gfDateIni" onchange="applyGadsDate()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-            <span class="fl">Até:</span>
-            <input type="date" id="gfDateFim" onchange="applyGadsDate()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-            <button class="btn" onclick="clearGadsDate()" style="padding:5px 10px;font-size:11px">✕ Limpar</button>
-          </div>
-          <span id="gadsInfo" style="font-size:11px;color:var(--mu);white-space:nowrap;padding-left:12px"></span>
+      <div id="gadsContent" style="display:flex;flex-direction:column;height:calc(100vh - 60px)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0">
+          <div style="font-size:13px;font-weight:600;color:var(--tx)">🔍 Google Ads — Looker Studio</div>
+          <a href="https://datastudio.google.com/reporting/12f939a6-9b61-474f-86fa-8762ef2e1051" target="_blank"
+             style="font-size:11px;color:var(--mu);text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--bdr);border-radius:8px;transition:all .2s"
+             onmouseover="this.style.color='var(--blue)';this.style.borderColor='var(--blue)'"
+             onmouseout="this.style.color='var(--mu)';this.style.borderColor='var(--bdr)'">
+            ↗ Abrir em nova aba
+          </a>
         </div>
-
-        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
-          <div class="kpi green"><div class="kpi-label">Investimento Total</div><div class="kpi-val" id="gk_gasto">—</div><div class="kpi-sub" id="gk_gastoS">Google Ads</div></div>
-          <div class="kpi blue"><div class="kpi-label">Cliques</div><div class="kpi-val" id="gk_cliques">—</div><div class="kpi-sub" id="gk_cliquesS">Total de cliques</div></div>
-          <div class="kpi purple"><div class="kpi-label">Impressões</div><div class="kpi-val" id="gk_imp">—</div><div class="kpi-sub" id="gk_impS">Alcance de exibição</div></div>
-          <div class="kpi amber"><div class="kpi-label">CTR Médio</div><div class="kpi-val" id="gk_ctr">—</div><div class="kpi-sub" id="gk_ctrS">Taxa de clique</div></div>
-          <div class="kpi teal"><div class="kpi-label">CPC Médio</div><div class="kpi-val" id="gk_cpc">—</div><div class="kpi-sub" id="gk_cpcS">Custo por clique</div></div>
-        </div>
-
-        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
-          <div class="kpi green"><div class="kpi-label">Conversões</div><div class="kpi-val" id="gk_conv">—</div><div class="kpi-sub" id="gk_convS">Total convertido</div></div>
-          <div class="kpi blue"><div class="kpi-label">Taxa de Conv.</div><div class="kpi-val" id="gk_txconv">—</div><div class="kpi-sub" id="gk_txconvS">Cliques → Conversão</div></div>
-          <div class="kpi red"><div class="kpi-label">Custo/Conv. (CPA)</div><div class="kpi-val" id="gk_cpa">—</div><div class="kpi-sub" id="gk_cpaS">Custo por conversão</div></div>
-          <div class="kpi amber"><div class="kpi-label">Impr. no Topo (%)</div><div class="kpi-val" id="gk_roas">—</div><div class="kpi-sub" id="gk_roasS">Share of top impressions</div></div>
-          <div class="kpi purple"><div class="kpi-label">Campanhas Ativas</div><div class="kpi-val" id="gk_ativas">—</div><div class="kpi-sub" id="gk_ativasS">de total</div></div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartTipo"></canvas></div></div>
-          <div class="card"><div class="card-hd"><div class="card-title">👆 Cliques por Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartCTR"></canvas></div></div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card">
-            <div class="card-hd"><div class="card-title">🥇 Posição Absoluta no Topo (%)</div></div>
-            <div style="height:200px;position:relative"><canvas id="gadsChartAbsTop"></canvas></div>
-          </div>
-          <div class="card">
-            <div class="card-hd"><div class="card-title">📈 CTR por Campanha</div></div>
-            <div style="height:200px;position:relative"><canvas id="gadsChartCTR2"></canvas></div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-hd">
-            <div class="card-title">📋 Performance por Campanha</div>
-            <span id="gadsCampCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 campanhas</span>
-          </div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px" id="gadsTable">
-              <thead>
-                <tr style="border-bottom:1px solid var(--bdr)">
-                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Campanha</th>
-                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
-                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Status</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Gasto</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Cliques</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CTR</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CPC</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Conv.</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CPA</th>
-                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">ROAS</th>
-                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Saúde</th>
-                </tr>
-              </thead>
-              <tbody id="gadsTableBody">
-                <tr><td colspan="11" style="text-align:center;padding:30px;color:var(--mu)">Carregando…</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-hd"><div class="card-title">📊 CPA por Campanha (top 10)</div></div>
-          <div id="gadsCPABars" style="display:flex;flex-direction:column;gap:8px;padding:4px 0"></div>
-        </div>
+        <iframe
+          src="https://lookerstudio.google.com/embed/reporting/12f939a6-9b61-474f-86fa-8762ef2e1051"
+          style="flex:1;width:100%;border:none;border-radius:12px;background:var(--bg2)"
+          allowfullscreen
+          sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads">
+        </iframe>
       </div>
     </div><!-- /page-gads -->
 

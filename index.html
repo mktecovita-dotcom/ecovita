@@ -5203,34 +5203,37 @@ async function loadInstagram(){
   if(body)    body.style.display='none';
   if(errEl)   errEl.style.display='none';
   if(st)      st.textContent='Carregando…';
-  try {
-    if(_hasOrgAPI()){
-      // ── Fonte: Graph API Instagram ──
+
+  var apiOk = false;
+
+  if(_hasOrgAPI()){
+    try{
+      // ── Camada 1: buscar lista de posts básicos ──
       if(st) st.textContent='Buscando posts via API…';
-      var medias = await _graphGetAll(_orgIgId()+'/media', {
+      var medias = await _graphGetAll(_orgIgId()+'/media',{
         fields:'id,caption,media_type,timestamp,like_count,comments_count,permalink',
         limit:'50'
       }, 3);
 
-      // Busca insights de cada post em paralelo (lotes de 10)
+      // ── Camada 2: insights por post (falha silenciosa por post) ──
       if(st) st.textContent='Buscando insights ('+medias.length+' posts)…';
-      var insightsList = [];
+      var insightsList=[];
       for(var i=0;i<medias.length;i+=10){
-        var batch = medias.slice(i,i+10);
-        var ins = await Promise.all(batch.map(function(m){ return _igPostInsights(m.id); }));
-        insightsList = insightsList.concat(ins);
+        var batch=medias.slice(i,i+10);
+        var ins=await Promise.all(batch.map(function(m){ return _igPostInsights(m.id); }));
+        insightsList=insightsList.concat(ins);
       }
 
-      // Monta estrutura compatível com renderPostagens()
       rawPostagens = medias.map(function(m,idx){
-        var ins = insightsList[idx]||{};
-        var tipo = m.media_type==='VIDEO'?'Vídeo':m.media_type==='CAROUSEL_ALBUM'?'Carrossel':'Foto';
+        var ins=insightsList[idx]||{};
+        var tipo=m.media_type==='VIDEO'?'Vídeo':m.media_type==='CAROUSEL_ALBUM'?'Carrossel':'Foto';
+        var hasInsights = ins.reach>0||ins.impressions>0;
         return {
           'Data de publicação': _isoToBR(m.timestamp),
           'Tipo de post':       tipo,
           'Visualizações':      String(ins.impressions||ins.video_views||0),
           'Alcance':            String(ins.reach||0),
-          'Engajamentos':       String(ins.total_interactions||0),
+          'Engajamentos':       String(ins.total_interactions||(Number(m.like_count||0)+Number(m.comments_count||0))),
           'Curtidas':           String(m.like_count||0),
           'Comentários':        String(m.comments_count||0),
           'Salvamentos':        String(ins.saved||0),
@@ -5238,29 +5241,46 @@ async function loadInstagram(){
           'Seguidores ganhos':  String(ins.follows||0),
           'Legenda':            (m.caption||'').substring(0,120),
           'Link':               m.permalink||'',
-          '_fonte':             'api'
+          '_fonte':             'api',
+          '_semInsights':       !hasInsights
         };
       });
-      rawStories = []; // Stories via API requer permissão adicional
+      rawStories=[];
+      apiOk=true;
+      var semIns=rawPostagens.filter(function(p){return p._semInsights;}).length;
+      var notice=semIns>0?' · ⚠️ '+semIns+' posts sem insights (permissão pendente)':'';
       if(loading) loading.style.display='none';
-      if(st) st.textContent = rawPostagens.length+' posts (API) · Stories via Sheets';
-    } else {
-      // ── Fonte: Google Sheets (fallback) ──
+      if(st) st.textContent=rawPostagens.length+' posts (API)'+notice;
+    } catch(apiErr){
+      // ── Camada 3: fallback para Sheets se API falhar ──
+      console.warn('Instagram API falhou, usando Sheets:', apiErr.message);
+      if(errEl){
+        errEl.style.display='block';
+        errEl.textContent='⚠️ API: '+apiErr.message+' — carregando via Sheets…';
+        errEl.style.color='var(--amber)';
+        errEl.style.background='rgba(245,166,35,.08)';
+        errEl.style.border='1px solid rgba(245,166,35,.3)';
+      }
+    }
+  }
+
+  if(!apiOk){
+    try{
       var [rawP, rawS] = await Promise.all([
         fetchCSV(IG_POSTAGEM_SHEET,'0'),
-        fetchCSV(IG_STORY_SHEET,   '0'),
+        fetchCSV(IG_STORY_SHEET,'0'),
       ]);
-      rawPostagens = rawP;
-      rawStories   = rawS;
+      rawPostagens=rawP; rawStories=rawS;
       if(loading) loading.style.display='none';
-      if(st) st.textContent = rawPostagens.length+' posts · '+rawStories.length+' stories (Sheets)';
+      if(st) st.textContent=rawPostagens.length+' posts · '+rawStories.length+' stories (Sheets)';
+    } catch(sheetErr){
+      if(loading) loading.style.display='none';
+      if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+sheetErr.message; errEl.style.color=''; errEl.style.background=''; errEl.style.border=''; }
+      if(st) st.textContent='';
+      return;
     }
-    applyIgFilter();
-  } catch(e) {
-    if(loading) loading.style.display='none';
-    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
-    if(st) st.textContent='';
   }
+  applyIgFilter();
 }
 
 function applyIgFilter(){
@@ -5699,15 +5719,19 @@ async function loadFacebook(){
   if(body)    body.style.display='none';
   if(errEl)   errEl.style.display='none';
   if(st)      st.textContent='Carregando…';
-  try {
-    if(_hasOrgAPI()){
-      // ── Fonte: Graph API Facebook ──
+
+  var apiOk=false;
+
+  if(_hasOrgAPI()){
+    try{
+      // ── Camada 1: buscar lista de posts básicos ──
       if(st) st.textContent='Buscando posts via API…';
       var posts = await _graphGetAll(_orgFbId()+'/posts',{
         fields:'id,message,created_time,full_picture,shares,likes.summary(true),comments.summary(true),attachments',
         limit:'50'
       }, 3);
 
+      // ── Camada 2: insights por post (falha silenciosa por post) ──
       if(st) st.textContent='Buscando insights ('+posts.length+' posts)…';
       var insightsList=[];
       for(var i=0;i<posts.length;i+=10){
@@ -5719,45 +5743,67 @@ async function loadFacebook(){
       rawFacebook = posts.map(function(p,idx){
         var ins=insightsList[idx]||{};
         var reac=ins.post_reactions_by_type_total||{};
-        var totReac=Object.values(reac).reduce(function(s,v){return s+(typeof v==='object'?Object.values(v).reduce(function(a,b){return a+b;},0):v);},0);
+        var totReac=0;
+        try{ totReac=Object.values(reac).reduce(function(s,v){return s+(typeof v==='object'?Object.values(v).reduce(function(a,b){return a+b;},0):Number(v)||0);},0); }catch(e){}
         var linkClicks=0, totalClicks=0;
         if(ins.post_clicks_by_type&&typeof ins.post_clicks_by_type==='object'){
-          linkClicks = ins.post_clicks_by_type.link||0;
-          totalClicks = Object.values(ins.post_clicks_by_type).reduce(function(s,v){return s+v;},0);
+          try{
+            linkClicks=ins.post_clicks_by_type.link||0;
+            totalClicks=Object.values(ins.post_clicks_by_type).reduce(function(s,v){return s+v;},0);
+          }catch(e){}
         }
-        if(!totalClicks) totalClicks = typeof ins.post_clicks==='number' ? ins.post_clicks : 0;
-        var attach = p.attachments?.data?.[0];
-        var tipo = attach ? (attach.type==='video'?'Vídeo':attach.type==='album'?'Álbum':'Foto') : 'Post';
+        if(!totalClicks) totalClicks=typeof ins.post_clicks==='number'?ins.post_clicks:0;
+        var attach=p.attachments&&p.attachments.data&&p.attachments.data[0];
+        var tipo=attach?(attach.type==='video'?'Vídeo':attach.type==='album'?'Álbum':'Foto'):'Post';
+        var hasInsights=!!(ins.post_impressions||ins.post_reach);
         return {
           'Data de Publicação': _isoToBR(p.created_time),
           'Tipo de Post':       tipo,
           'Visualizações':      String(ins.post_impressions||0),
           'Alcance':            String(ins.post_reach||0),
-          'Engajamento Total':  String(ins.post_engaged_users||0),
-          'Reações':            String(totReac || (p.likes?.summary?.total_count||0)),
-          'Comentários':        String(p.comments?.summary?.total_count||0),
-          'Compartilhamentos':  String(p.shares?.count||0),
+          'Engajamento Total':  String(ins.post_engaged_users||(Number(p.likes&&p.likes.summary&&p.likes.summary.total_count||0)+Number(p.comments&&p.comments.summary&&p.comments.summary.total_count||0)+Number(p.shares&&p.shares.count||0))),
+          'Reações':            String(totReac||(p.likes&&p.likes.summary&&p.likes.summary.total_count||0)),
+          'Comentários':        String(p.comments&&p.comments.summary&&p.comments.summary.total_count||0),
+          'Compartilhamentos':  String(p.shares&&p.shares.count||0),
           'Cliques no Link':    String(linkClicks),
           'Total de Cliques':   String(totalClicks),
           'Mensagem':           (p.message||'').substring(0,120),
-          '_fonte':             'api'
+          '_fonte':             'api',
+          '_semInsights':       !hasInsights
         };
       });
+      apiOk=true;
+      var semIns=rawFacebook.filter(function(p){return p._semInsights;}).length;
+      var notice=semIns>0?' · ⚠️ '+semIns+' posts sem insights (permissão pendente)':'';
       if(loading) loading.style.display='none';
-      if(st) st.textContent = rawFacebook.length+' posts (API)';
-    } else {
-      // ── Fonte: Google Sheets (fallback) ──
-      var csv = await fetchCSV(FB_SHEET,'0');
-      rawFacebook = csv;
-      if(loading) loading.style.display='none';
-      if(st) st.textContent = rawFacebook.length+' posts (Sheets)';
+      if(st) st.textContent=rawFacebook.length+' posts (API)'+notice;
+    } catch(apiErr){
+      // ── Camada 3: fallback para Sheets se API falhar ──
+      console.warn('Facebook API falhou, usando Sheets:', apiErr.message);
+      if(errEl){
+        errEl.style.display='block';
+        errEl.textContent='⚠️ API: '+apiErr.message+' — carregando via Sheets…';
+        errEl.style.color='var(--amber)';
+        errEl.style.background='rgba(245,166,35,.08)';
+        errEl.style.border='1px solid rgba(245,166,35,.3)';
+      }
     }
-    applyFbFilter();
-  } catch(e){
-    if(loading) loading.style.display='none';
-    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
-    if(st) st.textContent='';
   }
+
+  if(!apiOk){
+    try{
+      var csv=await fetchCSV(FB_SHEET,'0');
+      rawFacebook=csv;
+      if(loading) loading.style.display='none';
+      if(st) st.textContent=rawFacebook.length+' posts (Sheets)';
+    } catch(sheetErr){
+      if(loading) loading.style.display='none';
+      if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+sheetErr.message; errEl.style.color=''; errEl.style.background=''; errEl.style.border=''; }
+      if(st) st.textContent='';
+      return;
+    }
+  }
+  applyFbFilter();
 }
 
 // Data publicação FB: DD/MM/YYYY HH:MM → YYYY-MM-DD

@@ -2123,12 +2123,20 @@ function parseMeta(rows){
 }
 
 function parseLeads(rows){
+  // Datas da limpeza em massa — leads "Perdido" nessas datas devem ser ignorados
+  const LIMPEZA_DATAS = ['23/07/2026','24/07/2026'];
   return rows.filter(r=>{
     if(!r['Id']||isNaN(parseInt(r['Id']))) return false;
     const n=(r['Nome']||'').toLowerCase(),e=(r['E-mail']||'').toLowerCase();
     if(n.includes('teste')||n.includes('treinamento')) return false;
     if(e.includes('cvcrm.com')||e.includes('@exemplo')||e.includes('testando')) return false;
-    return!!r['Situação'];
+    if(!r['Situação']) return false;
+    // Exclui leads marcados como "Perdido" nas datas da limpeza em massa (23/07 e 24/07/2026)
+    const sit = (r['Situação']||'').trim();
+    const dataUlt = (r['Data da Última Entrada']||r['Data da última entrada']||r['Data da Ultima Entrada']||'').trim();
+    const dataUltDia = dataUlt.substring(0,10); // pega DD/MM/YYYY
+    if(sit==='Perdido' && LIMPEZA_DATAS.includes(dataUltDia)) return false;
+    return true;
   }).map(r=>{
     const p=(r['Primeira Origem']||'').trim();
     const u=(r['Última Origem']||'').trim();

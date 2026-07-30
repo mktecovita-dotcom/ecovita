@@ -80,6 +80,14 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .page{display:none;padding:24px;max-width:1440px;margin:0 auto}
 .page.active{display:block}
 #page-gads.active{padding:8px 8px 0;max-width:100%}
+.fn-chip{padding:4px 11px;font-size:11px;font-weight:600;border:1px solid var(--bdr);border-radius:20px;cursor:pointer;background:var(--bg3);color:var(--mu);transition:all .2s}
+.fn-chip.fn-chip-on{background:rgba(79,142,247,.18);border-color:var(--blue);color:var(--blue)}
+.fn-emp-check{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx);transition:background .15s}
+.fn-emp-check:hover{background:var(--bg3)}
+.fn-emp-check input{accent-color:var(--blue);width:14px;height:14px}
+.fn-bar{height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:width .5s ease;position:relative;min-width:80px}
+.fn-bar-val{font-size:24px;font-weight:900;color:#fff;line-height:1.1}
+.fn-bar-lbl{font-size:10px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 
 /* FILTER BAR */
 .fbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px}
@@ -517,6 +525,9 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item active" onclick="goPage('dashboard')">
         <span class="nav-icon">📊</span> Dashboard
       </div>
+      <div class="nav-item" onclick="goPage('funil')">
+        <span class="nav-icon">🔽</span> Funil de Vendas
+      </div>
       <div class="nav-item" onclick="goPage('campanhas')">
         <span class="nav-icon">📣</span> Campanhas Meta
       </div>
@@ -731,6 +742,128 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
     </div>
+
+    <!-- ══════════════ PAGE: FUNIL DE VENDAS ══════════════ -->
+    <div class="page" id="page-funil">
+
+      <!-- Filtros -->
+      <div class="card" style="margin-bottom:18px;padding:16px 20px">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+
+          <!-- Datas -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="fl">De:</span>
+            <input type="date" id="fnDe" onchange="renderFunil()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <span class="fl">Até:</span>
+            <input type="date" id="fnAte" onchange="renderFunil()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <button class="btn" onclick="fnClearDates()" style="padding:5px 9px;font-size:11px">✕</button>
+          </div>
+
+          <!-- Tipo de Funil -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="fl">Funil:</span>
+            <div style="display:flex;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
+              <button id="fnBtnVida" onclick="fnSetTipo('vida')"
+                style="padding:5px 14px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:var(--blue);color:#fff;transition:all .2s">
+                📅 Vida Toda
+              </button>
+              <button id="fnBtnMes" onclick="fnSetTipo('mes')"
+                style="padding:5px 14px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s">
+                📆 Mensal
+              </button>
+            </div>
+          </div>
+
+          <!-- Tipo de Lead -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="fl">Lead:</span>
+            <div style="display:flex;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
+              <button id="fnLdTodos" onclick="fnSetLead('todos')"
+                style="padding:5px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:var(--purple);color:#fff;transition:all .2s">Todos</button>
+              <button id="fnLdNovo" onclick="fnSetLead('novo')"
+                style="padding:5px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s">Novo</button>
+              <button id="fnLdReimp" onclick="fnSetLead('reimp')"
+                style="padding:5px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s">Reimpactado</button>
+            </div>
+          </div>
+
+          <!-- Origem multi-select -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="fl">Origem:</span>
+            <div style="display:flex;gap:4px;flex-wrap:wrap" id="fnOrigemChips">
+              <button class="fn-chip fn-chip-on" data-orig="chatbot" onclick="fnToggleOrig(this)">💬 ChatBot</button>
+              <button class="fn-chip fn-chip-on" data-orig="facebook" onclick="fnToggleOrig(this)">📘 Facebook</button>
+              <button class="fn-chip fn-chip-on" data-orig="instagram" onclick="fnToggleOrig(this)">📸 Instagram</button>
+              <button class="fn-chip fn-chip-on" data-orig="website" onclick="fnToggleOrig(this)">🌐 WebSite</button>
+            </div>
+          </div>
+
+          <!-- Empreendimentos multi-select dropdown -->
+          <div style="position:relative">
+            <button onclick="fnToggleEmpDrop()" id="fnEmpBtn"
+              style="padding:5px 14px;font-size:11px;font-weight:600;border:1px solid var(--bdr);border-radius:8px;background:var(--bg4);color:var(--tx);cursor:pointer;white-space:nowrap">
+              🏢 Empreendimentos <span id="fnEmpCount" style="color:var(--blue)">(Todos)</span> ▾
+            </button>
+            <div id="fnEmpDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:8px;min-width:240px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)">
+              <div style="display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
+                <button onclick="fnEmpAll()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Todos</button>
+                <button onclick="fnEmpNone()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Nenhum</button>
+              </div>
+              <div id="fnEmpList" style="display:flex;flex-direction:column;gap:4px"></div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="renderFunil()" style="padding:5px 16px;font-size:11px">🔍 Filtrar</button>
+        </div>
+
+        <!-- Info resultado -->
+        <div id="fnInfo" style="margin-top:10px;font-size:11px;color:var(--mu)"></div>
+      </div>
+
+      <!-- KPIs resumo -->
+      <div class="kpi-grid kpi-5" style="margin-bottom:18px" id="fnKpis">
+        <div class="kpi blue"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="fnK1">—</div><div class="kpi-sub">Online no período</div></div>
+        <div class="kpi purple"><div class="kpi-label">Em Atendimento</div><div class="kpi-val" id="fnK2">—</div><div class="kpi-sub" id="fnK2s">—</div></div>
+        <div class="kpi amber"><div class="kpi-label">Com Reserva</div><div class="kpi-val" id="fnK3">—</div><div class="kpi-sub" id="fnK3s">—</div></div>
+        <div class="kpi green"><div class="kpi-label">Venda Realizada</div><div class="kpi-val" id="fnK4">—</div><div class="kpi-sub" id="fnK4s">—</div></div>
+        <div class="kpi teal"><div class="kpi-label">Conversão</div><div class="kpi-val" id="fnK5">—</div><div class="kpi-sub">Leads → Vendas</div></div>
+      </div>
+
+      <!-- Funil visual -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-hd">
+          <div class="card-title" id="fnTituloFunil">🔽 Funil — Vida Toda</div>
+          <span style="font-size:11px;color:var(--mu)" id="fnSubtitle"></span>
+        </div>
+        <div id="fnFunilBody" style="padding:8px 0"></div>
+      </div>
+
+      <!-- Tabela detalhada por empreendimento -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📋 Detalhamento por Empreendimento</div>
+          <span id="fnTblCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)">—</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bdr)">
+                <th style="text-align:left;padding:8px 12px;color:var(--mu);font-weight:600">Empreendimento</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Leads</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Atendimento</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">% Atend.</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Reserva</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">% Reserva</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Vendas</th>
+                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Conversão</th>
+              </tr>
+            </thead>
+            <tbody id="fnTblBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-funil -->
 
     <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
     <div class="page" id="page-campanhas">
@@ -1963,7 +2096,7 @@ function startCountdown(){
 // NAVEGAÇÃO
 // ═══════════════════════════════════════════════════════
 const PAGE_TITLES={
-  dashboard:'Dashboard',campanhas:'Campanhas Meta',
+  dashboard:'Dashboard',funil:'Funil de Vendas',campanhas:'Campanhas Meta',
   investimento:'Investimento',gads:'Google Ads',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
@@ -1975,7 +2108,7 @@ function goPage(pg){
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',funil:'funil',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
@@ -1988,6 +2121,7 @@ function goPage(pg){
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
   if(pg==='mercado') renderMercadoHistorico();
+  if(pg==='funil'){fnInitEmpresas();renderFunil();}
   if(pg==='config') initConfigPage();
   if(pg==='meta') initMetaPage();
   if(pg==='gads') renderGoogleAds();
@@ -3245,6 +3379,193 @@ function renderInvestimento(){
       <td style="padding-right:14px;min-width:120px">${bar}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="12" style="padding:16px;color:'+clrMu+'">Nenhum dado encontrado</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════
+// FUNIL DE VENDAS
+// ═══════════════════════════════════════════════════════
+let _fnTipo='vida'; // 'vida' | 'mensal'
+let _fnLead='todos'; // 'todos' | 'novo' | 'reimp'
+let _fnOrigem=new Set(['chatbot','facebook','instagram','website']);
+let _fnEmps=new Set(); // empty = todos
+
+function fnSetTipo(t){
+  _fnTipo=t;
+  document.getElementById('fnBtnVida').classList.toggle('fn-chip-on',t==='vida');
+  document.getElementById('fnBtnMes').classList.toggle('fn-chip-on',t==='mensal');
+  renderFunil();
+}
+function fnSetLead(t){
+  _fnLead=t;
+  ['fnLdTodos','fnLdNovo','fnLdReimp'].forEach((id,i)=>{
+    document.getElementById(id).classList.toggle('fn-chip-on',['todos','novo','reimp'][i]===t);
+  });
+  renderFunil();
+}
+function fnToggleOrig(orig){
+  if(_fnOrigem.has(orig)) _fnOrigem.delete(orig); else _fnOrigem.add(orig);
+  document.querySelectorAll('#fnOrigemChips .fn-chip').forEach(c=>{
+    const o=c.dataset.orig;
+    c.classList.toggle('fn-chip-on',_fnOrigem.has(o));
+  });
+  renderFunil();
+}
+function fnToggleEmpDrop(){
+  const d=document.getElementById('fnEmpDrop');
+  d.style.display=d.style.display==='block'?'none':'block';
+}
+function fnEmpAll(){
+  _fnEmps=new Set();
+  document.querySelectorAll('#fnEmpList input[type=checkbox]').forEach(c=>c.checked=false);
+  document.getElementById('fnEmpCount').textContent='Todos';
+  renderFunil();
+}
+function fnEmpNone(){}
+function fnClearDates(){
+  document.getElementById('fnDe').value='';
+  document.getElementById('fnAte').value='';
+  renderFunil();
+}
+function fnInitEmpresas(){
+  const emps=[...new Set(leadsCV.filter(l=>l.online).map(l=>l.emp).filter(Boolean))].sort();
+  const list=document.getElementById('fnEmpList');
+  list.innerHTML=emps.map(e=>`
+    <label class="fn-emp-check">
+      <input type="checkbox" value="${e}" onchange="fnEmpChange(this)"> ${e}
+    </label>`).join('');
+}
+function fnEmpChange(cb){
+  if(cb.checked) _fnEmps.add(cb.value); else _fnEmps.delete(cb.value);
+  const n=_fnEmps.size;
+  document.getElementById('fnEmpCount').textContent=n===0?'Todos':n+' selecionado'+(n>1?'s':'');
+  renderFunil();
+}
+
+function renderFunil(){
+  const de=document.getElementById('fnDe')?.value;
+  const ate=document.getElementById('fnAte')?.value;
+  const deD=de?new Date(de+'T00:00:00'):null;
+  const ateD=ate?new Date(ate+'T23:59:59'):null;
+
+  // Situações por etapa
+  const ATEND=['Em Atendimento','Visita Agendada','Visita Cancelada','Visita Realizada','Simulação','Análise de Crédito (Pré-Cadastro)'];
+  const RESERVA=['Com Reserva'];
+  const VENDIDO=['Venda Realizada'];
+
+  const origens=_fnOrigem;
+
+  let base=leadsCV.filter(l=>{
+    if(!l.online) return false;
+    // filtro origem
+    const orig=(l.primeiraOrigem||'').toLowerCase();
+    if(![...origens].some(o=>orig.includes(o))) return false;
+    // filtro lead type
+    if(_fnLead==='novo' && !l.novo) return false;
+    if(_fnLead==='reimp' && !l.reimpactado) return false;
+    // filtro empreendimento
+    if(_fnEmps.size>0 && !_fnEmps.has(l.emp)) return false;
+    return true;
+  });
+
+  // Filtro por data (dataCadastro para todos)
+  function inPeriodCad(l){
+    if(!deD && !ateD) return true;
+    const d=l.dataCadastro;
+    if(!d) return false;
+    if(deD && d<deD) return false;
+    if(ateD && d>ateD) return false;
+    return true;
+  }
+  function inPeriodUlt(l){
+    const d=l.dataUltima;
+    if(!d) return false;
+    if(deD && d<deD) return false;
+    if(ateD && d>ateD) return false;
+    return true;
+  }
+
+  let leads;
+  if(_fnTipo==='vida'){
+    leads=base.filter(l=>inPeriodCad(l));
+  } else {
+    // Mensal: dataCadastro E dataUltima no mesmo período
+    leads=base.filter(l=>inPeriodCad(l)&&inPeriodUlt(l));
+  }
+
+  const total=leads.length;
+  const atend=leads.filter(l=>ATEND.includes(l.situacao)||RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)).length;
+  const reserva=leads.filter(l=>RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)).length;
+  const vendido=leads.filter(l=>VENDIDO.includes(l.situacao)).length;
+  const conv=total>0?((vendido/total)*100):0;
+
+  // KPI cards
+  const fPct=(n,d)=>d>0?((n/d)*100).toFixed(1)+'%':'—';
+  document.getElementById('fnK1').textContent=fN(total);
+  document.getElementById('fnK2').textContent=fN(atend);
+  document.getElementById('fnK2s').textContent=fPct(atend,total)+' dos leads';
+  document.getElementById('fnK3').textContent=fN(reserva);
+  document.getElementById('fnK3s').textContent=fPct(reserva,atend)+' do atendimento';
+  document.getElementById('fnK4').textContent=fN(vendido);
+  document.getElementById('fnK4s').textContent=fPct(vendido,reserva)+' das reservas';
+  document.getElementById('fnK5').textContent=conv.toFixed(1)+'%';
+
+  // Funil visual
+  const stages=[
+    {lbl:'Leads',n:total,color:'#4f8ef7'},
+    {lbl:'Atendimento',n:atend,color:'#9b7ff4'},
+    {lbl:'Reserva',n:reserva,color:'#26c6da'},
+    {lbl:'Vendido',n:vendido,color:'#2ecc8e'},
+  ];
+  const maxN=total||1;
+  const body=document.getElementById('fnFunilBody');
+  body.innerHTML=stages.map((s,i)=>{
+    const pct=Math.max(30,(s.n/maxN)*100);
+    const prevN=i>0?stages[i-1].n:null;
+    const pctPrev=prevN!=null&&prevN>0?((s.n/prevN)*100).toFixed(1):null;
+    const pctPrevStr=pctPrev!=null?`<div style="font-size:11px;color:var(--mu);margin-top:4px">▼ ${pctPrev}% da etapa anterior</div>`:'';
+    return `<div style="display:flex;flex-direction:column;align-items:center;width:100%;gap:2px">
+      <div style="width:${pct}%;background:${s.color};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;padding:8px 16px;transition:width .5s ease">
+        <div style="font-size:22px;font-weight:900;color:#fff">${fN(s.n)}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px">${s.lbl}</div>
+      </div>
+      ${pctPrevStr}
+      ${i<stages.length-1?'<div style="font-size:18px;color:var(--mu);line-height:1">▼</div>':''}
+    </div>`;
+  }).join('');
+
+  // Detail table by empreendimento
+  const empMap={};
+  leads.forEach(l=>{
+    const e=l.emp||'Outros';
+    if(!empMap[e]) empMap[e]={leads:0,atend:0,reserva:0,vendido:0};
+    empMap[e].leads++;
+    if(ATEND.includes(l.situacao)||RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)) empMap[e].atend++;
+    if(RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)) empMap[e].reserva++;
+    if(VENDIDO.includes(l.situacao)) empMap[e].vendido++;
+  });
+  const rows=Object.entries(empMap).sort((a,b)=>b[1].leads-a[1].leads);
+  const tb=document.getElementById('fnTblBody');
+  tb.innerHTML=rows.map(([e,d])=>`
+    <tr>
+      <td style="font-weight:600;color:var(--tx)">${e}</td>
+      <td style="text-align:center">${fN(d.leads)}</td>
+      <td style="text-align:center">${fN(d.atend)} <span style="color:var(--mu);font-size:11px">(${fPct(d.atend,d.leads)})</span></td>
+      <td style="text-align:center">${fN(d.reserva)} <span style="color:var(--mu);font-size:11px">(${fPct(d.reserva,d.atend)})</span></td>
+      <td style="text-align:center">${fN(d.vendido)}</td>
+      <td style="text-align:center;font-weight:700;color:var(--green)">${fPct(d.vendido,d.leads)}</td>
+    </tr>`).join('');
+  document.getElementById('fnTblCount').textContent=rows.length+' empreendimento'+(rows.length!==1?'s':'');
+
+  // Titulo
+  const tit=document.getElementById('fnTituloFunil');
+  if(tit) tit.textContent=_fnTipo==='vida'?'Funil Vida Toda':'Funil Mensal';
+  const sub=document.getElementById('fnSubtitle');
+  if(sub){
+    const pd=de&&ate?`${de.split('-').reverse().join('/')} → ${ate.split('-').reverse().join('/')}`:(de?`a partir de ${de.split('-').reverse().join('/')}`:(ate?`até ${ate.split('-').reverse().join('/')}`:'Todo o período'));
+    sub.textContent=pd;
+  }
+  const info=document.getElementById('fnInfo');
+  if(info) info.textContent=`${fN(total)} leads no período`;
 }
 
 // ═══════════════════════════════════════════════════════

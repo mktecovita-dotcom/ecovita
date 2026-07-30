@@ -759,21 +759,6 @@ body.tv-mode #tvExitBtn{display:block}
             <button class="btn" onclick="fnClearDates()" style="padding:5px 9px;font-size:11px">✕</button>
           </div>
 
-          <!-- Tipo de Funil -->
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="fl">Funil:</span>
-            <div style="display:flex;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
-              <button id="fnBtnVida" onclick="fnSetTipo('vida')"
-                style="padding:5px 14px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:var(--blue);color:#fff;transition:all .2s">
-                📅 Vida Toda
-              </button>
-              <button id="fnBtnMes" onclick="fnSetTipo('mes')"
-                style="padding:5px 14px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s">
-                📆 Mensal
-              </button>
-            </div>
-          </div>
-
           <!-- Tipo de Lead -->
           <div style="display:flex;align-items:center;gap:6px">
             <span class="fl">Lead:</span>
@@ -787,14 +772,23 @@ body.tv-mode #tvExitBtn{display:block}
             </div>
           </div>
 
-          <!-- Origem multi-select -->
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="fl">Origem:</span>
-            <div style="display:flex;gap:4px;flex-wrap:wrap" id="fnOrigemChips">
-              <button class="fn-chip fn-chip-on" data-orig="chatbot" onclick="fnToggleOrig(this)">💬 ChatBot</button>
-              <button class="fn-chip fn-chip-on" data-orig="facebook" onclick="fnToggleOrig(this)">📘 Facebook</button>
-              <button class="fn-chip fn-chip-on" data-orig="instagram" onclick="fnToggleOrig(this)">📸 Instagram</button>
-              <button class="fn-chip fn-chip-on" data-orig="website" onclick="fnToggleOrig(this)">🌐 WebSite</button>
+          <!-- Origem multi-select dropdown -->
+          <div style="position:relative">
+            <button onclick="fnToggleOrigDrop()" id="fnOrigBtn"
+              style="padding:5px 14px;font-size:11px;font-weight:600;border:1px solid var(--bdr);border-radius:8px;background:var(--bg4);color:var(--tx);cursor:pointer;white-space:nowrap">
+              🌐 Origem <span id="fnOrigCount" style="color:var(--blue)">(Todas)</span> ▾
+            </button>
+            <div id="fnOrigDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4)">
+              <div style="display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
+                <button onclick="fnOrigAll()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Todas</button>
+                <button onclick="fnOrigNone()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Nenhuma</button>
+              </div>
+              <div id="fnOrigList" style="display:flex;flex-direction:column;gap:4px">
+                <label class="fn-emp-check"><input type="checkbox" value="chatbot" checked onchange="fnOrigChange(this)"> 💬 ChatBot</label>
+                <label class="fn-emp-check"><input type="checkbox" value="facebook" checked onchange="fnOrigChange(this)"> 📘 Facebook</label>
+                <label class="fn-emp-check"><input type="checkbox" value="instagram" checked onchange="fnOrigChange(this)"> 📸 Instagram</label>
+                <label class="fn-emp-check"><input type="checkbox" value="website" checked onchange="fnOrigChange(this)"> 🌐 WebSite</label>
+              </div>
             </div>
           </div>
 
@@ -832,7 +826,7 @@ body.tv-mode #tvExitBtn{display:block}
       <!-- Funil visual -->
       <div class="card" style="margin-bottom:18px">
         <div class="card-hd">
-          <div class="card-title" id="fnTituloFunil">🔽 Funil — Vida Toda</div>
+          <div class="card-title" id="fnTituloFunil">🔽 Funil Mensal</div>
           <span style="font-size:11px;color:var(--mu)" id="fnSubtitle"></span>
         </div>
         <div id="fnFunilBody" style="padding:8px 0"></div>
@@ -3384,17 +3378,10 @@ function renderInvestimento(){
 // ═══════════════════════════════════════════════════════
 // FUNIL DE VENDAS
 // ═══════════════════════════════════════════════════════
-let _fnTipo='vida'; // 'vida' | 'mensal'
 let _fnLead='todos'; // 'todos' | 'novo' | 'reimp'
 let _fnOrigem=new Set(['chatbot','facebook','instagram','website']);
 let _fnEmps=new Set(); // empty = todos
 
-function fnSetTipo(t){
-  _fnTipo=t;
-  document.getElementById('fnBtnVida').classList.toggle('fn-chip-on',t==='vida');
-  document.getElementById('fnBtnMes').classList.toggle('fn-chip-on',t==='mensal');
-  renderFunil();
-}
 function fnSetLead(t){
   _fnLead=t;
   ['fnLdTodos','fnLdNovo','fnLdReimp'].forEach((id,i)=>{
@@ -3402,12 +3389,26 @@ function fnSetLead(t){
   });
   renderFunil();
 }
-function fnToggleOrig(orig){
-  if(_fnOrigem.has(orig)) _fnOrigem.delete(orig); else _fnOrigem.add(orig);
-  document.querySelectorAll('#fnOrigemChips .fn-chip').forEach(c=>{
-    const o=c.dataset.orig;
-    c.classList.toggle('fn-chip-on',_fnOrigem.has(o));
-  });
+function fnToggleOrigDrop(){
+  const d=document.getElementById('fnOrigDrop');
+  d.style.display=d.style.display==='block'?'none':'block';
+}
+function fnOrigChange(cb){
+  if(cb.checked) _fnOrigem.add(cb.value); else _fnOrigem.delete(cb.value);
+  const n=_fnOrigem.size;
+  document.getElementById('fnOrigCount').textContent=n===4||n===0?'(Todas)':n+' selecionada'+(n>1?'s':'');
+  renderFunil();
+}
+function fnOrigAll(){
+  _fnOrigem=new Set(['chatbot','facebook','instagram','website']);
+  document.querySelectorAll('#fnOrigList input[type=checkbox]').forEach(c=>c.checked=true);
+  document.getElementById('fnOrigCount').textContent='(Todas)';
+  renderFunil();
+}
+function fnOrigNone(){
+  _fnOrigem=new Set();
+  document.querySelectorAll('#fnOrigList input[type=checkbox]').forEach(c=>c.checked=false);
+  document.getElementById('fnOrigCount').textContent='(Nenhuma)';
   renderFunil();
 }
 function fnToggleEmpDrop(){
@@ -3484,13 +3485,8 @@ function renderFunil(){
     return true;
   }
 
-  let leads;
-  if(_fnTipo==='vida'){
-    leads=base.filter(l=>inPeriodCad(l));
-  } else {
-    // Mensal: dataCadastro E dataUltima no mesmo período
-    leads=base.filter(l=>inPeriodCad(l)&&inPeriodUlt(l));
-  }
+  // Mensal: dataCadastro E dataUltima no mesmo período
+  const leads=base.filter(l=>inPeriodCad(l)&&inPeriodUlt(l));
 
   const total=leads.length;
   const atend=leads.filter(l=>ATEND.includes(l.situacao)||RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)).length;
@@ -3558,7 +3554,7 @@ function renderFunil(){
 
   // Titulo
   const tit=document.getElementById('fnTituloFunil');
-  if(tit) tit.textContent=_fnTipo==='vida'?'Funil Vida Toda':'Funil Mensal';
+  if(tit) tit.textContent='🔽 Funil Mensal';
   const sub=document.getElementById('fnSubtitle');
   if(sub){
     const pd=de&&ate?`${de.split('-').reverse().join('/')} → ${ate.split('-').reverse().join('/')}`:(de?`a partir de ${de.split('-').reverse().join('/')}`:(ate?`até ${ate.split('-').reverse().join('/')}`:'Todo o período'));

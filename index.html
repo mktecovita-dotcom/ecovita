@@ -2161,7 +2161,7 @@ function parseMeta(rows){
 
 function parseLeads(rows){
   // Datas da limpeza em massa — leads "Perdido" nessas datas devem ser ignorados
-  const LIMPEZA_DATAS = ['23/07/2026','24/07/2026'];
+  const LIMPEZA_DATAS = ['23/07/2026','24/07/2026','29/07/2026'];
   return rows.filter(r=>{
     if(!r['Id']||isNaN(parseInt(r['Id']))) return false;
     const n=(r['Nome']||'').toLowerCase(),e=(r['E-mail']||'').toLowerCase();

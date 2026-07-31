@@ -526,7 +526,7 @@ body.tv-mode #tvExitBtn{display:block}
         <span class="nav-icon">📊</span> Dashboard
       </div>
       <div class="nav-item" onclick="goPage('funil')">
-        <span class="nav-icon">🔽</span> Funil de Vendas
+        <span class="nav-icon">🔽</span> Funil de Leads
       </div>
       <div class="nav-item" onclick="goPage('campanhas')">
         <span class="nav-icon">📣</span> Campanhas Meta
@@ -2090,7 +2090,7 @@ function startCountdown(){
 // NAVEGAÇÃO
 // ═══════════════════════════════════════════════════════
 const PAGE_TITLES={
-  dashboard:'Dashboard',funil:'Funil de Vendas',campanhas:'Campanhas Meta',
+  dashboard:'Dashboard',funil:'Funil de Leads',campanhas:'Campanhas Meta',
   investimento:'Investimento',gads:'Google Ads',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
@@ -3468,25 +3468,19 @@ function renderFunil(){
     return true;
   });
 
-  // Filtro por data (dataCadastro para todos)
-  function inPeriodCad(l){
+  // Filtro de data:
+  // - "novo": usa dataCadastro (lead entrou no período)
+  // - "reimp" e "todos": usa dataUltima (lead estava ativo no período, captura ambos)
+  function inPeriod(l){
     if(!deD && !ateD) return true;
-    const d=l.dataCadastro;
-    if(!d) return false;
-    if(deD && d<deD) return false;
-    if(ateD && d>ateD) return false;
-    return true;
-  }
-  function inPeriodUlt(l){
-    const d=l.dataUltima;
+    const d=_fnLead==='novo' ? l.dataCadastro : (l.dataUltima || l.dataCadastro);
     if(!d) return false;
     if(deD && d<deD) return false;
     if(ateD && d>ateD) return false;
     return true;
   }
 
-  // Mensal: dataCadastro E dataUltima no mesmo período
-  const leads=base.filter(l=>inPeriodCad(l)&&inPeriodUlt(l));
+  const leads=base.filter(l=>inPeriod(l));
 
   const total=leads.length;
   const atend=leads.filter(l=>ATEND.includes(l.situacao)||RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)).length;
@@ -3505,29 +3499,40 @@ function renderFunil(){
   document.getElementById('fnK4s').textContent=fPct(vendido,reserva)+' das reservas';
   document.getElementById('fnK5').textContent=conv.toFixed(1)+'%';
 
-  // Funil visual
+  // Funil visual — largura proporcional ao total, mínimo 12%
   const stages=[
-    {lbl:'Leads',n:total,color:'#4f8ef7'},
-    {lbl:'Atendimento',n:atend,color:'#9b7ff4'},
-    {lbl:'Reserva',n:reserva,color:'#26c6da'},
-    {lbl:'Vendido',n:vendido,color:'#2ecc8e'},
+    {lbl:'Leads',n:total,color:'#4f8ef7',icon:'👥'},
+    {lbl:'Atendimento',n:atend,color:'#9b7ff4',icon:'🤝'},
+    {lbl:'Reserva',n:reserva,color:'#26c6da',icon:'📋'},
+    {lbl:'Vendido',n:vendido,color:'#2ecc8e',icon:'🏆'},
   ];
   const maxN=total||1;
   const body=document.getElementById('fnFunilBody');
-  body.innerHTML=stages.map((s,i)=>{
-    const pct=Math.max(30,(s.n/maxN)*100);
+  body.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:8px 0">`+
+  stages.map((s,i)=>{
+    const pct=total===0?100:Math.max(12,Math.round((s.n/maxN)*100));
     const prevN=i>0?stages[i-1].n:null;
     const pctPrev=prevN!=null&&prevN>0?((s.n/prevN)*100).toFixed(1):null;
-    const pctPrevStr=pctPrev!=null?`<div style="font-size:11px;color:var(--mu);margin-top:4px">▼ ${pctPrev}% da etapa anterior</div>`:'';
-    return `<div style="display:flex;flex-direction:column;align-items:center;width:100%;gap:2px">
-      <div style="width:${pct}%;background:${s.color};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;padding:8px 16px;transition:width .5s ease">
-        <div style="font-size:22px;font-weight:900;color:#fff">${fN(s.n)}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px">${s.lbl}</div>
+    const pctPrevBadge=pctPrev!=null
+      ?`<span style="font-size:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:1px 7px;color:rgba(255,255,255,.85);white-space:nowrap">${pctPrev}% anterior</span>`:'';
+    const connector=i<stages.length-1
+      ?`<div style="width:2px;height:14px;background:var(--bdr);margin:0 auto"></div>`:'';
+    return `
+      <div style="width:${pct}%;background:${s.color};border-radius:10px;
+        display:flex;align-items:center;justify-content:space-between;
+        min-height:60px;padding:10px 18px;transition:width .6s cubic-bezier(.4,0,.2,1);
+        box-shadow:0 4px 16px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">${s.icon}</span>
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,.75);font-weight:700;text-transform:uppercase;letter-spacing:.8px">${s.lbl}</div>
+            <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.1">${fN(s.n)}</div>
+          </div>
+        </div>
+        ${pctPrevBadge}
       </div>
-      ${pctPrevStr}
-      ${i<stages.length-1?'<div style="font-size:18px;color:var(--mu);line-height:1">▼</div>':''}
-    </div>`;
-  }).join('');
+      ${connector}`;
+  }).join('')+`</div>`;
 
   // Detail table by empreendimento
   const empMap={};

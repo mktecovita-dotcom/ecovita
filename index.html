@@ -6,6 +6,7 @@
 <title>Ecovita · Sistema de Tráfego Pago</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="app.js"></script>
 <style>
 /* ═══════════════════════ RESET & VARS ═══════════════════════ */
@@ -670,7 +671,7 @@ body.tv-mode #tvExitBtn{display:block}
 
       <div id="tvS1charts" class="grid g53">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
+          <div class="card-hd"><div class="card-title">Investimento por mês</div></div>
           <div class="legend">
             <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
             <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
@@ -2007,6 +2008,12 @@ const API_KEY_PLACEHOLDER = ''; // Chave da Anthropic passada pelo usuário via 
 
 const C={blue:'#4f8ef7',green:'#2ecc8e',amber:'#f5a623',red:'#f06565',
   purple:'#9b7ff4',teal:'#26c6da',pink:'#e879a0',orange:'#fb923c',mu:'#6b7a9e'};
+// Registra plugin datalabels globalmente; por padrão desativado em todos os charts
+// (ativar individualmente via plugins.datalabels.display:true)
+if(window.ChartDataLabels){
+  Chart.register(ChartDataLabels);
+  Chart.defaults.plugins.datalabels = { display: false };
+}
 const OBJ_C={Cadastro:C.blue,WhatsApp:C.green,Alcance:C.purple};
 const ORIGENS_ONLINE=['chatbot','facebook','website','instagram','busca orgânica','busca organica','organic'];
 const COR_SIT={'Venda Realizada':C.green,'Com Reserva':C.teal,'Em Atendimento':C.blue,
@@ -2558,6 +2565,17 @@ function renderDashboard(){
   // Aplica filtro de empreendimento nos leads CVCRM
   if(fEmpVal) lf = lf.filter(l => l.emp === fEmpVal);
 
+  // Aplica filtro de objetivo nos leads CVCRM:
+  // WhatsApp → origem ChatBot | Cadastro → origem Facebook/Instagram/WebSite
+  if(fObjVal==='whatsapp'){
+    lf = lf.filter(l=>(l.primeiraOrigem||'').toLowerCase().includes('chatbot'));
+  } else if(fObjVal==='cadastro'){
+    lf = lf.filter(l=>{
+      const o=(l.primeiraOrigem||'').toLowerCase();
+      return o.includes('facebook')||o.includes('instagram')||o.includes('website');
+    });
+  }
+
   // ── Leads Meta: soma Resultados da Planilha 2 filtrado por "Término dos relatórios" ──
   // Exclui campanhas com "Alcance" no nome (objetivo de alcance não gera leads)
   let metaFiltradoBase = filteredMetaByDate().filter(c=>!c.nome.toLowerCase().includes('alcance'));
@@ -2636,7 +2654,7 @@ function renderDashboard(){
   const getMesData = (mes, campo) => d.filter(r=>r.mes===mes).reduce((s,r)=>s+r[campo],0);
   const getMesRoas = mes => { const rows=d.filter(r=>r.mes===mes&&r.roas>0&&r.roas<5000); return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0; };
 
-  // ── Chart Invest vs Receita — grouped bars com escala dupla para melhor visibilidade ──
+  // ── Chart Investimento por mês — barras com valor visível no topo ──
   dc('cMensal');
   const ctxM = document.getElementById('cMensal')?.getContext('2d');
   if(ctxM){ charts.cMensal = new Chart(ctxM, {
@@ -2644,22 +2662,28 @@ function renderDashboard(){
     data:{ labels: mesesAno.map(fmtMes), datasets:[
       { label:'Investimento',
         data: mesesAno.map(m=>getMesData(m,'investTotal')),
-        backgroundColor:'rgba(79,142,247,.9)', borderRadius:5, borderSkipped:false,
-        yAxisID:'yInv', order:1 },
-      { label:'Receita',
-        data: mesesAno.map(m=>getMesData(m,'receita')),
-        type:'line', borderColor:C.green, backgroundColor:'rgba(46,204,142,.1)',
-        fill:true, tension:.4, pointRadius:4, pointBackgroundColor:C.green,
-        borderWidth:2.5, yAxisID:'yRec', order:0 }
+        backgroundColor:'rgba(79,142,247,.85)',
+        borderColor:'rgba(79,142,247,1)',
+        borderWidth:1,
+        borderRadius:6, borderSkipped:false }
     ]},
     options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false},
-        tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+fBRL(ctx.raw,true) } } },
+      plugins:{
+        legend:{display:false},
+        tooltip:{ callbacks:{ label: ctx => 'Investimento: '+fBRL(ctx.raw,true) } },
+        datalabels:{
+          display: true,
+          anchor:'end', align:'top', color:C.blue,
+          font:{size:10, weight:'700'},
+          formatter: v => v>0 ? 'R$'+(v/1000).toFixed(0)+'k' : ''
+        }
+      },
       scales:{
-        yInv:{ position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, title:{display:true,text:'Investimento',color:C.blue,font:{size:10}} },
-        yRec:{ position:'right', grid:{display:false},                  ticks:{color:C.green,  font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, title:{display:true,text:'Receita',color:C.green,font:{size:10}} },
-        x:   { grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
-      }}
+        y:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
+        x:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
+      },
+      layout:{ padding:{ top:24 } }
+    }
   });}
 
   // ── Chart ROAS mensal — fixado no ano atual ──

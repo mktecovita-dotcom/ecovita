@@ -2219,18 +2219,18 @@ function parseRoas(rows){
 // Para adicionar novo empreendimento: inclua no array abaixo
 // ══════════════════════════════════════════════════════════
 const EMPREENDIMENTOS_CANONICAL = [
-  { name:'Parque Aviação',     keys:['aviacao','aviação'] },
-  { name:'Villaggios',         keys:['villag'] },
+  { name:'Parque Aviação',     keys:['aviacao'] },              // aviacao cobre aviação após normalização
+  { name:'Villaggios',         keys:['villag'] },              // cobre villaggio, villaggios, villagios
   { name:'Beija Flor',         keys:['beija','flor'] },
   { name:'Monte Verde',        keys:['monte','verde'] },
   { name:'Altos da Serra',     keys:['altos','serra'] },
   { name:'Piemonte',           keys:['piemonte'] },
-  { name:'Jardim dos Ipês',    keys:['jardim','ipes','ipês','ipe'] },
+  { name:'Jardim dos Ipês',    keys:['jardim','ipe'] },        // 'ipe' cobre ipe, ipes, ipê, ipês
   { name:'Cidade Alegre',      keys:['cidade','alegre'] },
   { name:'Nova Quinta',        keys:['nova','quinta'] },
-  { name:'Olga Nasser',        keys:['olga'] },                    // cobre "nascer" e "nasser"
+  { name:'Olga Nasser',        keys:['olga'] },                // cobre nascer e nasser
   { name:'Guiomar Novaes',     keys:['guiomar'] },
-  { name:'Jardim Corumbataí',  keys:['corumbatai','corumbataí'] },
+  { name:'Jardim Corumbataí',  keys:['corumbatai'] },          // corumbatai cobre corumbataí após normalização
   { name:'Raiz Di Verona',     keys:['verona'] },
 ];
 

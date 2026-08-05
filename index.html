@@ -1707,6 +1707,25 @@ body.tv-mode #tvExitBtn{display:block}
         <div id="tkCompareResult" style="margin-top:16px"></div>
       </div>
 
+      <!-- ── Comparativo Mensal Automático ── -->
+      <div id="tkMensalCard" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:700;color:var(--tx)" id="tkMensalTitulo">📅 Comparativo Mensal</div>
+          <div style="display:flex;gap:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--pink);background:rgba(232,121,160,.12);padding:3px 10px;border-radius:20px" id="tkMensalNomeA">—</div>
+            <div style="font-size:11px;font-weight:700;color:var(--mu);background:var(--bg3);padding:3px 10px;border-radius:20px" id="tkMensalNomeB">—</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px" id="tkMensalGrid">
+          <!-- preenchido por renderTkMensalComparativo() -->
+        </div>
+        <!-- Gráfico histórico mensal -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bdr)">
+          <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Histórico mensal — Posts e Views</div>
+          <div style="height:160px;position:relative"><canvas id="tkChartMensal"></canvas></div>
+        </div>
+      </div>
+
       <div id="tkBody" style="display:none">
         <!-- KPIs -->
         <div class="kpi-grid kpi-5" style="margin-bottom:14px">
@@ -2374,14 +2393,9 @@ function parseLeads(rows){
     const dataUltima   = parseDateBR(dataUltimaRaw);
     const dataCadastro = parseDateBR(dataCadastroRaw);
 
-    // Reimpactado: dataCadastro < dataUltima (pelo menos 1 dia — voltou depois)
-    // Fallback sem data: Primeira Origem online E Última Origem diferente
-    let reimpactado = false;
-    if(dataCadastro && dataUltima){
-      reimpactado = (dataUltima - dataCadastro) > 86400000; // > 1 dia
-    } else {
-      reimpactado = isOnline(p) && !!u && u !== p;
-    }
+    // Reimpactado: Última Origem ≠ Primeira Origem (ambas online)
+    // Indica que o lead voltou por uma nova campanha, não apenas movimentação interna
+    const reimpactado = isOnline(p) && !!u && u.toLowerCase() !== p.toLowerCase();
 
     return {
       situacao       : (r['Situação']||'').trim(),
@@ -6459,6 +6473,38 @@ function ttkParseDate(s){
   return '';
 }
 
+// GIDs das abas do TikTok Sheets: aba histórica (0) + aba recente (337466513)
+var TK_GIDS = ['0','337466513'];
+
+// Converte string de Time da planilha para Date comparável
+function ttkParseTime(s){
+  if(!s) return new Date(0);
+  if(s instanceof Date) return s;
+  // formato DD/MM/YYYY ou YYYY-MM-DD
+  var m=String(s).match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return new Date(m[3],m[2]-1,m[1]);
+  m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(m[1],m[2]-1,m[3]);
+  return new Date(s);
+}
+
+// Mescla múltiplas abas: para cada vídeo (chave = Video link), mantém o registro
+// com o snapshot mais recente (coluna Time)
+function ttkMerge(abas){
+  var map={};
+  abas.forEach(function(rows){
+    rows.forEach(function(r){
+      var link=(r['Video link']||'').trim();
+      if(!link) return;
+      var tNovo=ttkParseTime(r['Time']);
+      if(!map[link] || tNovo > ttkParseTime(map[link]['Time'])){
+        map[link]=r;
+      }
+    });
+  });
+  return Object.values(map);
+}
+
 async function loadTiktok(){
   var loading=document.getElementById('tkLoading');
   var body=document.getElementById('tkBody');
@@ -6469,16 +6515,118 @@ async function loadTiktok(){
   if(errEl)   errEl.style.display='none';
   if(st)      st.textContent='Carregando…';
   try {
-    var csv=await fetchCSV(TK_SHEET,'0');
-    rawTiktok=csv;
+    // Carrega todas as abas em paralelo; ignora abas que falharem
+    var resultados=await Promise.allSettled(TK_GIDS.map(function(gid){ return fetchCSV(TK_SHEET,gid); }));
+    var abas=resultados.filter(function(r){return r.status==='fulfilled'&&r.value.length;}).map(function(r){return r.value;});
+    if(!abas.length) throw new Error('Nenhuma aba carregada');
+    rawTiktok=ttkMerge(abas);
     if(loading) loading.style.display='none';
-    if(st) st.textContent=rawTiktok.length+' vídeos';
+    if(st) st.textContent=rawTiktok.length+' vídeos ('+abas.length+' aba'+(abas.length>1?'s':'')+')';
+    renderTkMensalComparativo();
     applyTkFilter();
   } catch(e){
     if(loading) loading.style.display='none';
     if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
     if(st) st.textContent='';
   }
+}
+
+function renderTkMensalComparativo(){
+  var card=document.getElementById('tkMensalCard');
+  if(!card||!rawTiktok.length) return;
+  card.style.display='block';
+
+  var MESES_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var hoje=new Date();
+  var mesAtual=hoje.getMonth(), anoAtual=hoje.getFullYear();
+  var mesPrev=mesAtual===0?11:mesAtual-1, anoPrev=mesAtual===0?anoAtual-1:anoAtual;
+
+  function isMes(r,m,y){
+    var d=ttkParseDate(r['Dia da publicação']);
+    if(!d) return false;
+    var dt=new Date(d);
+    return dt.getMonth()===m && dt.getFullYear()===y;
+  }
+
+  var vidsAtual=rawTiktok.filter(function(r){return isMes(r,mesAtual,anoAtual);});
+  var vidsPrev =rawTiktok.filter(function(r){return isMes(r,mesPrev,anoPrev);});
+
+  function calc(arr){
+    var views=0,likes=0,coment=0;
+    arr.forEach(function(r){
+      views +=orgN(r['Total views']);
+      likes +=orgN(r['Total likes']);
+      coment+=orgN(r['Total de comentários']);
+    });
+    return {posts:arr.length,views:views,likes:likes,coment:coment,
+            avgViews:arr.length?Math.round(views/arr.length):0};
+  }
+  var kA=calc(vidsAtual), kB=calc(vidsPrev);
+
+  // Atualiza labels
+  var nomeA=MESES_PT[mesAtual]+'/'+anoAtual;
+  var nomeB=MESES_PT[mesPrev]+'/'+anoPrev;
+  sid('tkMensalNomeA','📅 '+nomeA);
+  sid('tkMensalNomeB','📅 '+nomeB);
+
+  function metricCard(icon,label,valA,valB,fmt){
+    fmt=fmt||function(v){return fN(v);};
+    var diff=valA-valB;
+    var pct=valB>0?((diff/valB)*100):0;
+    var up=diff>=0;
+    var cor=up?'#2ecc8e':'#f06565';
+    var seta=up?'▲':'▼';
+    return '<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px">'
+      +'<div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+icon+' '+label+'</div>'
+      +'<div style="font-size:20px;font-weight:900;color:var(--tx);line-height:1.1">'+fmt(valA)+'</div>'
+      +'<div style="font-size:11px;color:var(--mu);margin:3px 0">vs '+fmt(valB)+' ('+nomeB+')</div>'
+      +'<div style="font-size:12px;font-weight:700;color:'+cor+'">'+seta+' '+Math.abs(pct).toFixed(1)+'%'
+        +(diff!==0?' ('+( diff>0?'+':'')+fN(Math.round(diff))+')':'')+'</div>'
+      +'</div>';
+  }
+
+  var grid=document.getElementById('tkMensalGrid');
+  if(grid){
+    grid.innerHTML=
+      metricCard('🎵','Posts',kA.posts,kB.posts)
+      +metricCard('👁️','Views',kA.views,kB.views)
+      +metricCard('❤️','Likes',kA.likes,kB.likes)
+      +metricCard('💬','Comentários',kA.coment,kB.coment)
+      +metricCard('📊','Média Views/Post',kA.avgViews,kB.avgViews);
+  }
+
+  // Gráfico histórico — agrupa todos os vídeos por mês/ano
+  var byMes={};
+  rawTiktok.forEach(function(r){
+    var d=ttkParseDate(r['Dia da publicação']);
+    if(!d) return;
+    var dt=new Date(d);
+    var key=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+    if(!byMes[key]) byMes[key]={posts:0,views:0};
+    byMes[key].posts++;
+    byMes[key].views+=orgN(r['Total views']);
+  });
+  var mesKeys=Object.keys(byMes).sort();
+  var isLight=document.body.classList.contains('light');
+  var clrMu=isLight?'#6b7280':'#6b7a9e', clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+  mkChart('tkChartMensal','bar',
+    mesKeys.map(function(k){ var p=k.split('-'); return MESES_PT[parseInt(p[1])-1].slice(0,3)+'/'+p[0].slice(2); }),
+    [
+      {label:'Posts',data:mesKeys.map(function(k){return byMes[k].posts;}),
+       backgroundColor:'rgba(232,121,160,.8)',borderRadius:4,yAxisID:'yP'},
+      {label:'Views',data:mesKeys.map(function(k){return byMes[k].views;}),
+       backgroundColor:'rgba(155,127,244,.5)',borderRadius:4,yAxisID:'yV',type:'line',
+       borderColor:'#9b7ff4',fill:false,tension:.3,pointRadius:3,pointBackgroundColor:'#9b7ff4'}
+    ],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:true,position:'top',labels:{color:clrMu,font:{size:10},boxWidth:10}},
+               datalabels:{display:false}},
+     scales:{
+       yP:{position:'left',ticks:{color:'#e879a0',font:{size:9}},grid:{color:clrGrid},title:{display:true,text:'Posts',color:'#e879a0',font:{size:9}}},
+       yV:{position:'right',ticks:{color:'#9b7ff4',font:{size:9},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{display:false},title:{display:true,text:'Views',color:'#9b7ff4',font:{size:9}}},
+       x:{ticks:{color:clrMu,font:{size:9}},grid:{color:clrGrid}}
+     }
+    });
 }
 
 function applyTkFilter(){

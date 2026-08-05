@@ -6504,7 +6504,27 @@ async function loadTiktok(){
 function applyTkFilter(){
   var de=(document.getElementById('tkDateDe')||{}).value||'';
   var ate=(document.getElementById('tkDateAte')||{}).value||'';
-  var vids=rawTiktok.filter(function(r){return orgInRange(ttkParseDate(r['Dia da publicação']),de,ate);});
+  // Debug: loga as primeiras 3 linhas para ver nomes de colunas e datas
+  if(rawTiktok.length){
+    console.log('[TK] Colunas disponíveis:', Object.keys(rawTiktok[0]));
+    console.log('[TK] Primeiros 3 registros (Dia da publicação):',
+      rawTiktok.slice(0,3).map(function(r){
+        var col=r['Dia da publicação']||r['Dia da Publicação']||r['dia da publicação']||'?';
+        return col + ' → ' + ttkParseDate(col);
+      }));
+    console.log('[TK] Filtro DE:', de, 'ATE:', ate);
+  }
+  // Tenta múltiplas variações do nome da coluna
+  function getDia(r){
+    return r['Dia da publicação']||r['Dia da Publicação']||r['dia da publicação']||r['Dia Da Publicação']||'';
+  }
+  var vids=rawTiktok.filter(function(r){
+    var d=ttkParseDate(getDia(r));
+    // Se tem filtro ativo e não conseguiu parsear a data, exclui
+    if(!d && (de||ate)) return false;
+    return orgInRange(d,de,ate);
+  });
+  console.log('[TK] Vídeos após filtro:', vids.length, 'de', rawTiktok.length);
   document.getElementById('tkBody').style.display='block';
   renderTiktok(vids,de,ate);
 }

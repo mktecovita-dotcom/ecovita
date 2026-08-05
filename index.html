@@ -6446,7 +6446,7 @@ function ttkN(v){
 }
 
 // GIDs das abas do TikTok Sheets
-var TK_GIDS = ['0','337466513'];
+var TK_GIDS = ['0']; // Apenas primeira aba — deduplicação por Time dentro dela
 
 // Snapshot date → Date obj
 function ttkParseTime(s){
@@ -6459,15 +6459,17 @@ function ttkParseTime(s){
   return new Date(s);
 }
 
-// Merge das abas: mesma URL = usa snapshot mais recente
+// Deduplicação: mesma URL (ou título+dataPub) = usa snapshot mais recente (Time)
 function ttkMerge(abas){
   var map={};
   abas.forEach(function(rows){
     rows.forEach(function(r){
       var link=(r['Video link']||'').trim();
-      if(!link) return;
+      // fallback: usa título + data de publicação como chave
+      var key=link||(r['Título do Vídeo']||'')+'__'+(r['Dia da publicação']||'');
+      if(!key) return;
       var tNovo=ttkParseTime(r['Time']);
-      if(!map[link]||tNovo>ttkParseTime(map[link]['Time'])) map[link]=r;
+      if(!map[key]||tNovo>ttkParseTime(map[key]['Time'])) map[key]=r;
     });
   });
   return Object.values(map);
@@ -6488,7 +6490,7 @@ async function loadTiktok(){
     if(!abas.length) throw new Error('Nenhuma aba carregada');
     rawTiktok=ttkMerge(abas);
     if(loading) loading.style.display='none';
-    if(st) st.textContent=rawTiktok.length+' vídeos · '+abas.length+' aba'+(abas.length>1?'s':'');
+    if(st) st.textContent=rawTiktok.length+' vídeo'+(rawTiktok.length!==1?'s':'')+' únicos';
     applyTkFilter();
   } catch(e){
     if(loading) loading.style.display='none';

@@ -2345,9 +2345,14 @@ function parseLeads(rows){
     const dataUltima   = parseDateBR(dataUltimaRaw);
     const dataCadastro = parseDateBR(dataCadastroRaw);
 
-    // Reimpactado: Última Origem ≠ Primeira Origem (ambas online)
-    // Indica que o lead voltou por uma nova campanha, não apenas movimentação interna
-    const reimpactado = isOnline(p) && !!u && u.toLowerCase() !== p.toLowerCase();
+    // Lead NOVO: Data Primeiro Cadastro == Data da Última Entrada (mesmo dia, sem movimentação posterior)
+    // Lead REIMPACTADO: tem dataUltima diferente de dataCadastro (voltou a interagir)
+    function sameDay(a,b){
+      if(!a||!b) return false;
+      return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+    }
+    const novo        = isOnline(p) && sameDay(dataCadastro, dataUltima);
+    const reimpactado = isOnline(p) && !!dataUltima && !sameDay(dataCadastro, dataUltima);
 
     return {
       situacao       : (r['Situação']||'').trim(),
@@ -2355,10 +2360,10 @@ function parseLeads(rows){
       primeiraOrigem : p,
       ultimaOrigem   : u,
       online         : isOnline(p),
+      novo,
       reimpactado,
-      novo           : !reimpactado,
       dataCadastro,
-      dataUltima,      // ← campo usado no filtro de data
+      dataUltima,
     };
   });
 }
@@ -2574,8 +2579,8 @@ function renderDashboard(){
 
   // 3) Novos Online, Reimpactados, Taxa → filtrados por dataCadastro (via filteredLeads)
   const lfOnline    = lf.filter(l=>l.online);
-  const novosOnline = lf.filter(l=>l.online && !l.reimpactado);
-  const reimp       = lf.filter(l=>l.reimpactado && l.online);
+  const novosOnline = lf.filter(l=>l.novo);
+  const reimp       = lf.filter(l=>l.reimpactado);
   const txR         = lfOnline.length>0 ? reimp.length/lfOnline.length*100 : 0;
   const cpl         = lmeta>0 ? inv/lmeta : 0;
 

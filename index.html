@@ -2564,8 +2564,7 @@ function renderDashboard(){
   const roas = rv.length ? rv.reduce((s,r)=>s+r.roas,0)/rv.length : 0;
   const vn   = d.reduce((s,r)=>s+r.qtdVendas,0);
 
-  // ── Métricas de leads com 3 lógicas distintas ──
-  // lf = filtrado por dataUltima (período selecionado)
+  // ── Métricas de leads ──
 
   // 1) CRM TOTAL → todos os leads da base, sem filtro de data
   const totalLeads   = leadsCV.length;
@@ -2573,11 +2572,32 @@ function renderDashboard(){
   // 2) CRM ONLINE → todos os leads com Primeira Origem online, sem filtro de data
   const onlineLeadsTotal = leadsCV.filter(l=>l.online);
 
-  // 3) Novos Online, Reimpactados, Taxa → filtrados pelo período (dataUltima)
-  const lfOnline    = lf.filter(l=>l.online);
-  const novosOnline = lf.filter(l=>l.online && !l.reimpactado);
-  const reimp       = lf.filter(l=>l.reimpactado && l.online);
-  const txR         = lfOnline.length>0 ? reimp.length/lfOnline.length*100 : 0;
+  // 3) Leads NOVOS: filtrados por dataCadastro (quando entraram) — exclui se sem data quando filtro ativo
+  const {de: deD, ate: ateD} = getFiltroDatas();
+  function inRangeCadastro(l){
+    const d=l.dataCadastro;
+    if(!d && (deD||ateD)) return false;
+    if(deD && d<deD) return false;
+    if(ateD && d>ateD) return false;
+    return true;
+  }
+  // Aplica mesmo filtro de emp/objetivo ao base de novos
+  let lfNovosBase = leadsCV.filter(inRangeCadastro);
+  if(fEmpVal) lfNovosBase = lfNovosBase.filter(l=>l.emp===fEmpVal);
+  if(fObjVal==='whatsapp'){
+    lfNovosBase = lfNovosBase.filter(l=>(l.primeiraOrigem||'').toLowerCase().includes('chatbot'));
+  } else if(fObjVal==='cadastro'){
+    lfNovosBase = lfNovosBase.filter(l=>{
+      const o=(l.primeiraOrigem||'').toLowerCase();
+      return o.includes('facebook')||o.includes('instagram')||o.includes('website');
+    });
+  }
+  const novosOnline = lfNovosBase.filter(l=>l.online && !l.reimpactado);
+
+  // 4) Reimpactados: filtrados por dataUltima (quando voltaram) — lf já filtrado acima
+  const reimp    = lf.filter(l=>l.reimpactado && l.online);
+  const lfOnline = lf.filter(l=>l.online);
+  const txR      = (novosOnline.length+reimp.length)>0 ? reimp.length/(novosOnline.length+reimp.length)*100 : 0;
   const cpl         = lmeta>0 ? inv/lmeta : 0;
 
   // ── Preenche KPIs ──
@@ -6504,27 +6524,14 @@ async function loadTiktok(){
 function applyTkFilter(){
   var de=(document.getElementById('tkDateDe')||{}).value||'';
   var ate=(document.getElementById('tkDateAte')||{}).value||'';
-  // Debug: loga as primeiras 3 linhas para ver nomes de colunas e datas
-  if(rawTiktok.length){
-    console.log('[TK] Colunas disponíveis:', Object.keys(rawTiktok[0]));
-    console.log('[TK] Primeiros 3 registros (Dia da publicação):',
-      rawTiktok.slice(0,3).map(function(r){
-        var col=r['Dia da publicação']||r['Dia da Publicação']||r['dia da publicação']||'?';
-        return col + ' → ' + ttkParseDate(col);
-      }));
-    console.log('[TK] Filtro DE:', de, 'ATE:', ate);
-  }
-  // Tenta múltiplas variações do nome da coluna
   function getDia(r){
     return r['Dia da publicação']||r['Dia da Publicação']||r['dia da publicação']||r['Dia Da Publicação']||'';
   }
   var vids=rawTiktok.filter(function(r){
     var d=ttkParseDate(getDia(r));
-    // Se tem filtro ativo e não conseguiu parsear a data, exclui
     if(!d && (de||ate)) return false;
     return orgInRange(d,de,ate);
   });
-  console.log('[TK] Vídeos após filtro:', vids.length, 'de', rawTiktok.length);
   document.getElementById('tkBody').style.display='block';
   renderTiktok(vids,de,ate);
 }

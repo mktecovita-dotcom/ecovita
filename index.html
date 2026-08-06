@@ -2425,13 +2425,13 @@ function filteredRoas(){
   });
 }
 
-// Filtra leadsCV pela "Data da última entrada" — exclui leads sem data quando filtro está ativo
+// Filtra leadsCV pela "Data Primeiro Cadastro" — quando o lead entrou no sistema
 function filteredLeads(){
   const {de, ate} = getFiltroDatas();
   if(!de && !ate) return leadsCV; // sem filtro → todos
   return leadsCV.filter(l=>{
-    const d = l.dataUltima; // usa APENAS "Data da última entrada"
-    if(!d) return false;    // sem data → EXCLUI quando filtro está ativo
+    const d = l.dataCadastro; // usa "Data Primeiro Cadastro"
+    if(!d) return false;      // sem data → EXCLUI quando filtro está ativo
     if(de  && d < de)  return false;
     if(ate && d > ate) return false;
     return true;
@@ -2572,32 +2572,11 @@ function renderDashboard(){
   // 2) CRM ONLINE → todos os leads com Primeira Origem online, sem filtro de data
   const onlineLeadsTotal = leadsCV.filter(l=>l.online);
 
-  // 3) Leads NOVOS: filtrados por dataCadastro (quando entraram) — exclui se sem data quando filtro ativo
-  const {de: deD, ate: ateD} = getFiltroDatas();
-  function inRangeCadastro(l){
-    const d=l.dataCadastro;
-    if(!d && (deD||ateD)) return false;
-    if(deD && d<deD) return false;
-    if(ateD && d>ateD) return false;
-    return true;
-  }
-  // Aplica mesmo filtro de emp/objetivo ao base de novos
-  let lfNovosBase = leadsCV.filter(inRangeCadastro);
-  if(fEmpVal) lfNovosBase = lfNovosBase.filter(l=>l.emp===fEmpVal);
-  if(fObjVal==='whatsapp'){
-    lfNovosBase = lfNovosBase.filter(l=>(l.primeiraOrigem||'').toLowerCase().includes('chatbot'));
-  } else if(fObjVal==='cadastro'){
-    lfNovosBase = lfNovosBase.filter(l=>{
-      const o=(l.primeiraOrigem||'').toLowerCase();
-      return o.includes('facebook')||o.includes('instagram')||o.includes('website');
-    });
-  }
-  const novosOnline = lfNovosBase.filter(l=>l.online && !l.reimpactado);
-
-  // 4) Reimpactados: filtrados por dataUltima (quando voltaram) — lf já filtrado acima
-  const reimp    = lf.filter(l=>l.reimpactado && l.online);
-  const lfOnline = lf.filter(l=>l.online);
-  const txR      = (novosOnline.length+reimp.length)>0 ? reimp.length/(novosOnline.length+reimp.length)*100 : 0;
+  // 3) Novos Online, Reimpactados, Taxa → filtrados por dataCadastro (via filteredLeads)
+  const lfOnline    = lf.filter(l=>l.online);
+  const novosOnline = lf.filter(l=>l.online && !l.reimpactado);
+  const reimp       = lf.filter(l=>l.reimpactado && l.online);
+  const txR         = lfOnline.length>0 ? reimp.length/lfOnline.length*100 : 0;
   const cpl         = lmeta>0 ? inv/lmeta : 0;
 
   // ── Preenche KPIs ──

@@ -561,6 +561,9 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('tiktok')">
         <span class="nav-icon">🎵</span> TikTok Orgânico
       </div>
+      <div class="nav-item" onclick="goPage('youtube')">
+        <span class="nav-icon">▶️</span> YouTube Orgânico
+      </div>
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -1749,6 +1752,91 @@ body.tv-mode #tvExitBtn{display:block}
       </div><!-- /tkBody -->
     </div><!-- /page-tiktok -->
 
+    <!-- ══════════════ PAGE: YOUTUBE ORGÂNICO ══════════════ -->
+    <div class="page" id="page-youtube">
+
+      <!-- Filtro -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">DE:</span>
+          <input type="date" id="ytDateDe" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:13px">
+          <span style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">ATÉ:</span>
+          <input type="date" id="ytDateAte" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:13px">
+          <button onclick="applyYtFilter()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:13px;font-weight:700;cursor:pointer">▶ Aplicar</button>
+          <button onclick="ytClearDates()" style="background:var(--bg3);color:var(--mu);border:1px solid var(--bdr);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer">✕ Limpar</button>
+          <button onclick="loadYoutube()" style="background:var(--bg3);color:var(--blue);border:1px solid var(--bdr);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer">⟳ Atualizar</button>
+          <span id="ytStatus" style="font-size:11px;color:var(--mu);margin-left:4px"></span>
+        </div>
+      </div>
+
+      <div id="ytLoading" style="display:none;text-align:center;padding:40px;color:var(--mu);font-size:13px">⏳ Carregando dados do YouTube…</div>
+      <div id="ytError"   style="display:none;background:rgba(240,101,101,.1);border:1px solid var(--red);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:12px"></div>
+
+      <div id="ytBody" style="display:none">
+
+        <!-- KPI cards -->
+        <div id="ytKpiGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px"></div>
+
+        <!-- Comparação label -->
+        <div id="ytCmpLabel" style="font-size:11px;color:var(--mu);margin-bottom:16px;text-align:right"></div>
+
+        <!-- Gráficos linha 1: Visualizações por mês + Inscritos por mês -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">👁️ Visualizações por Mês</div>
+            <div style="height:220px"><canvas id="ytChartViews"></canvas></div>
+          </div>
+          <div class="card">
+            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">🔔 Inscritos Ganhos por Mês</div>
+            <div style="height:220px"><canvas id="ytChartSubs"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Gráficos linha 2: Tempo exibição + Impressões -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">⏱️ Tempo de Exibição por Mês (horas)</div>
+            <div style="height:220px"><canvas id="ytChartWatch"></canvas></div>
+          </div>
+          <div class="card">
+            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📢 Impressões &amp; CTR por Mês</div>
+            <div style="height:220px"><canvas id="ytChartImpressions"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Top 10 vídeos -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">🏆 Top 10 Vídeos — Visualizações</div>
+            <span id="ytVideoCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
+          </div>
+          <div style="height:280px"><canvas id="ytChartTopViews"></canvas></div>
+        </div>
+
+        <!-- Tabela de vídeos -->
+        <div class="card">
+          <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📋 Todos os Vídeos no Período</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="border-bottom:2px solid var(--bdr)">
+                  <th style="padding:8px 12px;text-align:left;color:var(--mu);font-size:11px;white-space:nowrap">Publicação</th>
+                  <th style="padding:8px 12px;text-align:left;color:var(--mu);font-size:11px">Título</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Visualizações</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Tempo (h)</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Inscritos</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Impressões</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">CTR (%)</th>
+                  <th style="padding:8px 12px;text-align:center;color:var(--mu);font-size:11px">Link</th>
+                </tr>
+              </thead>
+              <tbody id="ytVideoBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /ytBody -->
+    </div><!-- /page-youtube -->
 
     <!-- ══════════════ PAGE: O QUE MELHORAR ══════════════ -->
     <div class="page" id="page-melhorias">
@@ -2089,6 +2177,7 @@ function goPage(pg){
   if(pg==='instagram') loadOrganico('instagram');
   if(pg==='facebook')  loadOrganico('facebook');
   if(pg==='tiktok')    loadOrganico('tiktok');
+  if(pg==='youtube')   loadOrganico('youtube');
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -6701,6 +6790,273 @@ function loadOrganico(pg){
   if(pg==='instagram' && !rawPostagens.length) loadInstagram();
   if(pg==='facebook'  && !rawFacebook.length)  loadFacebook();
   if(pg==='tiktok'    && !rawTiktok.length)    loadTiktok();
+  if(pg==='youtube'   && !rawYoutube.length)   loadYoutube();
+}
+
+// ─── YOUTUBE ORGÂNICO ─────────────────────────────────────
+var YT_SHEET = '1hXscY8H3Ci7lm20GO3dvFs-Hw238eQFW73QIPeZ5tLY';
+var rawYoutube = [];
+
+var YT_MESES_EN = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
+                   jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+var YT_MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+// Converte "May 8, 2023" ou "Apr 22, 2026" → "YYYY-MM-DD"
+function ytParseDate(s){
+  if(!s) return '';
+  s = String(s).trim();
+  // "Month DD, YYYY"
+  var m = s.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+  if(m){
+    var mm = YT_MESES_EN[m[1].toLowerCase().slice(0,3)] || '01';
+    return m[3]+'-'+mm+'-'+m[2].padStart(2,'0');
+  }
+  // YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return '';
+}
+
+function ytN(v){ return parseFloat(String(v).replace(/[^0-9.-]/g,''))||0; }
+
+async function loadYoutube(){
+  var loading = document.getElementById('ytLoading');
+  var body    = document.getElementById('ytBody');
+  var errEl   = document.getElementById('ytError');
+  var st      = document.getElementById('ytStatus');
+  if(loading) loading.style.display='block';
+  if(body)    body.style.display='none';
+  if(errEl)   errEl.style.display='none';
+  if(st)      st.textContent='Carregando…';
+  try {
+    var rows = await fetchCSV(YT_SHEET, 0);
+    // Remove a linha de Total (primeira linha após header)
+    rawYoutube = rows.filter(function(r){
+      return (r['Conteúdo']||'').trim().toLowerCase() !== 'total' &&
+             (r['Conteúdo']||'').trim() !== '';
+    });
+    if(loading) loading.style.display='none';
+    if(st) st.textContent = rawYoutube.length+' vídeo'+(rawYoutube.length!==1?'s':'');
+    applyYtFilter();
+  } catch(e){
+    if(loading) loading.style.display='none';
+    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
+    if(st) st.textContent='';
+  }
+}
+
+function applyYtFilter(){
+  var de  = (document.getElementById('ytDateDe')||{}).value||'';
+  var ate = (document.getElementById('ytDateAte')||{}).value||'';
+  var vids = rawYoutube.filter(function(r){
+    var d = ytParseDate(r['Horário de publicação do vídeo']);
+    if(!d && (de||ate)) return false;
+    return orgInRange(d, de, ate);
+  });
+  document.getElementById('ytBody').style.display='block';
+  renderYoutube(vids, de, ate);
+}
+
+function ytClearDates(){
+  var d1=document.getElementById('ytDateDe'), d2=document.getElementById('ytDateAte');
+  if(d1) d1.value=''; if(d2) d2.value='';
+  applyYtFilter();
+}
+
+function renderYoutube(vids, de, ate){
+  var isLight = document.body.classList.contains('light');
+  var clrMu   = isLight?'#6b7280':'#6b7a9e';
+  var clrTx   = isLight?'#1a2332':'#e2e8f0';
+  var clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  // ── Totais período atual ──
+  function calc(arr){
+    var views=0,watch=0,subs=0,imp=0,ctrSum=0,ctrCount=0;
+    arr.forEach(function(r){
+      views   += ytN(r['Visualizações']);
+      watch   += ytN(r['Tempo de exibição (horas)']);
+      subs    += ytN(r['Inscritos']);
+      imp     += ytN(r['Impressões']);
+      var c    = ytN(r['Taxa de cliques de impressões (%)']);
+      if(c>0){ ctrSum+=c; ctrCount++; }
+    });
+    return {
+      posts : arr.length,
+      views : views,
+      watch : +watch.toFixed(1),
+      subs  : subs,
+      imp   : imp,
+      ctr   : ctrCount>0 ? +(ctrSum/ctrCount).toFixed(2) : 0
+    };
+  }
+
+  var kA = calc(vids);
+
+  // ── Período de comparação ──
+  var prevLabel = '';
+  var vidsPrev  = [];
+  if(de && ate){
+    var d1=new Date(de), d2=new Date(ate);
+    var diff = d2.getTime()-d1.getTime();
+    var pb2  = new Date(d1.getTime()-86400000);
+    var pb1  = new Date(pb2.getTime()-diff);
+    var fmt  = function(d){ return d.toISOString().slice(0,10); };
+    var pb1s = fmt(pb1), pb2s = fmt(pb2);
+    vidsPrev = rawYoutube.filter(function(r){
+      var d=ytParseDate(r['Horário de publicação do vídeo']);
+      return d && orgInRange(d,pb1s,pb2s);
+    });
+    prevLabel = 'vs. '+pb1s.split('-').reverse().join('/')+' → '+pb2s.split('-').reverse().join('/');
+  } else {
+    var hoje=new Date(), mA=hoje.getMonth(), yA=hoje.getFullYear();
+    var mB=mA===0?11:mA-1, yB=mA===0?yA-1:yA;
+    vidsPrev = rawYoutube.filter(function(r){
+      var d=ytParseDate(r['Horário de publicação do vídeo']);
+      if(!d) return false;
+      var dt=new Date(d);
+      return dt.getMonth()===mB && dt.getFullYear()===yB;
+    });
+    prevLabel = 'vs. '+YT_MESES_PT[mB]+'/'+yB;
+  }
+  var kB = calc(vidsPrev);
+  sid('ytCmpLabel', prevLabel);
+
+  // ── KPI Cards ──
+  function kpiCard(icon, label, valA, valB, color, fmtFn){
+    fmtFn = fmtFn || fN;
+    var diff = valA-valB;
+    var pct  = valB>0 ? (diff/valB*100) : 0;
+    var up   = diff>=0, cor=up?'#2ecc8e':'#f06565', seta=up?'▲':'▼';
+    return '<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px 14px">'
+      +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:8px">'+icon+' '+label+'</div>'
+      +'<div style="font-size:22px;font-weight:900;color:'+color+';line-height:1">'+fmtFn(valA)+'</div>'
+      +(valB>0
+        ?'<div style="margin-top:8px;font-size:11px;font-weight:700;color:'+cor+'">'+seta+' '+Math.abs(pct).toFixed(1)+'%</div>'
+         +'<div style="font-size:10px;color:var(--mu)">'+fmtFn(valB)+' '+prevLabel+'</div>'
+        :'<div style="margin-top:8px;font-size:10px;color:var(--mu)">'+prevLabel+'</div>')
+      +'</div>';
+  }
+  var grid=document.getElementById('ytKpiGrid');
+  if(grid){
+    grid.innerHTML=
+      kpiCard('🎬','Vídeos',kA.posts,kB.posts,'#e879a0')
+      +kpiCard('👁️','Visualizações',kA.views,kB.views,'#9b7ff4')
+      +kpiCard('⏱️','Tempo Exib. (h)',kA.watch,kB.watch,'#4f8ef7',function(v){return v.toLocaleString('pt-BR');})
+      +kpiCard('🔔','Inscritos',kA.subs,kB.subs,'#2ecc8e')
+      +kpiCard('📢','Impressões',kA.imp,kB.imp,'#f5a623')
+      +kpiCard('🎯','CTR Médio',kA.ctr,kB.ctr,'#26c6da',function(v){return v.toFixed(2)+'%';});
+  }
+  document.getElementById('ytVideoCount').textContent = vids.length+' vídeo'+(vids.length!==1?'s':'');
+
+  // ── Agrupa por mês ──
+  var byMes = {};
+  vids.forEach(function(r){
+    var d = ytParseDate(r['Horário de publicação do vídeo']);
+    if(!d) return;
+    var dt  = new Date(d);
+    var key = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+    if(!byMes[key]) byMes[key]={posts:0,views:0,watch:0,subs:0,imp:0,ctrSum:0,ctrN:0};
+    var bm = byMes[key];
+    bm.posts++;
+    bm.views += ytN(r['Visualizações']);
+    bm.watch += ytN(r['Tempo de exibição (horas)']);
+    bm.subs  += ytN(r['Inscritos']);
+    bm.imp   += ytN(r['Impressões']);
+    var c = ytN(r['Taxa de cliques de impressões (%)']);
+    if(c>0){ bm.ctrSum+=c; bm.ctrN++; }
+  });
+  var mesKeys = Object.keys(byMes).sort();
+  var mesLabels = mesKeys.map(function(k){
+    var p=k.split('-');
+    return YT_MESES_PT[parseInt(p[1])-1]+'/'+p[0].slice(2);
+  });
+
+  // ── Chart: Visualizações por mês ──
+  mkChart('ytChartViews','bar', mesLabels,
+    [{label:'Visualizações',data:mesKeys.map(function(k){return byMes[k].views;}),
+      backgroundColor:'rgba(155,127,244,.8)',borderRadius:5}],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:false},datalabels:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
+             y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}}}});
+
+  // ── Chart: Inscritos por mês ──
+  mkChart('ytChartSubs','bar', mesLabels,
+    [{label:'Inscritos',data:mesKeys.map(function(k){return byMes[k].subs;}),
+      backgroundColor:'rgba(46,204,142,.8)',borderRadius:5}],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:false},datalabels:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
+             y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+
+  // ── Chart: Tempo de exibição por mês ──
+  mkChart('ytChartWatch','bar', mesLabels,
+    [{label:'Horas',data:mesKeys.map(function(k){return +byMes[k].watch.toFixed(1);}),
+      backgroundColor:'rgba(79,142,247,.8)',borderRadius:5}],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:false},datalabels:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
+             y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v+'h';}},grid:{color:clrGrid}}}});
+
+  // ── Chart: Impressões + CTR por mês (eixo duplo) ──
+  mkChart('ytChartImpressions','bar', mesLabels,
+    [
+      {label:'Impressões',data:mesKeys.map(function(k){return byMes[k].imp;}),
+       backgroundColor:'rgba(245,166,35,.75)',borderRadius:5,yAxisID:'yI'},
+      {label:'CTR (%)',data:mesKeys.map(function(k){return byMes[k].ctrN>0?+(byMes[k].ctrSum/byMes[k].ctrN).toFixed(2):0;}),
+       type:'line',borderColor:'#26c6da',backgroundColor:'rgba(38,198,218,.15)',fill:true,
+       tension:.3,pointRadius:4,pointBackgroundColor:'#26c6da',yAxisID:'yCtr'}
+    ],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:true,position:'top',labels:{color:clrMu,font:{size:10},boxWidth:10}},datalabels:{display:false}},
+     scales:{
+       yI: {position:'left',ticks:{color:'#f5a623',font:{size:9},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}},
+       yCtr:{position:'right',ticks:{color:'#26c6da',font:{size:9},callback:function(v){return v+'%';}},grid:{display:false}},
+       x:  {ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}}
+     }});
+
+  // ── Chart: Top 10 por visualizações ──
+  var sortV = vids.slice().sort(function(a,b){return ytN(b['Visualizações'])-ytN(a['Visualizações']);});
+  var top10  = sortV.slice(0,10);
+  mkChart('ytChartTopViews','bar',
+    top10.map(function(r){return (r['Título do vídeo']||'—').slice(0,35);}),
+    [{label:'Visualizações',data:top10.map(function(r){return ytN(r['Visualizações']);}),
+      backgroundColor:'rgba(155,127,244,.85)',borderRadius:5,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
+     plugins:{legend:{display:false},datalabels:{display:false},
+       tooltip:{callbacks:{label:function(ctx){return ' '+fN(ctx.raw)+' views';}}}},
+     scales:{
+       x:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}},
+       y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}
+     }});
+
+  // ── Tabela ──
+  var vb = document.getElementById('ytVideoBody');
+  if(vb){
+    vb.innerHTML = sortV.map(function(r){
+      var vid   = (r['Conteúdo']||'').trim();
+      var link  = vid ? 'https://www.youtube.com/watch?v='+vid : '';
+      var titulo= r['Título do vídeo']||'—';
+      var data  = ytParseDate(r['Horário de publicação do vídeo']);
+      if(data){ var dp=data.split('-'); data=dp[2]+'/'+dp[1]+'/'+dp[0]; }
+      var v  = ytN(r['Visualizações']);
+      var w  = ytN(r['Tempo de exibição (horas)']).toFixed(1);
+      var s  = ytN(r['Inscritos']);
+      var im = ytN(r['Impressões']);
+      var ct = ytN(r['Taxa de cliques de impressões (%)']);
+      var ctCor = ct>=5?'var(--green)':ct>=2?'var(--blue)':'var(--amber)';
+      return '<tr style="border-bottom:1px solid var(--bdr)">'
+        +'<td style="padding:7px 12px;color:var(--mu);font-size:11px;white-space:nowrap">'+data+'</td>'
+        +'<td style="padding:7px 12px;color:var(--tx);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+titulo+'">'+titulo+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:#9b7ff4">'+fN(v)+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;color:#4f8ef7">'+w+'h</td>'
+        +'<td style="padding:7px 12px;text-align:right;color:#2ecc8e">'+fN(s)+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;color:#f5a623">'+fN(im)+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:'+ctCor+'">'+ct.toFixed(2)+'%</td>'
+        +'<td style="padding:7px 12px;text-align:center">'
+        +(link?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:13px;text-decoration:none" title="Abrir no YouTube">▶</a>':'—')
+        +'</td></tr>';
+    }).join('');
+  }
 }
 
 // Menu mobile

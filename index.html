@@ -656,10 +656,11 @@ body.tv-mode #tvExitBtn{display:block}
       <div id="tvS1leadKpi" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:16px">
         <!-- Linha 1: por objetivo -->
         <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">POR OBJETIVO · META ADS</div>
-        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;gap:8px">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;gap:8px">
           <div class="kpi" style="border-top-color:#25D366;margin:0"><div class="kpi-label">Leads WhatsApp</div><div class="kpi-val" style="color:#25D366" id="kWpp">—</div><div class="kpi-sub" id="kWpps"></div></div>
           <div class="kpi blue" style="margin:0"><div class="kpi-label">Leads Cadastro</div><div class="kpi-val blue" id="kCad">—</div><div class="kpi-sub" id="kCads"></div></div>
           <div class="kpi purple" style="margin:0"><div class="kpi-label">Leads Meta Total</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
+          <div class="kpi amber" style="margin:0;border-top-color:var(--amber)"><div class="kpi-label">CPL · Custo por Lead</div><div class="kpi-val" style="color:var(--amber)" id="kCpl">—</div><div class="kpi-sub" id="kCpls"></div></div>
         </div>
         <!-- Linha 2: CRM -->
         <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">BASE CRM · CVCRM</div>
@@ -2688,6 +2689,13 @@ function renderDashboard(){
   sid('kCad', fN(lCad));  sid('kCads', `${pctCad} dos leads Meta`);
   // Leads Meta = Resultados da planilha campanhas (Sheet 1 tem por mês = lmeta filtrado)
   sid('k4',  fN(lmeta));                          sid('k4s',  fObjVal ? `Filtro: ${fObjVal}` : 'Resultados · período filtrado');
+
+  // CPL = Valor investido em Meta (campanhas filtradas) ÷ Total de leads Meta
+  // Usa campsMeta com filtro de data + empreendimento (mesmo que metaFiltradoBase)
+  const invMeta = metaFiltradoBase.reduce((s,c)=>s+(c.valor||0), 0);
+  const cplVal  = lmeta > 0 ? invMeta / lmeta : 0;
+  sid('kCpl',  cplVal > 0 ? fBRL(cplVal) : '—');
+  sid('kCpls', invMeta > 0 ? `${fBRL(invMeta,true)} investido · ${fN(lmeta)} leads` : 'Sem dados de investimento');
   sid('k11', fN(onlineLeadsTotal.length));         sid('k11s', 'Toda base · Origem online');
   sid('k7',  fN(novosOnline.length));              sid('k7s',  'Online · período filtrado');
   sid('k8',  fN(reimp.length));                    sid('k8s',  'Online · período filtrado');

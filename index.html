@@ -6898,7 +6898,7 @@ async function loadPrecificacao(){
     var sampleKeys = Object.keys(rows[0]);
     // O CSV do sheets vem com datas como "mar./2024" ou "2024-03-01" — precisamos identificar
     // Colunas fixas: Cód, Empreendimento, Cidade, Data Demanda, Fim Venda, Unid., Tipo
-    var fixedCols = ['Cód','Empreendimento','Cidade','Data Demanda','Fim Venda','Unid.','Tipo'];
+    var fixedCols = ['Cód','Empreendimento','Cidade','Data Demanda','Fim Venda','Unid.','F/R'];
 
     // Colunas de meses = tudo que não é fixo
     var mesCols = sampleKeys.filter(function(k){
@@ -6913,8 +6913,8 @@ async function loadPrecificacao(){
         jun:'06',jul:'07',ago:'08',aug:'08',set:'09',sep:'09',out:'10',oct:'10',
         nov:'11',dez:'12',dec:'12'
       };
-      // Remove pontos finais: "ago." → "ago"
-      s = s.replace(/\.(\s|\/|$)/g,'$1').trim();
+      // Remove pontos: "ago./2024" → "ago/2024", "ago." → "ago"
+      s = s.replace(/\./g,'').trim();
       // "ago/2026" ou "ago 2026"
       var m1 = s.match(/^([a-z]{2,3})[\/\s](\d{4})$/);
       if(m1 && mMap[m1[1]]) return m1[2]+'-'+mMap[m1[1]];
@@ -6935,7 +6935,7 @@ async function loadPrecificacao(){
 
     rawPrec = [];
     rows.forEach(function(r){
-      var tipo = (r['Tipo']||'').trim();
+      var tipo = (r['F/R']||r['Tipo']||'').trim();
       if(tipo !== 'F' && tipo !== 'R') return;
       var cod   = (r['Cód']||'').trim();
       var nome  = (r['Empreendimento']||'').replace(/\n/g,' ').trim();

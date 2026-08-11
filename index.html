@@ -6905,24 +6905,31 @@ async function loadPrecificacao(){
       return !fixedCols.includes(k) && k.trim() !== '';
     });
 
-    // Parser de coluna de mês: "ago./2026" "2026-08-01" "08/2026"
+    // Parser de coluna de mês — cobre todos os formatos do Google Sheets
     function parseMesCol(s){
       s = String(s).trim().toLowerCase();
-      // "ago./2026" ou "ago/2026"
-      var mMap = {jan:'01',fev:'02','mar.':'03',mar:'03',abr:'04',mai:'05','mai.':'05',
-                  jun:'06','jun.':'06',jul:'07','jul.':'07',ago:'08','ago.':'08',
-                  set:'09','set.':'09',out:'10','out.':'10',nov:'11','nov.':'11',dez:'12','dez.':'12'};
-      var m1 = s.match(/^([a-zç\.]+)\/?\.?\/?(\d{4})/);
-      if(m1){
-        var mm = mMap[m1[1]];
-        if(mm) return m1[2]+'-'+mm;
-      }
+      var mMap = {
+        jan:'01',fev:'02',feb:'02',mar:'03',abr:'04',apr:'04',mai:'05',may:'05',
+        jun:'06',jul:'07',ago:'08',aug:'08',set:'09',sep:'09',out:'10',oct:'10',
+        nov:'11',dez:'12',dec:'12'
+      };
+      // Remove pontos finais: "ago." → "ago"
+      s = s.replace(/\.(\s|\/|$)/g,'$1').trim();
+      // "ago/2026" ou "ago 2026"
+      var m1 = s.match(/^([a-z]{2,3})[\/\s](\d{4})$/);
+      if(m1 && mMap[m1[1]]) return m1[2]+'-'+mMap[m1[1]];
       // "2026-08-01" ou "2026-08"
       var m2 = s.match(/^(\d{4})-(\d{2})/);
       if(m2) return m2[1]+'-'+m2[2];
       // "08/2026"
-      var m3 = s.match(/^(\d{2})\/(\d{4})/);
-      if(m3) return m3[2]+'-'+m3[1];
+      var m3 = s.match(/^(\d{1,2})\/(\d{4})$/);
+      if(m3) return m3[2]+'-'+m3[1].padStart(2,'0');
+      // "3/1/2024" (M/D/YYYY — formato padrão do Google Sheets)
+      var m4 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if(m4) return m4[3]+'-'+m4[1].padStart(2,'0');
+      // "2024/03/01"
+      var m5 = s.match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+      if(m5) return m5[1]+'-'+m5[2];
       return null;
     }
 
@@ -6937,7 +6944,7 @@ async function loadPrecificacao(){
 
       mesCols.forEach(function(col){
         var mes = parseMesCol(col);
-        if(!mes || mes < '2026-01') return; // só a partir de 2026
+        if(!mes) return;
         var val = parseInt(r[col])||0;
         if(!val) return;
 
@@ -6955,6 +6962,15 @@ async function loadPrecificacao(){
 
     precCarregado = true;
     if(loading) loading.style.display='none';
+    // Debug: mostra quantas linhas foram lidas
+    if(errEl && rawPrec.length===0){
+      errEl.style.display='block';
+      errEl.style.background='rgba(79,142,247,.1)';
+      errEl.style.borderColor='var(--blue)';
+      errEl.style.color='var(--blue)';
+      var amostra = rows.length>0 ? JSON.stringify(Object.keys(rows[0])).slice(0,300) : 'nenhuma linha';
+      errEl.textContent = '⚠️ Planilha lida ('+rows.length+' linhas), mas nenhuma linha F/R encontrada. Colunas: '+amostra;
+    }
 
     // Popular filtros
     var meses = [...new Set(rawPrec.map(function(e){return e.mes;}))].sort();

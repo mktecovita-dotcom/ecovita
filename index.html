@@ -541,15 +541,15 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
       </div>
+      <div class="nav-item" onclick="goPage('precificacao')">
+        <span class="nav-icon">🧮</span> Precificação de Campanha
+      </div>
       <div class="sb-section">Análise</div>
       <div class="nav-item" onclick="goPage('melhorias')">
         <span class="nav-icon">🎯</span> O que Melhorar
       </div>
       <div class="nav-item" onclick="goPage('ia')">
         <span class="nav-icon">🤖</span> Análise por IA
-      </div>
-      <div class="nav-item" onclick="goPage('mercado')">
-        <span class="nav-icon">🔍</span> Pesquisa de Mercado
       </div>
       <div class="sb-section">Conteúdo Orgânico</div>
       <div class="nav-item" onclick="goPage('instagram')">
@@ -1839,6 +1839,81 @@ body.tv-mode #tvExitBtn{display:block}
       </div><!-- /ytBody -->
     </div><!-- /page-youtube -->
 
+    <!-- ══════════════ PAGE: PRECIFICAÇÃO DE CAMPANHA ══════════════ -->
+    <div class="page" id="page-precificacao">
+
+      <!-- Cabeçalho + Calculadora -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:15px;font-weight:700">🧮 Precificação de Campanha</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Investimento necessário por empreendimento com base no Forecast de Vendas</div>
+          </div>
+          <!-- Calculadora de leads/venda -->
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:10px 16px">
+            <span style="font-size:12px;color:var(--mu);font-weight:600">Leads por Venda:</span>
+            <input type="number" id="precLeadsVenda" value="30" min="1" max="500"
+              style="width:70px;background:var(--bg2);border:1px solid var(--blue);border-radius:6px;padding:5px 8px;color:var(--tx);font-size:14px;font-weight:700;text-align:center"
+              oninput="renderPrecificacao()">
+            <span style="font-size:11px;color:var(--mu)">leads = 1 venda</span>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--bdr)">
+          <span style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">Mês:</span>
+          <select id="precMes" onchange="renderPrecificacao()"
+            style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:13px">
+            <option value="">Todos</option>
+          </select>
+          <span style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">Empreendimento:</span>
+          <select id="precEmp" onchange="renderPrecificacao()"
+            style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:13px;min-width:220px">
+            <option value="">Todos</option>
+          </select>
+          <span id="precCplInfo" style="font-size:11px;color:var(--mu);margin-left:8px"></span>
+        </div>
+      </div>
+
+      <div id="precLoading" style="display:none;text-align:center;padding:40px;color:var(--mu);font-size:13px">⏳ Carregando dados do Forecast…</div>
+      <div id="precError"   style="display:none;background:rgba(240,101,101,.1);border:1px solid var(--red);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:12px"></div>
+
+      <div id="precBody" style="display:none">
+
+        <!-- KPIs resumo -->
+        <div id="precKpiGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"></div>
+
+        <!-- Gráfico de investimento por empreendimento -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📊 Investimento Necessário por Empreendimento (R$)</div>
+          <div style="height:280px"><canvas id="precChartInvest"></canvas></div>
+        </div>
+
+        <!-- Tabela principal -->
+        <div class="card">
+          <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📋 Detalhamento por Empreendimento</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="border-bottom:2px solid var(--bdr)">
+                  <th style="padding:8px 12px;text-align:left;color:var(--mu);font-size:11px">Empreendimento</th>
+                  <th style="padding:8px 12px;text-align:left;color:var(--mu);font-size:11px">Cidade</th>
+                  <th style="padding:8px 12px;text-align:center;color:var(--mu);font-size:11px">Mês</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Forecast<br>(vendas)</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Realizado<br>(vendas)</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Saldo</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Leads<br>Necessários</th>
+                  <th style="padding:8px 12px;text-align:right;color:var(--amber);font-size:11px">Investimento<br>Necessário</th>
+                </tr>
+              </thead>
+              <tbody id="precTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /precBody -->
+    </div><!-- /page-precificacao -->
+
     <!-- ══════════════ PAGE: O QUE MELHORAR ══════════════ -->
     <div class="page" id="page-melhorias">
       <div class="card">
@@ -2178,7 +2253,8 @@ function goPage(pg){
   if(pg==='instagram') loadOrganico('instagram');
   if(pg==='facebook')  loadOrganico('facebook');
   if(pg==='tiktok')    loadOrganico('tiktok');
-  if(pg==='youtube')   loadOrganico('youtube');
+  if(pg==='youtube')      loadOrganico('youtube');
+  if(pg==='precificacao') loadPrecificacao();
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -6793,6 +6869,234 @@ function tkHidePreview(){
 
 /* renderTkCompare — removido, comparação automática agora está em renderTiktok() */
 
+
+// ─── PRECIFICAÇÃO DE CAMPANHA ─────────────────────────────
+var PREC_SHEET = '19KAXSSPrdYwYpY2OiAAiMZINd2BJqzyUrDoVloz_Kl8';
+var rawPrec = []; // [{cod, nome, cidade, mes, F, R}]
+var precCarregado = false;
+
+var PREC_MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function precFmtMes(ym){ // '2026-08' → 'Ago/2026'
+  var p=ym.split('-');
+  return PREC_MESES_PT[parseInt(p[1])-1]+'/'+p[0];
+}
+
+async function loadPrecificacao(){
+  if(precCarregado){ renderPrecificacao(); return; }
+  var loading=document.getElementById('precLoading');
+  var body   =document.getElementById('precBody');
+  var errEl  =document.getElementById('precError');
+  if(loading) loading.style.display='block';
+  if(body)    body.style.display='none';
+  if(errEl)   errEl.style.display='none';
+  try {
+    var rows = await fetchCSV(PREC_SHEET, 0);
+    if(!rows.length) throw new Error('Planilha vazia');
+
+    // Descobrir colunas de meses (header: chaves que parecem datas YYYY-M ou MM/YYYY)
+    var sampleKeys = Object.keys(rows[0]);
+    // O CSV do sheets vem com datas como "mar./2024" ou "2024-03-01" — precisamos identificar
+    // Colunas fixas: Cód, Empreendimento, Cidade, Data Demanda, Fim Venda, Unid., Tipo
+    var fixedCols = ['Cód','Empreendimento','Cidade','Data Demanda','Fim Venda','Unid.','Tipo'];
+
+    // Colunas de meses = tudo que não é fixo
+    var mesCols = sampleKeys.filter(function(k){
+      return !fixedCols.includes(k) && k.trim() !== '';
+    });
+
+    // Parser de coluna de mês: "ago./2026" "2026-08-01" "08/2026"
+    function parseMesCol(s){
+      s = String(s).trim().toLowerCase();
+      // "ago./2026" ou "ago/2026"
+      var mMap = {jan:'01',fev:'02','mar.':'03',mar:'03',abr:'04',mai:'05','mai.':'05',
+                  jun:'06','jun.':'06',jul:'07','jul.':'07',ago:'08','ago.':'08',
+                  set:'09','set.':'09',out:'10','out.':'10',nov:'11','nov.':'11',dez:'12','dez.':'12'};
+      var m1 = s.match(/^([a-zç\.]+)\/?\.?\/?(\d{4})/);
+      if(m1){
+        var mm = mMap[m1[1]];
+        if(mm) return m1[2]+'-'+mm;
+      }
+      // "2026-08-01" ou "2026-08"
+      var m2 = s.match(/^(\d{4})-(\d{2})/);
+      if(m2) return m2[1]+'-'+m2[2];
+      // "08/2026"
+      var m3 = s.match(/^(\d{2})\/(\d{4})/);
+      if(m3) return m3[2]+'-'+m3[1];
+      return null;
+    }
+
+    rawPrec = [];
+    rows.forEach(function(r){
+      var tipo = (r['Tipo']||'').trim();
+      if(tipo !== 'F' && tipo !== 'R') return;
+      var cod   = (r['Cód']||'').trim();
+      var nome  = (r['Empreendimento']||'').replace(/\n/g,' ').trim();
+      var cidade= (r['Cidade']||'').trim();
+      if(!nome) return;
+
+      mesCols.forEach(function(col){
+        var mes = parseMesCol(col);
+        if(!mes || mes < '2026-01') return; // só a partir de 2026
+        var val = parseInt(r[col])||0;
+        if(!val) return;
+
+        // Encontrar ou criar entrada
+        var entry = rawPrec.find(function(e){
+          return e.cod===cod && e.nome===nome && e.mes===mes;
+        });
+        if(!entry){
+          entry = {cod:cod, nome:nome, cidade:cidade, mes:mes, F:0, R:0};
+          rawPrec.push(entry);
+        }
+        entry[tipo] += val;
+      });
+    });
+
+    precCarregado = true;
+    if(loading) loading.style.display='none';
+
+    // Popular filtros
+    var meses = [...new Set(rawPrec.map(function(e){return e.mes;}))].sort();
+    var emps  = [...new Set(rawPrec.map(function(e){return e.nome;}))].sort();
+    var selM  = document.getElementById('precMes');
+    var selE  = document.getElementById('precEmp');
+    if(selM){
+      selM.innerHTML = '<option value="">Todos os meses</option>';
+      meses.forEach(function(m){ selM.innerHTML += '<option value="'+m+'">'+precFmtMes(m)+'</option>'; });
+      // Seleciona mês atual por padrão
+      var hoje = new Date();
+      var mesAtual = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+      if(meses.includes(mesAtual)) selM.value = mesAtual;
+    }
+    if(selE){
+      selE.innerHTML = '<option value="">Todos os empreendimentos</option>';
+      emps.forEach(function(e){ selE.innerHTML += '<option value="'+e+'">'+e+'</option>'; });
+    }
+    renderPrecificacao();
+  } catch(e){
+    if(loading) loading.style.display='none';
+    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
+  }
+}
+
+function renderPrecificacao(){
+  var body  = document.getElementById('precBody');
+  var mesF  = (document.getElementById('precMes')||{}).value||'';
+  var empF  = (document.getElementById('precEmp')||{}).value||'';
+  var lpv   = parseInt(document.getElementById('precLeadsVenda')?.value)||30;
+
+  // CPL atual do dashboard (usa campsMeta já carregado)
+  var cpl = 0;
+  if(window.campsMeta && campsMeta.length){
+    var invTotal = campsMeta.reduce(function(s,c){return s+(c.valor||0);},0);
+    var leadsTotal = campsMeta.reduce(function(s,c){return s+(c.resultados||0);},0);
+    if(leadsTotal>0) cpl = invTotal/leadsTotal;
+  }
+  var cplInfo = document.getElementById('precCplInfo');
+  if(cplInfo) cplInfo.textContent = cpl>0 ? 'CPL atual: '+fBRL(cpl) : 'CPL: carregue o Dashboard primeiro';
+
+  // Filtrar dados
+  var dados = rawPrec.filter(function(e){
+    if(mesF && e.mes !== mesF) return false;
+    if(empF && e.nome !== empF) return false;
+    return e.F > 0; // só empreendimentos com forecast
+  });
+
+  if(!dados.length){ body.style.display='none'; return; }
+  body.style.display='block';
+
+  var isLight = document.body.classList.contains('light');
+  var clrMu   = isLight?'#6b7280':'#6b7a9e';
+  var clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+
+  // ── KPIs ──
+  var totF     = dados.reduce(function(s,e){return s+e.F;},0);
+  var totR     = dados.reduce(function(s,e){return s+e.R;},0);
+  var saldo    = totF - totR;
+  var leadsNec = saldo > 0 ? saldo * lpv : 0;
+  var invNec   = cpl > 0 ? leadsNec * cpl : 0;
+
+  function kCard(icon,label,val,cor,sub){
+    return '<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px 14px">'
+      +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:8px">'+icon+' '+label+'</div>'
+      +'<div style="font-size:22px;font-weight:900;color:'+cor+';line-height:1">'+val+'</div>'
+      +(sub?'<div style="margin-top:6px;font-size:10px;color:var(--mu)">'+sub+'</div>':'')
+      +'</div>';
+  }
+  var grid = document.getElementById('precKpiGrid');
+  if(grid) grid.innerHTML =
+    kCard('🎯','Vendas Forecast',fN(totF),'#9b7ff4',mesF?precFmtMes(mesF):'Total período')
+    +kCard('✅','Vendas Realizadas',fN(totR),'#2ecc8e',(totF>0?(totR/totF*100).toFixed(1):'0')+'% do forecast')
+    +kCard('📉','Saldo a Realizar',fN(saldo),saldo>0?'#f5a623':'#2ecc8e',lpv+' leads/venda')
+    +kCard('💰','Investimento Necessário',cpl>0?fBRL(invNec,true):'—','#f06565',
+           cpl>0?(fN(leadsNec)+' leads × '+fBRL(cpl)+'/lead'):'Configure o CPL no Dashboard');
+
+  // ── Agrupa por empreendimento para o gráfico ──
+  var byEmp = {};
+  dados.forEach(function(e){
+    if(!byEmp[e.nome]) byEmp[e.nome]={nome:e.nome,cidade:e.cidade,F:0,R:0};
+    byEmp[e.nome].F += e.F;
+    byEmp[e.nome].R += e.R;
+  });
+  var empList = Object.values(byEmp)
+    .map(function(e){
+      var sd = Math.max(0, e.F-e.R);
+      e.saldo = sd;
+      e.leads = sd * lpv;
+      e.invest = cpl > 0 ? sd * lpv * cpl : 0;
+      return e;
+    })
+    .sort(function(a,b){return b.invest-a.invest;})
+    .slice(0,20); // top 20
+
+  var labels = empList.map(function(e){
+    // Pega nome curto
+    var n = e.nome.replace(/MÓD\.\s*\d+\s*/i,'').replace(/\s+/g,' ').trim().slice(0,35);
+    return n;
+  });
+
+  mkChart('precChartInvest','bar', labels,
+    [{label:'Investimento Necessário (R$)',
+      data:empList.map(function(e){return Math.round(e.invest);}),
+      backgroundColor:'rgba(245,166,35,.85)',borderRadius:5,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
+     plugins:{legend:{display:false},datalabels:{display:false},
+       tooltip:{callbacks:{label:function(ctx){
+         return ' '+fBRL(ctx.raw);
+       }}}},
+     scales:{
+       x:{ticks:{color:clrMu,font:{size:10},callback:function(v){return 'R$'+(v>=1000?(v/1000).toFixed(0)+'k':v);}},grid:{color:clrGrid}},
+       y:{ticks:{color:isLight?'#1a2332':'#e2e8f0',font:{size:10}},grid:{display:false}}
+     }});
+
+  // ── Tabela ──
+  var tb = document.getElementById('precTableBody');
+  if(tb){
+    // Mostrar por linha (empreendimento + mês)
+    var linhas = dados.slice().sort(function(a,b){
+      return a.nome.localeCompare(b.nome) || a.mes.localeCompare(b.mes);
+    });
+    tb.innerHTML = linhas.map(function(e){
+      var sd    = Math.max(0, e.F - e.R);
+      var ld    = sd * lpv;
+      var inv   = cpl > 0 ? ld * cpl : 0;
+      var sdCor = sd > 0 ? 'var(--amber)' : 'var(--green)';
+      var pct   = e.F > 0 ? (e.R/e.F*100).toFixed(0) : 0;
+      var invStr= cpl > 0 ? fBRL(inv) : '—';
+      return '<tr style="border-bottom:1px solid var(--bdr)">'
+        +'<td style="padding:7px 12px;color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+e.nome+'">'+e.nome+'</td>'
+        +'<td style="padding:7px 12px;color:var(--mu);font-size:11px;white-space:nowrap">'+e.cidade+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;color:var(--mu);font-size:11px;white-space:nowrap">'+precFmtMes(e.mes)+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:#9b7ff4">'+e.F+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;color:#2ecc8e">'+e.R+' <span style="font-size:10px;color:var(--mu)">('+pct+'%)</span></td>'
+        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:'+sdCor+'">'+sd+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;color:#4f8ef7">'+fN(ld)+'</td>'
+        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:var(--amber)">'+invStr+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+}
 
 function loadOrganico(pg){
   if(pg==='instagram' && !rawPostagens.length) loadInstagram();

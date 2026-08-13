@@ -2496,8 +2496,8 @@ function parseLeads(rows){
 
     const parseDateBR = s => {
       if(!s) return null;
-      // Formato: DD/MM/YYYY HH:MM:SS ou DD/MM/YYYY
-      const m1 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+      // Formato: D/M/YYYY ou DD/MM/YYYY (com ou sem zero) + opcional HH:MM:SS
+      const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
       if(m1) return new Date(parseInt(m1[3]), parseInt(m1[2])-1, parseInt(m1[1]));
       const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
       if(m2) return new Date(parseInt(m2[1]), parseInt(m2[2])-1, parseInt(m2[3]));

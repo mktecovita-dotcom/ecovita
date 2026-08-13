@@ -2488,7 +2488,7 @@ function parseLeads(rows){
     const sit = (r['Situação']||'').trim();
     const dataUlt = (r['Data da Última Entrada']||r['Data da última entrada']||r['Data da Ultima Entrada']||'').trim();
     const dataUltDia = dataUlt.substring(0,10);
-    if(sit==='Perdido' && LIMPEZA_DATAS.includes(dataUltDia)) return false;
+    // NÃO excluir leads Perdidos da base geral — leads novos que viraram Perdido ainda são leads captados
     return true;
   }).map(r=>{
     const p=(r['Primeira Origem']||'').trim();
@@ -2518,7 +2518,10 @@ function parseLeads(rows){
       return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
     }
     const novo        = isOnline(p); // Lead novo = primeira origem online (data filtrada por dataCadastro em filteredLeads)
-    const reimpactado = isOnline(p) && !!dataUltima && !sameDay(dataCadastro, dataUltima);
+    // Reimpactado: exclui datas de limpeza (ajustes em massa no CRM não contam como reimpacto real)
+    const dataUltimaRawDia = dataUltimaRaw.substring(0,10); // "DD/MM/YYYY"
+    const reimpactado = isOnline(p) && !!dataUltima && !sameDay(dataCadastro, dataUltima)
+                        && !LIMPEZA_DATAS.includes(dataUltimaRawDia);
 
     return {
       situacao       : (r['Situação']||'').trim(),

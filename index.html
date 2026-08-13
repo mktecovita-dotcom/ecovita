@@ -2150,7 +2150,7 @@ if(window.ChartDataLabels){
   Chart.defaults.plugins.datalabels = { display: false };
 }
 const OBJ_C={Cadastro:C.blue,WhatsApp:C.green,Alcance:C.purple};
-const ORIGENS_ONLINE=['chatbot','facebook','website','instagram','busca orgânica','busca organica','organic'];
+const ORIGENS_ONLINE=['chatbot','facebook','website','instagram','busca orgânica','busca organica','organic','não definido','nao definido'];
 const COR_SIT={'Venda Realizada':C.green,'Com Reserva':C.teal,'Em Atendimento':C.blue,
   'Aguardando Corretor':C.purple,'Em Tentativa de Contato':C.amber,
   'Aguardando Atendimento':C.orange,'Perdido':C.red,'Simulação':C.mu};
@@ -2517,7 +2517,7 @@ function parseLeads(rows){
       if(!a||!b) return false;
       return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
     }
-    const novo        = isOnline(p) && sameDay(dataCadastro, dataUltima);
+    const novo        = isOnline(p); // Lead novo = primeira origem online (data filtrada por dataCadastro em filteredLeads)
     const reimpactado = isOnline(p) && !!dataUltima && !sameDay(dataCadastro, dataUltima);
 
     return {

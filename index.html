@@ -3158,6 +3158,12 @@ function resetCampKPIs(){
 }
 
 // Detecta objetivo a partir do nome da campanha
+function detectarEmpCampanha(nomeCamp){
+  // Empreendimento = tudo antes do primeiro " - " ou " – " no nome da campanha
+  const m = (nomeCamp||'').match(/^(.+?)\s*[-–]\s*/);
+  return m ? m[1].trim() : (nomeCamp||'').trim();
+}
+
 function detectarObjetivo(nomeCamp){
   const n = (nomeCamp||'').toLowerCase();
   if(n.includes('whatsapp') || n.includes('wpp') || n.includes('whats')) return 'WhatsApp';
@@ -3203,6 +3209,7 @@ async function loadCampanhasAPI(){
       reach         : parseInt  (insightsArr[i]?.reach       || 0),
       frequency     : parseFloat(insightsArr[i]?.frequency   || 0),
       objetivo      : detectarObjetivo(c.name),
+      emp           : detectarEmpCampanha(c.name),
     })).sort((a,b) => b.results - a.results || b.spend - a.spend);
 
     renderCampanhasMetaAPI(campanhasAPIData);

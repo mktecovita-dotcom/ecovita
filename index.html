@@ -901,6 +901,10 @@ body.tv-mode #tvExitBtn{display:block}
           <option value="this_quarter">Este trimestre</option>
           <option value="maximum">Máximo histórico</option>
         </select>
+        <span class="fl">Empreendimento:</span>
+        <select id="fCampEmp" onchange="var d=document.getElementById('fCampEmpDiario');if(d)d.value=this.value;filterCampanhasAPI();" style="min-width:180px">
+          <option value="">Todos</option>
+        </select>
         <button class="btn btn-primary" id="btnLoadCamp" onclick="loadCampanhasAPI()">↻ Carregar</button>
         <button class="btn btn-ai" id="btnAnalisarCamp" style="display:none" onclick="analisarCampanhasIA()">🤖 Analisar com IA</button>
         <span id="infoCamp" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
@@ -925,7 +929,7 @@ body.tv-mode #tvExitBtn{display:block}
           <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">📈 Meta · Leads por dia</div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="fl">Empreendimento:</span>
-            <select id="fCampEmpDiario" onchange="renderGraficoDiario()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
+            <select id="fCampEmpDiario" onchange="document.getElementById('fCampEmp').value=this.value;filterCampanhasAPI();" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
               <option value="">Todos</option>
             </select>
           </div>
@@ -3346,10 +3350,12 @@ function renderGraficoDiario(){
 function renderCampanhasMetaAPI(all){
   const fObj = document.getElementById('fCampObj')?.value  || '';
   const fSt  = document.getElementById('fCampSt')?.value   || '';
+  const fEmp = document.getElementById('fCampEmp')?.value  || '';
 
   let dados = all.filter(c =>
     (!fObj || c.objetivo === fObj) &&
-    (!fSt  || c.status   === fSt)
+    (!fSt  || c.status   === fSt)  &&
+    (!fEmp || c.emp      === fEmp)
   );
 
   // KPIs
@@ -3377,15 +3383,16 @@ function renderCampanhasMetaAPI(all){
   sid('ckCpl2', cpl2 > 0 ? fBRL(cpl2) : '—'); sid('ckCpl2s', cpl2 > 0 ? `${fBRL(totalSpend,true)} ÷ ${fN(resTotal)}` : '—');
   sid('infoCamp', `${dados.length} campanha${dados.length!==1?'s':''}${fObj?' · '+fObj:''}${fSt?' · '+(fSt==='ACTIVE'?'ativas':'pausadas'):''}`);
 
-  // Popula select de empreendimento do gráfico diário
+  // Popula selects de empreendimento (barra principal + gráfico diário)
   window._campAPIAll = all;
-  const selEmpD = document.getElementById('fCampEmpDiario');
-  if(selEmpD){
-    const empsD = [...new Set(all.map(c=>c.emp||'').filter(Boolean))].sort();
-    const curVal = selEmpD.value;
-    selEmpD.innerHTML = '<option value="">Todos</option>' + empsD.map(e=>`<option value="${e}">${e}</option>`).join('');
-    if(empsD.includes(curVal)) selEmpD.value = curVal;
-  }
+  const empsD = [...new Set(all.map(c=>c.emp||'').filter(Boolean))].sort();
+  ['fCampEmp','fCampEmpDiario'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Todos</option>' + empsD.map(e=>`<option value="${e}">${e}</option>`).join('');
+    if(empsD.includes(cur)) sel.value = cur;
+  });
   renderGraficoDiario();
 
   if(!dados.length){

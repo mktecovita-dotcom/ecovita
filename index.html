@@ -3284,13 +3284,21 @@ function renderGraficoDiario(){
   // Extrai resultados de um objeto dailyInsight (actions array)
   function _extractDailyResults(d){
     const actions = d.actions || [];
-    // Procura lead, onsite_conversion.messaging_first_reply, offsite_conversion.fb_pixel_lead
-    const keys = ['lead','onsite_conversion.messaging_first_reply','offsite_conversion.fb_pixel_lead','omni_complete_registration'];
-    for(const k of keys){
+    // Apenas action types que representam leads/conversões reais
+    const keys = [
+      'lead',
+      'onsite_conversion.messaging_first_reply',
+      'onsite_conversion.messaging_conversation_started_7d',
+      'offsite_conversion.fb_pixel_lead',
+      'omni_complete_registration',
+      'complete_registration',
+    ];
+    // Soma só os tipos relevantes (não fallback para tudo)
+    const total = keys.reduce((s,k)=>{
       const a = actions.find(x=>x.action_type===k);
-      if(a) return parseInt(a.value||0);
-    }
-    return actions.reduce((s,a)=>s+parseInt(a.value||0),0);
+      return s + (a ? parseInt(a.value||0) : 0);
+    }, 0);
+    return total;
   }
 
   // Agrupa insights diários por data

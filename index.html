@@ -931,6 +931,13 @@ body.tv-mode #tvExitBtn{display:block}
           </div>
         </div>
         <div style="height:220px;position:relative"><canvas id="campChartDiario"></canvas></div>
+        <div style="font-size:10px;color:var(--mu);margin-top:6px">⚠️ Campanhas de Alcance não incluídas nesta visão</div>
+      </div>
+
+      <!-- Gráfico Alcance por dia -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📣 Alcance · Impressões e Gasto por Dia</div>
+        <div style="height:180px;position:relative"><canvas id="campChartAlcance"></canvas></div>
       </div>
 
       <!-- Container de cards -->
@@ -3217,6 +3224,45 @@ function filterCampanhasAPI(){
   renderCampanhasMetaAPI(campanhasAPIData);
 }
 
+function renderGraficoAlcance(){
+  const all  = window._campAPIAll || [];
+  const empF = (document.getElementById('fCampEmpDiario')||{}).value||'';
+  const isLight = document.body.classList.contains('light');
+  const clrMu   = isLight?'#6b7280':'#6b7a9e';
+  const clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.06)';
+
+  const byDate = {};
+  all.forEach(c=>{
+    if(empF && (c.emp||'')!==empF) return;
+    if(c.objetivo!=='Alcance') return;
+    (c.dailyInsights||[]).forEach(d=>{
+      const dt = d.date_start||'';
+      if(!dt) return;
+      if(!byDate[dt]) byDate[dt]={impressions:0,spend:0};
+      byDate[dt].impressions += parseInt((d.impressions||0));
+      byDate[dt].spend       += parseFloat((d.spend||0));
+    });
+  });
+
+  const dias   = Object.keys(byDate).sort();
+  if(!dias.length){ if(window._alcChart){window._alcChart.destroy();window._alcChart=null;} return; }
+
+  const labels = dias.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; });
+  mkChart('campChartAlcance','bar', labels,
+    [
+      {label:'Impressões', data:dias.map(d=>byDate[d].impressions), backgroundColor:'rgba(155,127,244,.75)', borderRadius:4, borderSkipped:false, yAxisID:'y', order:2},
+      {label:'Gasto (R$)',  data:dias.map(d=>byDate[d].spend),       type:'line', borderColor:'#f5a623', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1},
+    ],
+    {responsive:true,maintainAspectRatio:false,
+     plugins:{legend:{display:true,labels:{color:clrMu,font:{size:11},boxWidth:14}},datalabels:{display:false}},
+     scales:{
+       y: {position:'left', ticks:{color:clrMu,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}, grid:{color:clrGrid}, beginAtZero:true},
+       y2:{position:'right',ticks:{color:clrMu,font:{size:10},callback:v=>'R$'+v.toFixed(0)}, grid:{display:false}, beginAtZero:true},
+       x: {ticks:{color:clrMu,font:{size:10},maxRotation:45}, grid:{display:false}}
+     }
+    });
+}
+
 function renderGraficoDiario(){
   const all = window._campAPIAll || [];
   const empF = (document.getElementById('fCampEmpDiario')||{}).value||'';
@@ -3240,6 +3286,7 @@ function renderGraficoDiario(){
   const byDate = {};
   all.forEach(c=>{
     if(empF && (c.emp||'')!==empF) return;
+    if(c.objetivo==='Alcance') return; // Alcance tem visão própria separada
     const daily = c.dailyInsights || [];
     daily.forEach(d=>{
       const dt = d.date_start || '';
@@ -3271,7 +3318,7 @@ function renderGraficoDiario(){
 
   mkChart('campChartDiario','bar', labels,
     [
-      {label:'Resultados', data:resArr, backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false, yAxisID:'y', order:2},
+      {label:'Resultados (Cadastro + WhatsApp)', data:resArr, backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false, yAxisID:'y', order:2},
       {label:'Custo por cadastro (API)', data:cplCad, type:'line', borderColor:'#f5a623', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1, spanGaps:true},
       {label:'Custo por WhatsApp (API)', data:cplWpp, type:'line', borderColor:'#2ecc8e', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1, spanGaps:true},
     ],
@@ -3284,6 +3331,9 @@ function renderGraficoDiario(){
        x:  {ticks:{color:clrMu,font:{size:10},maxRotation:45}, grid:{display:false}}
      }
     });
+
+  // Renderiza gráfico de Alcance separado
+  renderGraficoAlcance();
 }
 
 function renderCampanhasMetaAPI(all){

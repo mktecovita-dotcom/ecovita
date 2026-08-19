@@ -156,6 +156,38 @@ class MetaAPIClient {
     return data.data || [];
   }
 
+  // Insights diários da conta (agregado) — para o gráfico de leads por dia
+  async getAccountDailyInsights (datePreset = 'this_month') {
+    try {
+      const acctId = this.activeAccount?.id;
+      if (!acctId) return [];
+      const data = await this._get(`${acctId}/insights`, {
+        fields       : 'spend,impressions,actions,cost_per_action_type',
+        date_preset  : datePreset,
+        time_increment: '1',
+        level        : 'account',
+      });
+      return data.data || [];
+    } catch (e) {
+      console.warn('Daily insights:', e.message);
+      return [];
+    }
+  }
+
+  // Insights diários por campanha — para filtro por empreendimento
+  async getCampaignDailyInsights (campaignId, datePreset = 'this_month') {
+    try {
+      const data = await this._get(`${campaignId}/insights`, {
+        fields        : 'spend,actions,cost_per_action_type,date_start',
+        date_preset   : datePreset,
+        time_increment: '1',
+      });
+      return data.data || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   async getCampaignInsights (campaignId, datePreset = 'this_month') {
     try {
       const data = await this._get(`${campaignId}/insights`, {

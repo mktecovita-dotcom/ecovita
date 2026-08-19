@@ -3179,17 +3179,23 @@ async function loadCampanhasAPI(){
       camps.map(c => window.MetaAPI.getCampaignInsights(c.id, period))
     );
 
+    // Busca breakdown diário por campanha (para gráfico)
+    const dailyArr = await Promise.all(
+      camps.map(c => window.MetaAPI.getCampaignDailyInsights(c.id, period))
+    );
+
     campanhasAPIData = camps.map((c,i) => ({
       ...c,
-      insights   : insightsArr[i],
-      results    : window.MetaAPI._extractResults(insightsArr[i]),
-      spend      : parseFloat(insightsArr[i]?.spend       || 0),
-      ctr        : parseFloat(insightsArr[i]?.ctr         || 0),
-      cpc        : parseFloat(insightsArr[i]?.cpc         || 0),
-      impressions: parseInt  (insightsArr[i]?.impressions || 0),
-      reach      : parseInt  (insightsArr[i]?.reach       || 0),
-      frequency  : parseFloat(insightsArr[i]?.frequency   || 0),
-      objetivo   : detectarObjetivo(c.name),
+      insights      : insightsArr[i],
+      dailyInsights : dailyArr[i] || [],
+      results       : window.MetaAPI._extractResults(insightsArr[i]),
+      spend         : parseFloat(insightsArr[i]?.spend       || 0),
+      ctr           : parseFloat(insightsArr[i]?.ctr         || 0),
+      cpc           : parseFloat(insightsArr[i]?.cpc         || 0),
+      impressions   : parseInt  (insightsArr[i]?.impressions || 0),
+      reach         : parseInt  (insightsArr[i]?.reach       || 0),
+      frequency     : parseFloat(insightsArr[i]?.frequency   || 0),
+      objetivo      : detectarObjetivo(c.name),
     })).sort((a,b) => b.results - a.results || b.spend - a.spend);
 
     renderCampanhasMetaAPI(campanhasAPIData);
@@ -3218,18 +3224,32 @@ function renderGraficoDiario(){
   const clrMu   = isLight?'#6b7280':'#6b7a9e';
   const clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.06)';
 
-  // Agrupa insights diários por data (cada campanha tem c.dailyInsights=[{date,spend,results,objective}])
+  // Extrai resultados de um objeto dailyInsight (actions array)
+  function _extractDailyResults(d){
+    const actions = d.actions || [];
+    // Procura lead, onsite_conversion.messaging_first_reply, offsite_conversion.fb_pixel_lead
+    const keys = ['lead','onsite_conversion.messaging_first_reply','offsite_conversion.fb_pixel_lead','omni_complete_registration'];
+    for(const k of keys){
+      const a = actions.find(x=>x.action_type===k);
+      if(a) return parseInt(a.value||0);
+    }
+    return actions.reduce((s,a)=>s+parseInt(a.value||0),0);
+  }
+
+  // Agrupa insights diários por data
   const byDate = {};
   all.forEach(c=>{
     if(empF && (c.emp||'')!==empF) return;
-    const daily = c.dailyInsights || c.insights?.daily || [];
+    const daily = c.dailyInsights || [];
     daily.forEach(d=>{
-      const dt = d.date_start || d.date || '';
+      const dt = d.date_start || '';
       if(!dt) return;
       if(!byDate[dt]) byDate[dt]={date:dt,results:0,spendCad:0,spendWpp:0,resCad:0,resWpp:0};
-      byDate[dt].results += +(d.results||d.actions||0);
-      if(c.objetivo==='Cadastro'){ byDate[dt].spendCad+=(+d.spend||0); byDate[dt].resCad+=(+d.results||0); }
-      if(c.objetivo==='WhatsApp'){ byDate[dt].spendWpp+=(+d.spend||0); byDate[dt].resWpp+=(+d.results||0); }
+      const res = _extractDailyResults(d);
+      const spend = parseFloat(d.spend||0);
+      byDate[dt].results += res;
+      if(c.objetivo==='Cadastro'){ byDate[dt].spendCad+=spend; byDate[dt].resCad+=res; }
+      if(c.objetivo==='WhatsApp'){ byDate[dt].spendWpp+=spend; byDate[dt].resWpp+=res; }
     });
   });
 

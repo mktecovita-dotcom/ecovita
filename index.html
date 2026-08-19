@@ -907,12 +907,30 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
 
       <!-- KPIs -->
-      <div class="kpi-grid kpi-5" style="margin-bottom:16px">
-        <div class="kpi blue"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue" id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
-        <div class="kpi green"><div class="kpi-label">Ativas</div><div class="kpi-val green" id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
-        <div class="kpi amber"><div class="kpi-label">Gasto no Período</div><div class="kpi-val amber" id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
-        <div class="kpi purple"><div class="kpi-label">Resultados Totais</div><div class="kpi-val purple" id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
-        <div class="kpi teal"><div class="kpi-label">CTR Médio</div><div class="kpi-val teal" id="ck5">—</div><div class="kpi-sub" id="ck5s"></div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(9,1fr);margin-bottom:14px;gap:8px">
+        <div class="kpi blue"  style="margin:0"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue"   id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
+        <div class="kpi green" style="margin:0"><div class="kpi-label">Ativas</div><div class="kpi-val green"  id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
+        <div class="kpi amber" style="margin:0"><div class="kpi-label">Gasto no Período</div><div class="kpi-val amber"  id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
+        <div class="kpi green" style="margin:0"><div class="kpi-label">Res. WhatsApp</div><div class="kpi-val green"  id="ckWpp">—</div><div class="kpi-sub" id="ckWpps"></div></div>
+        <div class="kpi blue"  style="margin:0"><div class="kpi-label">Res. Cadastro</div><div class="kpi-val blue"   id="ckCad">—</div><div class="kpi-sub" id="ckCads"></div></div>
+        <div class="kpi purple" style="margin:0"><div class="kpi-label">Res. Alcance</div><div class="kpi-val purple" id="ckAlc">—</div><div class="kpi-sub" id="ckAlcs"></div></div>
+        <div class="kpi teal"  style="margin:0"><div class="kpi-label">Res. Total (W+C)</div><div class="kpi-val teal"   id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
+        <div class="kpi teal"  style="margin:0"><div class="kpi-label">CTR Médio</div><div class="kpi-val teal"   id="ck5">—</div><div class="kpi-sub" id="ck5s"></div></div>
+        <div class="kpi amber" style="margin:0;border-top-color:var(--amber)"><div class="kpi-label">CPL</div><div class="kpi-val amber"  id="ckCpl2">—</div><div class="kpi-sub" id="ckCpl2s"></div></div>
+      </div>
+
+      <!-- Gráfico diário de leads -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">📈 Meta · Leads por dia</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="fl">Empreendimento:</span>
+            <select id="fCampEmpDiario" onchange="renderGraficoDiario()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:220px;position:relative"><canvas id="campChartDiario"></canvas></div>
       </div>
 
       <!-- Container de cards -->
@@ -3193,6 +3211,61 @@ function filterCampanhasAPI(){
   renderCampanhasMetaAPI(campanhasAPIData);
 }
 
+function renderGraficoDiario(){
+  const all = window._campAPIAll || [];
+  const empF = (document.getElementById('fCampEmpDiario')||{}).value||'';
+  const isLight = document.body.classList.contains('light');
+  const clrMu   = isLight?'#6b7280':'#6b7a9e';
+  const clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.06)';
+
+  // Agrupa insights diários por data (cada campanha tem c.dailyInsights=[{date,spend,results,objective}])
+  const byDate = {};
+  all.forEach(c=>{
+    if(empF && (c.emp||'')!==empF) return;
+    const daily = c.dailyInsights || c.insights?.daily || [];
+    daily.forEach(d=>{
+      const dt = d.date_start || d.date || '';
+      if(!dt) return;
+      if(!byDate[dt]) byDate[dt]={date:dt,results:0,spendCad:0,spendWpp:0,resCad:0,resWpp:0};
+      byDate[dt].results += +(d.results||d.actions||0);
+      if(c.objetivo==='Cadastro'){ byDate[dt].spendCad+=(+d.spend||0); byDate[dt].resCad+=(+d.results||0); }
+      if(c.objetivo==='WhatsApp'){ byDate[dt].spendWpp+=(+d.spend||0); byDate[dt].resWpp+=(+d.results||0); }
+    });
+  });
+
+  const dias = Object.keys(byDate).sort();
+
+  if(!dias.length){
+    // Sem dados diários — tenta construir da planilha campsMeta (Sheet 2) por mês
+    // Fallback: mostra mensagem
+    if(window._campChartDiario){ window._campChartDiario.destroy(); window._campChartDiario=null; }
+    const ctx=document.getElementById('campChartDiario');
+    if(ctx){ const c2=ctx.getContext('2d'); c2.clearRect(0,0,ctx.width,ctx.height); }
+    return;
+  }
+
+  const labels   = dias.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; });
+  const resArr   = dias.map(d=>byDate[d].results);
+  const cplCad   = dias.map(d=>{ const r=byDate[d].resCad; return r>0?byDate[d].spendCad/r:null; });
+  const cplWpp   = dias.map(d=>{ const r=byDate[d].resWpp; return r>0?byDate[d].spendWpp/r:null; });
+
+  mkChart('campChartDiario','bar', labels,
+    [
+      {label:'Resultados', data:resArr, backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false, yAxisID:'y', order:2},
+      {label:'Custo por cadastro (API)', data:cplCad, type:'line', borderColor:'#f5a623', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1, spanGaps:true},
+      {label:'Custo por WhatsApp (API)', data:cplWpp, type:'line', borderColor:'#2ecc8e', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1, spanGaps:true},
+    ],
+    {responsive:true, maintainAspectRatio:false,
+     plugins:{legend:{display:true,labels:{color:clrMu,font:{size:11},boxWidth:14}},
+              datalabels:{display:function(ctx){return ctx.datasetIndex===0;},color:'#fff',font:{size:9,weight:'700'},anchor:'center',align:'center'}},
+     scales:{
+       y:  {position:'left', ticks:{color:clrMu,font:{size:10}}, grid:{color:clrGrid}, beginAtZero:true},
+       y2: {position:'right', ticks:{color:clrMu,font:{size:10},callback:v=>'R$'+v.toFixed(0)}, grid:{display:false}, beginAtZero:true},
+       x:  {ticks:{color:clrMu,font:{size:10},maxRotation:45}, grid:{display:false}}
+     }
+    });
+}
+
 function renderCampanhasMetaAPI(all){
   const fObj = document.getElementById('fCampObj')?.value  || '';
   const fSt  = document.getElementById('fCampSt')?.value   || '';
@@ -3205,16 +3278,38 @@ function renderCampanhasMetaAPI(all){
   // KPIs
   const ativas     = dados.filter(c => c.status === 'ACTIVE');
   const totalSpend = dados.reduce((s,c) => s + c.spend, 0);
+  const dadosWpp   = dados.filter(c => c.objetivo === 'WhatsApp');
+  const dadosCad   = dados.filter(c => c.objetivo === 'Cadastro');
+  const dadosAlc   = dados.filter(c => c.objetivo === 'Alcance');
+  const resWpp     = dadosWpp.reduce((s,c) => s + c.results, 0);
+  const resCad     = dadosCad.reduce((s,c) => s + c.results, 0);
+  const resAlc     = dadosAlc.reduce((s,c) => s + c.results, 0);
+  const resTotal   = resWpp + resCad; // só WhatsApp + Cadastro
   const totalRes   = dados.reduce((s,c) => s + c.results, 0);
   const ctrMedio   = dados.length ? dados.reduce((s,c) => s + c.ctr, 0) / dados.length : 0;
-  const cprMedio   = totalRes > 0 ? totalSpend / totalRes : 0;
+  const cpl2       = resTotal > 0 ? totalSpend / resTotal : 0;
 
   sid('ck1', fN(dados.length));        sid('ck1s', `${all.length} total na conta`);
   sid('ck2', fN(ativas.length));       sid('ck2s', `${dados.length - ativas.length} pausadas`);
-  sid('ck3', fBRL(totalSpend, true));  sid('ck3s', cprMedio > 0 ? `CPR: ${fBRL(cprMedio)}` : 'no período');
-  sid('ck4', fN(totalRes));            sid('ck4s', cprMedio > 0 ? `CPR médio: ${fBRL(cprMedio)}` : '—');
+  sid('ck3', fBRL(totalSpend, true));  sid('ck3s', 'no período');
+  sid('ckWpp',  fN(resWpp));           sid('ckWpps',  dadosWpp.length+' campanhas');
+  sid('ckCad',  fN(resCad));           sid('ckCads',  dadosCad.length+' campanhas');
+  sid('ckAlc',  fN(resAlc));           sid('ckAlcs',  dadosAlc.length+' campanhas');
+  sid('ck4', fN(resTotal));            sid('ck4s', 'WhatsApp + Cadastro');
   sid('ck5', ctrMedio.toFixed(2)+'%'); sid('ck5s', `${fN(dados.reduce((s,c)=>s+c.impressions,0))} imp.`);
+  sid('ckCpl2', cpl2 > 0 ? fBRL(cpl2) : '—'); sid('ckCpl2s', cpl2 > 0 ? `${fBRL(totalSpend,true)} ÷ ${fN(resTotal)}` : '—');
   sid('infoCamp', `${dados.length} campanha${dados.length!==1?'s':''}${fObj?' · '+fObj:''}${fSt?' · '+(fSt==='ACTIVE'?'ativas':'pausadas'):''}`);
+
+  // Popula select de empreendimento do gráfico diário
+  window._campAPIAll = all;
+  const selEmpD = document.getElementById('fCampEmpDiario');
+  if(selEmpD){
+    const empsD = [...new Set(all.map(c=>c.emp||'').filter(Boolean))].sort();
+    const curVal = selEmpD.value;
+    selEmpD.innerHTML = '<option value="">Todos</option>' + empsD.map(e=>`<option value="${e}">${e}</option>`).join('');
+    if(empsD.includes(curVal)) selEmpD.value = curVal;
+  }
+  renderGraficoDiario();
 
   if(!dados.length){
     document.getElementById('campCards').innerHTML = `

@@ -7488,18 +7488,20 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 })();
 
 // ── MODO TV ──────────────────────────────────────────────────────────────
-const TV_REFRESH = 60; // segundos para re-ler os dados
+const TV_DASH_SECS  = 45; // segundos no slide do Dashboard
+const TV_CAMP_SECS  = 40; // segundos por conta de campanhas
 let tvActive = false, tvTimer = null, tvSec = 0;
+let tvSlide = 'dashboard'; // 'dashboard' | 'campanhas'
+let tvAccIdx = 0;          // índice da conta sendo exibida
 
 function toggleTVMode(){ tvActive ? exitTVMode() : enterTVMode(); }
 
 function enterTVMode(){
-  tvActive = true; tvSec = 0;
+  tvActive = true; tvSec = 0; tvSlide = 'dashboard'; tvAccIdx = 0;
   document.body.classList.add('tv-mode');
   const btn = document.getElementById('btnTV');
   if(btn) btn.textContent = '⏹ Sair TV';
   document.documentElement.requestFullscreen?.().catch(()=>{});
-  // Garante que o dashboard está ativo e renderizado
   goPage('dashboard');
   setTimeout(()=>{ buildTVScreen(); }, 100);
   tvTimer = setInterval(tvTick, 1000);
@@ -7518,17 +7520,177 @@ function exitTVMode(){
 
 function tvKeyEsc(e){ if(e.key==='Escape') exitTVMode(); }
 
+function tvSlideLimit(){ return tvSlide==='dashboard' ? TV_DASH_SECS : TV_CAMP_SECS; }
+
+function tvNextSlide(){
+  const accounts = window.MetaAPI?.accounts || [];
+  if(tvSlide === 'dashboard'){
+    // Próximo: campanhas da primeira conta (se houver)
+    if(accounts.length){
+      tvSlide = 'campanhas'; tvAccIdx = 0;
+      tvLoadCampTV(accounts[0]);
+    } else {
+      buildTVScreen(); // sem contas → fica no dashboard
+    }
+  } else {
+    tvAccIdx++;
+    if(tvAccIdx < accounts.length){
+      tvLoadCampTV(accounts[tvAccIdx]);
+    } else {
+      // Voltou ao início → Dashboard
+      tvSlide = 'dashboard'; tvAccIdx = 0;
+      buildTVScreen();
+    }
+  }
+}
+
+async function tvLoadCampTV(account){
+  const scr = document.getElementById('tvScreen');
+  if(!scr) return;
+  // Tela de loading
+  scr.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px">
+    <div style="font-size:48px">📊</div>
+    <div style="font-size:22px;font-weight:700;color:var(--tx)">Carregando campanhas…</div>
+    <div style="font-size:14px;color:var(--mu)">${account.name||account.id}</div>
+  </div>`;
+
+  try{
+    if(window.MetaAPI && account.id !== window.MetaAPI.activeAccount?.id){
+      const idx = window.MetaAPI.accounts.findIndex(a=>a.id===account.id);
+      if(idx>=0) window.MetaAPI.switchAccount(idx);
+    }
+    const period = 'this_month';
+    const camps = await window.MetaAPI.getCampaigns({datePreset:period});
+    const insArr = await Promise.all(camps.map(c=>window.MetaAPI.getCampaignInsights(c.id,period)));
+    const dailyArr = await Promise.all(camps.map(c=>window.MetaAPI.getCampaignDailyInsights(c.id,period)));
+
+    const data = camps.map((c,i)=>({
+      ...c,
+      insights:insArr[i], dailyInsights:dailyArr[i]||[],
+      results: window.MetaAPI._extractResults(insArr[i]),
+      spend:   parseFloat(insArr[i]?.spend||0),
+      ctr:     parseFloat(insArr[i]?.ctr||0),
+      objetivo:detectarObjetivo(c.name),
+      emp:     detectarEmpCampanha(c.name),
+    }));
+
+    buildTVCampanhas(data, account.name||account.id);
+  } catch(e){
+    buildTVCampanhas([], account.name||account.id, e.message);
+  }
+}
+
 function tvTick(){
   if(!tvActive) return;
   tvSec++;
+  const lim = tvSlideLimit();
   const bar = document.getElementById('tvProgBar');
-  if(bar) bar.style.width = (tvSec/TV_REFRESH*100)+'%';
+  if(bar) bar.style.width = (tvSec/lim*100)+'%';
   const lbl = document.getElementById('tvTimerLbl');
-  if(lbl) lbl.textContent = 'Atualiza em '+(TV_REFRESH-tvSec)+'s';
-  if(tvSec >= TV_REFRESH){ tvSec=0; buildTVScreen(); }
+  if(lbl) lbl.textContent = 'Próximo em '+(lim-tvSec)+'s';
+  if(tvSec >= lim){ tvSec=0; tvNextSlide(); }
 }
 
 function tvG(id){ return (document.getElementById(id)||{}).textContent||'—'; }
+
+function buildTVCampanhas(data, contaNome, erro){
+  const scr = document.getElementById('tvScreen');
+  if(!scr) return;
+
+  const accounts  = window.MetaAPI?.accounts || [];
+  const totalAcc  = accounts.length;
+  const slideInfo = totalAcc > 1 ? `Conta ${tvAccIdx+1} de ${totalAcc}` : '';
+
+  // Header reutilizável
+  const headerHtml = `
+  <div class="tvs-hd">
+    <div class="tvs-brand">
+      <div class="tvs-brand-name">ECOVITA</div>
+      <div class="tvs-brand-sub">Meta Ads · ${contaNome}</div>
+    </div>
+    <div class="tvs-sep"></div>
+    <div class="tvs-period">📅 ${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</div>
+    <div class="tvs-right">
+      <span style="font-size:11px;color:var(--mu);margin-right:8px">${slideInfo}</span>
+      <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_CAMP_SECS}s</span>
+      <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
+      <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
+    </div>
+  </div>`;
+
+  if(erro || !data.length){
+    scr.innerHTML = headerHtml + `<div style="display:flex;align-items:center;justify-content:center;flex:1;font-size:18px;color:var(--mu)">${erro||'Sem campanhas no período'}</div>`;
+    return;
+  }
+
+  // KPIs
+  const ativas   = data.filter(c=>c.status==='ACTIVE').length;
+  const totalSpend= data.reduce((s,c)=>s+c.spend,0);
+  const resWpp   = data.filter(c=>c.objetivo==='WhatsApp').reduce((s,c)=>s+c.results,0);
+  const resCad   = data.filter(c=>c.objetivo==='Cadastro').reduce((s,c)=>s+c.results,0);
+  const resAlc   = data.filter(c=>c.objetivo==='Alcance').reduce((s,c)=>s+c.results,0);
+  const resTotal = resWpp + resCad;
+  const cpl      = resTotal > 0 ? totalSpend/resTotal : 0;
+  const ctrMed   = data.length ? data.reduce((s,c)=>s+c.ctr,0)/data.length : 0;
+
+  // Gráfico diário — monta canvas inline
+  const byDate={};
+  data.forEach(c=>{
+    if(c.objetivo==='Alcance') return;
+    (c.dailyInsights||[]).forEach(d=>{
+      const dt=d.date_start||''; if(!dt) return;
+      if(!byDate[dt]) byDate[dt]={r:0};
+      const actions=d.actions||[];
+      const keys=['lead','onsite_conversion.messaging_first_reply','offsite_conversion.fb_pixel_lead','omni_complete_registration','complete_registration'];
+      byDate[dt].r += keys.reduce((s,k)=>{ const a=actions.find(x=>x.action_type===k); return s+(a?parseInt(a.value||0):0); },0);
+    });
+  });
+  const dias = Object.keys(byDate).sort();
+  const chartHtml = dias.length
+    ? `<canvas id="tvCampChart" style="width:100%;height:180px"></canvas>`
+    : `<div style="color:var(--mu);font-size:13px;text-align:center;padding:20px">Sem dados diários disponíveis</div>`;
+
+  scr.innerHTML = headerHtml + `
+  <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:8px;padding:10px 16px 0">
+    ${[
+      ['📋','Campanhas',fN(data.length),'var(--blue)','ativas: '+ativas],
+      ['✅','Ativas',fN(ativas),'var(--green)',data.length-ativas+' pausadas'],
+      ['💰','Gasto',fBRL(totalSpend,true),'var(--amber)','no mês'],
+      ['💬','WhatsApp',fN(resWpp),'#25D366','leads'],
+      ['📝','Cadastro',fN(resCad),'var(--blue)','leads'],
+      ['📣','Alcance',fN(resAlc),'var(--purple)','resultados'],
+      ['🎯','Total (W+C)',fN(resTotal),'var(--teal)','leads'],
+      ['👆','CTR Médio',ctrMed.toFixed(2)+'%','var(--orange)',''],
+      ['💡','CPL',cpl>0?fBRL(cpl):'—','var(--amber)',cpl>0?fBRL(totalSpend,true)+'÷'+fN(resTotal):''],
+    ].map(([ic,lb,vl,cor,sb])=>`
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:10px 8px;text-align:center">
+        <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${ic} ${lb}</div>
+        <div style="font-size:18px;font-weight:900;color:${cor};line-height:1">${vl}</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:3px">${sb}</div>
+      </div>`).join('')}
+  </div>
+  <div style="padding:12px 16px;flex:1">
+    <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">📈 Leads por Dia · Cadastro + WhatsApp</div>
+    ${chartHtml}
+  </div>`;
+
+  // Renderiza gráfico após inserir no DOM
+  if(dias.length){
+    setTimeout(()=>{
+      const isLight = document.body.classList.contains('light');
+      const clrMu = isLight?'#6b7280':'#6b7a9e';
+      mkChart('tvCampChart','bar',
+        dias.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; }),
+        [{label:'Resultados', data:dias.map(d=>byDate[d].r), backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false}],
+        {responsive:true, maintainAspectRatio:false,
+         plugins:{legend:{display:false},datalabels:{display:true,color:'#fff',font:{size:10,weight:'700'},anchor:'center',align:'center',formatter:v=>v||''}},
+         scales:{
+           y:{ticks:{color:clrMu,font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true},
+           x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{display:false}}
+         }});
+    }, 50);
+  }
+}
 
 function buildTVScreen(){
   const scr = document.getElementById('tvScreen');

@@ -7524,20 +7524,20 @@ function tvSlideLimit(){ return tvSlide==='dashboard' ? TV_DASH_SECS : TV_CAMP_S
 
 function tvNextSlide(){
   const accounts = window.MetaAPI?.accounts || [];
+  console.log('[TV] nextSlide — slide:', tvSlide, '| contas:', accounts.length, '| accIdx:', tvAccIdx);
   if(tvSlide === 'dashboard'){
-    // Próximo: campanhas da primeira conta (se houver)
     if(accounts.length){
       tvSlide = 'campanhas'; tvAccIdx = 0;
       tvLoadCampTV(accounts[0]);
     } else {
-      buildTVScreen(); // sem contas → fica no dashboard
+      console.warn('[TV] Nenhuma conta Meta configurada — ficando no dashboard');
+      buildTVScreen();
     }
   } else {
     tvAccIdx++;
     if(tvAccIdx < accounts.length){
       tvLoadCampTV(accounts[tvAccIdx]);
     } else {
-      // Voltou ao início → Dashboard
       tvSlide = 'dashboard'; tvAccIdx = 0;
       buildTVScreen();
     }
@@ -7555,9 +7555,11 @@ async function tvLoadCampTV(account){
   </div>`;
 
   try{
-    if(window.MetaAPI && account.id !== window.MetaAPI.activeAccount?.id){
-      const idx = window.MetaAPI.accounts.findIndex(a=>a.id===account.id);
-      if(idx>=0) window.MetaAPI.switchAccount(idx);
+    if(window.MetaAPI){
+      // Busca por accountId (mais robusto que id interno)
+      const accounts = window.MetaAPI.accounts;
+      const idx = accounts.findIndex(a=>a.accountId===account.accountId || a.id===account.id || a.name===account.name);
+      if(idx>=0 && idx !== window.MetaAPI.activeIdx) window.MetaAPI.switchAccount(idx);
     }
     const period = 'this_month';
     const camps = await window.MetaAPI.getCampaigns({datePreset:period});
@@ -7755,7 +7757,7 @@ function buildTVScreen(){
     <div class="tvs-sep"></div>
     <div class="tvs-period">${period}</div>
     <div class="tvs-right">
-      <span class="tvs-timer" id="tvTimerLbl">Atualiza em ${TV_REFRESH}s</span>
+      <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_DASH_SECS}s</span>
       <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
       <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
     </div>

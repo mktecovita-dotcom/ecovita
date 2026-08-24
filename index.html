@@ -7187,36 +7187,41 @@ async function loadAgenda(){
   if(lista) lista.innerHTML = '<div style="color:var(--mu);font-size:13px">Carregando eventos...</div>';
 
   try {
-    const url  = `https://docs.google.com/spreadsheets/d/${AGENDA_SHEET_ID}/export?format=csv&gid=0`;
-    const text = await fetch(url).then(r => r.text());
-    const rows = parseCSV(text);
+    // fetchCSV usa parseCSV que retorna array de objetos {coluna: valor}
+    const rows = await fetchCSV(AGENDA_SHEET_ID, 0);
     if(!rows.length){ lista.innerHTML='<div style="color:var(--mu)">Nenhum evento encontrado.</div>'; return; }
 
-    // Tenta descobrir colunas automaticamente pelo cabeçalho
-    const header = rows[0].map(h => h.trim().toLowerCase());
-    const iData  = header.findIndex(h => h.includes('data'));
-    const iTit   = header.findIndex(h => h.includes('evento') || h.includes('título') || h.includes('titulo') || h.includes('nome'));
-    const iCat   = header.findIndex(h => h.includes('categoria') || h.includes('tipo'));
-    const iDesc  = header.findIndex(h => h.includes('descrição') || h.includes('descri') || h.includes('obs') || h.includes('detalhe'));
+    // Detecta as chaves do objeto pelo primeiro registro (case-insensitive)
+    const keys      = Object.keys(rows[0]);
+    const kData     = keys.find(k => k.toLowerCase().includes('data'))      || 'Data';
+    const kTitulo   = keys.find(k => /evento|título|titulo|nome/i.test(k)) || 'Evento';
+    const kCateg    = keys.find(k => /categoria|tipo/i.test(k))             || 'Categoria';
+    const kDesc     = keys.find(k => /descri|obs|detalhe/i.test(k))        || 'Descrição';
 
     agendaCatMap = {};
     agendaEventos = [];
 
-    for(let i = 1; i < rows.length; i++){
-      const r = rows[i];
-      if(!r || r.every(c => !c.trim())) continue;
-      const dataRaw = iData >= 0 ? (r[iData]||'').trim() : '';
+    for(const r of rows){
+      const dataRaw = (r[kData] || '').trim();
       if(!dataRaw) continue;
-      const dt = parseDateBR(dataRaw) || (() => {
-        // tenta ISO
-        const d = new Date(dataRaw);
-        return isNaN(d) ? null : d;
-      })();
-      if(!dt || isNaN(dt)) continue;
 
-      const titulo    = iTit  >= 0 ? (r[iTit]  ||'').trim() : r[1]||'';
-      const categoria = iCat  >= 0 ? (r[iCat]  ||'').trim() : 'Geral';
-      const descricao = iDesc >= 0 ? (r[iDesc] ||'').trim() : '';
+      // Tenta DD/MM/AAAA primeiro, depois ISO, depois MM/DD/AAAA (export americano)
+      let dt = parseDateBR(dataRaw);
+      if(!dt || isNaN(dt)){
+        // ISO AAAA-MM-DD
+        const mISO = dataRaw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if(mISO) dt = new Date(+mISO[1], +mISO[2]-1, +mISO[3]);
+      }
+      if(!dt || isNaN(dt)){
+        // fallback genérico
+        const d = new Date(dataRaw);
+        dt = isNaN(d) ? null : d;
+      }
+      if(!dt) continue;
+
+      const titulo    = (r[kTitulo]  || '').trim() || '(sem título)';
+      const categoria = (r[kCateg]   || '').trim() || 'Geral';
+      const descricao = (r[kDesc]    || '').trim();
 
       agendaEventos.push({ dt, titulo, categoria, descricao });
     }
@@ -7224,7 +7229,7 @@ async function loadAgenda(){
     // ordena por data
     agendaEventos.sort((a,b) => a.dt - b.dt);
 
-    // garante cores mapeadas em ordem
+    // garante cores mapeadas em ordem de aparição
     agendaEventos.forEach(e => agendaCorCategoria(e.categoria));
 
     renderAgenda();

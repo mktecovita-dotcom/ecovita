@@ -7157,6 +7157,17 @@ function tkHidePreview(){
 
 // ─── AGENDA ──────────────────────────────────────────────────────────
 
+// Parse de data DD/MM/AAAA ou AAAA-MM-DD (global, usada pela Agenda)
+function parseDateAgenda(s){
+  if(!s) return null;
+  const mBR  = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(mBR)  return new Date(+mBR[3], +mBR[2]-1, +mBR[1]);
+  const mISO = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(mISO) return new Date(+mISO[1], +mISO[2]-1, +mISO[3]);
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
 const AGENDA_SHEET_ID = '1MzJk7mFwzluoSaR27Oy8aoeWlRe9XsA1rk_snxjfKGU';
 let agendaEventos   = [];
 let agendaMesOffset = 0; // quantos meses deslocado do mês atual
@@ -7205,19 +7216,8 @@ async function loadAgenda(){
       const dataRaw = (r[kData] || '').trim();
       if(!dataRaw) continue;
 
-      // Tenta DD/MM/AAAA primeiro, depois ISO, depois MM/DD/AAAA (export americano)
-      let dt = parseDateBR(dataRaw);
-      if(!dt || isNaN(dt)){
-        // ISO AAAA-MM-DD
-        const mISO = dataRaw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-        if(mISO) dt = new Date(+mISO[1], +mISO[2]-1, +mISO[3]);
-      }
-      if(!dt || isNaN(dt)){
-        // fallback genérico
-        const d = new Date(dataRaw);
-        dt = isNaN(d) ? null : d;
-      }
-      if(!dt) continue;
+      const dt = parseDateAgenda(dataRaw);
+      if(!dt || isNaN(dt)) continue;
 
       const titulo    = (r[kTitulo]  || '').trim() || '(sem título)';
       const categoria = (r[kCateg]   || '').trim() || 'Geral';

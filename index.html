@@ -404,6 +404,24 @@ body.light .theme-thumb{transform:translateX(20px);background:var(--blue)}
 .theme-label{font-size:12px;color:var(--mu);font-weight:500;transition:color .2s}
 body.light .theme-label{color:var(--blue)}
 
+/* ── AGENDA ────────────────────────────────────────── */
+.ag-cal{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
+.ag-cal-header{padding:12px 16px;font-size:13px;font-weight:700;color:var(--tx);text-transform:capitalize;border-bottom:1px solid var(--bdr);text-align:center;background:var(--bg3)}
+.ag-cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.ag-cal-dow{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;text-align:center;padding:6px 2px;border-bottom:1px solid var(--bdr)}
+.ag-day{min-height:52px;padding:3px 4px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);cursor:default;transition:background .12s;position:relative}
+.ag-day:nth-child(7n){border-right:none}
+.ag-day.ag-out{opacity:.35}
+.ag-day.ag-today .ag-daynum{background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.ag-daynum{font-size:11px;font-weight:600;color:var(--mu2);margin-bottom:2px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.ag-evt{font-size:9.5px;font-weight:600;border-radius:4px;padding:1px 5px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.5}
+.ag-evt:hover{filter:brightness(1.15)}
+.ag-lista-item{display:flex;align-items:flex-start;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 16px}
+.ag-lista-data{min-width:52px;text-align:center;background:var(--bg3);border-radius:8px;padding:6px 8px}
+.ag-lista-dia{font-size:20px;font-weight:900;color:var(--tx);line-height:1}
+.ag-lista-mes{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase}
+.ag-lista-badge{font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:4px}
+
 /* ── MODO TV ────────────────────────────────────────── */
 body.tv-mode .sidebar{display:none!important}
 body.tv-mode .topbar{display:none!important}
@@ -541,9 +559,13 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
       </div>
-      <div class="nav-item" onclick="goPage('precificacao')">
-        <span class="nav-icon">🧮</span> Precificação de Campanha
+      <div class="nav-item" onclick="goPage('agenda')">
+        <span class="nav-icon">📅</span> Agenda
       </div>
+      <!-- PRECIFICAÇÃO OCULTA -->
+      <!-- <div class="nav-item" onclick="goPage('precificacao')">
+        <span class="nav-icon">🧮</span> Precificação de Campanha
+      </div> -->
       <div class="sb-section">Análise</div>
       <div class="nav-item" onclick="goPage('melhorias')">
         <span class="nav-icon">🎯</span> O que Melhorar
@@ -1970,6 +1992,39 @@ body.tv-mode #tvExitBtn{display:block}
 
     </div><!-- /page-precificacao -->
 
+    <!-- ══════════════ PAGE: AGENDA ══════════════ -->
+    <div class="page" id="page-agenda">
+
+      <!-- Cabeçalho -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:18px;font-weight:800;color:var(--tx)">📅 Agenda</div>
+          <div style="font-size:12px;color:var(--mu);margin-top:4px">Eventos, entregas e marcos importantes</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button onclick="agendaMover(-1)" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">← Anterior</button>
+          <button onclick="agendaHoje()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">Hoje</button>
+          <button onclick="agendaMover(1)" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">Próximo →</button>
+          <button onclick="loadAgenda()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px" title="Atualizar">🔄</button>
+        </div>
+      </div>
+
+      <!-- Legenda de categorias -->
+      <div id="agendaLegenda" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+      <!-- 3 calendários lado a lado -->
+      <div id="agendaCalendarios" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px"></div>
+
+      <!-- Lista de próximos eventos -->
+      <div style="margin-top:22px">
+        <div style="font-size:13px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">📋 Próximos Eventos</div>
+        <div id="agendaLista" style="display:flex;flex-direction:column;gap:8px">
+          <div style="color:var(--mu);font-size:13px">Carregando...</div>
+        </div>
+      </div>
+
+    </div><!-- /page-agenda -->
+
     <!-- ══════════════ PAGE: O QUE MELHORAR ══════════════ -->
     <div class="page" id="page-melhorias">
       <div class="card">
@@ -2311,6 +2366,7 @@ function goPage(pg){
   if(pg==='tiktok')    loadOrganico('tiktok');
   if(pg==='youtube')      loadOrganico('youtube');
   if(pg==='precificacao') loadPrecificacao();
+  if(pg==='agenda')      loadAgenda();
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
@@ -7098,6 +7154,234 @@ function tkHidePreview(){
 
 /* renderTkCompare — removido, comparação automática agora está em renderTiktok() */
 
+
+// ─── AGENDA ──────────────────────────────────────────────────────────
+
+const AGENDA_SHEET_ID = '1MzJk7mFwzluoSaR27Oy8aoeWlRe9XsA1rk_snxjfKGU';
+let agendaEventos   = [];
+let agendaMesOffset = 0; // quantos meses deslocado do mês atual
+
+// Paleta de cores por categoria (expande automaticamente)
+const AGENDA_CORES = [
+  {bg:'rgba(79,142,247,.25)',  border:'#4f8ef7', text:'#4f8ef7'},   // azul
+  {bg:'rgba(46,204,142,.25)', border:'#2ecc8e', text:'#2ecc8e'},   // verde
+  {bg:'rgba(245,166,35,.25)', border:'#f5a623', text:'#f5a623'},   // âmbar
+  {bg:'rgba(155,127,244,.25)',border:'#9b7ff4', text:'#9b7ff4'},   // roxo
+  {bg:'rgba(240,101,101,.25)',border:'#f06565', text:'#f06565'},   // vermelho
+  {bg:'rgba(38,198,218,.25)', border:'#26c6da', text:'#26c6da'},   // teal
+  {bg:'rgba(232,121,160,.25)',border:'#e879a0', text:'#e879a0'},   // rosa
+  {bg:'rgba(251,146,60,.25)', border:'#fb923c', text:'#fb923c'},   // laranja
+];
+let agendaCatMap = {}; // categoria → índice de cor
+
+function agendaCorCategoria(cat){
+  if(agendaCatMap[cat] === undefined){
+    const keys = Object.keys(agendaCatMap);
+    agendaCatMap[cat] = keys.length % AGENDA_CORES.length;
+  }
+  return AGENDA_CORES[agendaCatMap[cat]];
+}
+
+async function loadAgenda(){
+  const lista = document.getElementById('agendaLista');
+  if(lista) lista.innerHTML = '<div style="color:var(--mu);font-size:13px">Carregando eventos...</div>';
+
+  try {
+    const url  = `https://docs.google.com/spreadsheets/d/${AGENDA_SHEET_ID}/export?format=csv&gid=0`;
+    const text = await fetch(url).then(r => r.text());
+    const rows = parseCSV(text);
+    if(!rows.length){ lista.innerHTML='<div style="color:var(--mu)">Nenhum evento encontrado.</div>'; return; }
+
+    // Tenta descobrir colunas automaticamente pelo cabeçalho
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const iData  = header.findIndex(h => h.includes('data'));
+    const iTit   = header.findIndex(h => h.includes('evento') || h.includes('título') || h.includes('titulo') || h.includes('nome'));
+    const iCat   = header.findIndex(h => h.includes('categoria') || h.includes('tipo'));
+    const iDesc  = header.findIndex(h => h.includes('descrição') || h.includes('descri') || h.includes('obs') || h.includes('detalhe'));
+
+    agendaCatMap = {};
+    agendaEventos = [];
+
+    for(let i = 1; i < rows.length; i++){
+      const r = rows[i];
+      if(!r || r.every(c => !c.trim())) continue;
+      const dataRaw = iData >= 0 ? (r[iData]||'').trim() : '';
+      if(!dataRaw) continue;
+      const dt = parseDateBR(dataRaw) || (() => {
+        // tenta ISO
+        const d = new Date(dataRaw);
+        return isNaN(d) ? null : d;
+      })();
+      if(!dt || isNaN(dt)) continue;
+
+      const titulo    = iTit  >= 0 ? (r[iTit]  ||'').trim() : r[1]||'';
+      const categoria = iCat  >= 0 ? (r[iCat]  ||'').trim() : 'Geral';
+      const descricao = iDesc >= 0 ? (r[iDesc] ||'').trim() : '';
+
+      agendaEventos.push({ dt, titulo, categoria, descricao });
+    }
+
+    // ordena por data
+    agendaEventos.sort((a,b) => a.dt - b.dt);
+
+    // garante cores mapeadas em ordem
+    agendaEventos.forEach(e => agendaCorCategoria(e.categoria));
+
+    renderAgenda();
+  } catch(e) {
+    console.error('loadAgenda erro:', e);
+    if(lista) lista.innerHTML = `<div style="color:var(--red);font-size:13px">Erro ao carregar eventos: ${e.message}</div>`;
+  }
+}
+
+function agendaMover(delta){ agendaMesOffset += delta; renderAgenda(); }
+function agendaHoje(){ agendaMesOffset = 0; renderAgenda(); }
+
+function renderAgenda(){
+  renderAgendaLegenda();
+  renderAgendaCalendarios();
+  renderAgendaLista();
+}
+
+function renderAgendaLegenda(){
+  const el = document.getElementById('agendaLegenda');
+  if(!el) return;
+  const cats = Object.keys(agendaCatMap);
+  if(!cats.length){ el.innerHTML=''; return; }
+  el.innerHTML = cats.map(cat => {
+    const c = agendaCorCategoria(cat);
+    return `<div style="display:flex;align-items:center;gap:5px;background:${c.bg};border:1px solid ${c.border};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:${c.text}">${cat}</div>`;
+  }).join('');
+}
+
+function renderAgendaCalendarios(){
+  const cont = document.getElementById('agendaCalendarios');
+  if(!cont) return;
+  const hoje = new Date();
+  cont.innerHTML = '';
+  for(let m = 0; m < 3; m++){
+    const ano = hoje.getFullYear() + Math.floor((hoje.getMonth() + agendaMesOffset + m) / 12);
+    const mes = (hoje.getMonth() + agendaMesOffset + m) % 12;
+    const mesAdj = ((mes % 12) + 12) % 12;
+    const anoAdj = ano + Math.floor(mes / 12) - (mes < 0 ? 1 : 0);
+    cont.appendChild(buildCalMes(anoAdj, mesAdj, hoje));
+  }
+}
+
+function buildCalMes(ano, mes, hoje){
+  const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ag-cal';
+
+  // Header
+  wrapper.innerHTML = `<div class="ag-cal-header">${nomesMes[mes]} ${ano}</div>`;
+
+  // Grid
+  const grid = document.createElement('div');
+  grid.className = 'ag-cal-grid';
+
+  // Dias da semana (Dom → Sáb)
+  ['D','S','T','Q','Q','S','S'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'ag-cal-dow';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  // Primeiro dia da semana do mês
+  const primeiro = new Date(ano, mes, 1).getDay();
+  const totalDias = new Date(ano, mes+1, 0).getDate();
+
+  // Dias do mês anterior (fill)
+  const diasMesAnt = new Date(ano, mes, 0).getDate();
+  for(let d = primeiro - 1; d >= 0; d--){
+    const cell = document.createElement('div');
+    cell.className = 'ag-day ag-out';
+    cell.innerHTML = `<div class="ag-daynum">${diasMesAnt - d}</div>`;
+    grid.appendChild(cell);
+  }
+
+  // Dias do mês
+  for(let dia = 1; dia <= totalDias; dia++){
+    const cell = document.createElement('div');
+    cell.className = 'ag-day';
+    const ehHoje = dia===hoje.getDate() && mes===hoje.getMonth() && ano===hoje.getFullYear();
+    if(ehHoje) cell.classList.add('ag-today');
+
+    const evsDia = agendaEventos.filter(e =>
+      e.dt.getFullYear()===ano && e.dt.getMonth()===mes && e.dt.getDate()===dia
+    );
+
+    let html = `<div class="ag-daynum">${dia}</div>`;
+    // Mostra até 2 eventos, o resto indica "+N"
+    const visiveis = evsDia.slice(0, 2);
+    visiveis.forEach(ev => {
+      const c = agendaCorCategoria(ev.categoria);
+      html += `<div class="ag-evt" style="background:${c.bg};color:${c.text};border-left:2px solid ${c.border}" title="${ev.titulo}${ev.descricao ? ' — '+ev.descricao : ''}">${ev.titulo}</div>`;
+    });
+    if(evsDia.length > 2){
+      html += `<div style="font-size:9px;color:var(--mu);padding-left:2px">+${evsDia.length-2} mais</div>`;
+    }
+    cell.innerHTML = html;
+    grid.appendChild(cell);
+  }
+
+  // Fill final para completar a grade
+  const totalCells = primeiro + totalDias;
+  const restantes = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for(let d = 1; d <= restantes; d++){
+    const cell = document.createElement('div');
+    cell.className = 'ag-day ag-out';
+    cell.innerHTML = `<div class="ag-daynum">${d}</div>`;
+    grid.appendChild(cell);
+  }
+
+  wrapper.appendChild(grid);
+  return wrapper;
+}
+
+function renderAgendaLista(){
+  const el = document.getElementById('agendaLista');
+  if(!el) return;
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  // Eventos a partir de hoje nos próximos 90 dias
+  const limite = new Date(hoje); limite.setDate(limite.getDate() + 90);
+  const proximos = agendaEventos.filter(e => {
+    const d = new Date(e.dt); d.setHours(0,0,0,0);
+    return d >= hoje && d <= limite;
+  });
+
+  if(!proximos.length){
+    el.innerHTML = '<div style="color:var(--mu);font-size:13px">Nenhum evento nos próximos 90 dias.</div>';
+    return;
+  }
+
+  const nomesMes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  el.innerHTML = proximos.map(ev => {
+    const c   = agendaCorCategoria(ev.categoria);
+    const d   = ev.dt;
+    const dhj = new Date(d); dhj.setHours(0,0,0,0);
+    const diff = Math.round((dhj - hoje) / 86400000);
+    const tag  = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã' : `em ${diff} dias`;
+    return `
+    <div class="ag-lista-item">
+      <div class="ag-lista-data">
+        <div class="ag-lista-dia">${d.getDate()}</div>
+        <div class="ag-lista-mes">${nomesMes[d.getMonth()]} ${d.getFullYear()}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+          <span class="ag-lista-badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${ev.categoria}</span>
+          <span style="font-size:10px;color:var(--mu)">${tag}</span>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:var(--tx)">${ev.titulo}</div>
+        ${ev.descricao ? `<div style="font-size:12px;color:var(--mu);margin-top:3px">${ev.descricao}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 
 // ─── PRECIFICAÇÃO DE CAMPANHA — CALCULADORA ───────────────
 

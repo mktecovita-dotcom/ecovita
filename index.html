@@ -573,19 +573,7 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('ia')">
         <span class="nav-icon">🤖</span> Análise por IA
       </div>
-      <div class="sb-section">Conteúdo Orgânico</div>
-      <div class="nav-item" onclick="goPage('instagram')">
-        <span class="nav-icon">📸</span> Instagram Orgânico
-      </div>
-      <div class="nav-item" onclick="goPage('facebook')">
-        <span class="nav-icon">📘</span> Facebook Orgânico
-      </div>
-      <div class="nav-item" onclick="goPage('tiktok')">
-        <span class="nav-icon">🎵</span> TikTok Orgânico
-      </div>
-      <div class="nav-item" onclick="goPage('youtube')">
-        <span class="nav-icon">▶️</span> YouTube Orgânico
-      </div>
+      <!-- ORGÂNICO OCULTO -->
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -1364,7 +1352,7 @@ body.tv-mode #tvExitBtn{display:block}
 
 
     <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
-    <div class="page" id="page-instagram">
+    <div class="page" style="display:none!important" id="page-instagram">
       <!-- Barra de filtros -->
       <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
         <span class="fl">De:</span>
@@ -1581,7 +1569,7 @@ body.tv-mode #tvExitBtn{display:block}
 
 
     <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
-    <div class="page" id="page-facebook">
+    <div class="page" style="display:none!important" id="page-facebook">
       <!-- Filtros -->
       <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
         <span class="fl">De:</span>
@@ -1712,7 +1700,7 @@ body.tv-mode #tvExitBtn{display:block}
     </div>
 
     <!-- ══════════════ PAGE: TIKTOK ORGÂNICO ══════════════ -->
-    <div class="page" id="page-tiktok">
+    <div class="page" style="display:none!important" id="page-tiktok">
 
       <!-- Tooltip de prévia de vídeo -->
       <div id="tkPreview" style="display:none;position:fixed;z-index:9999;pointer-events:none;
@@ -1805,7 +1793,7 @@ body.tv-mode #tvExitBtn{display:block}
     </div><!-- /page-tiktok -->
 
     <!-- ══════════════ PAGE: YOUTUBE ORGÂNICO ══════════════ -->
-    <div class="page" id="page-youtube">
+    <div class="page" style="display:none!important" id="page-youtube">
 
       <!-- Filtro -->
       <div class="card" style="margin-bottom:14px">
@@ -2012,16 +2000,10 @@ body.tv-mode #tvExitBtn{display:block}
       <!-- Legenda de categorias -->
       <div id="agendaLegenda" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
 
-      <!-- 3 calendários lado a lado -->
-      <div id="agendaCalendarios" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px"></div>
+      <!-- 4 calendários 2x2 -->
+      <div id="agendaCalendarios" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px"></div>
 
-      <!-- Lista de próximos eventos -->
-      <div style="margin-top:22px">
-        <div style="font-size:13px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">📋 Próximos Eventos</div>
-        <div id="agendaLista" style="display:flex;flex-direction:column;gap:8px">
-          <div style="color:var(--mu);font-size:13px">Carregando...</div>
-        </div>
-      </div>
+      <div id="agendaLista" style="display:none"></div>
 
     </div><!-- /page-agenda -->
 
@@ -7264,7 +7246,7 @@ function renderAgendaCalendarios(){
   if(!cont) return;
   const hoje = new Date();
   cont.innerHTML = '';
-  for(let m = 0; m < 3; m++){
+  for(let m = 0; m < 4; m++){
     const ano = hoje.getFullYear() + Math.floor((hoje.getMonth() + agendaMesOffset + m) / 12);
     const mes = (hoje.getMonth() + agendaMesOffset + m) % 12;
     const mesAdj = ((mes % 12) + 12) % 12;
@@ -7777,10 +7759,112 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 })();
 
 // ── MODO TV ──────────────────────────────────────────────────────────────
-const TV_DASH_SECS  = 45; // segundos no slide do Dashboard
-const TV_CAMP_SECS  = 40; // segundos por conta de campanhas
+
+function buildTVAgenda(){
+  const scr = document.getElementById('tvScreen');
+  if(!scr) return;
+  scr.style.display = 'flex';
+
+  const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const hoje = new Date();
+
+  // Header padrão TV
+  const headerHtml = `
+  <div class="tvs-hd" style="flex-shrink:0">
+    <div class="tvs-left">
+      <img src="https://i.imgur.com/2CpXJBo.png" style="height:28px;border-radius:6px;margin-right:10px" onerror="this.style.display='none'">
+      <span class="tvs-title">ECOVITA · AGENDA</span>
+    </div>
+    <div class="tvs-right">
+      <span style="font-size:11px;color:var(--mu);margin-right:8px">${nomesMes[hoje.getMonth()]} ${hoje.getFullYear()}</span>
+      <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_AGENDA_SECS}s</span>
+      <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
+    </div>
+  </div>`;
+
+  // Renderiza 4 calendários em 2x2 usando os dados já carregados
+  const calHtml = (() => {
+    let h = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;flex:1;min-height:0;overflow:hidden">';
+    for(let m = 0; m < 4; m++){
+      const rawMes = hoje.getMonth() + m;
+      const ano    = hoje.getFullYear() + Math.floor(rawMes / 12);
+      const mes    = rawMes % 12;
+      h += buildTVCalMes(ano, mes, hoje, nomesMes);
+    }
+    h += '</div>';
+    return h;
+  })();
+
+  scr.innerHTML = `
+  <div style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+    ${headerHtml}
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 16px;gap:10px;overflow:hidden">
+      <!-- Legenda -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0">
+        ${Object.keys(agendaCatMap).map(cat => {
+          const c = agendaCorCategoria(cat);
+          return `<div style="display:flex;align-items:center;gap:5px;background:${c.bg};border:1px solid ${c.border};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:${c.text}">${cat}</div>`;
+        }).join('')}
+      </div>
+      ${calHtml}
+    </div>
+  </div>`;
+}
+
+function buildTVCalMes(ano, mes, hoje, nomesMes){
+  const totalDias  = new Date(ano, mes+1, 0).getDate();
+  const primeiro   = new Date(ano, mes, 1).getDay();
+  const diasMesAnt = new Date(ano, mes, 0).getDate();
+
+  let rows = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px">';
+
+  // DOW
+  ['D','S','T','Q','Q','S','S'].forEach(d => {
+    rows += `<div style="font-size:9px;font-weight:700;color:var(--mu);text-align:center;padding:3px 0;border-bottom:1px solid var(--bdr)">${d}</div>`;
+  });
+
+  // Fill anterior
+  for(let d = primeiro - 1; d >= 0; d--){
+    rows += `<div style="min-height:40px;padding:2px 3px;opacity:.3"><div style="font-size:9px;color:var(--mu)">${diasMesAnt - d}</div></div>`;
+  }
+
+  // Dias
+  for(let dia = 1; dia <= totalDias; dia++){
+    const ehHoje = dia===hoje.getDate() && mes===hoje.getMonth() && ano===hoje.getFullYear();
+    const evs    = agendaEventos.filter(e => e.dt.getFullYear()===ano && e.dt.getMonth()===mes && e.dt.getDate()===dia);
+    const numStyle = ehHoje
+      ? 'background:var(--blue);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:800'
+      : 'color:var(--mu2)';
+    let evHtml = evs.slice(0,2).map(ev => {
+      const c = agendaCorCategoria(ev.categoria);
+      return `<div style="font-size:8px;font-weight:600;border-radius:3px;padding:0 3px;background:${c.bg};color:${c.text};border-left:2px solid ${c.border};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px">${ev.titulo}</div>`;
+    }).join('');
+    if(evs.length > 2) evHtml += `<div style="font-size:8px;color:var(--mu)">+${evs.length-2}</div>`;
+    rows += `<div style="min-height:40px;padding:2px 3px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr)">
+      <div style="font-size:9px;${numStyle};margin-bottom:1px">${dia}</div>
+      ${evHtml}
+    </div>`;
+  }
+
+  // Fill posterior
+  const totalCells = primeiro + totalDias;
+  const resto = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for(let d = 1; d <= resto; d++){
+    rows += `<div style="min-height:40px;padding:2px 3px;opacity:.3"><div style="font-size:9px;color:var(--mu)">${d}</div></div>`;
+  }
+  rows += '</div>';
+
+  return `
+  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+    <div style="padding:8px 12px;font-size:12px;font-weight:700;color:var(--tx);text-transform:capitalize;border-bottom:1px solid var(--bdr);text-align:center;background:var(--bg3)">${nomesMes[mes]} ${ano}</div>
+    <div style="flex:1;overflow:hidden">${rows}</div>
+  </div>`;
+}
+const TV_DASH_SECS   = 45; // segundos no slide do Dashboard
+const TV_CAMP_SECS   = 40; // segundos por conta de campanhas
+const TV_AGENDA_SECS = 30; // segundos no slide da Agenda
 let tvActive = false, tvTimer = null, tvSec = 0;
-let tvSlide = 'dashboard'; // 'dashboard' | 'campanhas'
+let tvSlide = 'dashboard'; // 'dashboard' | 'campanhas' | 'agenda'
 let tvAccIdx = 0;          // índice da conta sendo exibida
 
 function toggleTVMode(){ tvActive ? exitTVMode() : enterTVMode(); }
@@ -7792,6 +7876,8 @@ function enterTVMode(){
   if(btn) btn.textContent = '⏹ Sair TV';
   document.documentElement.requestFullscreen?.().catch(()=>{});
   goPage('dashboard');
+  // Pré-carrega agenda em background para ter dados quando o slide aparecer
+  if(!agendaEventos.length) loadAgenda();
   setTimeout(()=>{ buildTVScreen(); }, 100);
   tvTimer = setInterval(tvTick, 1000);
   document.addEventListener('keydown', tvKeyEsc);
@@ -7809,26 +7895,33 @@ function exitTVMode(){
 
 function tvKeyEsc(e){ if(e.key==='Escape') exitTVMode(); }
 
-function tvSlideLimit(){ return tvSlide==='dashboard' ? TV_DASH_SECS : TV_CAMP_SECS; }
+function tvSlideLimit(){
+  if(tvSlide==='dashboard') return TV_DASH_SECS;
+  if(tvSlide==='agenda')    return TV_AGENDA_SECS;
+  return TV_CAMP_SECS;
+}
 
 function tvNextSlide(){
   const accounts = window.MetaAPI?.accounts || [];
-  console.log('[TV] nextSlide — slide:', tvSlide, '| contas:', accounts.length, '| accIdx:', tvAccIdx);
   if(tvSlide === 'dashboard'){
     if(accounts.length){
       tvSlide = 'campanhas'; tvAccIdx = 0;
       tvLoadCampTV(accounts[0]);
     } else {
-      console.warn('[TV] Nenhuma conta Meta configurada — ficando no dashboard');
-      buildTVScreen();
+      tvSlide = 'agenda';
+      buildTVAgenda();
     }
+  } else if(tvSlide === 'agenda'){
+    tvSlide = 'dashboard'; tvAccIdx = 0;
+    buildTVScreen();
   } else {
     tvAccIdx++;
     if(tvAccIdx < accounts.length){
       tvLoadCampTV(accounts[tvAccIdx]);
     } else {
-      tvSlide = 'dashboard'; tvAccIdx = 0;
-      buildTVScreen();
+      // Após campanhas → Agenda
+      tvSlide = 'agenda'; tvAccIdx = 0;
+      buildTVAgenda();
     }
   }
 }

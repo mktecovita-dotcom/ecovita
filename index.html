@@ -7771,14 +7771,15 @@ function buildTVAgenda(){
   // Header padrão TV
   const headerHtml = `
   <div class="tvs-hd" style="flex-shrink:0">
-    <div class="tvs-left">
-      <img src="https://i.imgur.com/2CpXJBo.png" style="height:28px;border-radius:6px;margin-right:10px" onerror="this.style.display='none'">
-      <span class="tvs-title">ECOVITA · AGENDA</span>
+    <div class="tvs-brand">
+      <div class="tvs-brand-name">ECOVITA</div>
+      <div class="tvs-brand-sub">Agenda · ${nomesMes[hoje.getMonth()]} ${hoje.getFullYear()}</div>
     </div>
+    <div class="tvs-sep"></div>
     <div class="tvs-right">
-      <span style="font-size:11px;color:var(--mu);margin-right:8px">${nomesMes[hoje.getMonth()]} ${hoje.getFullYear()}</span>
       <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_AGENDA_SECS}s</span>
       <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
+      <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
     </div>
   </div>`;
 
@@ -7881,19 +7882,27 @@ function enterTVMode(){
   setTimeout(()=>{ buildTVScreen(); }, 100);
   tvTimer = setInterval(tvTick, 1000);
   document.addEventListener('keydown', tvKeyEsc);
+  document.addEventListener('fullscreenchange', tvOnFullscreenChange);
 }
 
 function exitTVMode(){
+  if(!tvActive) return;
   tvActive = false;
   clearInterval(tvTimer); tvTimer = null;
   document.body.classList.remove('tv-mode');
   const btn = document.getElementById('btnTV');
   if(btn) btn.textContent = '📺 TV';
-  document.fullscreenElement && document.exitFullscreen?.();
   document.removeEventListener('keydown', tvKeyEsc);
+  document.removeEventListener('fullscreenchange', tvOnFullscreenChange);
+  if(document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
 }
 
 function tvKeyEsc(e){ if(e.key==='Escape') exitTVMode(); }
+
+// Quando o ESC sai do fullscreen via browser, detecta e finaliza o modo TV
+function tvOnFullscreenChange(){
+  if(!document.fullscreenElement && tvActive) exitTVMode();
+}
 
 function tvSlideLimit(){
   if(tvSlide==='dashboard') return TV_DASH_SECS;

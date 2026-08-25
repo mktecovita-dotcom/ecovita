@@ -409,12 +409,12 @@ body.light .theme-label{color:var(--blue)}
 .ag-cal-header{padding:12px 16px;font-size:13px;font-weight:700;color:var(--tx);text-transform:capitalize;border-bottom:1px solid var(--bdr);text-align:center;background:var(--bg3)}
 .ag-cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
 .ag-cal-dow{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;text-align:center;padding:6px 2px;border-bottom:1px solid var(--bdr)}
-.ag-day{min-height:52px;padding:3px 4px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);cursor:default;transition:background .12s;position:relative}
+.ag-day{min-height:62px;padding:3px 4px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);cursor:default;transition:background .12s;position:relative}
 .ag-day:nth-child(7n){border-right:none}
 .ag-day.ag-out{opacity:.35}
 .ag-day.ag-today .ag-daynum{background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:800}
 .ag-daynum{font-size:11px;font-weight:600;color:var(--mu2);margin-bottom:2px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
-.ag-evt{font-size:9.5px;font-weight:600;border-radius:4px;padding:1px 5px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.5}
+.ag-evt{font-size:9.5px;font-weight:600;border-radius:4px;padding:2px 5px;margin-bottom:2px;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;cursor:pointer;line-height:1.4;word-break:break-word}
 .ag-evt:hover{filter:brightness(1.15)}
 .ag-lista-item{display:flex;align-items:flex-start;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 16px}
 .ag-lista-data{min-width:52px;text-align:center;background:var(--bg3);border-radius:8px;padding:6px 8px}
@@ -7838,7 +7838,7 @@ function buildTVCalMes(ano, mes, hoje, nomesMes){
       : 'color:var(--mu2)';
     let evHtml = evs.slice(0,2).map(ev => {
       const c = agendaCorCategoria(ev.categoria);
-      return `<div style="font-size:8px;font-weight:600;border-radius:3px;padding:0 3px;background:${c.bg};color:${c.text};border-left:2px solid ${c.border};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px">${ev.titulo}</div>`;
+      return `<div style="font-size:8px;font-weight:600;border-radius:3px;padding:1px 3px;background:${c.bg};color:${c.text};border-left:2px solid ${c.border};overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;line-height:1.3;margin-bottom:1px">${ev.titulo}</div>`;
     }).join('');
     if(evs.length > 2) evHtml += `<div style="font-size:8px;color:var(--mu)">+${evs.length-2}</div>`;
     rows += `<div style="min-height:40px;padding:2px 3px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr)">

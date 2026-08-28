@@ -830,12 +830,13 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
 
       <!-- KPIs resumo -->
-      <div class="kpi-grid kpi-5" style="margin-bottom:18px" id="fnKpis">
-        <div class="kpi blue"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="fnK1">—</div><div class="kpi-sub">Online no período</div></div>
-        <div class="kpi purple"><div class="kpi-label">Em Atendimento</div><div class="kpi-val" id="fnK2">—</div><div class="kpi-sub" id="fnK2s">—</div></div>
-        <div class="kpi amber"><div class="kpi-label">Com Reserva</div><div class="kpi-val" id="fnK3">—</div><div class="kpi-sub" id="fnK3s">—</div></div>
-        <div class="kpi green"><div class="kpi-label">Venda Realizada</div><div class="kpi-val" id="fnK4">—</div><div class="kpi-sub" id="fnK4s">—</div></div>
-        <div class="kpi teal"><div class="kpi-label">Conversão</div><div class="kpi-val" id="fnK5">—</div><div class="kpi-sub">Leads → Vendas</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:18px" id="fnKpis">
+        <div class="kpi blue"><div class="kpi-label">Captados</div><div class="kpi-val" id="fnK1">—</div><div class="kpi-sub">Leads online no período</div></div>
+        <div class="kpi purple"><div class="kpi-label">Contatados</div><div class="kpi-val" id="fnK2">—</div><div class="kpi-sub" id="fnK2s">—</div></div>
+        <div class="kpi red"><div class="kpi-label">Perdidos</div><div class="kpi-val" id="fnKP">—</div><div class="kpi-sub" id="fnKPs">—</div></div>
+        <div class="kpi orange"><div class="kpi-label">Em Atendimento</div><div class="kpi-val" id="fnK3">—</div><div class="kpi-sub" id="fnK3s">—</div></div>
+        <div class="kpi teal"><div class="kpi-label">Com Reserva</div><div class="kpi-val" id="fnK4">—</div><div class="kpi-sub" id="fnK4s">—</div></div>
+        <div class="kpi green"><div class="kpi-label">Venda Realizada</div><div class="kpi-val" id="fnK5">—</div><div class="kpi-sub" id="fnK5s">—</div></div>
       </div>
 
       <!-- Funil visual -->
@@ -858,13 +859,14 @@ body.tv-mode #tvExitBtn{display:block}
             <thead>
               <tr style="border-bottom:1px solid var(--bdr)">
                 <th style="text-align:left;padding:8px 12px;color:var(--mu);font-weight:600">Empreendimento</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Leads</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Atendimento</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">% Atend.</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Reserva</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">% Reserva</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Vendas</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Conversão</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Captados</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Contatados</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--red);font-weight:600">Perdidos</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Atend. Ativo</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Reserva</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Vendas</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Conv. Leads→Venda</th>
+                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Conv. Atend→Venda</th>
               </tr>
             </thead>
             <tbody id="fnTblBody"></tbody>
@@ -3926,29 +3928,30 @@ function renderFunil(){
   const deD=de?new Date(de+'T00:00:00'):null;
   const ateD=ate?new Date(ate+'T23:59:59'):null;
 
-  // Situações por etapa
-  const ATEND=['Em Atendimento','Visita Agendada','Visita Cancelada','Visita Realizada','Simulação','Análise de Crédito (Pré-Cadastro)'];
-  const RESERVA=['Com Reserva'];
-  const VENDIDO=['Venda Realizada'];
+  // ── Definição das etapas ────────────────────────────────
+  // Contatados = saíram de "Aguardando Atendimento" (inclui Perdido — foram trabalhados)
+  const SIT_AGUARDANDO    = ['Aguardando Atendimento'];
+  const SIT_TENTATIVA     = ['Em Tentativa de Contato'];
+  const SIT_AGUARD_CORET  = ['Aguardando Corretor'];
+  const SIT_ATEND_ATIVO   = ['Em Atendimento','Visita Agendada','Visita Cancelada','Visita Realizada','Simulação','Análise de Crédito (Pré-Cadastro)'];
+  const SIT_PERDIDO       = ['Perdido'];
+  const SIT_RESERVA       = ['Com Reserva'];
+  const SIT_VENDIDO       = ['Venda Realizada'];
+
+  const CONTATADOS_SITS   = [...SIT_TENTATIVA,...SIT_AGUARD_CORET,...SIT_ATEND_ATIVO,...SIT_PERDIDO,...SIT_RESERVA,...SIT_VENDIDO];
+  const ATEND_ATIVO_SITS  = [...SIT_TENTATIVA,...SIT_AGUARD_CORET,...SIT_ATEND_ATIVO,...SIT_RESERVA,...SIT_VENDIDO];
 
   const origens=_fnOrigem;
-
   let base=leadsCV.filter(l=>{
     if(!l.online) return false;
-    // filtro origem
     const orig=(l.primeiraOrigem||'').toLowerCase();
     if(![...origens].some(o=>orig.includes(o))) return false;
-    // filtro lead type
-    if(_fnLead==='novo' && !l.novo) return false;
+    if(_fnLead==='novo'  && !l.novo)        return false;
     if(_fnLead==='reimp' && !l.reimpactado) return false;
-    // filtro empreendimento
-    if(_fnEmps.size>0 && !_fnEmps.has(l.emp)) return false;
+    if(_fnEmps.size>0    && !_fnEmps.has(l.emp)) return false;
     return true;
   });
 
-  // Filtro de data:
-  // - "novo": usa dataCadastro (lead entrou no período)
-  // - "reimp" e "todos": usa dataUltima (lead estava ativo no período, captura ambos)
   function inPeriod(l){
     if(!deD && !ateD) return true;
     const d=_fnLead==='novo' ? l.dataCadastro : (l.dataUltima || l.dataCadastro);
@@ -3958,93 +3961,107 @@ function renderFunil(){
     return true;
   }
 
-  const leads=base.filter(l=>inPeriod(l));
+  const leads    = base.filter(l=>inPeriod(l));
+  const total    = leads.length;
+  const contato  = leads.filter(l=>CONTATADOS_SITS.includes(l.situacao)).length;
+  const perdido  = leads.filter(l=>SIT_PERDIDO.includes(l.situacao)).length;
+  const atendAtivo=leads.filter(l=>ATEND_ATIVO_SITS.includes(l.situacao)).length;
+  const reserva  = leads.filter(l=>[...SIT_RESERVA,...SIT_VENDIDO].includes(l.situacao)).length;
+  const vendido  = leads.filter(l=>SIT_VENDIDO.includes(l.situacao)).length;
 
-  const total=leads.length;
-  const atend=leads.filter(l=>ATEND.includes(l.situacao)||RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)).length;
-  const reserva=leads.filter(l=>RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)).length;
-  const vendido=leads.filter(l=>VENDIDO.includes(l.situacao)).length;
-  const conv=total>0?((vendido/total)*100):0;
+  const fPct=(n,d)=>d>0?((n/d)*100).toFixed(1)+'%':'—';
 
   // KPI cards
-  const fPct=(n,d)=>d>0?((n/d)*100).toFixed(1)+'%':'—';
   document.getElementById('fnK1').textContent=fN(total);
-  document.getElementById('fnK2').textContent=fN(atend);
-  document.getElementById('fnK2s').textContent=fPct(atend,total)+' dos leads';
-  document.getElementById('fnK3').textContent=fN(reserva);
-  document.getElementById('fnK3s').textContent=fPct(reserva,atend)+' do atendimento';
-  document.getElementById('fnK4').textContent=fN(vendido);
-  document.getElementById('fnK4s').textContent=fPct(vendido,reserva)+' das reservas';
-  document.getElementById('fnK5').textContent=conv.toFixed(1)+'%';
+  document.getElementById('fnK2').textContent=fN(contato);
+  document.getElementById('fnK2s').textContent=fPct(contato,total)+' dos captados';
+  document.getElementById('fnKP').textContent=fN(perdido);
+  document.getElementById('fnKPs').textContent=fPct(perdido,contato)+' dos contatados';
+  document.getElementById('fnK3').textContent=fN(atendAtivo);
+  document.getElementById('fnK3s').textContent=fPct(atendAtivo,contato)+' dos contatados';
+  document.getElementById('fnK4').textContent=fN(reserva);
+  document.getElementById('fnK4s').textContent=fPct(reserva,atendAtivo)+' do atendimento';
+  document.getElementById('fnK5').textContent=fN(vendido);
+  document.getElementById('fnK5s').textContent=fPct(vendido,total)+' dos captados · '+fPct(vendido,reserva)+' das reservas';
 
-  // Funil visual — largura proporcional ao total, mínimo 12%
+  // ── Funil visual ────────────────────────────────────────
   const stages=[
-    {lbl:'Leads',n:total,color:'#4f8ef7',icon:'👥'},
-    {lbl:'Atendimento',n:atend,color:'#9b7ff4',icon:'🤝'},
-    {lbl:'Reserva',n:reserva,color:'#26c6da',icon:'📋'},
-    {lbl:'Vendido',n:vendido,color:'#2ecc8e',icon:'🏆'},
+    {lbl:'Captados',    sub:'Online no período',                  n:total,     color:'#4f8ef7', icon:'🎯', lost:null},
+    {lbl:'Contatados',  sub:`${fN(perdido)} perdidos (${fPct(perdido,contato)})`, n:contato,   color:'#9b7ff4', icon:'📞', lost:perdido},
+    {lbl:'Em Atendimento',sub:'Ativo — excl. Perdidos',           n:atendAtivo,color:'#fb923c', icon:'🤝', lost:null},
+    {lbl:'Com Reserva', sub:'Reserva + Venda',                    n:reserva,   color:'#26c6da', icon:'📋', lost:null},
+    {lbl:'Venda Realizada',sub:fPct(vendido,total)+' dos captados',n:vendido,  color:'#2ecc8e', icon:'🏆', lost:null},
   ];
-  const maxN=total||1;
   const body=document.getElementById('fnFunilBody');
   body.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:8px 0">`+
   stages.map((s,i)=>{
-    const pct=total===0?100:Math.max(12,Math.round((s.n/maxN)*100));
+    const pct=total===0?100:Math.max(10,Math.round((s.n/total)*100));
     const prevN=i>0?stages[i-1].n:null;
     const pctPrev=prevN!=null&&prevN>0?((s.n/prevN)*100).toFixed(1):null;
-    const pctPrevBadge=pctPrev!=null
-      ?`<span style="font-size:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:1px 7px;color:rgba(255,255,255,.85);white-space:nowrap">${pctPrev}% anterior</span>`:'';
+    const pctBadge=pctPrev!=null
+      ?`<span style="font-size:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:2px 9px;color:rgba(255,255,255,.9);white-space:nowrap">${pctPrev}% da etapa anterior</span>`:'';
+    const lostBadge=s.lost>0
+      ?`<span style="font-size:10px;background:rgba(240,101,101,.35);border:1px solid rgba(240,101,101,.6);border-radius:10px;padding:2px 9px;color:#fca5a5;white-space:nowrap;margin-left:6px">⚠ ${fN(s.lost)} perdidos</span>`:'';
     const connector=i<stages.length-1
       ?`<div style="width:2px;height:14px;background:var(--bdr);margin:0 auto"></div>`:'';
     return `
       <div style="width:${pct}%;background:${s.color};border-radius:10px;
-        display:flex;align-items:center;justify-content:space-between;
-        min-height:60px;padding:10px 18px;transition:width .6s cubic-bezier(.4,0,.2,1);
+        display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;
+        min-height:64px;padding:10px 18px;transition:width .6s cubic-bezier(.4,0,.2,1);
         box-shadow:0 4px 16px rgba(0,0,0,.25)">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">${s.icon}</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">${s.icon}</span>
           <div>
             <div style="font-size:10px;color:rgba(255,255,255,.75);font-weight:700;text-transform:uppercase;letter-spacing:.8px">${s.lbl}</div>
-            <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.1">${fN(s.n)}</div>
+            <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">${fN(s.n)}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.65)">${s.sub}</div>
           </div>
         </div>
-        ${pctPrevBadge}
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          ${pctBadge}${lostBadge}
+        </div>
       </div>
       ${connector}`;
   }).join('')+`</div>`;
 
-  // Detail table by empreendimento
+  // ── Tabela por empreendimento ───────────────────────────
   const empMap={};
   leads.forEach(l=>{
     const e=l.emp||'Outros';
-    if(!empMap[e]) empMap[e]={leads:0,atend:0,reserva:0,vendido:0};
+    if(!empMap[e]) empMap[e]={leads:0,contato:0,perdido:0,atend:0,reserva:0,vendido:0};
     empMap[e].leads++;
-    if(ATEND.includes(l.situacao)||RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)) empMap[e].atend++;
-    if(RESERVA.includes(l.situacao)||VENDIDO.includes(l.situacao)) empMap[e].reserva++;
-    if(VENDIDO.includes(l.situacao)) empMap[e].vendido++;
+    if(CONTATADOS_SITS.includes(l.situacao))  empMap[e].contato++;
+    if(SIT_PERDIDO.includes(l.situacao))      empMap[e].perdido++;
+    if(ATEND_ATIVO_SITS.includes(l.situacao)) empMap[e].atend++;
+    if([...SIT_RESERVA,...SIT_VENDIDO].includes(l.situacao)) empMap[e].reserva++;
+    if(SIT_VENDIDO.includes(l.situacao))      empMap[e].vendido++;
   });
   const rows=Object.entries(empMap).sort((a,b)=>b[1].leads-a[1].leads);
   const tb=document.getElementById('fnTblBody');
   tb.innerHTML=rows.map(([e,d])=>`
-    <tr>
-      <td style="font-weight:600;color:var(--tx)">${e}</td>
-      <td style="text-align:center">${fN(d.leads)}</td>
-      <td style="text-align:center">${fN(d.atend)} <span style="color:var(--mu);font-size:11px">(${fPct(d.atend,d.leads)})</span></td>
-      <td style="text-align:center">${fN(d.reserva)} <span style="color:var(--mu);font-size:11px">(${fPct(d.reserva,d.atend)})</span></td>
-      <td style="text-align:center">${fN(d.vendido)}</td>
-      <td style="text-align:center;font-weight:700;color:var(--green)">${fPct(d.vendido,d.leads)}</td>
+    <tr style="border-bottom:1px solid var(--bdr)">
+      <td style="padding:8px 12px;font-weight:600;color:var(--tx)">${e}</td>
+      <td style="padding:8px 12px;text-align:center">${fN(d.leads)}</td>
+      <td style="padding:8px 12px;text-align:center">${fN(d.contato)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.contato,d.leads)}</span></td>
+      <td style="padding:8px 12px;text-align:center;color:var(--red);font-weight:600">${fN(d.perdido)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.perdido,d.contato)}</span></td>
+      <td style="padding:8px 12px;text-align:center">${fN(d.atend)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.atend,d.contato)}</span></td>
+      <td style="padding:8px 12px;text-align:center">${fN(d.reserva)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.reserva,d.atend)}</span></td>
+      <td style="padding:8px 12px;text-align:center;font-weight:700;color:var(--green)">${fN(d.vendido)}</td>
+      <td style="padding:8px 12px;text-align:center;font-weight:700;color:var(--blue)">${fPct(d.vendido,d.leads)}</td>
+      <td style="padding:8px 12px;text-align:center;font-weight:700;color:var(--teal)">${fPct(d.vendido,d.atend)}</td>
     </tr>`).join('');
   document.getElementById('fnTblCount').textContent=rows.length+' empreendimento'+(rows.length!==1?'s':'');
 
-  // Titulo
+  // Título e período
   const tit=document.getElementById('fnTituloFunil');
-  if(tit) tit.textContent='🔽 Funil Mensal';
+  if(tit) tit.textContent='🔽 Funil de Atendimento';
   const sub=document.getElementById('fnSubtitle');
   if(sub){
     const pd=de&&ate?`${de.split('-').reverse().join('/')} → ${ate.split('-').reverse().join('/')}`:(de?`a partir de ${de.split('-').reverse().join('/')}`:(ate?`até ${ate.split('-').reverse().join('/')}`:'Todo o período'));
     sub.textContent=pd;
   }
   const info=document.getElementById('fnInfo');
-  if(info) info.textContent=`${fN(total)} leads no período`;
+  if(info) info.textContent=`${fN(total)} leads captados · ${fN(contato)} contatados · ${fN(perdido)} perdidos · ${fN(vendido)} vendas`;
 }
 
 // ═══════════════════════════════════════════════════════

@@ -3938,9 +3938,9 @@ function renderFunil(){
   const SIT_RESERVA       = ['Com Reserva'];
   const SIT_VENDIDO       = ['Venda Realizada'];
 
-  // "Em Tentativa de Contato" NÃO conta como contatado — ainda não houve atendimento real
-  const CONTATADOS_SITS   = [...SIT_AGUARD_CORET,...SIT_ATEND_ATIVO,...SIT_PERDIDO,...SIT_RESERVA,...SIT_VENDIDO];
-  const ATEND_ATIVO_SITS  = [...SIT_AGUARD_CORET,...SIT_ATEND_ATIVO,...SIT_RESERVA,...SIT_VENDIDO];
+  // "Em Tentativa de Contato" e "Aguardando Corretor" NÃO contam como contatados — ainda não houve atendimento real
+  const CONTATADOS_SITS   = [...SIT_ATEND_ATIVO,...SIT_PERDIDO,...SIT_RESERVA,...SIT_VENDIDO];
+  const ATEND_ATIVO_SITS  = [...SIT_ATEND_ATIVO,...SIT_RESERVA,...SIT_VENDIDO];
 
   const origens=_fnOrigem;
   let base=leadsCV.filter(l=>{

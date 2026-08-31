@@ -3953,13 +3953,23 @@ function renderFunil(){
     return true;
   });
 
-  function inPeriod(l){
-    if(!deD && !ateD) return true;
-    const d=_fnLead==='novo' ? l.dataCadastro : (l.dataUltima || l.dataCadastro);
+  // Filtro de data — alinhado com o dashboard:
+  // - Novo:        dataCadastro no período
+  // - Reimpactado: dataUltima no período
+  // - Todos:       novo(dataCadastro) OU reimpactado(dataUltima) — sem misturar datas
+  function dentroDoIntervalo(d){
     if(!d) return false;
     if(deD && d<deD) return false;
     if(ateD && d>ateD) return false;
     return true;
+  }
+  function inPeriod(l){
+    if(!deD && !ateD) return true;
+    if(_fnLead==='novo')  return dentroDoIntervalo(l.dataCadastro);
+    if(_fnLead==='reimp') return dentroDoIntervalo(l.dataUltima);
+    // "todos": conta se for novo no período OU reimpactado no período
+    return (l.novo && dentroDoIntervalo(l.dataCadastro)) ||
+           (l.reimpactado && dentroDoIntervalo(l.dataUltima));
   }
 
   const leads    = base.filter(l=>inPeriod(l));

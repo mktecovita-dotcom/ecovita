@@ -6,7 +6,6 @@
 <title>Ecovita · Sistema de Tráfego Pago</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="app.js"></script>
 <style>
 /* ═══════════════════════ RESET & VARS ═══════════════════════ */
@@ -80,15 +79,6 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .content{margin-left:var(--sidebar);padding-top:56px;min-height:100vh}
 .page{display:none;padding:24px;max-width:1440px;margin:0 auto}
 .page.active{display:block}
-#page-gads.active{padding:8px 8px 0;max-width:100%}
-.fn-chip{padding:4px 11px;font-size:11px;font-weight:600;border:1px solid var(--bdr);border-radius:20px;cursor:pointer;background:var(--bg3);color:var(--mu);transition:all .2s}
-.fn-chip.fn-chip-on{background:rgba(79,142,247,.18);border-color:var(--blue);color:var(--blue)}
-.fn-emp-check{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx);transition:background .15s}
-.fn-emp-check:hover{background:var(--bg3)}
-.fn-emp-check input{accent-color:var(--blue);width:14px;height:14px}
-.fn-bar{height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:width .5s ease;position:relative;min-width:80px}
-.fn-bar-val{font-size:24px;font-weight:900;color:#fff;line-height:1.1}
-.fn-bar-lbl{font-size:10px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 
 /* FILTER BAR */
 .fbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px}
@@ -404,24 +394,6 @@ body.light .theme-thumb{transform:translateX(20px);background:var(--blue)}
 .theme-label{font-size:12px;color:var(--mu);font-weight:500;transition:color .2s}
 body.light .theme-label{color:var(--blue)}
 
-/* ── AGENDA ────────────────────────────────────────── */
-.ag-cal{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
-.ag-cal-header{padding:12px 16px;font-size:13px;font-weight:700;color:var(--tx);text-transform:capitalize;border-bottom:1px solid var(--bdr);text-align:center;background:var(--bg3)}
-.ag-cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.ag-cal-dow{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;text-align:center;padding:6px 2px;border-bottom:1px solid var(--bdr)}
-.ag-day{min-height:62px;padding:3px 4px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);cursor:default;transition:background .12s;position:relative}
-.ag-day:nth-child(7n){border-right:none}
-.ag-day.ag-out{opacity:.35}
-.ag-day.ag-today .ag-daynum{background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:800}
-.ag-daynum{font-size:11px;font-weight:600;color:var(--mu2);margin-bottom:2px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
-.ag-evt{font-size:9.5px;font-weight:600;border-radius:4px;padding:2px 5px;margin-bottom:2px;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;cursor:pointer;line-height:1.4;word-break:break-word}
-.ag-evt:hover{filter:brightness(1.15)}
-.ag-lista-item{display:flex;align-items:flex-start;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 16px}
-.ag-lista-data{min-width:52px;text-align:center;background:var(--bg3);border-radius:8px;padding:6px 8px}
-.ag-lista-dia{font-size:20px;font-weight:900;color:var(--tx);line-height:1}
-.ag-lista-mes{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase}
-.ag-lista-badge{font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:4px}
-
 /* ── MODO TV ────────────────────────────────────────── */
 body.tv-mode .sidebar{display:none!important}
 body.tv-mode .topbar{display:none!important}
@@ -544,9 +516,6 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item active" onclick="goPage('dashboard')">
         <span class="nav-icon">📊</span> Dashboard
       </div>
-      <div class="nav-item" onclick="goPage('funil')">
-        <span class="nav-icon">🔽</span> Funil de Leads
-      </div>
       <div class="nav-item" onclick="goPage('campanhas')">
         <span class="nav-icon">📣</span> Campanhas Meta
       </div>
@@ -559,13 +528,6 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('investimento')">
         <span class="nav-icon">💰</span> Investimento
       </div>
-      <div class="nav-item" onclick="goPage('agenda')">
-        <span class="nav-icon">📅</span> Agenda
-      </div>
-      <!-- PRECIFICAÇÃO OCULTA -->
-      <!-- <div class="nav-item" onclick="goPage('precificacao')">
-        <span class="nav-icon">🧮</span> Precificação de Campanha
-      </div> -->
       <div class="sb-section">Análise</div>
       <div class="nav-item" onclick="goPage('melhorias')">
         <span class="nav-icon">🎯</span> O que Melhorar
@@ -573,7 +535,19 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('ia')">
         <span class="nav-icon">🤖</span> Análise por IA
       </div>
-      <!-- ORGÂNICO OCULTO -->
+      <div class="nav-item" onclick="goPage('mercado')">
+        <span class="nav-icon">🔍</span> Pesquisa de Mercado
+      </div>
+      <div class="sb-section">Conteúdo Orgânico</div>
+      <div class="nav-item" onclick="goPage('instagram')">
+        <span class="nav-icon">📸</span> Instagram Orgânico
+      </div>
+      <div class="nav-item" onclick="goPage('facebook')">
+        <span class="nav-icon">📘</span> Facebook Orgânico
+      </div>
+      <div class="nav-item" onclick="goPage('tiktok')">
+        <span class="nav-icon">🎵</span> TikTok Orgânico
+      </div>
       <div class="sb-section">Configurações</div>
       <div class="nav-item" onclick="goPage('config')">
         <span class="nav-icon">⚙️</span> Config. de API
@@ -666,11 +640,10 @@ body.tv-mode #tvExitBtn{display:block}
       <div id="tvS1leadKpi" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:16px">
         <!-- Linha 1: por objetivo -->
         <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">POR OBJETIVO · META ADS</div>
-        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;gap:8px">
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;gap:8px">
           <div class="kpi" style="border-top-color:#25D366;margin:0"><div class="kpi-label">Leads WhatsApp</div><div class="kpi-val" style="color:#25D366" id="kWpp">—</div><div class="kpi-sub" id="kWpps"></div></div>
           <div class="kpi blue" style="margin:0"><div class="kpi-label">Leads Cadastro</div><div class="kpi-val blue" id="kCad">—</div><div class="kpi-sub" id="kCads"></div></div>
           <div class="kpi purple" style="margin:0"><div class="kpi-label">Leads Meta Total</div><div class="kpi-val purple" id="k4">—</div><div class="kpi-sub" id="k4s"></div></div>
-          <div class="kpi amber" style="margin:0;border-top-color:var(--amber)"><div class="kpi-label">CPL · Custo por Lead</div><div class="kpi-val" style="color:var(--amber)" id="kCpl">—</div><div class="kpi-sub" id="kCpls"></div></div>
         </div>
         <!-- Linha 2: CRM -->
         <div style="font-size:10px;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);letter-spacing:.05em">BASE CRM · CVCRM</div>
@@ -685,7 +658,7 @@ body.tv-mode #tvExitBtn{display:block}
 
       <div id="tvS1charts" class="grid g53">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento por mês</div></div>
+          <div class="card-hd"><div class="card-title">Investimento vs Receita por mês</div></div>
           <div class="legend">
             <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
             <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
@@ -758,124 +731,6 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
     </div>
 
-    <!-- ══════════════ PAGE: FUNIL DE VENDAS ══════════════ -->
-    <div class="page" id="page-funil">
-
-      <!-- Filtros -->
-      <div class="card" style="margin-bottom:18px;padding:16px 20px">
-        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
-
-          <!-- Datas -->
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="fl">De:</span>
-            <input type="date" id="fnDe" onchange="renderFunil()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-            <span class="fl">Até:</span>
-            <input type="date" id="fnAte" onchange="renderFunil()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-            <button class="btn" onclick="fnClearDates()" style="padding:5px 9px;font-size:11px">✕</button>
-          </div>
-
-          <!-- Tipo de Lead -->
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="fl">Lead:</span>
-            <div style="display:flex;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
-              <button id="fnLdTodos" onclick="fnSetLead('todos')"
-                style="padding:5px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:var(--purple);color:#fff;transition:all .2s">Todos</button>
-              <button id="fnLdNovo" onclick="fnSetLead('novo')"
-                style="padding:5px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s">Novo</button>
-              <button id="fnLdReimp" onclick="fnSetLead('reimp')"
-                style="padding:5px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s">Reimpactado</button>
-            </div>
-          </div>
-
-          <!-- Origem multi-select dropdown -->
-          <div style="position:relative">
-            <button onclick="fnToggleOrigDrop()" id="fnOrigBtn"
-              style="padding:5px 14px;font-size:11px;font-weight:600;border:1px solid var(--bdr);border-radius:8px;background:var(--bg4);color:var(--tx);cursor:pointer;white-space:nowrap">
-              🌐 Origem <span id="fnOrigCount" style="color:var(--blue)">(Todas)</span> ▾
-            </button>
-            <div id="fnOrigDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4)">
-              <div style="display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
-                <button onclick="fnOrigAll()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Todas</button>
-                <button onclick="fnOrigNone()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Nenhuma</button>
-              </div>
-              <div id="fnOrigList" style="display:flex;flex-direction:column;gap:4px">
-                <label class="fn-emp-check"><input type="checkbox" value="chatbot" checked onchange="fnOrigChange(this)"> 💬 ChatBot</label>
-                <label class="fn-emp-check"><input type="checkbox" value="facebook" checked onchange="fnOrigChange(this)"> 📘 Facebook</label>
-                <label class="fn-emp-check"><input type="checkbox" value="instagram" checked onchange="fnOrigChange(this)"> 📸 Instagram</label>
-                <label class="fn-emp-check"><input type="checkbox" value="website" checked onchange="fnOrigChange(this)"> 🌐 WebSite</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Empreendimentos multi-select dropdown -->
-          <div style="position:relative">
-            <button onclick="fnToggleEmpDrop()" id="fnEmpBtn"
-              style="padding:5px 14px;font-size:11px;font-weight:600;border:1px solid var(--bdr);border-radius:8px;background:var(--bg4);color:var(--tx);cursor:pointer;white-space:nowrap">
-              🏢 Empreendimentos <span id="fnEmpCount" style="color:var(--blue)">(Todos)</span> ▾
-            </button>
-            <div id="fnEmpDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:8px;min-width:240px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)">
-              <div style="display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
-                <button onclick="fnEmpAll()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Todos</button>
-                <button onclick="fnEmpNone()" style="font-size:10px;padding:3px 8px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg3);color:var(--tx);cursor:pointer">Nenhum</button>
-              </div>
-              <div id="fnEmpList" style="display:flex;flex-direction:column;gap:4px"></div>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="renderFunil()" style="padding:5px 16px;font-size:11px">🔍 Filtrar</button>
-        </div>
-
-        <!-- Info resultado -->
-        <div id="fnInfo" style="margin-top:10px;font-size:11px;color:var(--mu)"></div>
-      </div>
-
-      <!-- KPIs resumo -->
-      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:18px" id="fnKpis">
-        <div class="kpi blue"><div class="kpi-label">Captados</div><div class="kpi-val" id="fnK1">—</div><div class="kpi-sub">Leads online no período</div></div>
-        <div class="kpi purple"><div class="kpi-label">Contatados</div><div class="kpi-val" id="fnK2">—</div><div class="kpi-sub" id="fnK2s">—</div></div>
-        <div class="kpi red"><div class="kpi-label">Perdidos</div><div class="kpi-val" id="fnKP">—</div><div class="kpi-sub" id="fnKPs">—</div></div>
-        <div class="kpi orange"><div class="kpi-label">Em Atendimento</div><div class="kpi-val" id="fnK3">—</div><div class="kpi-sub" id="fnK3s">—</div></div>
-        <div class="kpi teal"><div class="kpi-label">Com Reserva</div><div class="kpi-val" id="fnK4">—</div><div class="kpi-sub" id="fnK4s">—</div></div>
-        <div class="kpi green"><div class="kpi-label">Venda Realizada</div><div class="kpi-val" id="fnK5">—</div><div class="kpi-sub" id="fnK5s">—</div></div>
-      </div>
-
-      <!-- Funil visual -->
-      <div class="card" style="margin-bottom:18px">
-        <div class="card-hd">
-          <div class="card-title" id="fnTituloFunil">🔽 Funil Mensal</div>
-          <span style="font-size:11px;color:var(--mu)" id="fnSubtitle"></span>
-        </div>
-        <div id="fnFunilBody" style="padding:8px 0"></div>
-      </div>
-
-      <!-- Tabela detalhada por empreendimento -->
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-title">📋 Detalhamento por Empreendimento</div>
-          <span id="fnTblCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)">—</span>
-        </div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead>
-              <tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 12px;color:var(--mu);font-weight:600">Empreendimento</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Captados</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Contatados</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--red);font-weight:600">Perdidos</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Atend. Ativo</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Reserva</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Vendas</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Conv. Leads→Venda</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Conv. Atend→Venda</th>
-              </tr>
-            </thead>
-            <tbody id="fnTblBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div><!-- /page-funil -->
-
     <!-- ══════════════ PAGE: CAMPANHAS ══════════════ -->
     <div class="page" id="page-campanhas">
 
@@ -913,47 +768,18 @@ body.tv-mode #tvExitBtn{display:block}
           <option value="this_quarter">Este trimestre</option>
           <option value="maximum">Máximo histórico</option>
         </select>
-        <span class="fl">Empreendimento:</span>
-        <select id="fCampEmp" onchange="var d=document.getElementById('fCampEmpDiario');if(d)d.value=this.value;filterCampanhasAPI();" style="min-width:180px">
-          <option value="">Todos</option>
-        </select>
         <button class="btn btn-primary" id="btnLoadCamp" onclick="loadCampanhasAPI()">↻ Carregar</button>
         <button class="btn btn-ai" id="btnAnalisarCamp" style="display:none" onclick="analisarCampanhasIA()">🤖 Analisar com IA</button>
         <span id="infoCamp" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
       </div>
 
       <!-- KPIs -->
-      <div class="kpi-grid" style="grid-template-columns:repeat(9,1fr);margin-bottom:14px;gap:8px">
-        <div class="kpi blue"  style="margin:0"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue"   id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
-        <div class="kpi green" style="margin:0"><div class="kpi-label">Ativas</div><div class="kpi-val green"  id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
-        <div class="kpi amber" style="margin:0"><div class="kpi-label">Gasto no Período</div><div class="kpi-val amber"  id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
-        <div class="kpi green" style="margin:0"><div class="kpi-label">Res. WhatsApp</div><div class="kpi-val green"  id="ckWpp">—</div><div class="kpi-sub" id="ckWpps"></div></div>
-        <div class="kpi blue"  style="margin:0"><div class="kpi-label">Res. Cadastro</div><div class="kpi-val blue"   id="ckCad">—</div><div class="kpi-sub" id="ckCads"></div></div>
-        <div class="kpi purple" style="margin:0"><div class="kpi-label">Res. Alcance</div><div class="kpi-val purple" id="ckAlc">—</div><div class="kpi-sub" id="ckAlcs"></div></div>
-        <div class="kpi teal"  style="margin:0"><div class="kpi-label">Res. Total (W+C)</div><div class="kpi-val teal"   id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
-        <div class="kpi teal"  style="margin:0"><div class="kpi-label">CTR Médio</div><div class="kpi-val teal"   id="ck5">—</div><div class="kpi-sub" id="ck5s"></div></div>
-        <div class="kpi amber" style="margin:0;border-top-color:var(--amber)"><div class="kpi-label">CPL</div><div class="kpi-val amber"  id="ckCpl2">—</div><div class="kpi-sub" id="ckCpl2s"></div></div>
-      </div>
-
-      <!-- Gráfico diário de leads -->
-      <div class="card" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">📈 Meta · Leads por dia</div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="fl">Empreendimento:</span>
-            <select id="fCampEmpDiario" onchange="document.getElementById('fCampEmp').value=this.value;filterCampanhasAPI();" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
-              <option value="">Todos</option>
-            </select>
-          </div>
-        </div>
-        <div style="height:220px;position:relative"><canvas id="campChartDiario"></canvas></div>
-        <div style="font-size:10px;color:var(--mu);margin-top:6px">⚠️ Campanhas de Alcance não incluídas nesta visão</div>
-      </div>
-
-      <!-- Gráfico Alcance por dia -->
-      <div class="card" style="margin-bottom:14px">
-        <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📣 Alcance · Impressões e Gasto por Dia</div>
-        <div style="height:180px;position:relative"><canvas id="campChartAlcance"></canvas></div>
+      <div class="kpi-grid kpi-5" style="margin-bottom:16px">
+        <div class="kpi blue"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue" id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
+        <div class="kpi green"><div class="kpi-label">Ativas</div><div class="kpi-val green" id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
+        <div class="kpi amber"><div class="kpi-label">Gasto no Período</div><div class="kpi-val amber" id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
+        <div class="kpi purple"><div class="kpi-label">Resultados Totais</div><div class="kpi-val purple" id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
+        <div class="kpi teal"><div class="kpi-label">CTR Médio</div><div class="kpi-val teal" id="ck5">—</div><div class="kpi-sub" id="ck5s"></div></div>
       </div>
 
       <!-- Container de cards -->
@@ -1098,17 +924,105 @@ body.tv-mode #tvExitBtn{display:block}
     <!-- ══════════════ PAGE: GOOGLE ADS ══════════════ -->
     <div class="page" id="page-gads">
 
-      <div id="gadsContent" style="display:flex;flex-direction:column;height:calc(100vh - 105px)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0">
-          <div style="font-size:13px;font-weight:600;color:var(--tx)">🔍 Google Ads</div>
-          <a href="https://datastudio.google.com/reporting/12f939a6-9b61-474f-86fa-8762ef2e1051" target="_blank"
-             style="font-size:11px;color:var(--mu);text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--bdr);border-radius:8px;transition:all .2s"
-             onmouseover="this.style.color='var(--blue)';this.style.borderColor='var(--blue)'"
-             onmouseout="this.style.color='var(--mu)';this.style.borderColor='var(--bdr)'">
-            ↗ Abrir em nova aba
-          </a>
+      <div id="gadsNotConfigured" style="display:none;text-align:center;padding:60px 20px">
+        <div style="font-size:48px;margin-bottom:16px">🔍</div>
+        <div style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px">Google Ads não conectado</div>
+        <div style="font-size:13px;color:var(--mu);margin-bottom:20px">Configure a planilha Google Ads em Configurações de API.</div>
+        <button class="btn btn-primary" onclick="goPage('config')">⚙️ Ir para Configurações</button>
+      </div>
+
+      <div id="gadsContent">
+        <div class="fbar" style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+            <span class="fl">Tipo:</span>
+            <select id="gfTipo" onchange="renderGoogleAds()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tx)">
+              <option value="">Todos</option>
+              <option value="Pesquisa">Pesquisa</option>
+              <option value="Display">Display</option>
+              <option value="YouTube">YouTube</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Performance Max">Performance Max</option>
+            </select>
+            <span class="fl">Status:</span>
+            <select id="gfStatus" onchange="renderGoogleAds()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--tx)">
+              <option value="">Todos</option>
+              <option value="Ativa">Ativas</option>
+              <option value="Pausada">Pausadas</option>
+            </select>
+            <span class="fl" style="margin-left:8px">De:</span>
+            <input type="date" id="gfDateIni" onchange="applyGadsDate()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <span class="fl">Até:</span>
+            <input type="date" id="gfDateFim" onchange="applyGadsDate()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <button class="btn" onclick="clearGadsDate()" style="padding:5px 10px;font-size:11px">✕ Limpar</button>
+          </div>
+          <span id="gadsInfo" style="font-size:11px;color:var(--mu);white-space:nowrap;padding-left:12px"></span>
         </div>
-        <iframe width="1920" height="1080" src="https://datastudio.google.com/embed/reporting/12f939a6-9b61-474f-86fa-8762ef2e1051/page/p_xbxm5kr0td" frameborder="0" style="border:0;border-radius:12px;max-width:100%" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+
+        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+          <div class="kpi green"><div class="kpi-label">Investimento Total</div><div class="kpi-val" id="gk_gasto">—</div><div class="kpi-sub" id="gk_gastoS">Google Ads</div></div>
+          <div class="kpi blue"><div class="kpi-label">Cliques</div><div class="kpi-val" id="gk_cliques">—</div><div class="kpi-sub" id="gk_cliquesS">Total de cliques</div></div>
+          <div class="kpi purple"><div class="kpi-label">Impressões</div><div class="kpi-val" id="gk_imp">—</div><div class="kpi-sub" id="gk_impS">Alcance de exibição</div></div>
+          <div class="kpi amber"><div class="kpi-label">CTR Médio</div><div class="kpi-val" id="gk_ctr">—</div><div class="kpi-sub" id="gk_ctrS">Taxa de clique</div></div>
+          <div class="kpi teal"><div class="kpi-label">CPC Médio</div><div class="kpi-val" id="gk_cpc">—</div><div class="kpi-sub" id="gk_cpcS">Custo por clique</div></div>
+        </div>
+
+        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+          <div class="kpi green"><div class="kpi-label">Conversões</div><div class="kpi-val" id="gk_conv">—</div><div class="kpi-sub" id="gk_convS">Total convertido</div></div>
+          <div class="kpi blue"><div class="kpi-label">Taxa de Conv.</div><div class="kpi-val" id="gk_txconv">—</div><div class="kpi-sub" id="gk_txconvS">Cliques → Conversão</div></div>
+          <div class="kpi red"><div class="kpi-label">Custo/Conv. (CPA)</div><div class="kpi-val" id="gk_cpa">—</div><div class="kpi-sub" id="gk_cpaS">Custo por conversão</div></div>
+          <div class="kpi amber"><div class="kpi-label">Impr. no Topo (%)</div><div class="kpi-val" id="gk_roas">—</div><div class="kpi-sub" id="gk_roasS">Share of top impressions</div></div>
+          <div class="kpi purple"><div class="kpi-label">Campanhas Ativas</div><div class="kpi-val" id="gk_ativas">—</div><div class="kpi-sub" id="gk_ativasS">de total</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><div class="card-title">💰 Gasto por Tipo de Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartTipo"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-title">👆 Cliques por Campanha</div></div><div style="height:200px;position:relative"><canvas id="gadsChartCTR"></canvas></div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🥇 Posição Absoluta no Topo (%)</div></div>
+            <div style="height:200px;position:relative"><canvas id="gadsChartAbsTop"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📈 CTR por Campanha</div></div>
+            <div style="height:200px;position:relative"><canvas id="gadsChartCTR2"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd">
+            <div class="card-title">📋 Performance por Campanha</div>
+            <span id="gadsCampCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)">0 campanhas</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px" id="gadsTable">
+              <thead>
+                <tr style="border-bottom:1px solid var(--bdr)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Campanha</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Tipo</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Status</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Gasto</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Cliques</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CTR</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CPC</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Conv.</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">CPA</th>
+                  <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">ROAS</th>
+                  <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Saúde</th>
+                </tr>
+              </thead>
+              <tbody id="gadsTableBody">
+                <tr><td colspan="11" style="text-align:center;padding:30px;color:var(--mu)">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><div class="card-title">📊 CPA por Campanha (top 10)</div></div>
+          <div id="gadsCPABars" style="display:flex;flex-direction:column;gap:8px;padding:4px 0"></div>
+        </div>
       </div>
     </div><!-- /page-gads -->
 
@@ -1180,44 +1094,7 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
 
-      <!-- Bloco Instagram & Facebook Orgânico API -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          <div class="card-title">📸 Instagram & Facebook — API Orgânico</div>
-          <span class="badge" id="cfgOrgBadge" style="background:rgba(107,122,158,.12);color:var(--mu)">Não configurado</span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-          <div class="cred-field">
-            <label>Token de Página (permanente)</label>
-            <input type="password" id="orgPageToken" placeholder="EAAxxxxxxxx…" autocomplete="new-password"
-              style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-          </div>
-          <div class="cred-field">
-            <label>Facebook Page ID</label>
-            <input type="text" id="orgFbPageId" placeholder="Ex: 123456789012345" autocomplete="off"
-              style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-          </div>
-          <div class="cred-field">
-            <label>Instagram Business ID</label>
-            <input type="text" id="orgIgBizId" placeholder="Ex: 17841400000000000" autocomplete="off"
-              style="width:100%;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--tx);outline:none;font-family:inherit">
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-          <button class="btn btn-primary" onclick="saveOrganicoConfig()">💾 Salvar</button>
-          <button class="btn" onclick="testarOrganicoConfig()">🔌 Testar conexão</button>
-          <button class="btn" onclick="clearOrganicoConfig()" style="color:var(--red)">✕ Limpar</button>
-          <span id="orgMsg" style="font-size:12px;margin-left:4px"></span>
-        </div>
-        <div style="padding:12px 14px;background:var(--bg3);border-radius:10px;font-size:12px;line-height:1.9;color:var(--mu2)">
-          <b style="color:var(--tx)">Como obter os dados (siga o passo a passo do chat):</b><br>
-          <b style="color:var(--pink)">1.</b> Gere o token no Graph API Explorer com permissões <code style="background:rgba(232,121,249,.12);color:var(--pink);padding:1px 5px;border-radius:4px">pages_read_engagement</code> <code style="background:rgba(232,121,249,.12);color:var(--pink);padding:1px 5px;border-radius:4px">instagram_manage_insights</code> <code style="background:rgba(232,121,249,.12);color:var(--pink);padding:1px 5px;border-radius:4px">read_insights</code><br>
-          <b style="color:var(--pink)">2.</b> Troque por token de longa duração (60 dias) via <code style="background:rgba(232,121,249,.12);color:var(--pink);padding:1px 5px;border-radius:4px">/oauth/access_token?grant_type=fb_exchange_token…</code><br>
-          <b style="color:var(--pink)">3.</b> Busque o <b>Token de Página permanente</b> via <code style="background:rgba(232,121,249,.12);color:var(--pink);padding:1px 5px;border-radius:4px">/me/accounts</code> — esse nunca expira<br>
-          <b style="color:var(--pink)">4.</b> O <b>Facebook Page ID</b> vem na mesma resposta do <code>/me/accounts</code> (campo <code>id</code>)<br>
-          <b style="color:var(--pink)">5.</b> O <b>Instagram Business ID</b> via <code style="background:rgba(232,121,249,.12);color:var(--pink);padding:1px 5px;border-radius:4px">/PAGE_ID?fields=instagram_business_account</code>
-        </div>
-      </div>
+      <!-- Bloco Instagram Orgânico -->
 
       <!-- Bloco Claude API -->
       <div class="card" style="margin-bottom:14px">
@@ -1354,7 +1231,7 @@ body.tv-mode #tvExitBtn{display:block}
 
 
     <!-- ══════════════ PAGE: INSTAGRAM ORGÂNICO ══════════════ -->
-    <div class="page" style="display:none!important" id="page-instagram">
+    <div class="page" id="page-instagram">
       <!-- Barra de filtros -->
       <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
         <span class="fl">De:</span>
@@ -1571,7 +1448,7 @@ body.tv-mode #tvExitBtn{display:block}
 
 
     <!-- ══════════════ PAGE: FACEBOOK ORGÂNICO ══════════════ -->
-    <div class="page" style="display:none!important" id="page-facebook">
+    <div class="page" id="page-facebook">
       <!-- Filtros -->
       <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
         <span class="fl">De:</span>
@@ -1702,312 +1579,127 @@ body.tv-mode #tvExitBtn{display:block}
     </div>
 
     <!-- ══════════════ PAGE: TIKTOK ORGÂNICO ══════════════ -->
-    <div class="page" style="display:none!important" id="page-tiktok">
-
-      <!-- Tooltip de prévia de vídeo -->
-      <div id="tkPreview" style="display:none;position:fixed;z-index:9999;pointer-events:none;
-        background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px;
-        box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:240px;min-width:180px">
-        <div id="tkPreviewThumb" style="width:100%;aspect-ratio:9/16;background:var(--bg3);border-radius:8px;margin-bottom:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">
-          <span style="font-size:32px">🎵</span>
-        </div>
-        <div id="tkPreviewTitle" style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:6px;line-height:1.3"></div>
-        <div style="display:flex;gap:10px;font-size:11px;color:var(--mu)">
-          <span>👁️ <b id="tkPreviewViews" style="color:var(--tx)">—</b></span>
-          <span>❤️ <b id="tkPreviewLikes" style="color:var(--tx)">—</b></span>
-          <span>💬 <b id="tkPreviewComents" style="color:var(--tx)">—</b></span>
-        </div>
+    <div class="page" id="page-tiktok">
+      <!-- Filtros -->
+      <div class="fbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <span class="fl">De:</span>
+        <input type="date" id="tkDateDe" onchange="applyTkFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+        <span class="fl">Até:</span>
+        <input type="date" id="tkDateAte" onchange="applyTkFilter()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+        <button class="btn" onclick="tkClearDates()" style="font-size:11px;padding:5px 10px">✕</button>
+        <button class="btn btn-primary" onclick="loadTiktok()" style="font-size:11px;padding:5px 14px">🔄 Atualizar</button>
+        <div style="width:1px;background:var(--bdr);height:20px;margin:0 4px"></div>
+        <button class="btn" onclick="toggleTkCompare()" style="font-size:11px;padding:5px 12px">⚖️ Comparar períodos</button>
+        <button class="btn" onclick="tkSetMesAnterior()" style="font-size:11px;padding:5px 12px" title="Mês atual vs. mês anterior">📅 Mês anterior</button>
+        <span id="tkStatus" style="font-size:11px;color:var(--mu);margin-left:8px"></span>
       </div>
 
-      <!-- Filtro -->
-      <div class="card" style="margin-bottom:16px;padding:14px 18px">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
-          <span class="fl">De:</span>
-          <input type="date" id="tkDateDe" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <span class="fl">Até:</span>
-          <input type="date" id="tkDateAte" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
-          <button class="btn btn-primary" onclick="applyTkFilter()" style="font-size:12px;padding:5px 18px">▶ Aplicar</button>
-          <button class="btn" onclick="tkClearDates()" style="font-size:11px;padding:5px 10px">✕ Limpar</button>
-          <button class="btn" onclick="loadTiktok()" style="font-size:11px;padding:5px 12px">🔄 Atualizar</button>
-          <span id="tkStatus" style="font-size:11px;color:var(--mu);margin-left:4px"></span>
-        </div>
-      </div>
-
-      <div id="tkLoading" style="display:none;text-align:center;padding:48px">
-        <div style="font-size:28px;margin-bottom:10px">⏳</div>
-        <div style="font-size:13px;color:var(--mu)">Carregando dados TikTok…</div>
+      <div id="tkLoading" style="display:none;text-align:center;padding:40px">
+        <div style="font-size:22px;margin-bottom:8px">⏳</div>
+        <div style="font-size:13px;color:var(--mu)">Carregando dados…</div>
       </div>
       <div id="tkError" style="display:none" class="ebox"></div>
 
-      <div id="tkBody" style="display:none">
+      <!-- Painel comparação -->
+      <div id="tkComparePanel" style="display:none;background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px">⚖️ Comparar dois períodos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;margin-bottom:8px">Período A</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="tkCmpA1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              <span style="color:var(--mu);font-size:11px">até</span>
+              <input type="date" id="tkCmpA2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:8px">Período B</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="tkCmpB1" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+              <span style="color:var(--mu);font-size:11px">até</span>
+              <input type="date" id="tkCmpB2" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="renderTkCompare()" style="font-size:12px">Comparar</button>
+          <button class="btn" onclick="tkFillCurrentVsPrev()" style="font-size:11px;padding:5px 12px">📅 Mês atual vs. mês anterior</button>
+          <button class="btn" onclick="tkFillFilterVsPrev()" style="font-size:11px;padding:5px 12px">🔍 Filtro atual vs. período anterior</button>
+        </div>
+        <div id="tkCompareResult" style="margin-top:16px"></div>
+      </div>
 
-        <!-- ── KPIs com comparação ── -->
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px" id="tkKpiGrid">
-          <!-- gerado por renderTiktok() -->
+      <div id="tkBody" style="display:none">
+        <!-- KPIs -->
+        <div class="kpi-grid kpi-5" style="margin-bottom:14px">
+          <div class="kpi pink"><div class="kpi-label">Total Vídeos</div><div class="kpi-val" id="tk_videos">—</div><div class="kpi-sub" id="tk_videosS">No período</div></div>
+          <div class="kpi purple"><div class="kpi-label">Total Views</div><div class="kpi-val" id="tk_views">—</div><div class="kpi-sub">Visualizações acumuladas</div></div>
+          <div class="kpi green"><div class="kpi-label">Total Likes</div><div class="kpi-val" id="tk_likes">—</div><div class="kpi-sub">Curtidas acumuladas</div></div>
+          <div class="kpi blue"><div class="kpi-label">Comentários</div><div class="kpi-val" id="tk_coments">—</div><div class="kpi-sub">Total de comentários</div></div>
+          <div class="kpi amber"><div class="kpi-label">Total Ações</div><div class="kpi-val" id="tk_acoes">—</div><div class="kpi-sub">Salv.+comp.+outros</div></div>
+        </div>
+        <div class="kpi-grid kpi-5" style="margin-bottom:20px">
+          <div class="kpi purple"><div class="kpi-label">Média Views/Vídeo</div><div class="kpi-val" id="tk_avgViews">—</div><div class="kpi-sub">Alcance médio</div></div>
+          <div class="kpi pink"><div class="kpi-label">Média Likes/Vídeo</div><div class="kpi-val" id="tk_avgLikes">—</div><div class="kpi-sub">Curtidas médias</div></div>
+          <div class="kpi green"><div class="kpi-label">Taxa de Engaj.</div><div class="kpi-val" id="tk_txeng">—</div><div class="kpi-sub" id="tk_txengS">Eng/Views %</div></div>
+          <div class="kpi blue"><div class="kpi-label">Melhor Vídeo</div><div class="kpi-val" id="tk_topViews">—</div><div class="kpi-sub" id="tk_topViewsS">views</div></div>
+          <div class="kpi amber"><div class="kpi-label">+ Engajamento</div><div class="kpi-val" id="tk_topEng">—</div><div class="kpi-sub" id="tk_topEngS">likes+coment+ações</div></div>
         </div>
 
-        <!-- Linha de comparação período -->
-        <div id="tkCmpLabel" style="font-size:11px;color:var(--mu);margin-bottom:16px;text-align:right"></div>
-
-        <!-- ── Top 10 Views + Top 10 Likes ── -->
+        <!-- Charts linha 1 -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📈 Views por Data de Publicação — Crescimento Orgânico</div></div>
+            <div style="height:200px;position:relative"><canvas id="tkChartTrend"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🎯 Distribuição de Engajamento</div></div>
+            <div style="height:200px;position:relative"><canvas id="tkChartDist"></canvas></div>
+          </div>
+        </div>
+        <!-- Charts linha 2 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
           <div class="card">
             <div class="card-hd"><div class="card-title">🔥 Top 10 Vídeos — Views</div></div>
-            <div style="height:280px;position:relative"><canvas id="tkChartTopViews"></canvas></div>
+            <div style="height:240px;position:relative"><canvas id="tkChartTopViews"></canvas></div>
           </div>
           <div class="card">
             <div class="card-hd"><div class="card-title">❤️ Top 10 Vídeos — Likes</div></div>
-            <div style="height:280px;position:relative"><canvas id="tkChartTopLikes"></canvas></div>
+            <div style="height:240px;position:relative"><canvas id="tkChartTopLikes"></canvas></div>
           </div>
         </div>
-
-        <!-- ── Taxa de Engajamento ── -->
+        <!-- Chart linha 3 -->
         <div class="card" style="margin-bottom:14px">
-          <div class="card-hd">
-            <div class="card-title">📊 Taxa de Engajamento por Vídeo — Top 10 (Likes + Comentários / Views %)</div>
-          </div>
-          <div style="height:220px;position:relative"><canvas id="tkChartEngRate"></canvas></div>
+          <div class="card-hd"><div class="card-title">📊 Taxa de Engajamento por Vídeo (Likes+Coment.+Ações / Views %)</div></div>
+          <div style="height:200px;position:relative"><canvas id="tkChartEngRate"></canvas></div>
         </div>
 
-        <!-- ── Tabela de vídeos ── -->
+        <!-- Tabela -->
         <div class="card">
           <div class="card-hd">
-            <div class="card-title">🎵 Todos os Vídeos do Período</div>
+            <div class="card-title">📋 Todos os Vídeos</div>
             <span id="tkVideoCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
           </div>
           <div style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:12px">
               <thead><tr style="border-bottom:1px solid var(--bdr)">
-                <th style="text-align:left;padding:8px 12px;color:var(--mu);font-weight:600;white-space:nowrap">Data</th>
-                <th style="text-align:left;padding:8px 12px;color:var(--mu);font-weight:600">Título</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Views</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Likes</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Coment.</th>
-                <th style="text-align:right;padding:8px 12px;color:var(--mu);font-weight:600">Tx. Eng.</th>
-                <th style="text-align:center;padding:8px 12px;color:var(--mu);font-weight:600">Link</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600">Data</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--mu);font-weight:600;max-width:220px">Título</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Views</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Likes</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Coment.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Ações</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Engaj.</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--mu);font-weight:600">Tx. Eng.</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--mu);font-weight:600">Link</th>
               </tr></thead>
               <tbody id="tkVideoBody"></tbody>
             </table>
           </div>
         </div>
-
-      </div><!-- /tkBody -->
+      </div>
     </div><!-- /page-tiktok -->
 
-    <!-- ══════════════ PAGE: YOUTUBE ORGÂNICO ══════════════ -->
-    <div class="page" style="display:none!important" id="page-youtube">
-
-      <!-- Filtro -->
-      <div class="card" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <span style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">DE:</span>
-          <input type="date" id="ytDateDe" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:13px">
-          <span style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">ATÉ:</span>
-          <input type="date" id="ytDateAte" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:13px">
-          <button onclick="applyYtFilter()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:13px;font-weight:700;cursor:pointer">▶ Aplicar</button>
-          <button onclick="ytClearDates()" style="background:var(--bg3);color:var(--mu);border:1px solid var(--bdr);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer">✕ Limpar</button>
-          <button onclick="loadYoutube()" style="background:var(--bg3);color:var(--blue);border:1px solid var(--bdr);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer">⟳ Atualizar</button>
-          <span id="ytStatus" style="font-size:11px;color:var(--mu);margin-left:4px"></span>
-        </div>
-      </div>
-
-      <div id="ytLoading" style="display:none;text-align:center;padding:40px;color:var(--mu);font-size:13px">⏳ Carregando dados do YouTube…</div>
-      <div id="ytError"   style="display:none;background:rgba(240,101,101,.1);border:1px solid var(--red);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:12px"></div>
-
-      <div id="ytBody" style="display:none">
-
-        <!-- KPI cards -->
-        <div id="ytKpiGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px"></div>
-
-        <!-- Comparação label -->
-        <div id="ytCmpLabel" style="font-size:11px;color:var(--mu);margin-bottom:16px;text-align:right"></div>
-
-        <!-- Gráficos linha 1: Visualizações por mês + Inscritos por mês -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card">
-            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">👁️ Visualizações por Mês</div>
-            <div style="height:220px"><canvas id="ytChartViews"></canvas></div>
-          </div>
-          <div class="card">
-            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">🔔 Inscritos Ganhos por Mês</div>
-            <div style="height:220px"><canvas id="ytChartSubs"></canvas></div>
-          </div>
-        </div>
-
-        <!-- Gráficos linha 2: Tempo exibição + Impressões -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div class="card">
-            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">⏱️ Tempo de Exibição por Mês (horas)</div>
-            <div style="height:220px"><canvas id="ytChartWatch"></canvas></div>
-          </div>
-          <div class="card">
-            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📢 Impressões &amp; CTR por Mês</div>
-            <div style="height:220px"><canvas id="ytChartImpressions"></canvas></div>
-          </div>
-        </div>
-
-        <!-- Top 10 vídeos -->
-        <div class="card" style="margin-bottom:14px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px">🏆 Top 10 Vídeos — Visualizações</div>
-            <span id="ytVideoCount" class="badge" style="background:rgba(107,122,158,.12);color:var(--mu)"></span>
-          </div>
-          <div style="height:280px"><canvas id="ytChartTopViews"></canvas></div>
-        </div>
-
-        <!-- Tabela de vídeos -->
-        <div class="card">
-          <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">📋 Todos os Vídeos no Período</div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead>
-                <tr style="border-bottom:2px solid var(--bdr)">
-                  <th style="padding:8px 12px;text-align:left;color:var(--mu);font-size:11px;white-space:nowrap">Publicação</th>
-                  <th style="padding:8px 12px;text-align:left;color:var(--mu);font-size:11px">Título</th>
-                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Visualizações</th>
-                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Tempo (h)</th>
-                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Inscritos</th>
-                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">Impressões</th>
-                  <th style="padding:8px 12px;text-align:right;color:var(--mu);font-size:11px">CTR (%)</th>
-                  <th style="padding:8px 12px;text-align:center;color:var(--mu);font-size:11px">Link</th>
-                </tr>
-              </thead>
-              <tbody id="ytVideoBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </div><!-- /ytBody -->
-    </div><!-- /page-youtube -->
-
-    <!-- ══════════════ PAGE: PRECIFICAÇÃO DE CAMPANHA ══════════════ -->
-    <div class="page" id="page-precificacao">
-
-      <!-- Título -->
-      <div style="margin-bottom:18px">
-        <div style="font-size:18px;font-weight:800;color:var(--tx)">🧮 Calculadora de Precificação</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:4px">Simule quantos leads e quanto investir para atingir sua meta de vendas</div>
-      </div>
-
-      <!-- CARD: Seleção -->
-      <div class="card" style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:14px">1 · Selecione o Empreendimento e Objetivo</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div>
-            <label style="font-size:11px;color:var(--mu);font-weight:600;display:block;margin-bottom:6px">Empreendimento</label>
-            <select id="calcEmp" onchange="calcPrecificacao()"
-              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px">
-              <option value="">Todos os empreendimentos</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--mu);font-weight:600;display:block;margin-bottom:6px">Objetivo da Campanha</label>
-            <select id="calcObj" onchange="calcPrecificacao()"
-              style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px">
-              <option value="">Todos os objetivos</option>
-              <option value="Cadastro">Cadastro</option>
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Alcance">Alcance</option>
-            </select>
-          </div>
-        </div>
-        <!-- Info CPL encontrado -->
-        <div id="calcCplInfo" style="margin-top:12px;padding:10px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--mu);display:none"></div>
-      </div>
-
-      <!-- CARD: Inputs da calculadora -->
-      <div class="card" style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:14px">2 · Preencha os Parâmetros</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-
-          <!-- CPL -->
-          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">💰 CPL (Custo por Lead)</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-              <span style="font-size:13px;color:var(--mu)">R$</span>
-              <input type="number" id="calcCpl" min="0" step="0.01" placeholder="0,00" oninput="this.dataset.manual='1';calcPrecificacao()"
-                style="flex:1;background:var(--bg2);border:1px solid var(--blue);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:18px;font-weight:700;text-align:right;width:100%">
-            </div>
-            <div style="font-size:10px;color:var(--mu)">Preenchido automaticamente ou edite manualmente</div>
-          </div>
-
-          <!-- Leads por Venda -->
-          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">👥 Leads por Venda</div>
-            <input type="number" id="calcLeadsPorVenda" min="1" value="30" oninput="calcPrecificacao()"
-              style="width:100%;background:var(--bg2);border:1px solid var(--purple);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:24px;font-weight:700;text-align:center;box-sizing:border-box">
-            <div style="font-size:10px;color:var(--mu);margin-top:8px">Quantos leads são necessários para fechar 1 venda</div>
-          </div>
-
-          <!-- Vendas desejadas -->
-          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">🎯 Meta de Vendas no Mês</div>
-            <input type="number" id="calcVendas" min="1" value="10" oninput="calcPrecificacao()"
-              style="width:100%;background:var(--bg2);border:1px solid var(--amber);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:24px;font-weight:700;text-align:center;box-sizing:border-box">
-            <div style="font-size:10px;color:var(--mu);margin-top:8px">Quantidade de vendas que deseja realizar</div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- CARD: Resultado -->
-      <div class="card" id="calcResultado" style="border:2px solid var(--blue);background:linear-gradient(135deg,rgba(79,142,247,.05),rgba(155,127,244,.05))">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:16px">3 · Resultado</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">
-
-          <div style="text-align:center;padding:20px;background:var(--bg2);border-radius:12px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">Leads Necessários</div>
-            <div id="calcResLeads" style="font-size:36px;font-weight:900;color:#4f8ef7;line-height:1">—</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:6px">leads para gerar</div>
-          </div>
-
-          <div style="text-align:center;padding:20px;background:var(--bg2);border-radius:12px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">Investimento Total</div>
-            <div id="calcResInvest" style="font-size:32px;font-weight:900;color:var(--amber);line-height:1">—</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:6px">a investir no mês</div>
-          </div>
-
-          <div style="text-align:center;padding:20px;background:var(--bg2);border-radius:12px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">Investimento Diário</div>
-            <div id="calcResDiario" style="font-size:32px;font-weight:900;color:#2ecc8e;line-height:1">—</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:6px">por dia (30 dias)</div>
-          </div>
-
-        </div>
-
-        <!-- Fórmula explicada -->
-        <div id="calcFormula" style="background:var(--bg3);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--mu);text-align:center;display:none">
-        </div>
-      </div>
-
-    </div><!-- /page-precificacao -->
-
-    <!-- ══════════════ PAGE: AGENDA ══════════════ -->
-    <div class="page" id="page-agenda">
-
-      <!-- Cabeçalho -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
-        <div>
-          <div style="font-size:18px;font-weight:800;color:var(--tx)">📅 Agenda</div>
-          <div style="font-size:12px;color:var(--mu);margin-top:4px">Eventos, entregas e marcos importantes</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <button onclick="agendaMover(-1)" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">← Anterior</button>
-          <button onclick="agendaHoje()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">Hoje</button>
-          <button onclick="agendaMover(1)" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">Próximo →</button>
-          <button onclick="loadAgenda()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px" title="Atualizar">🔄</button>
-        </div>
-      </div>
-
-      <!-- Legenda de categorias -->
-      <div id="agendaLegenda" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
-
-      <!-- 4 calendários 2x2 -->
-      <div id="agendaCalendarios" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px"></div>
-
-      <div id="agendaLista" style="display:none"></div>
-
-    </div><!-- /page-agenda -->
 
     <!-- ══════════════ PAGE: O QUE MELHORAR ══════════════ -->
     <div class="page" id="page-melhorias">
@@ -2238,14 +1930,8 @@ const API_KEY_PLACEHOLDER = ''; // Chave da Anthropic passada pelo usuário via 
 
 const C={blue:'#4f8ef7',green:'#2ecc8e',amber:'#f5a623',red:'#f06565',
   purple:'#9b7ff4',teal:'#26c6da',pink:'#e879a0',orange:'#fb923c',mu:'#6b7a9e'};
-// Registra plugin datalabels globalmente; por padrão desativado em todos os charts
-// (ativar individualmente via plugins.datalabels.display:true)
-if(window.ChartDataLabels){
-  Chart.register(ChartDataLabels);
-  Chart.defaults.plugins.datalabels = { display: false };
-}
 const OBJ_C={Cadastro:C.blue,WhatsApp:C.green,Alcance:C.purple};
-const ORIGENS_ONLINE=['chatbot','facebook','website','instagram','busca orgânica','busca organica','organic','não definido','nao definido'];
+const ORIGENS_ONLINE=['chatbot','facebook','website','instagram','busca orgânica','busca organica','organic'];
 const COR_SIT={'Venda Realizada':C.green,'Com Reserva':C.teal,'Em Atendimento':C.blue,
   'Aguardando Corretor':C.purple,'Em Tentativa de Contato':C.amber,
   'Aguardando Atendimento':C.orange,'Perdido':C.red,'Simulação':C.mu};
@@ -2327,7 +2013,7 @@ function startCountdown(){
 // NAVEGAÇÃO
 // ═══════════════════════════════════════════════════════
 const PAGE_TITLES={
-  dashboard:'Dashboard',funil:'Funil de Leads',campanhas:'Campanhas Meta',
+  dashboard:'Dashboard',campanhas:'Campanhas Meta',
   investimento:'Investimento',gads:'Google Ads',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
@@ -2339,7 +2025,7 @@ function goPage(pg){
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',funil:'funil',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
@@ -2348,14 +2034,10 @@ function goPage(pg){
   if(pg==='instagram') loadOrganico('instagram');
   if(pg==='facebook')  loadOrganico('facebook');
   if(pg==='tiktok')    loadOrganico('tiktok');
-  if(pg==='youtube')      loadOrganico('youtube');
-  if(pg==='precificacao') loadPrecificacao();
-  if(pg==='agenda')      loadAgenda();
   
   if(pg==='melhorias'&&campsMeta.length) renderMelhorias();
   if(pg==='ia'&&campsMeta.length) renderIAPage();
   if(pg==='mercado') renderMercadoHistorico();
-  if(pg==='funil'){fnInitEmpresas();renderFunil();}
   if(pg==='config') initConfigPage();
   if(pg==='meta') initMetaPage();
   if(pg==='gads') renderGoogleAds();
@@ -2459,18 +2141,18 @@ function parseRoas(rows){
 // Para adicionar novo empreendimento: inclua no array abaixo
 // ══════════════════════════════════════════════════════════
 const EMPREENDIMENTOS_CANONICAL = [
-  { name:'Parque Aviação',     keys:['aviacao'] },              // aviacao cobre aviação após normalização
-  { name:'Villaggios',         keys:['villag'] },              // cobre villaggio, villaggios, villagios
+  { name:'Parque Aviação',     keys:['aviacao','aviação'] },
+  { name:'Villaggios',         keys:['villaggios','villaggio'] },
   { name:'Beija Flor',         keys:['beija','flor'] },
   { name:'Monte Verde',        keys:['monte','verde'] },
   { name:'Altos da Serra',     keys:['altos','serra'] },
   { name:'Piemonte',           keys:['piemonte'] },
-  { name:'Jardim dos Ipês',    keys:['jardim','ipe'] },        // 'ipe' cobre ipe, ipes, ipê, ipês
+  { name:'Jardim dos Ipês',    keys:['jardim','ipes','ipês','ipe'] },
   { name:'Cidade Alegre',      keys:['cidade','alegre'] },
   { name:'Nova Quinta',        keys:['nova','quinta'] },
-  { name:'Olga Nasser',        keys:['olga'] },                // cobre nascer e nasser
+  { name:'Olga Nasser',        keys:['olga'] },                    // cobre "nascer" e "nasser"
   { name:'Guiomar Novaes',     keys:['guiomar'] },
-  { name:'Jardim Corumbataí',  keys:['corumbatai'] },          // corumbatai cobre corumbataí após normalização
+  { name:'Jardim Corumbataí',  keys:['corumbatai','corumbataí'] },
   { name:'Raiz Di Verona',     keys:['verona'] },
 ];
 
@@ -2516,7 +2198,7 @@ function parseMeta(rows){
     const m = termRaw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
     if(m) dataTermino = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
     return {
-      nome:r['Nome da campanha']||'',emp:extractEmpMeta(r['Nome da campanha']||'')||matchEmpCanonical(r['Empreendimento']||''),objetivo:r['Objetivo']||'',
+      nome:r['Nome da campanha']||'',emp:extractEmpMeta(r['Nome da campanha']||''),objetivo:r['Objetivo']||'',
       cidade:r['Cidade']||'',status:r['Veiculação da campanha']||'',
       valor:toN(r['Valor usado (BRL)']),resultados:toN(r['Resultados']),
       alcance:toN(r['Alcance']),impressoes:toN(r['Impressões']),
@@ -2527,85 +2209,21 @@ function parseMeta(rows){
   });
 }
 
-// Datas confirmadas de limpeza em massa — mutável, auto-detecção pode adicionar mais
-const LIMPEZA_DATAS_FIXAS = ['23/07/2026','24/07/2026','29/07/2026','31/07/2026'];
-let   LIMPEZA_DATAS_AUTO  = []; // detectadas automaticamente
-function getLimpezaDatas(){ return [...new Set([...LIMPEZA_DATAS_FIXAS,...LIMPEZA_DATAS_AUTO])]; }
-
-// Detecta automaticamente dias com limpeza em massa:
-// se em um único dia >= 300 leads foram marcados Perdido E esse volume é >= 4x a mediana diária
-function detectarLimpezaAuto(rows){
-  const contPorDia = {};
-  rows.forEach(r=>{
-    const sit=(r['Situação']||'').trim();
-    if(sit!=='Perdido') return;
-    const dataUlt=(r['Data da Última Entrada']||r['Data da última entrada']||r['Data da Ultima Entrada']||'').trim();
-    const dia=dataUlt.substring(0,10);
-    if(!dia) return;
-    contPorDia[dia]=(contPorDia[dia]||0)+1;
-  });
-  const valores=Object.values(contPorDia).sort((a,b)=>a-b);
-  if(!valores.length) return;
-  const mediana=valores[Math.floor(valores.length/2)]||1;
-  const limiar=Math.max(300, mediana*4);
-  const novas=[];
-  Object.entries(contPorDia).forEach(([dia,n])=>{
-    if(n>=limiar && !LIMPEZA_DATAS_FIXAS.includes(dia)){
-      novas.push(dia);
-      console.warn(`[BI] Limpeza auto-detectada em ${dia}: ${n} leads Perdidos (limiar: ${limiar})`);
-    }
-  });
-  LIMPEZA_DATAS_AUTO=[...new Set(novas)];
-  if(novas.length){
-    // Mostra alerta apenas para datas ainda não vistas pelo usuário
-    const STORAGE_KEY = 'ecovita_limpeza_vistas';
-    let vistas = [];
-    try { vistas = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch(e){}
-    const novasIneditas = novas.filter(d => !vistas.includes(d));
-    if(novasIneditas.length){
-      // Marca como vistas
-      const atualizadas = [...new Set([...vistas, ...novasIneditas])];
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(atualizadas)); } catch(e){}
-      // Exibe alerta visual apenas 1 vez por data nova
-      setTimeout(()=>{
-        const existing=document.getElementById('_limpeza_alert');
-        if(existing) existing.remove();
-        const div=document.createElement('div');
-        div.id='_limpeza_alert';
-        div.style.cssText='position:fixed;bottom:20px;right:20px;background:#f5a623;color:#000;padding:12px 16px;border-radius:10px;font-size:12px;font-weight:700;z-index:9999;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:pointer';
-        div.title='Clique para fechar';
-        div.onclick=()=>div.remove();
-        div.innerHTML=`⚠️ Limpeza em massa detectada automaticamente:<br>${novasIneditas.map(d=>`<b>${d}</b>`).join(', ')}<br><span style="font-weight:400">Esses leads "Perdido" foram excluídos do painel.</span><br><span style="font-size:10px;opacity:.7">Clique para fechar · não aparecerá novamente</span>`;
-        document.body.appendChild(div);
-        setTimeout(()=>{ if(div.parentNode) div.remove(); },15000);
-      },1500);
-    }
-  }
-}
-
 function parseLeads(rows){
-  // Roda detecção automática antes de filtrar
-  detectarLimpezaAuto(rows);
-  const LIMPEZA_DATAS = getLimpezaDatas();
   return rows.filter(r=>{
     if(!r['Id']||isNaN(parseInt(r['Id']))) return false;
     const n=(r['Nome']||'').toLowerCase(),e=(r['E-mail']||'').toLowerCase();
     if(n.includes('teste')||n.includes('treinamento')) return false;
     if(e.includes('cvcrm.com')||e.includes('@exemplo')||e.includes('testando')) return false;
-    if(!r['Situação']) return false;
-    const sit = (r['Situação']||'').trim();
-    const dataUlt = (r['Data da Última Entrada']||r['Data da última entrada']||r['Data da Ultima Entrada']||'').trim();
-    const dataUltDia = dataUlt.substring(0,10);
-    // NÃO excluir leads Perdidos da base geral — leads novos que viraram Perdido ainda são leads captados
-    return true;
+    return!!r['Situação'];
   }).map(r=>{
     const p=(r['Primeira Origem']||'').trim();
     const u=(r['Última Origem']||'').trim();
 
     const parseDateBR = s => {
       if(!s) return null;
-      // Formato: D/M/YYYY ou DD/MM/YYYY (com ou sem zero) + opcional HH:MM:SS
-      const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      // Formato: DD/MM/YYYY HH:MM:SS ou DD/MM/YYYY
+      const m1 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
       if(m1) return new Date(parseInt(m1[3]), parseInt(m1[2])-1, parseInt(m1[1]));
       const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
       if(m2) return new Date(parseInt(m2[1]), parseInt(m2[2])-1, parseInt(m2[3]));
@@ -2619,17 +2237,14 @@ function parseLeads(rows){
     const dataUltima   = parseDateBR(dataUltimaRaw);
     const dataCadastro = parseDateBR(dataCadastroRaw);
 
-    // Lead NOVO: Data Primeiro Cadastro == Data da Última Entrada (mesmo dia, sem movimentação posterior)
-    // Lead REIMPACTADO: tem dataUltima diferente de dataCadastro (voltou a interagir)
-    function sameDay(a,b){
-      if(!a||!b) return false;
-      return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+    // Reimpactado: dataCadastro < dataUltima (pelo menos 1 dia — voltou depois)
+    // Fallback sem data: Primeira Origem online E Última Origem diferente
+    let reimpactado = false;
+    if(dataCadastro && dataUltima){
+      reimpactado = (dataUltima - dataCadastro) > 86400000; // > 1 dia
+    } else {
+      reimpactado = isOnline(p) && !!u && u !== p;
     }
-    const novo        = isOnline(p); // Lead novo = primeira origem online (data filtrada por dataCadastro em filteredLeads)
-    // Reimpactado: exclui datas de limpeza (ajustes em massa no CRM não contam como reimpacto real)
-    const dataUltimaRawDia = dataUltimaRaw.substring(0,10); // "DD/MM/YYYY"
-    const reimpactado = isOnline(p) && !!dataUltima && !sameDay(dataCadastro, dataUltima)
-                        && !LIMPEZA_DATAS.includes(dataUltimaRawDia);
 
     return {
       situacao       : (r['Situação']||'').trim(),
@@ -2637,10 +2252,10 @@ function parseLeads(rows){
       primeiraOrigem : p,
       ultimaOrigem   : u,
       online         : isOnline(p),
-      novo,
       reimpactado,
+      novo           : !reimpactado,
       dataCadastro,
-      dataUltima,
+      dataUltima,      // ← campo usado no filtro de data
     };
   });
 }
@@ -2707,13 +2322,13 @@ function filteredRoas(){
   });
 }
 
-// Filtra leadsCV pela "Data Primeiro Cadastro" — quando o lead entrou no sistema
+// Filtra leadsCV pela "Data da última entrada" — exclui leads sem data quando filtro está ativo
 function filteredLeads(){
   const {de, ate} = getFiltroDatas();
   if(!de && !ate) return leadsCV; // sem filtro → todos
   return leadsCV.filter(l=>{
-    const d = l.dataCadastro; // usa "Data Primeiro Cadastro"
-    if(!d) return false;      // sem data → EXCLUI quando filtro está ativo
+    const d = l.dataUltima; // usa APENAS "Data da última entrada"
+    if(!d) return false;    // sem data → EXCLUI quando filtro está ativo
     if(de  && d < de)  return false;
     if(ate && d > ate) return false;
     return true;
@@ -2813,17 +2428,6 @@ function renderDashboard(){
   // Aplica filtro de empreendimento nos leads CVCRM
   if(fEmpVal) lf = lf.filter(l => l.emp === fEmpVal);
 
-  // Aplica filtro de objetivo nos leads CVCRM:
-  // WhatsApp → origem ChatBot | Cadastro → origem Facebook/Instagram/WebSite
-  if(fObjVal==='whatsapp'){
-    lf = lf.filter(l=>(l.primeiraOrigem||'').toLowerCase().includes('chatbot'));
-  } else if(fObjVal==='cadastro'){
-    lf = lf.filter(l=>{
-      const o=(l.primeiraOrigem||'').toLowerCase();
-      return o.includes('facebook')||o.includes('instagram')||o.includes('website');
-    });
-  }
-
   // ── Leads Meta: soma Resultados da Planilha 2 filtrado por "Término dos relatórios" ──
   // Exclui campanhas com "Alcance" no nome (objetivo de alcance não gera leads)
   let metaFiltradoBase = filteredMetaByDate().filter(c=>!c.nome.toLowerCase().includes('alcance'));
@@ -2846,7 +2450,8 @@ function renderDashboard(){
   const roas = rv.length ? rv.reduce((s,r)=>s+r.roas,0)/rv.length : 0;
   const vn   = d.reduce((s,r)=>s+r.qtdVendas,0);
 
-  // ── Métricas de leads ──
+  // ── Métricas de leads com 3 lógicas distintas ──
+  // lf = filtrado por dataUltima (período selecionado)
 
   // 1) CRM TOTAL → todos os leads da base, sem filtro de data
   const totalLeads   = leadsCV.length;
@@ -2854,10 +2459,10 @@ function renderDashboard(){
   // 2) CRM ONLINE → todos os leads com Primeira Origem online, sem filtro de data
   const onlineLeadsTotal = leadsCV.filter(l=>l.online);
 
-  // 3) Novos Online, Reimpactados, Taxa → filtrados por dataCadastro (via filteredLeads)
+  // 3) Novos Online, Reimpactados, Taxa → filtrados pelo período (dataUltima)
   const lfOnline    = lf.filter(l=>l.online);
-  const novosOnline = lf.filter(l=>l.novo);
-  const reimp       = lf.filter(l=>l.reimpactado);
+  const novosOnline = lf.filter(l=>l.online && !l.reimpactado);
+  const reimp       = lf.filter(l=>l.reimpactado && l.online);
   const txR         = lfOnline.length>0 ? reimp.length/lfOnline.length*100 : 0;
   const cpl         = lmeta>0 ? inv/lmeta : 0;
 
@@ -2876,13 +2481,6 @@ function renderDashboard(){
   sid('kCad', fN(lCad));  sid('kCads', `${pctCad} dos leads Meta`);
   // Leads Meta = Resultados da planilha campanhas (Sheet 1 tem por mês = lmeta filtrado)
   sid('k4',  fN(lmeta));                          sid('k4s',  fObjVal ? `Filtro: ${fObjVal}` : 'Resultados · período filtrado');
-
-  // CPL = Valor investido em Meta (campanhas filtradas) ÷ Total de leads Meta
-  // CPL: usa o mesmo filtro de objetivo aplicado em metaFiltrado (investimento e leads do mesmo conjunto)
-  const invMeta = metaFiltrado.reduce((s,c)=>s+(c.valor||0), 0);
-  const cplVal  = lmeta > 0 ? invMeta / lmeta : 0;
-  sid('kCpl',  cplVal > 0 ? fBRL(cplVal) : '—');
-  sid('kCpls', invMeta > 0 ? `${fBRL(invMeta,true)} investido · ${fN(lmeta)} leads` : 'Sem dados de investimento');
   sid('k11', fN(onlineLeadsTotal.length));         sid('k11s', 'Toda base · Origem online');
   sid('k7',  fN(novosOnline.length));              sid('k7s',  'Online · período filtrado');
   sid('k8',  fN(reimp.length));                    sid('k8s',  'Online · período filtrado');
@@ -2908,7 +2506,7 @@ function renderDashboard(){
   const getMesData = (mes, campo) => d.filter(r=>r.mes===mes).reduce((s,r)=>s+r[campo],0);
   const getMesRoas = mes => { const rows=d.filter(r=>r.mes===mes&&r.roas>0&&r.roas<5000); return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0; };
 
-  // ── Chart Investimento por mês — barras com valor visível no topo ──
+  // ── Chart Invest vs Receita — grouped bars com escala dupla para melhor visibilidade ──
   dc('cMensal');
   const ctxM = document.getElementById('cMensal')?.getContext('2d');
   if(ctxM){ charts.cMensal = new Chart(ctxM, {
@@ -2916,28 +2514,22 @@ function renderDashboard(){
     data:{ labels: mesesAno.map(fmtMes), datasets:[
       { label:'Investimento',
         data: mesesAno.map(m=>getMesData(m,'investTotal')),
-        backgroundColor:'rgba(79,142,247,.85)',
-        borderColor:'rgba(79,142,247,1)',
-        borderWidth:1,
-        borderRadius:6, borderSkipped:false }
+        backgroundColor:'rgba(79,142,247,.9)', borderRadius:5, borderSkipped:false,
+        yAxisID:'yInv', order:1 },
+      { label:'Receita',
+        data: mesesAno.map(m=>getMesData(m,'receita')),
+        type:'line', borderColor:C.green, backgroundColor:'rgba(46,204,142,.1)',
+        fill:true, tension:.4, pointRadius:4, pointBackgroundColor:C.green,
+        borderWidth:2.5, yAxisID:'yRec', order:0 }
     ]},
     options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{ callbacks:{ label: ctx => 'Investimento: '+fBRL(ctx.raw,true) } },
-        datalabels:{
-          display: true,
-          anchor:'end', align:'top', color:C.blue,
-          font:{size:10, weight:'700'},
-          formatter: v => v>0 ? 'R$'+(v/1000).toFixed(0)+'k' : ''
-        }
-      },
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+fBRL(ctx.raw,true) } } },
       scales:{
-        y:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
-        x:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
-      },
-      layout:{ padding:{ top:24 } }
-    }
+        yInv:{ position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, title:{display:true,text:'Investimento',color:C.blue,font:{size:10}} },
+        yRec:{ position:'right', grid:{display:false},                  ticks:{color:C.green,  font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, title:{display:true,text:'Receita',color:C.green,font:{size:10}} },
+        x:   { grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
+      }}
   });}
 
   // ── Chart ROAS mensal — fixado no ano atual ──
@@ -3202,12 +2794,6 @@ function resetCampKPIs(){
 }
 
 // Detecta objetivo a partir do nome da campanha
-function detectarEmpCampanha(nomeCamp){
-  // Empreendimento = tudo antes do primeiro " - " ou " – " no nome da campanha
-  const m = (nomeCamp||'').match(/^(.+?)\s*[-–]\s*/);
-  return m ? m[1].trim() : (nomeCamp||'').trim();
-}
-
 function detectarObjetivo(nomeCamp){
   const n = (nomeCamp||'').toLowerCase();
   if(n.includes('whatsapp') || n.includes('wpp') || n.includes('whats')) return 'WhatsApp';
@@ -3236,24 +2822,17 @@ async function loadCampanhasAPI(){
       camps.map(c => window.MetaAPI.getCampaignInsights(c.id, period))
     );
 
-    // Busca breakdown diário por campanha (para gráfico)
-    const dailyArr = await Promise.all(
-      camps.map(c => window.MetaAPI.getCampaignDailyInsights(c.id, period))
-    );
-
     campanhasAPIData = camps.map((c,i) => ({
       ...c,
-      insights      : insightsArr[i],
-      dailyInsights : dailyArr[i] || [],
-      results       : window.MetaAPI._extractResults(insightsArr[i]),
-      spend         : parseFloat(insightsArr[i]?.spend       || 0),
-      ctr           : parseFloat(insightsArr[i]?.ctr         || 0),
-      cpc           : parseFloat(insightsArr[i]?.cpc         || 0),
-      impressions   : parseInt  (insightsArr[i]?.impressions || 0),
-      reach         : parseInt  (insightsArr[i]?.reach       || 0),
-      frequency     : parseFloat(insightsArr[i]?.frequency   || 0),
-      objetivo      : detectarObjetivo(c.name),
-      emp           : detectarEmpCampanha(c.name),
+      insights   : insightsArr[i],
+      results    : window.MetaAPI._extractResults(insightsArr[i]),
+      spend      : parseFloat(insightsArr[i]?.spend       || 0),
+      ctr        : parseFloat(insightsArr[i]?.ctr         || 0),
+      cpc        : parseFloat(insightsArr[i]?.cpc         || 0),
+      impressions: parseInt  (insightsArr[i]?.impressions || 0),
+      reach      : parseInt  (insightsArr[i]?.reach       || 0),
+      frequency  : parseFloat(insightsArr[i]?.frequency   || 0),
+      objetivo   : detectarObjetivo(c.name),
     })).sort((a,b) => b.results - a.results || b.spend - a.spend);
 
     renderCampanhasMetaAPI(campanhasAPIData);
@@ -3275,173 +2854,28 @@ function filterCampanhasAPI(){
   renderCampanhasMetaAPI(campanhasAPIData);
 }
 
-function renderGraficoAlcance(){
-  const all  = window._campAPIAll || [];
-  const empF = (document.getElementById('fCampEmpDiario')||{}).value||'';
-  const isLight = document.body.classList.contains('light');
-  const clrMu   = isLight?'#6b7280':'#6b7a9e';
-  const clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.06)';
-
-  const byDate = {};
-  all.forEach(c=>{
-    if(empF && (c.emp||'')!==empF) return;
-    if(c.objetivo!=='Alcance') return;
-    (c.dailyInsights||[]).forEach(d=>{
-      const dt = d.date_start||'';
-      if(!dt) return;
-      if(!byDate[dt]) byDate[dt]={impressions:0,spend:0};
-      byDate[dt].impressions += parseInt((d.impressions||0));
-      byDate[dt].spend       += parseFloat((d.spend||0));
-    });
-  });
-
-  const dias   = Object.keys(byDate).sort();
-  if(!dias.length){ if(window._alcChart){window._alcChart.destroy();window._alcChart=null;} return; }
-
-  const labels = dias.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; });
-  mkChart('campChartAlcance','bar', labels,
-    [
-      {label:'Impressões', data:dias.map(d=>byDate[d].impressions), backgroundColor:'rgba(155,127,244,.75)', borderRadius:4, borderSkipped:false, yAxisID:'y', order:2},
-      {label:'Gasto (R$)',  data:dias.map(d=>byDate[d].spend),       type:'line', borderColor:'#f5a623', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1},
-    ],
-    {responsive:true,maintainAspectRatio:false,
-     plugins:{legend:{display:true,labels:{color:clrMu,font:{size:11},boxWidth:14}},datalabels:{display:false}},
-     scales:{
-       y: {position:'left', ticks:{color:clrMu,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}, grid:{color:clrGrid}, beginAtZero:true},
-       y2:{position:'right',ticks:{color:clrMu,font:{size:10},callback:v=>'R$'+v.toFixed(0)}, grid:{display:false}, beginAtZero:true},
-       x: {ticks:{color:clrMu,font:{size:10},maxRotation:45}, grid:{display:false}}
-     }
-    });
-}
-
-function renderGraficoDiario(){
-  const all = window._campAPIAll || [];
-  const empF = (document.getElementById('fCampEmpDiario')||{}).value||'';
-  const isLight = document.body.classList.contains('light');
-  const clrMu   = isLight?'#6b7280':'#6b7a9e';
-  const clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.06)';
-
-  // Extrai resultados de um objeto dailyInsight (actions array)
-  function _extractDailyResults(d){
-    const actions = d.actions || [];
-    // Apenas action types que representam leads/conversões reais
-    const keys = [
-      'lead',
-      'onsite_conversion.messaging_first_reply',
-      'onsite_conversion.messaging_conversation_started_7d',
-      'offsite_conversion.fb_pixel_lead',
-      'omni_complete_registration',
-      'complete_registration',
-    ];
-    // Soma só os tipos relevantes (não fallback para tudo)
-    const total = keys.reduce((s,k)=>{
-      const a = actions.find(x=>x.action_type===k);
-      return s + (a ? parseInt(a.value||0) : 0);
-    }, 0);
-    return total;
-  }
-
-  // Agrupa insights diários por data
-  const byDate = {};
-  all.forEach(c=>{
-    if(empF && (c.emp||'')!==empF) return;
-    if(c.objetivo==='Alcance') return; // Alcance tem visão própria separada
-    const daily = c.dailyInsights || [];
-    daily.forEach(d=>{
-      const dt = d.date_start || '';
-      if(!dt) return;
-      if(!byDate[dt]) byDate[dt]={date:dt,results:0,spendCad:0,spendWpp:0,resCad:0,resWpp:0};
-      const res = _extractDailyResults(d);
-      const spend = parseFloat(d.spend||0);
-      byDate[dt].results += res;
-      if(c.objetivo==='Cadastro'){ byDate[dt].spendCad+=spend; byDate[dt].resCad+=res; }
-      if(c.objetivo==='WhatsApp'){ byDate[dt].spendWpp+=spend; byDate[dt].resWpp+=res; }
-    });
-  });
-
-  const dias = Object.keys(byDate).sort();
-
-  if(!dias.length){
-    // Sem dados diários — tenta construir da planilha campsMeta (Sheet 2) por mês
-    // Fallback: mostra mensagem
-    if(window._campChartDiario){ window._campChartDiario.destroy(); window._campChartDiario=null; }
-    const ctx=document.getElementById('campChartDiario');
-    if(ctx){ const c2=ctx.getContext('2d'); c2.clearRect(0,0,ctx.width,ctx.height); }
-    return;
-  }
-
-  const labels   = dias.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; });
-  const resArr   = dias.map(d=>byDate[d].results);
-  const cplCad   = dias.map(d=>{ const r=byDate[d].resCad; return r>0?byDate[d].spendCad/r:null; });
-  const cplWpp   = dias.map(d=>{ const r=byDate[d].resWpp; return r>0?byDate[d].spendWpp/r:null; });
-
-  mkChart('campChartDiario','bar', labels,
-    [
-      {label:'Resultados (Cadastro + WhatsApp)', data:resArr, backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false, yAxisID:'y', order:2},
-      {label:'Custo por cadastro (API)', data:cplCad, type:'line', borderColor:'#f5a623', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1, spanGaps:true},
-      {label:'Custo por WhatsApp (API)', data:cplWpp, type:'line', borderColor:'#2ecc8e', backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.35, yAxisID:'y2', order:1, spanGaps:true},
-    ],
-    {responsive:true, maintainAspectRatio:false,
-     plugins:{legend:{display:true,labels:{color:clrMu,font:{size:11},boxWidth:14}},
-              datalabels:{display:function(ctx){return ctx.datasetIndex===0;},color:'#fff',font:{size:9,weight:'700'},anchor:'center',align:'center'}},
-     scales:{
-       y:  {position:'left', ticks:{color:clrMu,font:{size:10}}, grid:{color:clrGrid}, beginAtZero:true},
-       y2: {position:'right', ticks:{color:clrMu,font:{size:10},callback:v=>'R$'+v.toFixed(0)}, grid:{display:false}, beginAtZero:true},
-       x:  {ticks:{color:clrMu,font:{size:10},maxRotation:45}, grid:{display:false}}
-     }
-    });
-
-  // Renderiza gráfico de Alcance separado
-  renderGraficoAlcance();
-}
-
 function renderCampanhasMetaAPI(all){
   const fObj = document.getElementById('fCampObj')?.value  || '';
   const fSt  = document.getElementById('fCampSt')?.value   || '';
-  const fEmp = document.getElementById('fCampEmp')?.value  || '';
 
   let dados = all.filter(c =>
     (!fObj || c.objetivo === fObj) &&
-    (!fSt  || c.status   === fSt)  &&
-    (!fEmp || c.emp      === fEmp)
+    (!fSt  || c.status   === fSt)
   );
 
   // KPIs
   const ativas     = dados.filter(c => c.status === 'ACTIVE');
   const totalSpend = dados.reduce((s,c) => s + c.spend, 0);
-  const dadosWpp   = dados.filter(c => c.objetivo === 'WhatsApp');
-  const dadosCad   = dados.filter(c => c.objetivo === 'Cadastro');
-  const dadosAlc   = dados.filter(c => c.objetivo === 'Alcance');
-  const resWpp     = dadosWpp.reduce((s,c) => s + c.results, 0);
-  const resCad     = dadosCad.reduce((s,c) => s + c.results, 0);
-  const resAlc     = dadosAlc.reduce((s,c) => s + c.results, 0);
-  const resTotal   = resWpp + resCad; // só WhatsApp + Cadastro
   const totalRes   = dados.reduce((s,c) => s + c.results, 0);
   const ctrMedio   = dados.length ? dados.reduce((s,c) => s + c.ctr, 0) / dados.length : 0;
-  const cpl2       = resTotal > 0 ? totalSpend / resTotal : 0;
+  const cprMedio   = totalRes > 0 ? totalSpend / totalRes : 0;
 
   sid('ck1', fN(dados.length));        sid('ck1s', `${all.length} total na conta`);
   sid('ck2', fN(ativas.length));       sid('ck2s', `${dados.length - ativas.length} pausadas`);
-  sid('ck3', fBRL(totalSpend, true));  sid('ck3s', 'no período');
-  sid('ckWpp',  fN(resWpp));           sid('ckWpps',  dadosWpp.length+' campanhas');
-  sid('ckCad',  fN(resCad));           sid('ckCads',  dadosCad.length+' campanhas');
-  sid('ckAlc',  fN(resAlc));           sid('ckAlcs',  dadosAlc.length+' campanhas');
-  sid('ck4', fN(resTotal));            sid('ck4s', 'WhatsApp + Cadastro');
+  sid('ck3', fBRL(totalSpend, true));  sid('ck3s', cprMedio > 0 ? `CPR: ${fBRL(cprMedio)}` : 'no período');
+  sid('ck4', fN(totalRes));            sid('ck4s', cprMedio > 0 ? `CPR médio: ${fBRL(cprMedio)}` : '—');
   sid('ck5', ctrMedio.toFixed(2)+'%'); sid('ck5s', `${fN(dados.reduce((s,c)=>s+c.impressions,0))} imp.`);
-  sid('ckCpl2', cpl2 > 0 ? fBRL(cpl2) : '—'); sid('ckCpl2s', cpl2 > 0 ? `${fBRL(totalSpend,true)} ÷ ${fN(resTotal)}` : '—');
   sid('infoCamp', `${dados.length} campanha${dados.length!==1?'s':''}${fObj?' · '+fObj:''}${fSt?' · '+(fSt==='ACTIVE'?'ativas':'pausadas'):''}`);
-
-  // Popula selects de empreendimento (barra principal + gráfico diário)
-  window._campAPIAll = all;
-  const empsD = [...new Set(all.map(c=>c.emp||'').filter(Boolean))].sort();
-  ['fCampEmp','fCampEmpDiario'].forEach(id=>{
-    const sel = document.getElementById(id);
-    if(!sel) return;
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">Todos</option>' + empsD.map(e=>`<option value="${e}">${e}</option>`).join('');
-    if(empsD.includes(cur)) sel.value = cur;
-  });
-  renderGraficoDiario();
 
   if(!dados.length){
     document.getElementById('campCards').innerHTML = `
@@ -3658,73 +3092,41 @@ function renderInvestimento(){
   const barH = 22; // altura fixa por barra
   const nomes = dados.map(e=>e.nome.replace(' - ',' · '));
 
-  // ── Chart: Investimento por empreendimento e objetivo (empilhado) — fonte: campsMeta ──
-  const mNamesInv = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const mesIdxInv = mNamesInv.indexOf(mesVal);
-  const anoNumInv = parseInt(document.getElementById('fInvAno')?.value || new Date().getFullYear());
-  // Filtra campsMeta pelo mês/ano selecionado via dataTermino
-  const campsDoMes = campsMeta.filter(c=>{
-    if(!c.dataTermino) return false;
-    return c.dataTermino.getMonth()===mesIdxInv && c.dataTermino.getFullYear()===anoNumInv;
-  });
-  // Agrega por empreendimento e objetivo
-  const empObjMap = {};
-  campsDoMes.forEach(c=>{
-    if(!c.emp) return;
-    if(!empObjMap[c.emp]) empObjMap[c.emp]={whats:0,cad:0,alc:0};
-    // Usa mesma lógica do detectarObjetivo: testa nome da campanha E campo objetivo
-    const chk = ((c.objetivo||'')+(c.nome||'')).toLowerCase();
-    if(chk.includes('whatsapp')||chk.includes('wpp')||chk.includes('whats')||chk.includes('mensagen')||chk.includes('message'))
-      empObjMap[c.emp].whats+=c.valor;
-    else if(chk.includes('cadastro')||chk.includes('lead')||chk.includes('form')||chk.includes('conversao')||chk.includes('conversão'))
-      empObjMap[c.emp].cad+=c.valor;
-    else
-      empObjMap[c.emp].alc+=c.valor;
-  });
-  const empObjEmps = Object.keys(empObjMap)
-    .filter(e=>(empObjMap[e].whats+empObjMap[e].cad+empObjMap[e].alc)>0)
-    .sort();
+  // ── Chart: Investimento por empreendimento e objetivo (empilhado) ──
+  const empObjNomes = dados
+    .filter(e=>e.meta_whats>0||e.meta_cad>0||(e.meta_total-e.meta_whats-e.meta_cad)>0)
+    .map(e=>e.nome.split(' - ')[0]); // só nome do empreendimento, sem cidade
+  const empObjDados = dados.filter(e=>e.meta_whats>0||e.meta_cad>0||(e.meta_total-e.meta_whats-e.meta_cad)>0);
   dc('cInvEmpObj');
   const ctxEO = document.getElementById('cInvEmpObj')?.getContext('2d');
-  if(ctxEO && empObjEmps.length){
-    const temAlc = empObjEmps.some(e=>empObjMap[e].alc>0);
+  if(ctxEO && empObjDados.length){
+    const algAlc = empObjDados.map(e=>Math.max(0,e.meta_total-e.meta_whats-e.meta_cad));
+    const temAlc = algAlc.some(v=>v>0);
     const datasets = [
       { label:'WhatsApp',
-        data: empObjEmps.map(e=>empObjMap[e].whats),
+        data: empObjDados.map(e=>e.meta_whats),
         backgroundColor:'rgba(46,204,142,.85)',
         borderColor:'rgba(46,204,142,1)', borderWidth:1, borderRadius:3 },
       { label:'Cadastro',
-        data: empObjEmps.map(e=>empObjMap[e].cad),
+        data: empObjDados.map(e=>e.meta_cad),
         backgroundColor:'rgba(245,166,35,.85)',
         borderColor:'rgba(245,166,35,1)', borderWidth:1, borderRadius:3 },
     ];
     if(temAlc) datasets.push({
       label:'Alcance / Outros',
-      data: empObjEmps.map(e=>empObjMap[e].alc),
+      data: algAlc,
       backgroundColor:'rgba(155,127,244,.85)',
       borderColor:'rgba(155,127,244,1)', borderWidth:1, borderRadius:3 });
     charts.cInvEmpObj = new Chart(ctxEO,{
       type:'bar',
-      data:{ labels:empObjEmps, datasets },
+      data:{ labels:empObjNomes, datasets },
       options:{
         responsive:true, maintainAspectRatio:false,
         plugins:{
           legend:{display:false},
           tooltip:{
-            mode:'index', intersect:false,
             callbacks:{
-              title: items => items[0]?.label || '',
-              label: ctx => {
-                if(!ctx.raw && ctx.raw!==0) return null;
-                const fBR = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-                return `  ${ctx.dataset.label}    ${fBR(ctx.raw)}`;
-              },
-              afterBody: items => {
-                const total = items.reduce((s,i)=>s+(i.raw||0),0);
-                if(!total) return [];
-                const fBR = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-                return ['','Total    '+fBR(total)];
-              }
+              label: ctx=>`${ctx.dataset.label}: R$ ${ctx.raw.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}`
             }
           },
           datalabels:{
@@ -3853,226 +3255,6 @@ function renderInvestimento(){
       <td style="padding-right:14px;min-width:120px">${bar}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="12" style="padding:16px;color:'+clrMu+'">Nenhum dado encontrado</td></tr>';
-}
-
-// ═══════════════════════════════════════════════════════
-// FUNIL DE VENDAS
-// ═══════════════════════════════════════════════════════
-let _fnLead='todos'; // 'todos' | 'novo' | 'reimp'
-let _fnOrigem=new Set(['chatbot','facebook','instagram','website']);
-let _fnEmps=new Set(); // empty = todos
-
-function fnSetLead(t){
-  _fnLead=t;
-  ['fnLdTodos','fnLdNovo','fnLdReimp'].forEach((id,i)=>{
-    document.getElementById(id).classList.toggle('fn-chip-on',['todos','novo','reimp'][i]===t);
-  });
-  renderFunil();
-}
-function fnToggleOrigDrop(){
-  const d=document.getElementById('fnOrigDrop');
-  d.style.display=d.style.display==='block'?'none':'block';
-}
-function fnOrigChange(cb){
-  if(cb.checked) _fnOrigem.add(cb.value); else _fnOrigem.delete(cb.value);
-  const n=_fnOrigem.size;
-  document.getElementById('fnOrigCount').textContent=n===4||n===0?'(Todas)':n+' selecionada'+(n>1?'s':'');
-  renderFunil();
-}
-function fnOrigAll(){
-  _fnOrigem=new Set(['chatbot','facebook','instagram','website']);
-  document.querySelectorAll('#fnOrigList input[type=checkbox]').forEach(c=>c.checked=true);
-  document.getElementById('fnOrigCount').textContent='(Todas)';
-  renderFunil();
-}
-function fnOrigNone(){
-  _fnOrigem=new Set();
-  document.querySelectorAll('#fnOrigList input[type=checkbox]').forEach(c=>c.checked=false);
-  document.getElementById('fnOrigCount').textContent='(Nenhuma)';
-  renderFunil();
-}
-function fnToggleEmpDrop(){
-  const d=document.getElementById('fnEmpDrop');
-  d.style.display=d.style.display==='block'?'none':'block';
-}
-function fnEmpAll(){
-  _fnEmps=new Set();
-  document.querySelectorAll('#fnEmpList input[type=checkbox]').forEach(c=>c.checked=false);
-  document.getElementById('fnEmpCount').textContent='Todos';
-  renderFunil();
-}
-function fnEmpNone(){}
-function fnClearDates(){
-  document.getElementById('fnDe').value='';
-  document.getElementById('fnAte').value='';
-  renderFunil();
-}
-function fnInitEmpresas(){
-  const emps=[...new Set(leadsCV.filter(l=>l.online).map(l=>l.emp).filter(Boolean))].sort();
-  const list=document.getElementById('fnEmpList');
-  list.innerHTML=emps.map(e=>`
-    <label class="fn-emp-check">
-      <input type="checkbox" value="${e}" onchange="fnEmpChange(this)"> ${e}
-    </label>`).join('');
-}
-function fnEmpChange(cb){
-  if(cb.checked) _fnEmps.add(cb.value); else _fnEmps.delete(cb.value);
-  const n=_fnEmps.size;
-  document.getElementById('fnEmpCount').textContent=n===0?'Todos':n+' selecionado'+(n>1?'s':'');
-  renderFunil();
-}
-
-function renderFunil(){
-  const de=document.getElementById('fnDe')?.value;
-  const ate=document.getElementById('fnAte')?.value;
-  const deD=de?new Date(de+'T00:00:00'):null;
-  const ateD=ate?new Date(ate+'T23:59:59'):null;
-
-  // ── Definição das etapas ────────────────────────────────
-  // Contatados = saíram de "Aguardando Atendimento" (inclui Perdido — foram trabalhados)
-  const SIT_AGUARDANDO    = ['Aguardando Atendimento'];
-  const SIT_TENTATIVA     = ['Em Tentativa de Contato'];
-  const SIT_AGUARD_CORET  = ['Aguardando Corretor'];
-  const SIT_ATEND_ATIVO   = ['Em Atendimento','Visita Agendada','Visita Cancelada','Visita Realizada','Simulação','Análise de Crédito (Pré-Cadastro)'];
-  const SIT_PERDIDO       = ['Perdido'];
-  const SIT_RESERVA       = ['Com Reserva'];
-  const SIT_VENDIDO       = ['Venda Realizada'];
-
-  // "Em Tentativa de Contato" e "Aguardando Corretor" NÃO contam como contatados — ainda não houve atendimento real
-  const CONTATADOS_SITS   = [...SIT_ATEND_ATIVO,...SIT_PERDIDO,...SIT_RESERVA,...SIT_VENDIDO];
-  const ATEND_ATIVO_SITS  = [...SIT_ATEND_ATIVO,...SIT_RESERVA,...SIT_VENDIDO];
-
-  const origens=_fnOrigem;
-  let base=leadsCV.filter(l=>{
-    if(!l.online) return false;
-    const orig=(l.primeiraOrigem||'').toLowerCase();
-    if(![...origens].some(o=>orig.includes(o))) return false;
-    if(_fnLead==='novo'  && !l.novo)        return false;
-    if(_fnLead==='reimp' && !l.reimpactado) return false;
-    if(_fnEmps.size>0    && !_fnEmps.has(l.emp)) return false;
-    return true;
-  });
-
-  // Filtro de data — alinhado com o dashboard:
-  // - Novo:        dataCadastro no período
-  // - Reimpactado: dataUltima no período
-  // - Todos:       novo(dataCadastro) OU reimpactado(dataUltima) — sem misturar datas
-  function dentroDoIntervalo(d){
-    if(!d) return false;
-    if(deD && d<deD) return false;
-    if(ateD && d>ateD) return false;
-    return true;
-  }
-  function inPeriod(l){
-    if(!deD && !ateD) return true;
-    if(_fnLead==='novo')  return dentroDoIntervalo(l.dataCadastro);
-    if(_fnLead==='reimp') return dentroDoIntervalo(l.dataUltima);
-    // "todos": conta se for novo no período OU reimpactado no período
-    return (l.novo && dentroDoIntervalo(l.dataCadastro)) ||
-           (l.reimpactado && dentroDoIntervalo(l.dataUltima));
-  }
-
-  const leads    = base.filter(l=>inPeriod(l));
-  const total    = leads.length;
-  const contato  = leads.filter(l=>CONTATADOS_SITS.includes(l.situacao)).length;
-  const perdido  = leads.filter(l=>SIT_PERDIDO.includes(l.situacao)).length;
-  const atendAtivo=leads.filter(l=>ATEND_ATIVO_SITS.includes(l.situacao)).length;
-  const reserva  = leads.filter(l=>[...SIT_RESERVA,...SIT_VENDIDO].includes(l.situacao)).length;
-  const vendido  = leads.filter(l=>SIT_VENDIDO.includes(l.situacao)).length;
-
-  const fPct=(n,d)=>d>0?((n/d)*100).toFixed(1)+'%':'—';
-
-  // KPI cards
-  document.getElementById('fnK1').textContent=fN(total);
-  document.getElementById('fnK2').textContent=fN(contato);
-  document.getElementById('fnK2s').textContent=fPct(contato,total)+' dos captados';
-  document.getElementById('fnKP').textContent=fN(perdido);
-  document.getElementById('fnKPs').textContent=fPct(perdido,contato)+' dos contatados';
-  document.getElementById('fnK3').textContent=fN(atendAtivo);
-  document.getElementById('fnK3s').textContent=fPct(atendAtivo,contato)+' dos contatados';
-  document.getElementById('fnK4').textContent=fN(reserva);
-  document.getElementById('fnK4s').textContent=fPct(reserva,atendAtivo)+' do atendimento';
-  document.getElementById('fnK5').textContent=fN(vendido);
-  document.getElementById('fnK5s').textContent=fPct(vendido,total)+' dos captados · '+fPct(vendido,reserva)+' das reservas';
-
-  // ── Funil visual ────────────────────────────────────────
-  const stages=[
-    {lbl:'Captados',    sub:'Online no período',                  n:total,     color:'#4f8ef7', icon:'🎯', lost:null},
-    {lbl:'Contatados',  sub:`${fN(perdido)} perdidos (${fPct(perdido,contato)})`, n:contato,   color:'#9b7ff4', icon:'📞', lost:perdido},
-    {lbl:'Em Atendimento',sub:'Ativo — excl. Perdidos',           n:atendAtivo,color:'#fb923c', icon:'🤝', lost:null},
-    {lbl:'Com Reserva', sub:'Reserva + Venda',                    n:reserva,   color:'#26c6da', icon:'📋', lost:null},
-    {lbl:'Venda Realizada',sub:fPct(vendido,total)+' dos captados',n:vendido,  color:'#2ecc8e', icon:'🏆', lost:null},
-  ];
-  const body=document.getElementById('fnFunilBody');
-  body.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:8px 0">`+
-  stages.map((s,i)=>{
-    const pct=total===0?100:Math.max(10,Math.round((s.n/total)*100));
-    const prevN=i>0?stages[i-1].n:null;
-    const pctPrev=prevN!=null&&prevN>0?((s.n/prevN)*100).toFixed(1):null;
-    const pctBadge=pctPrev!=null
-      ?`<span style="font-size:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:2px 9px;color:rgba(255,255,255,.9);white-space:nowrap">${pctPrev}% da etapa anterior</span>`:'';
-    const lostBadge=s.lost>0
-      ?`<span style="font-size:10px;background:rgba(240,101,101,.35);border:1px solid rgba(240,101,101,.6);border-radius:10px;padding:2px 9px;color:#fca5a5;white-space:nowrap;margin-left:6px">⚠ ${fN(s.lost)} perdidos</span>`:'';
-    const connector=i<stages.length-1
-      ?`<div style="width:2px;height:14px;background:var(--bdr);margin:0 auto"></div>`:'';
-    return `
-      <div style="width:${pct}%;background:${s.color};border-radius:10px;
-        display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;
-        min-height:64px;padding:10px 18px;transition:width .6s cubic-bezier(.4,0,.2,1);
-        box-shadow:0 4px 16px rgba(0,0,0,.25)">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:20px">${s.icon}</span>
-          <div>
-            <div style="font-size:10px;color:rgba(255,255,255,.75);font-weight:700;text-transform:uppercase;letter-spacing:.8px">${s.lbl}</div>
-            <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">${fN(s.n)}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.65)">${s.sub}</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-          ${pctBadge}${lostBadge}
-        </div>
-      </div>
-      ${connector}`;
-  }).join('')+`</div>`;
-
-  // ── Tabela por empreendimento ───────────────────────────
-  const empMap={};
-  leads.forEach(l=>{
-    const e=l.emp||'Outros';
-    if(!empMap[e]) empMap[e]={leads:0,contato:0,perdido:0,atend:0,reserva:0,vendido:0};
-    empMap[e].leads++;
-    if(CONTATADOS_SITS.includes(l.situacao))  empMap[e].contato++;
-    if(SIT_PERDIDO.includes(l.situacao))      empMap[e].perdido++;
-    if(ATEND_ATIVO_SITS.includes(l.situacao)) empMap[e].atend++;
-    if([...SIT_RESERVA,...SIT_VENDIDO].includes(l.situacao)) empMap[e].reserva++;
-    if(SIT_VENDIDO.includes(l.situacao))      empMap[e].vendido++;
-  });
-  const rows=Object.entries(empMap).sort((a,b)=>b[1].leads-a[1].leads);
-  const tb=document.getElementById('fnTblBody');
-  tb.innerHTML=rows.map(([e,d])=>`
-    <tr style="border-bottom:1px solid var(--bdr)">
-      <td style="padding:8px 12px;font-weight:600;color:var(--tx)">${e}</td>
-      <td style="padding:8px 12px;text-align:center">${fN(d.leads)}</td>
-      <td style="padding:8px 12px;text-align:center">${fN(d.contato)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.contato,d.leads)}</span></td>
-      <td style="padding:8px 12px;text-align:center;color:var(--red);font-weight:600">${fN(d.perdido)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.perdido,d.contato)}</span></td>
-      <td style="padding:8px 12px;text-align:center">${fN(d.atend)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.atend,d.contato)}</span></td>
-      <td style="padding:8px 12px;text-align:center">${fN(d.reserva)}<br><span style="color:var(--mu);font-size:10px">${fPct(d.reserva,d.atend)}</span></td>
-      <td style="padding:8px 12px;text-align:center;font-weight:700;color:var(--green)">${fN(d.vendido)}</td>
-      <td style="padding:8px 12px;text-align:center;font-weight:700;color:var(--blue)">${fPct(d.vendido,d.leads)}</td>
-      <td style="padding:8px 12px;text-align:center;font-weight:700;color:var(--teal)">${fPct(d.vendido,d.atend)}</td>
-    </tr>`).join('');
-  document.getElementById('fnTblCount').textContent=rows.length+' empreendimento'+(rows.length!==1?'s':'');
-
-  // Título e período
-  const tit=document.getElementById('fnTituloFunil');
-  if(tit) tit.textContent='🔽 Funil de Atendimento';
-  const sub=document.getElementById('fnSubtitle');
-  if(sub){
-    const pd=de&&ate?`${de.split('-').reverse().join('/')} → ${ate.split('-').reverse().join('/')}`:(de?`a partir de ${de.split('-').reverse().join('/')}`:(ate?`até ${ate.split('-').reverse().join('/')}`:'Todo o período'));
-    sub.textContent=pd;
-  }
-  const info=document.getElementById('fnInfo');
-  if(info) info.textContent=`${fN(total)} leads captados · ${fN(contato)} contatados · ${fN(perdido)} perdidos · ${fN(vendido)} vendas`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -5369,70 +4551,6 @@ let currentCreatives = [];   // top 5 da campanha atual
 let currentMetaCamp  = null; // campanha atual
 
 // ── Página de Configurações de API ──────────────────────
-function saveOrganicoConfig(){
-  const token = document.getElementById('orgPageToken').value.trim();
-  const fbId  = document.getElementById('orgFbPageId').value.trim();
-  const igId  = document.getElementById('orgIgBizId').value.trim();
-  const msg   = document.getElementById('orgMsg');
-  if(!token||!fbId||!igId){
-    msg.textContent='⚠️ Preencha todos os campos'; msg.style.color='var(--amber)'; return;
-  }
-  localStorage.setItem('org_page_token', token);
-  localStorage.setItem('org_fb_page_id', fbId);
-  localStorage.setItem('org_ig_biz_id',  igId);
-  msg.textContent='✓ Salvo!'; msg.style.color='var(--green)';
-  _updateOrgBadge(true);
-}
-
-function clearOrganicoConfig(){
-  localStorage.removeItem('org_page_token');
-  localStorage.removeItem('org_fb_page_id');
-  localStorage.removeItem('org_ig_biz_id');
-  ['orgPageToken','orgFbPageId','orgIgBizId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const msg=document.getElementById('orgMsg');
-  if(msg){msg.textContent='Configuração removida';msg.style.color='var(--mu)';}
-  _updateOrgBadge(false);
-}
-
-async function testarOrganicoConfig(){
-  const token = localStorage.getItem('org_page_token') || document.getElementById('orgPageToken')?.value.trim();
-  const fbId  = localStorage.getItem('org_fb_page_id') || document.getElementById('orgFbPageId')?.value.trim();
-  const msg   = document.getElementById('orgMsg');
-  if(!token||!fbId){msg.textContent='⚠️ Salve as credenciais primeiro';msg.style.color='var(--amber)';return;}
-  msg.textContent='⏳ Testando…'; msg.style.color='var(--mu)';
-  try{
-    const r = await fetch(`https://graph.facebook.com/v19.0/${fbId}?fields=name,fan_count&access_token=${token}`);
-    const d = await r.json();
-    if(d.error) throw new Error(d.error.message);
-    msg.textContent=`✓ Conectado! Página: ${d.name} · ${(d.fan_count||0).toLocaleString('pt-BR')} seguidores`;
-    msg.style.color='var(--green)';
-    _updateOrgBadge(true);
-  } catch(e){
-    msg.textContent='✗ Erro: '+e.message; msg.style.color='var(--red)';
-  }
-}
-
-function _updateOrgBadge(ok){
-  const b=document.getElementById('cfgOrgBadge');
-  if(!b) return;
-  b.textContent = ok ? 'Configurado' : 'Não configurado';
-  b.style.background = ok ? 'rgba(52,211,153,.15)' : 'rgba(107,122,158,.12)';
-  b.style.color = ok ? 'var(--green)' : 'var(--mu)';
-}
-
-function _loadOrganicoConfig(){
-  const token = localStorage.getItem('org_page_token');
-  const fbId  = localStorage.getItem('org_fb_page_id');
-  const igId  = localStorage.getItem('org_ig_biz_id');
-  const tEl = document.getElementById('orgPageToken');
-  const fEl = document.getElementById('orgFbPageId');
-  const iEl = document.getElementById('orgIgBizId');
-  if(tEl && token) tEl.value = '••••••••••••••••';
-  if(fEl && fbId)  fEl.value = fbId;
-  if(iEl && igId)  iEl.value = igId;
-  _updateOrgBadge(!!(token && fbId && igId));
-}
-
 function initConfigPage(){
   renderAccountsList();
   updateConfigStatus();
@@ -5453,8 +4571,6 @@ function initConfigPage(){
     gadsInp.value = gadsId ? gadsId + (gadsGid!=='0'?' (aba: '+gadsGid+')':'') : '';
   }
   updateGadsBadge();
-  // Orgânico Instagram/Facebook
-  _loadOrganicoConfig();
 }
 
 function updateConfigStatus(){
@@ -5973,55 +5089,6 @@ function orgInRange(d, de, ate){
 }
 
 // ─── LOAD INSTAGRAM ───────────────────────────────────────
-// ── Helpers Graph API ──────────────────────────────────────
-function _orgToken(){ return localStorage.getItem('org_page_token')||''; }
-function _orgFbId(){  return localStorage.getItem('org_fb_page_id')||''; }
-function _orgIgId(){  return localStorage.getItem('org_ig_biz_id')||''; }
-function _hasOrgAPI(){ return !!(_orgToken()&&_orgFbId()&&_orgIgId()); }
-
-async function _graphGet(path, params){
-  const token = _orgToken();
-  const qs = Object.entries({...params, access_token:token}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
-  const r = await fetch('https://graph.facebook.com/v19.0/'+path+'?'+qs);
-  const d = await r.json();
-  if(d.error) throw new Error(d.error.message);
-  return d;
-}
-
-// Converte timestamp ISO para DD/MM/YYYY
-function _isoToBR(ts){
-  if(!ts) return '';
-  var d=new Date(ts);
-  return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
-}
-
-// Busca todas as páginas de um endpoint (pagination)
-async function _graphGetAll(path, params, maxPages){
-  var results=[], cursor=null, page=0;
-  while(page < (maxPages||5)){
-    var p = {...params};
-    if(cursor) p.after = cursor;
-    var d = await _graphGet(path, p);
-    if(d.data) results = results.concat(d.data);
-    cursor = d.paging?.cursors?.after;
-    if(!cursor || !d.paging?.next) break;
-    page++;
-  }
-  return results;
-}
-
-// Busca insights de um post do Instagram
-async function _igPostInsights(mediaId){
-  try{
-    var d = await _graphGet(mediaId+'/insights', {
-      metric:'reach,impressions,saved,shares,follows,total_interactions,video_views'
-    });
-    var m={};
-    (d.data||[]).forEach(function(i){ m[i.name]=i.values?.[0]?.value??i.value??0; });
-    return m;
-  } catch(e){ return {}; }
-}
-
 async function loadInstagram(){
   var loading=document.getElementById('igLoading');
   var body=document.getElementById('igMainBody');
@@ -6031,84 +5098,21 @@ async function loadInstagram(){
   if(body)    body.style.display='none';
   if(errEl)   errEl.style.display='none';
   if(st)      st.textContent='Carregando…';
-
-  var apiOk = false;
-
-  if(_hasOrgAPI()){
-    try{
-      // ── Camada 1: buscar lista de posts básicos ──
-      if(st) st.textContent='Buscando posts via API…';
-      var medias = await _graphGetAll(_orgIgId()+'/media',{
-        fields:'id,caption,media_type,timestamp,like_count,comments_count,permalink',
-        limit:'50'
-      }, 3);
-
-      // ── Camada 2: insights por post (falha silenciosa por post) ──
-      if(st) st.textContent='Buscando insights ('+medias.length+' posts)…';
-      var insightsList=[];
-      for(var i=0;i<medias.length;i+=10){
-        var batch=medias.slice(i,i+10);
-        var ins=await Promise.all(batch.map(function(m){ return _igPostInsights(m.id); }));
-        insightsList=insightsList.concat(ins);
-      }
-
-      rawPostagens = medias.map(function(m,idx){
-        var ins=insightsList[idx]||{};
-        var tipo=m.media_type==='VIDEO'?'Vídeo':m.media_type==='CAROUSEL_ALBUM'?'Carrossel':'Foto';
-        var hasInsights = ins.reach>0||ins.impressions>0;
-        return {
-          'Data de publicação': _isoToBR(m.timestamp),
-          'Tipo de post':       tipo,
-          'Visualizações':      String(ins.impressions||ins.video_views||0),
-          'Alcance':            String(ins.reach||0),
-          'Engajamentos':       String(ins.total_interactions||(Number(m.like_count||0)+Number(m.comments_count||0))),
-          'Curtidas':           String(m.like_count||0),
-          'Comentários':        String(m.comments_count||0),
-          'Salvamentos':        String(ins.saved||0),
-          'Compartilhamentos':  String(ins.shares||0),
-          'Seguidores ganhos':  String(ins.follows||0),
-          'Legenda':            (m.caption||'').substring(0,120),
-          'Link':               m.permalink||'',
-          '_fonte':             'api',
-          '_semInsights':       !hasInsights
-        };
-      });
-      rawStories=[];
-      apiOk=true;
-      var semIns=rawPostagens.filter(function(p){return p._semInsights;}).length;
-      var notice=semIns>0?' · ⚠️ '+semIns+' posts sem insights (permissão pendente)':'';
-      if(loading) loading.style.display='none';
-      if(st) st.textContent=rawPostagens.length+' posts (API)'+notice;
-    } catch(apiErr){
-      // ── Camada 3: fallback para Sheets se API falhar ──
-      console.warn('Instagram API falhou, usando Sheets:', apiErr.message);
-      if(errEl){
-        errEl.style.display='block';
-        errEl.textContent='⚠️ API: '+apiErr.message+' — carregando via Sheets…';
-        errEl.style.color='var(--amber)';
-        errEl.style.background='rgba(245,166,35,.08)';
-        errEl.style.border='1px solid rgba(245,166,35,.3)';
-      }
-    }
+  try {
+    var [rawP, rawS] = await Promise.all([
+      fetchCSV(IG_POSTAGEM_SHEET,'0'),
+      fetchCSV(IG_STORY_SHEET,   '0'),
+    ]);
+    rawPostagens = rawP;
+    rawStories   = rawS;
+    if(loading) loading.style.display='none';
+    if(st) st.textContent = rawPostagens.length+' posts · '+rawStories.length+' stories';
+    applyIgFilter();
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
+    if(st) st.textContent='';
   }
-
-  if(!apiOk){
-    try{
-      var [rawP, rawS] = await Promise.all([
-        fetchCSV(IG_POSTAGEM_SHEET,'0'),
-        fetchCSV(IG_STORY_SHEET,'0'),
-      ]);
-      rawPostagens=rawP; rawStories=rawS;
-      if(loading) loading.style.display='none';
-      if(st) st.textContent=rawPostagens.length+' posts · '+rawStories.length+' stories (Sheets)';
-    } catch(sheetErr){
-      if(loading) loading.style.display='none';
-      if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+sheetErr.message; errEl.style.color=''; errEl.style.background=''; errEl.style.border=''; }
-      if(st) st.textContent='';
-      return;
-    }
-  }
-  applyIgFilter();
 }
 
 function applyIgFilter(){
@@ -6525,19 +5529,6 @@ function renderIgCompare(){
 
 
 // ─── LOAD FACEBOOK ────────────────────────────────────────
-async function _fbPostInsights(postId){
-  try{
-    var d = await _graphGet(postId+'/insights',{
-      metric:'post_impressions,post_reach,post_engaged_users,post_reactions_by_type_total,post_clicks,post_clicks_by_type'
-    });
-    var m={};
-    (d.data||[]).forEach(function(i){
-      m[i.name] = Array.isArray(i.values)&&i.values.length ? i.values[i.values.length-1].value : (i.value||0);
-    });
-    return m;
-  } catch(e){ return {}; }
-}
-
 async function loadFacebook(){
   var loading=document.getElementById('fbLoading');
   var body=document.getElementById('fbBody');
@@ -6547,91 +5538,17 @@ async function loadFacebook(){
   if(body)    body.style.display='none';
   if(errEl)   errEl.style.display='none';
   if(st)      st.textContent='Carregando…';
-
-  var apiOk=false;
-
-  if(_hasOrgAPI()){
-    try{
-      // ── Camada 1: buscar lista de posts básicos ──
-      if(st) st.textContent='Buscando posts via API…';
-      var posts = await _graphGetAll(_orgFbId()+'/posts',{
-        fields:'id,message,created_time,full_picture,shares,likes.summary(true),comments.summary(true),attachments',
-        limit:'50'
-      }, 3);
-
-      // ── Camada 2: insights por post (falha silenciosa por post) ──
-      if(st) st.textContent='Buscando insights ('+posts.length+' posts)…';
-      var insightsList=[];
-      for(var i=0;i<posts.length;i+=10){
-        var batch=posts.slice(i,i+10);
-        var ins=await Promise.all(batch.map(function(p){ return _fbPostInsights(p.id); }));
-        insightsList=insightsList.concat(ins);
-      }
-
-      rawFacebook = posts.map(function(p,idx){
-        var ins=insightsList[idx]||{};
-        var reac=ins.post_reactions_by_type_total||{};
-        var totReac=0;
-        try{ totReac=Object.values(reac).reduce(function(s,v){return s+(typeof v==='object'?Object.values(v).reduce(function(a,b){return a+b;},0):Number(v)||0);},0); }catch(e){}
-        var linkClicks=0, totalClicks=0;
-        if(ins.post_clicks_by_type&&typeof ins.post_clicks_by_type==='object'){
-          try{
-            linkClicks=ins.post_clicks_by_type.link||0;
-            totalClicks=Object.values(ins.post_clicks_by_type).reduce(function(s,v){return s+v;},0);
-          }catch(e){}
-        }
-        if(!totalClicks) totalClicks=typeof ins.post_clicks==='number'?ins.post_clicks:0;
-        var attach=p.attachments&&p.attachments.data&&p.attachments.data[0];
-        var tipo=attach?(attach.type==='video'?'Vídeo':attach.type==='album'?'Álbum':'Foto'):'Post';
-        var hasInsights=!!(ins.post_impressions||ins.post_reach);
-        return {
-          'Data de Publicação': _isoToBR(p.created_time),
-          'Tipo de Post':       tipo,
-          'Visualizações':      String(ins.post_impressions||0),
-          'Alcance':            String(ins.post_reach||0),
-          'Engajamento Total':  String(ins.post_engaged_users||(Number(p.likes&&p.likes.summary&&p.likes.summary.total_count||0)+Number(p.comments&&p.comments.summary&&p.comments.summary.total_count||0)+Number(p.shares&&p.shares.count||0))),
-          'Reações':            String(totReac||(p.likes&&p.likes.summary&&p.likes.summary.total_count||0)),
-          'Comentários':        String(p.comments&&p.comments.summary&&p.comments.summary.total_count||0),
-          'Compartilhamentos':  String(p.shares&&p.shares.count||0),
-          'Cliques no Link':    String(linkClicks),
-          'Total de Cliques':   String(totalClicks),
-          'Mensagem':           (p.message||'').substring(0,120),
-          '_fonte':             'api',
-          '_semInsights':       !hasInsights
-        };
-      });
-      apiOk=true;
-      var semIns=rawFacebook.filter(function(p){return p._semInsights;}).length;
-      var notice=semIns>0?' · ⚠️ '+semIns+' posts sem insights (permissão pendente)':'';
-      if(loading) loading.style.display='none';
-      if(st) st.textContent=rawFacebook.length+' posts (API)'+notice;
-    } catch(apiErr){
-      // ── Camada 3: fallback para Sheets se API falhar ──
-      console.warn('Facebook API falhou, usando Sheets:', apiErr.message);
-      if(errEl){
-        errEl.style.display='block';
-        errEl.textContent='⚠️ API: '+apiErr.message+' — carregando via Sheets…';
-        errEl.style.color='var(--amber)';
-        errEl.style.background='rgba(245,166,35,.08)';
-        errEl.style.border='1px solid rgba(245,166,35,.3)';
-      }
-    }
+  try {
+    var csv = await fetchCSV(FB_SHEET,'0');
+    rawFacebook = csv;
+    if(loading) loading.style.display='none';
+    if(st) st.textContent = rawFacebook.length+' posts';
+    applyFbFilter();
+  } catch(e){
+    if(loading) loading.style.display='none';
+    if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
+    if(st) st.textContent='';
   }
-
-  if(!apiOk){
-    try{
-      var csv=await fetchCSV(FB_SHEET,'0');
-      rawFacebook=csv;
-      if(loading) loading.style.display='none';
-      if(st) st.textContent=rawFacebook.length+' posts (Sheets)';
-    } catch(sheetErr){
-      if(loading) loading.style.display='none';
-      if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+sheetErr.message; errEl.style.color=''; errEl.style.background=''; errEl.style.border=''; }
-      if(st) st.textContent='';
-      return;
-    }
-  }
-  applyFbFilter();
 }
 
 // Data publicação FB: DD/MM/YYYY HH:MM → YYYY-MM-DD
@@ -6877,74 +5794,24 @@ function renderFbCompare(){
 
 // ─── goPage hook ─────────────────────────────────────────
 // ─── TIKTOK ───────────────────────────────────────────────
-var TK_MESES_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-var TK_MESES_MAP={'janeiro':'01','fevereiro':'02','março':'03','marco':'03','abril':'04',
+// Converte "19 de junho" / "19 de junho de 2026" → "YYYY-MM-DD"
+var TK_MESES={'janeiro':'01','fevereiro':'02','março':'03','marco':'03','abril':'04',
   'maio':'05','junho':'06','julho':'07','agosto':'08','setembro':'09','outubro':'10',
   'novembro':'11','dezembro':'12'};
-
-// Parser de data: "19 de junho de 2026" ou Date obj ou "YYYY-MM-DD" → "YYYY-MM-DD"
 function ttkParseDate(s){
   if(!s) return '';
-  if(s instanceof Date){
-    return s.getFullYear()+'-'+String(s.getMonth()+1).padStart(2,'0')+'-'+String(s.getDate()).padStart(2,'0');
-  }
   s=String(s).trim().toLowerCase();
+  // Already ISO
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  // "DD/MM/YYYY" ou "D/M/YYYY" (com ou sem zero)
-  var m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
-  // "19 de junho de 2026"
-  m=s.match(/^(\d{1,2})\s+de\s+(\w+)(?:\s+de\s+(\d{4}))?/);
+  // "19 de junho" or "19 de junho de 2026"
+  var m=s.match(/^(\d{1,2})\s+de\s+(\w+)(?:\s+de\s+(\d{4}))?/);
   if(m){
-    return (m[3]||String(new Date().getFullYear()))+'-'+(TK_MESES_MAP[m[2]]||'01')+'-'+m[1].padStart(2,'0');
+    var day=m[1].padStart(2,'0');
+    var mon=TK_MESES[m[2]]||'01';
+    var yr=m[3]||String(new Date().getFullYear());
+    return yr+'-'+mon+'-'+day;
   }
   return '';
-}
-
-// Parser de número: trata "17,3K" → 17300, "1.234" → 1234, etc.
-function ttkN(v){
-  if(!v && v!==0) return 0;
-  var s=String(v).trim();
-  // "17,3K" ou "17.3K"
-  var mk=s.match(/^([\d.,]+)\s*[kK]$/);
-  if(mk) return Math.round(parseFloat(mk[1].replace(',','.'))*1000);
-  var mm=s.match(/^([\d.,]+)\s*[mM]$/);
-  if(mm) return Math.round(parseFloat(mm[1].replace(',','.'))*1000000);
-  // número normal pt-BR: "1.234" ou "1.234,56"
-  s=s.replace(/[^0-9,.-]/g,'');
-  if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
-  else if(s.includes(',')) s=s.replace(',','.');
-  return parseFloat(s)||0;
-}
-
-// GIDs das abas do TikTok Sheets
-var TK_GIDS = ['0']; // Apenas primeira aba — deduplicação por Time dentro dela
-
-// Snapshot date → Date obj
-function ttkParseTime(s){
-  if(!s) return new Date(0);
-  if(s instanceof Date) return s;
-  var m=String(s).match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-  if(m) return new Date(m[3],m[2]-1,m[1]);
-  m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(m) return new Date(m[1],m[2]-1,m[3]);
-  return new Date(s);
-}
-
-// Deduplicação: mesma URL (ou título+dataPub) = usa snapshot mais recente (Time)
-function ttkMerge(abas){
-  var map={};
-  abas.forEach(function(rows){
-    rows.forEach(function(r){
-      var link=(r['Video link']||'').trim();
-      // fallback: usa título + data de publicação como chave
-      var key=link||(r['Título do Vídeo']||'')+'__'+(r['Dia da publicação']||'');
-      if(!key) return;
-      var tNovo=ttkParseTime(r['Time']);
-      if(!map[key]||tNovo>ttkParseTime(map[key]['Time'])) map[key]=r;
-    });
-  });
-  return Object.values(map);
 }
 
 async function loadTiktok(){
@@ -6957,592 +5824,11 @@ async function loadTiktok(){
   if(errEl)   errEl.style.display='none';
   if(st)      st.textContent='Carregando…';
   try {
-    var resultados=await Promise.allSettled(TK_GIDS.map(function(gid){return fetchCSV(TK_SHEET,gid);}));
-    var abas=resultados.filter(function(r){return r.status==='fulfilled'&&r.value.length;}).map(function(r){return r.value;});
-    if(!abas.length) throw new Error('Nenhuma aba carregada');
-    rawTiktok=ttkMerge(abas);
+    var csv=await fetchCSV(TK_SHEET,'0');
+    rawTiktok=csv;
     if(loading) loading.style.display='none';
-    if(st) st.textContent=rawTiktok.length+' vídeo'+(rawTiktok.length!==1?'s':'')+' únicos';
+    if(st) st.textContent=rawTiktok.length+' vídeos';
     applyTkFilter();
-  } catch(e){
-    if(loading) loading.style.display='none';
-    if(errEl){errEl.style.display='block';errEl.textContent='❌ '+e.message;}
-    if(st) st.textContent='';
-  }
-}
-
-/* __PLACEHOLDER_renderTkMensalComparativo — removido, substituído por renderTiktok() */
-
-function applyTkFilter(){
-  var de=(document.getElementById('tkDateDe')||{}).value||'';
-  var ate=(document.getElementById('tkDateAte')||{}).value||'';
-  function getDia(r){
-    return r['Dia da publicação']||r['Dia da Publicação']||r['dia da publicação']||r['Dia Da Publicação']||'';
-  }
-  var vids=rawTiktok.filter(function(r){
-    var d=ttkParseDate(getDia(r));
-    if(!d && (de||ate)) return false;
-    return orgInRange(d,de,ate);
-  });
-  document.getElementById('tkBody').style.display='block';
-  renderTiktok(vids,de,ate);
-}
-function tkClearDates(){
-  var d1=document.getElementById('tkDateDe'),d2=document.getElementById('tkDateAte');
-  if(d1)d1.value=''; if(d2)d2.value='';
-  applyTkFilter();
-}
-
-function renderTiktok(vids, de, ate){
-  var isLight=document.body.classList.contains('light');
-  var clrMu=isLight?'#6b7280':'#6b7a9e',clrTx=isLight?'#1a2332':'#e2e8f0',clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
-
-  // ── Totais do período atual ──
-  function calc(arr){
-    var views=0,likes=0,coment=0;
-    arr.forEach(function(r){
-      views +=ttkN(r['Total views']);
-      likes +=ttkN(r['Total likes']);
-      coment+=ttkN(r['Total de comentários']);
-    });
-    return {posts:arr.length,views:views,likes:likes,coment:coment,
-            avgViews:arr.length?Math.round(views/arr.length):0};
-  }
-
-  var kA=calc(vids);
-
-  // ── Período de comparação: mesmo intervalo antes ──
-  var prevLabel='';
-  var vidsPrev=[];
-  if(de && ate){
-    var d1=new Date(de),d2=new Date(ate);
-    var diff=d2.getTime()-d1.getTime();
-    var pb2=new Date(d1.getTime()-86400000);
-    var pb1=new Date(pb2.getTime()-diff);
-    var fmt=function(d){return d.toISOString().slice(0,10);};
-    var pb1s=fmt(pb1),pb2s=fmt(pb2);
-    vidsPrev=rawTiktok.filter(function(r){return orgInRange(ttkParseDate(r['Dia da publicação']),pb1s,pb2s);});
-    prevLabel='vs. período anterior ('+pb1s.split('-').reverse().join('/')+' → '+pb2s.split('-').reverse().join('/') +')';
-  } else {
-    // sem filtro: mês atual vs mês anterior
-    var hoje=new Date();
-    var mA=hoje.getMonth(),yA=hoje.getFullYear();
-    var mB=mA===0?11:mA-1,yB=mA===0?yA-1:yA;
-    vidsPrev=rawTiktok.filter(function(r){
-      var d=ttkParseDate(r['Dia da publicação']);
-      if(!d) return false;
-      var dt=new Date(d);
-      return dt.getMonth()===mB&&dt.getFullYear()===yB;
-    });
-    prevLabel='vs. '+TK_MESES_PT[mB]+'/'+yB;
-  }
-  var kB=calc(vidsPrev);
-  sid('tkCmpLabel',prevLabel);
-
-  // ── KPI Cards com comparação ──
-  function kpiCard(icon,label,valA,valB,color){
-    var diff=valA-valB;
-    var pct=valB>0?((diff/valB)*100):0;
-    var up=diff>=0,cor=up?'#2ecc8e':'#f06565',seta=up?'▲':'▼';
-    var exibirCmp=valB>0;
-    return '<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px 18px">'
-      +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:8px">'+icon+' '+label+'</div>'
-      +'<div style="font-size:26px;font-weight:900;color:'+color+';line-height:1">'+fN(valA)+'</div>'
-      +(exibirCmp
-        ?'<div style="margin-top:8px;font-size:11px;font-weight:700;color:'+cor+'">'+seta+' '+Math.abs(pct).toFixed(1)+'%</div>'
-        +'<div style="font-size:10px;color:var(--mu)">'+fN(valB)+' '+prevLabel+'</div>'
-        :'<div style="margin-top:8px;font-size:10px;color:var(--mu)">'+prevLabel+'</div>')
-      +'</div>';
-  }
-  var grid=document.getElementById('tkKpiGrid');
-  if(grid){
-    grid.innerHTML=
-      kpiCard('🎵','Posts',kA.posts,kB.posts,'#e879a0')
-      +kpiCard('👁️','Views',kA.views,kB.views,'#9b7ff4')
-      +kpiCard('❤️','Likes',kA.likes,kB.likes,'#2ecc8e')
-      +kpiCard('💬','Comentários',kA.coment,kB.coment,'#4f8ef7')
-      +kpiCard('📊','Média Views/Post',kA.avgViews,kB.avgViews,'#f5a623');
-  }
-  document.getElementById('tkVideoCount').textContent=vids.length+' vídeo'+(vids.length!==1?'s':'');
-
-  // ── Top 10 Views ──
-  var sortV=vids.slice().sort(function(a,b){return ttkN(b['Total views'])-ttkN(a['Total views']);});
-  var top10V=sortV.slice(0,10);
-  mkChart('tkChartTopViews','bar',
-    top10V.map(function(r){return (r['Título do Vídeo']||'—').slice(0,30);}),
-    [{label:'Views',data:top10V.map(function(r){return ttkN(r['Total views']);}),
-      backgroundColor:'rgba(155,127,244,.85)',borderRadius:5,borderSkipped:false}],
-    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
-     plugins:{legend:{display:false},datalabels:{display:false},
-       tooltip:{callbacks:{label:function(ctx){return ' '+fN(ctx.raw)+' views';}}}},
-     scales:{
-       x:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}},
-       y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}
-     }});
-
-  // ── Top 10 Likes ──
-  var sortL=vids.slice().sort(function(a,b){return ttkN(b['Total likes'])-ttkN(a['Total likes']);});
-  var top10L=sortL.slice(0,10);
-  mkChart('tkChartTopLikes','bar',
-    top10L.map(function(r){return (r['Título do Vídeo']||'—').slice(0,30);}),
-    [{label:'Likes',data:top10L.map(function(r){return ttkN(r['Total likes']);}),
-      backgroundColor:'rgba(232,121,160,.85)',borderRadius:5,borderSkipped:false}],
-    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
-     plugins:{legend:{display:false},datalabels:{display:false},
-       tooltip:{callbacks:{label:function(ctx){return ' '+fN(ctx.raw)+' likes';}}}},
-     scales:{
-       x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},
-       y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}
-     }});
-
-  // ── Taxa de Engajamento Top 10 ──
-  var withEng=vids.map(function(r){
-    var v=ttkN(r['Total views']),l=ttkN(r['Total likes']),c=ttkN(r['Total de comentários']);
-    var tx=v>0?+((l+c)/v*100).toFixed(2):0;
-    return {titulo:r['Título do Vídeo']||'—',tx:tx};
-  }).sort(function(a,b){return b.tx-a.tx;}).slice(0,10);
-  mkChart('tkChartEngRate','bar',
-    withEng.map(function(r){return r.titulo.slice(0,22);}),
-    [{label:'Taxa Eng. %',data:withEng.map(function(r){return r.tx;}),
-      backgroundColor:'rgba(79,142,247,.85)',borderRadius:5}],
-    {responsive:true,maintainAspectRatio:false,
-     plugins:{legend:{display:false},datalabels:{display:false},
-       tooltip:{callbacks:{label:function(ctx){return ' '+ctx.raw+'%';}}}},
-     scales:{
-       x:{ticks:{color:clrMu,font:{size:10},maxRotation:30},grid:{display:false}},
-       y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v+'%';}},grid:{color:clrGrid}}
-     }});
-
-  // ── Tabela com hover preview ──
-  var vb=document.getElementById('tkVideoBody');
-  if(vb){
-    var sorted=vids.slice().sort(function(a,b){return ttkN(b['Total views'])-ttkN(a['Total views']);});
-    vb.innerHTML=sorted.map(function(r,i){
-      var v=ttkN(r['Total views']),l=ttkN(r['Total likes']),c=ttkN(r['Total de comentários']);
-      var tx=v>0?((l+c)/v*100).toFixed(2)+'%':'—';
-      var link=r['Video link']||'';
-      var titulo=r['Título do Vídeo']||'—';
-      var data=ttkParseDate(r['Dia da publicação'])||'—';
-      var txCor=parseFloat(tx)>=5?'var(--green)':parseFloat(tx)>=2?'var(--blue)':'var(--amber)';
-      return '<tr style="border-bottom:1px solid var(--bdr);cursor:default" '
-        +'onmouseenter="tkShowPreview(event,'+i+')" onmouseleave="tkHidePreview()">'
-        +'<td style="padding:8px 12px;color:var(--mu);font-size:11px;white-space:nowrap">'+data+'</td>'
-        +'<td style="padding:8px 12px;color:var(--tx);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+titulo+'">'+titulo+'</td>'
-        +'<td style="padding:8px 12px;text-align:right;font-weight:700;color:#9b7ff4">'+fN(v)+'</td>'
-        +'<td style="padding:8px 12px;text-align:right;color:#e879a0">'+fN(l)+'</td>'
-        +'<td style="padding:8px 12px;text-align:right;color:var(--mu)">'+fN(c)+'</td>'
-        +'<td style="padding:8px 12px;text-align:right;font-weight:700;color:'+txCor+'">'+tx+'</td>'
-        +'<td style="padding:8px 12px;text-align:center">'
-        +(link?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:13px;text-decoration:none" title="Abrir no TikTok">↗</a>':'—')
-        +'</td></tr>';
-    }).join('');
-    // guarda dados para o preview
-    window._tkVidsForPreview=sorted;
-  }
-}
-
-// ── Hover preview de vídeo ──
-window._tkVidsForPreview=[];
-function tkShowPreview(e,idx){
-  var r=window._tkVidsForPreview[idx];
-  if(!r) return;
-  var p=document.getElementById('tkPreview');
-  if(!p) return;
-  sid('tkPreviewTitle',(r['Título do Vídeo']||'—'));
-  sid('tkPreviewViews', fN(ttkN(r['Total views'])));
-  sid('tkPreviewLikes', fN(ttkN(r['Total likes'])));
-  sid('tkPreviewComents',fN(ttkN(r['Total de comentários'])));
-  // posiciona próximo ao mouse
-  p.style.display='block';
-  p.style.left=(e.clientX+16)+'px';
-  p.style.top=Math.max(8,e.clientY-60)+'px';
-}
-function tkHidePreview(){
-  var p=document.getElementById('tkPreview');
-  if(p) p.style.display='none';
-}
-
-/* renderTkCompare — removido, comparação automática agora está em renderTiktok() */
-
-
-// ─── AGENDA ──────────────────────────────────────────────────────────
-
-// Parse de data DD/MM/AAAA ou AAAA-MM-DD (global, usada pela Agenda)
-function parseDateAgenda(s){
-  if(!s) return null;
-  const mBR  = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(mBR)  return new Date(+mBR[3], +mBR[2]-1, +mBR[1]);
-  const mISO = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if(mISO) return new Date(+mISO[1], +mISO[2]-1, +mISO[3]);
-  const d = new Date(s);
-  return isNaN(d) ? null : d;
-}
-
-const AGENDA_SHEET_ID = '1MzJk7mFwzluoSaR27Oy8aoeWlRe9XsA1rk_snxjfKGU';
-let agendaEventos   = [];
-let agendaMesOffset = 0; // quantos meses deslocado do mês atual
-
-// Paleta de cores por categoria (expande automaticamente)
-const AGENDA_CORES = [
-  {bg:'rgba(79,142,247,.25)',  border:'#4f8ef7', text:'#4f8ef7'},   // azul
-  {bg:'rgba(46,204,142,.25)', border:'#2ecc8e', text:'#2ecc8e'},   // verde
-  {bg:'rgba(245,166,35,.25)', border:'#f5a623', text:'#f5a623'},   // âmbar
-  {bg:'rgba(155,127,244,.25)',border:'#9b7ff4', text:'#9b7ff4'},   // roxo
-  {bg:'rgba(240,101,101,.25)',border:'#f06565', text:'#f06565'},   // vermelho
-  {bg:'rgba(38,198,218,.25)', border:'#26c6da', text:'#26c6da'},   // teal
-  {bg:'rgba(232,121,160,.25)',border:'#e879a0', text:'#e879a0'},   // rosa
-  {bg:'rgba(251,146,60,.25)', border:'#fb923c', text:'#fb923c'},   // laranja
-];
-let agendaCatMap = {}; // categoria → índice de cor
-
-function agendaCorCategoria(cat){
-  if(agendaCatMap[cat] === undefined){
-    const keys = Object.keys(agendaCatMap);
-    agendaCatMap[cat] = keys.length % AGENDA_CORES.length;
-  }
-  return AGENDA_CORES[agendaCatMap[cat]];
-}
-
-async function loadAgenda(){
-  const lista = document.getElementById('agendaLista');
-  if(lista) lista.innerHTML = '<div style="color:var(--mu);font-size:13px">Carregando eventos...</div>';
-
-  try {
-    // fetchCSV usa parseCSV que retorna array de objetos {coluna: valor}
-    const rows = await fetchCSV(AGENDA_SHEET_ID, 0);
-    if(!rows.length){ lista.innerHTML='<div style="color:var(--mu)">Nenhum evento encontrado.</div>'; return; }
-
-    // Detecta as chaves do objeto pelo primeiro registro (case-insensitive)
-    const keys      = Object.keys(rows[0]);
-    const kData     = keys.find(k => k.toLowerCase().includes('data'))      || 'Data';
-    const kTitulo   = keys.find(k => /evento|título|titulo|nome/i.test(k)) || 'Evento';
-    const kCateg    = keys.find(k => /categoria|tipo/i.test(k))             || 'Categoria';
-    const kDesc     = keys.find(k => /descri|obs|detalhe/i.test(k))        || 'Descrição';
-
-    agendaCatMap = {};
-    agendaEventos = [];
-
-    for(const r of rows){
-      const dataRaw = (r[kData] || '').trim();
-      if(!dataRaw) continue;
-
-      const dt = parseDateAgenda(dataRaw);
-      if(!dt || isNaN(dt)) continue;
-
-      const titulo    = (r[kTitulo]  || '').trim() || '(sem título)';
-      const categoria = (r[kCateg]   || '').trim() || 'Geral';
-      const descricao = (r[kDesc]    || '').trim();
-
-      agendaEventos.push({ dt, titulo, categoria, descricao });
-    }
-
-    // ordena por data
-    agendaEventos.sort((a,b) => a.dt - b.dt);
-
-    // garante cores mapeadas em ordem de aparição
-    agendaEventos.forEach(e => agendaCorCategoria(e.categoria));
-
-    renderAgenda();
-  } catch(e) {
-    console.error('loadAgenda erro:', e);
-    if(lista) lista.innerHTML = `<div style="color:var(--red);font-size:13px">Erro ao carregar eventos: ${e.message}</div>`;
-  }
-}
-
-function agendaMover(delta){ agendaMesOffset += delta; renderAgenda(); }
-function agendaHoje(){ agendaMesOffset = 0; renderAgenda(); }
-
-function renderAgenda(){
-  renderAgendaLegenda();
-  renderAgendaCalendarios();
-  renderAgendaLista();
-}
-
-function renderAgendaLegenda(){
-  const el = document.getElementById('agendaLegenda');
-  if(!el) return;
-  const cats = Object.keys(agendaCatMap);
-  if(!cats.length){ el.innerHTML=''; return; }
-  el.innerHTML = cats.map(cat => {
-    const c = agendaCorCategoria(cat);
-    return `<div style="display:flex;align-items:center;gap:5px;background:${c.bg};border:1px solid ${c.border};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:${c.text}">${cat}</div>`;
-  }).join('');
-}
-
-function renderAgendaCalendarios(){
-  const cont = document.getElementById('agendaCalendarios');
-  if(!cont) return;
-  const hoje = new Date();
-  cont.innerHTML = '';
-  for(let m = 0; m < 4; m++){
-    const ano = hoje.getFullYear() + Math.floor((hoje.getMonth() + agendaMesOffset + m) / 12);
-    const mes = (hoje.getMonth() + agendaMesOffset + m) % 12;
-    const mesAdj = ((mes % 12) + 12) % 12;
-    const anoAdj = ano + Math.floor(mes / 12) - (mes < 0 ? 1 : 0);
-    cont.appendChild(buildCalMes(anoAdj, mesAdj, hoje));
-  }
-}
-
-function buildCalMes(ano, mes, hoje){
-  const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const wrapper = document.createElement('div');
-  wrapper.className = 'ag-cal';
-
-  // Header
-  wrapper.innerHTML = `<div class="ag-cal-header">${nomesMes[mes]} ${ano}</div>`;
-
-  // Grid
-  const grid = document.createElement('div');
-  grid.className = 'ag-cal-grid';
-
-  // Dias da semana (Dom → Sáb)
-  ['D','S','T','Q','Q','S','S'].forEach(d => {
-    const el = document.createElement('div');
-    el.className = 'ag-cal-dow';
-    el.textContent = d;
-    grid.appendChild(el);
-  });
-
-  // Primeiro dia da semana do mês
-  const primeiro = new Date(ano, mes, 1).getDay();
-  const totalDias = new Date(ano, mes+1, 0).getDate();
-
-  // Dias do mês anterior (fill)
-  const diasMesAnt = new Date(ano, mes, 0).getDate();
-  for(let d = primeiro - 1; d >= 0; d--){
-    const cell = document.createElement('div');
-    cell.className = 'ag-day ag-out';
-    cell.innerHTML = `<div class="ag-daynum">${diasMesAnt - d}</div>`;
-    grid.appendChild(cell);
-  }
-
-  // Dias do mês
-  for(let dia = 1; dia <= totalDias; dia++){
-    const cell = document.createElement('div');
-    cell.className = 'ag-day';
-    const ehHoje = dia===hoje.getDate() && mes===hoje.getMonth() && ano===hoje.getFullYear();
-    if(ehHoje) cell.classList.add('ag-today');
-
-    const evsDia = agendaEventos.filter(e =>
-      e.dt.getFullYear()===ano && e.dt.getMonth()===mes && e.dt.getDate()===dia
-    );
-
-    let html = `<div class="ag-daynum">${dia}</div>`;
-    // Mostra até 2 eventos, o resto indica "+N"
-    const visiveis = evsDia.slice(0, 2);
-    visiveis.forEach(ev => {
-      const c = agendaCorCategoria(ev.categoria);
-      html += `<div class="ag-evt" style="background:${c.bg};color:${c.text};border-left:2px solid ${c.border}" title="${ev.titulo}${ev.descricao ? ' — '+ev.descricao : ''}">${ev.titulo}</div>`;
-    });
-    if(evsDia.length > 2){
-      html += `<div style="font-size:9px;color:var(--mu);padding-left:2px">+${evsDia.length-2} mais</div>`;
-    }
-    cell.innerHTML = html;
-    grid.appendChild(cell);
-  }
-
-  // Fill final para completar a grade
-  const totalCells = primeiro + totalDias;
-  const restantes = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  for(let d = 1; d <= restantes; d++){
-    const cell = document.createElement('div');
-    cell.className = 'ag-day ag-out';
-    cell.innerHTML = `<div class="ag-daynum">${d}</div>`;
-    grid.appendChild(cell);
-  }
-
-  wrapper.appendChild(grid);
-  return wrapper;
-}
-
-function renderAgendaLista(){
-  const el = document.getElementById('agendaLista');
-  if(!el) return;
-
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-  // Eventos a partir de hoje nos próximos 90 dias
-  const limite = new Date(hoje); limite.setDate(limite.getDate() + 90);
-  const proximos = agendaEventos.filter(e => {
-    const d = new Date(e.dt); d.setHours(0,0,0,0);
-    return d >= hoje && d <= limite;
-  });
-
-  if(!proximos.length){
-    el.innerHTML = '<div style="color:var(--mu);font-size:13px">Nenhum evento nos próximos 90 dias.</div>';
-    return;
-  }
-
-  const nomesMes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  el.innerHTML = proximos.map(ev => {
-    const c   = agendaCorCategoria(ev.categoria);
-    const d   = ev.dt;
-    const dhj = new Date(d); dhj.setHours(0,0,0,0);
-    const diff = Math.round((dhj - hoje) / 86400000);
-    const tag  = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã' : `em ${diff} dias`;
-    return `
-    <div class="ag-lista-item">
-      <div class="ag-lista-data">
-        <div class="ag-lista-dia">${d.getDate()}</div>
-        <div class="ag-lista-mes">${nomesMes[d.getMonth()]} ${d.getFullYear()}</div>
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-          <span class="ag-lista-badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${ev.categoria}</span>
-          <span style="font-size:10px;color:var(--mu)">${tag}</span>
-        </div>
-        <div style="font-size:14px;font-weight:700;color:var(--tx)">${ev.titulo}</div>
-        ${ev.descricao ? `<div style="font-size:12px;color:var(--mu);margin-top:3px">${ev.descricao}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ─── PRECIFICAÇÃO DE CAMPANHA — CALCULADORA ───────────────
-
-function loadPrecificacao(){
-  // Popula select de empreendimentos a partir de campsMeta (já carregado)
-  var selEmp = document.getElementById('calcEmp');
-  if(selEmp && window.campsMeta && campsMeta.length){
-    var emps = [...new Set(campsMeta.map(function(c){return c.emp||'';}).filter(Boolean))].sort();
-    selEmp.innerHTML = '<option value="">Todos os empreendimentos</option>';
-    emps.forEach(function(e){ selEmp.innerHTML += '<option value="'+e+'">'+e+'</option>'; });
-  }
-  calcPrecificacao();
-}
-
-function calcPrecificacao(){
-  var empF = (document.getElementById('calcEmp')||{}).value||'';
-  var objF = (document.getElementById('calcObj')||{}).value||'';
-
-  // ── Calcular CPL automaticamente com base em campsMeta filtrado ──
-  var cplAuto = 0;
-  var cplBaseCamps = [];
-  if(window.campsMeta && campsMeta.length){
-    cplBaseCamps = campsMeta.filter(function(c){
-      if(empF && (c.emp||'') !== empF) return false;
-      if(objF && (c.objetivo||'') !== objF) return false;
-      return (c.resultados||0) > 0;
-    });
-    var invSum   = cplBaseCamps.reduce(function(s,c){return s+(c.valor||0);},0);
-    var leadSum  = cplBaseCamps.reduce(function(s,c){return s+(c.resultados||0);},0);
-    if(leadSum > 0) cplAuto = invSum / leadSum;
-  }
-
-  // Info sobre o CPL encontrado
-  var infoEl = document.getElementById('calcCplInfo');
-  if(infoEl){
-    if(cplAuto > 0){
-      infoEl.style.display='block';
-      infoEl.innerHTML = '✅ CPL calculado automaticamente: <strong>'+fBRL(cplAuto)+'</strong> '
-        +'com base em <strong>'+cplBaseCamps.length+'</strong> campanha(s) · '
-        +fBRL(cplBaseCamps.reduce(function(s,c){return s+(c.valor||0);},0))
-        +' investido · '
-        +fN(cplBaseCamps.reduce(function(s,c){return s+(c.resultados||0);},0))+' leads';
-    } else {
-      infoEl.style.display='block';
-      infoEl.innerHTML = '⚠️ Nenhuma campanha encontrada para os filtros selecionados. Preencha o CPL manualmente abaixo.';
-    }
-  }
-
-  // Preenche o campo CPL se ainda não foi editado manualmente
-  var cplInput = document.getElementById('calcCpl');
-  if(cplInput){
-    // Só preenche automaticamente se o campo ainda está vazio ou se mudamos o filtro
-    if(cplAuto > 0 && !cplInput.dataset.manual){
-      cplInput.value = cplAuto.toFixed(2);
-    } else if(cplAuto > 0 && cplInput.dataset.cplAuto !== cplAuto.toFixed(2)){
-      // Filtro mudou → atualiza mesmo que tenha sido manual
-      cplInput.value = cplAuto.toFixed(2);
-      delete cplInput.dataset.manual;
-    }
-    cplInput.dataset.cplAuto = cplAuto.toFixed(2);
-  }
-
-  // ── Calcular resultado ──
-  var cpl    = parseFloat((document.getElementById('calcCpl')||{}).value)||0;
-  var lpv    = parseInt((document.getElementById('calcLeadsPorVenda')||{}).value)||30;
-  var vendas = parseInt((document.getElementById('calcVendas')||{}).value)||0;
-
-  var leadsNec = vendas * lpv;
-  var invNec   = leadsNec * cpl;
-  var diario   = invNec / 30;
-
-  // Atualizar resultado
-  var elLeads  = document.getElementById('calcResLeads');
-  var elInvest = document.getElementById('calcResInvest');
-  var elDiario = document.getElementById('calcResDiario');
-  var elForm   = document.getElementById('calcFormula');
-
-  if(elLeads)  elLeads.textContent  = vendas > 0 ? fN(leadsNec) : '—';
-  if(elInvest) elInvest.textContent = (vendas > 0 && cpl > 0) ? fBRL(invNec) : (cpl === 0 ? 'Informe o CPL' : '—');
-  if(elDiario) elDiario.textContent = (vendas > 0 && cpl > 0) ? fBRL(diario) : '—';
-
-  if(elForm){
-    if(vendas > 0 && cpl > 0){
-      elForm.style.display = 'block';
-      elForm.innerHTML = '<strong>'+fN(vendas)+'</strong> vendas × '
-        +'<strong>'+fN(lpv)+'</strong> leads/venda = '
-        +'<strong>'+fN(leadsNec)+'</strong> leads × '
-        +'<strong>'+fBRL(cpl)+'</strong> CPL = '
-        +'<strong style="color:var(--amber)">'+fBRL(invNec)+'</strong> de investimento necessário';
-    } else {
-      elForm.style.display = 'none';
-    }
-  }
-}
-
-function loadOrganico(pg){
-  if(pg==='instagram' && !rawPostagens.length) loadInstagram();
-  if(pg==='facebook'  && !rawFacebook.length)  loadFacebook();
-  if(pg==='tiktok'    && !rawTiktok.length)    loadTiktok();
-  if(pg==='youtube'   && !rawYoutube.length)   loadYoutube();
-}
-
-// ─── YOUTUBE ORGÂNICO ─────────────────────────────────────
-var YT_SHEET = '1hXscY8H3Ci7lm20GO3dvFs-Hw238eQFW73QIPeZ5tLY';
-var rawYoutube = [];
-
-var YT_MESES_EN = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
-                   jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-var YT_MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-
-// Converte "May 8, 2023" ou "Apr 22, 2026" → "YYYY-MM-DD"
-function ytParseDate(s){
-  if(!s) return '';
-  s = String(s).trim();
-  // "Month DD, YYYY"
-  var m = s.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
-  if(m){
-    var mm = YT_MESES_EN[m[1].toLowerCase().slice(0,3)] || '01';
-    return m[3]+'-'+mm+'-'+m[2].padStart(2,'0');
-  }
-  // YYYY-MM-DD
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  return '';
-}
-
-function ytN(v){ return parseFloat(String(v).replace(/[^0-9.-]/g,''))||0; }
-
-async function loadYoutube(){
-  var loading = document.getElementById('ytLoading');
-  var body    = document.getElementById('ytBody');
-  var errEl   = document.getElementById('ytError');
-  var st      = document.getElementById('ytStatus');
-  if(loading) loading.style.display='block';
-  if(body)    body.style.display='none';
-  if(errEl)   errEl.style.display='none';
-  if(st)      st.textContent='Carregando…';
-  try {
-    var rows = await fetchCSV(YT_SHEET, 0);
-    // Remove a linha de Total (primeira linha após header)
-    rawYoutube = rows.filter(function(r){
-      return (r['Conteúdo']||'').trim().toLowerCase() !== 'total' &&
-             (r['Conteúdo']||'').trim() !== '';
-    });
-    if(loading) loading.style.display='none';
-    if(st) st.textContent = rawYoutube.length+' vídeo'+(rawYoutube.length!==1?'s':'');
-    applyYtFilter();
   } catch(e){
     if(loading) loading.style.display='none';
     if(errEl){ errEl.style.display='block'; errEl.textContent='❌ '+e.message; }
@@ -7550,219 +5836,229 @@ async function loadYoutube(){
   }
 }
 
-function applyYtFilter(){
-  var de  = (document.getElementById('ytDateDe')||{}).value||'';
-  var ate = (document.getElementById('ytDateAte')||{}).value||'';
-  var vids = rawYoutube.filter(function(r){
-    var d = ytParseDate(r['Horário de publicação do vídeo']);
-    if(!d && (de||ate)) return false;
-    return orgInRange(d, de, ate);
-  });
-  document.getElementById('ytBody').style.display='block';
-  renderYoutube(vids, de, ate);
+function applyTkFilter(){
+  var de=(document.getElementById('tkDateDe')||{}).value||'';
+  var ate=(document.getElementById('tkDateAte')||{}).value||'';
+  var vids=rawTiktok.filter(function(r){ return orgInRange(ttkParseDate(r['Dia da publicação']),de,ate); });
+  var body=document.getElementById('tkBody');
+  if(body) body.style.display='block';
+  renderTiktok(vids);
 }
-
-function ytClearDates(){
-  var d1=document.getElementById('ytDateDe'), d2=document.getElementById('ytDateAte');
+function tkClearDates(){
+  var d1=document.getElementById('tkDateDe'),d2=document.getElementById('tkDateAte');
   if(d1) d1.value=''; if(d2) d2.value='';
-  applyYtFilter();
+  applyTkFilter();
+}
+function toggleTkCompare(){
+  var p=document.getElementById('tkComparePanel');
+  if(p) p.style.display=p.style.display==='none'?'block':'none';
+}
+function tkFillCurrentVsPrev(){
+  var now=new Date();
+  var y=now.getFullYear(),m=now.getMonth();
+  var a1=y+'-'+String(m+1).padStart(2,'0')+'-01';
+  var a2=now.toISOString().slice(0,10);
+  var pm=m===0?12:m,py=m===0?y-1:y;
+  var lastDay=new Date(y,m,0).getDate();
+  var b1=py+'-'+String(pm).padStart(2,'0')+'-01';
+  var b2=py+'-'+String(pm).padStart(2,'0')+'-'+String(lastDay).padStart(2,'0');
+  var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v;};
+  f('tkCmpA1',a1);f('tkCmpA2',a2);f('tkCmpB1',b1);f('tkCmpB2',b2);
+}
+function tkFillFilterVsPrev(){
+  var de=(document.getElementById('tkDateDe')||{}).value||'';
+  var ate=(document.getElementById('tkDateAte')||{}).value||'';
+  if(!de||!ate){tkFillCurrentVsPrev();return;}
+  var d1=new Date(de),d2=new Date(ate),diff=d2-d1;
+  var b2=new Date(d1.getTime()-86400000),b1=new Date(b2.getTime()-diff);
+  var fmt=function(d){return d.toISOString().slice(0,10);};
+  var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v;};
+  f('tkCmpA1',de);f('tkCmpA2',ate);f('tkCmpB1',fmt(b1));f('tkCmpB2',fmt(b2));
+}
+function tkSetMesAnterior(){
+  var p=document.getElementById('tkComparePanel');
+  if(p) p.style.display='block';
+  tkFillCurrentVsPrev();
+  renderTkCompare();
 }
 
-function renderYoutube(vids, de, ate){
-  var isLight = document.body.classList.contains('light');
-  var clrMu   = isLight?'#6b7280':'#6b7a9e';
-  var clrTx   = isLight?'#1a2332':'#e2e8f0';
-  var clrGrid = isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
+function renderTiktok(vids){
+  var isLight=document.body.classList.contains('light');
+  var clrMu=isLight?'#6b7280':'#6b7a9e',clrTx=isLight?'#1a2332':'#e2e8f0',clrGrid=isLight?'rgba(0,0,0,.07)':'rgba(255,255,255,.05)';
 
-  // ── Totais período atual ──
-  function calc(arr){
-    var views=0,watch=0,subs=0,imp=0,ctrSum=0,ctrCount=0;
-    arr.forEach(function(r){
-      views   += ytN(r['Visualizações']);
-      watch   += ytN(r['Tempo de exibição (horas)']);
-      subs    += ytN(r['Inscritos']);
-      imp     += ytN(r['Impressões']);
-      var c    = ytN(r['Taxa de cliques de impressões (%)']);
-      if(c>0){ ctrSum+=c; ctrCount++; }
-    });
-    return {
-      posts : arr.length,
-      views : views,
-      watch : +watch.toFixed(1),
-      subs  : subs,
-      imp   : imp,
-      ctr   : ctrCount>0 ? +(ctrSum/ctrCount).toFixed(2) : 0
-    };
-  }
-
-  var kA = calc(vids);
-
-  // ── Período de comparação ──
-  var prevLabel = '';
-  var vidsPrev  = [];
-  if(de && ate){
-    var d1=new Date(de), d2=new Date(ate);
-    var diff = d2.getTime()-d1.getTime();
-    var pb2  = new Date(d1.getTime()-86400000);
-    var pb1  = new Date(pb2.getTime()-diff);
-    var fmt  = function(d){ return d.toISOString().slice(0,10); };
-    var pb1s = fmt(pb1), pb2s = fmt(pb2);
-    vidsPrev = rawYoutube.filter(function(r){
-      var d=ytParseDate(r['Horário de publicação do vídeo']);
-      return d && orgInRange(d,pb1s,pb2s);
-    });
-    prevLabel = 'vs. '+pb1s.split('-').reverse().join('/')+' → '+pb2s.split('-').reverse().join('/');
-  } else {
-    var hoje=new Date(), mA=hoje.getMonth(), yA=hoje.getFullYear();
-    var mB=mA===0?11:mA-1, yB=mA===0?yA-1:yA;
-    vidsPrev = rawYoutube.filter(function(r){
-      var d=ytParseDate(r['Horário de publicação do vídeo']);
-      if(!d) return false;
-      var dt=new Date(d);
-      return dt.getMonth()===mB && dt.getFullYear()===yB;
-    });
-    prevLabel = 'vs. '+YT_MESES_PT[mB]+'/'+yB;
-  }
-  var kB = calc(vidsPrev);
-  sid('ytCmpLabel', prevLabel);
-
-  // ── KPI Cards ──
-  function kpiCard(icon, label, valA, valB, color, fmtFn){
-    fmtFn = fmtFn || fN;
-    var diff = valA-valB;
-    var pct  = valB>0 ? (diff/valB*100) : 0;
-    var up   = diff>=0, cor=up?'#2ecc8e':'#f06565', seta=up?'▲':'▼';
-    return '<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px 14px">'
-      +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:8px">'+icon+' '+label+'</div>'
-      +'<div style="font-size:22px;font-weight:900;color:'+color+';line-height:1">'+fmtFn(valA)+'</div>'
-      +(valB>0
-        ?'<div style="margin-top:8px;font-size:11px;font-weight:700;color:'+cor+'">'+seta+' '+Math.abs(pct).toFixed(1)+'%</div>'
-         +'<div style="font-size:10px;color:var(--mu)">'+fmtFn(valB)+' '+prevLabel+'</div>'
-        :'<div style="margin-top:8px;font-size:10px;color:var(--mu)">'+prevLabel+'</div>')
-      +'</div>';
-  }
-  var grid=document.getElementById('ytKpiGrid');
-  if(grid){
-    grid.innerHTML=
-      kpiCard('🎬','Vídeos',kA.posts,kB.posts,'#e879a0')
-      +kpiCard('👁️','Visualizações',kA.views,kB.views,'#9b7ff4')
-      +kpiCard('⏱️','Tempo Exib. (h)',kA.watch,kB.watch,'#4f8ef7',function(v){return v.toLocaleString('pt-BR');})
-      +kpiCard('🔔','Inscritos',kA.subs,kB.subs,'#2ecc8e')
-      +kpiCard('📢','Impressões',kA.imp,kB.imp,'#f5a623')
-      +kpiCard('🎯','CTR Médio',kA.ctr,kB.ctr,'#26c6da',function(v){return v.toFixed(2)+'%';});
-  }
-  document.getElementById('ytVideoCount').textContent = vids.length+' vídeo'+(vids.length!==1?'s':'');
-
-  // ── Agrupa por mês ──
-  var byMes = {};
+  var totViews=0,totLikes=0,totComent=0,totAcoes=0;
   vids.forEach(function(r){
-    var d = ytParseDate(r['Horário de publicação do vídeo']);
-    if(!d) return;
-    var dt  = new Date(d);
-    var key = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
-    if(!byMes[key]) byMes[key]={posts:0,views:0,watch:0,subs:0,imp:0,ctrSum:0,ctrN:0};
-    var bm = byMes[key];
-    bm.posts++;
-    bm.views += ytN(r['Visualizações']);
-    bm.watch += ytN(r['Tempo de exibição (horas)']);
-    bm.subs  += ytN(r['Inscritos']);
-    bm.imp   += ytN(r['Impressões']);
-    var c = ytN(r['Taxa de cliques de impressões (%)']);
-    if(c>0){ bm.ctrSum+=c; bm.ctrN++; }
+    totViews +=orgN(r['Total views']);
+    totLikes +=orgN(r['Total likes']);
+    totComent+=orgN(r['Total de comentários']);
+    totAcoes +=orgN(r['Total ações']);
   });
-  var mesKeys = Object.keys(byMes).sort();
-  var mesLabels = mesKeys.map(function(k){
-    var p=k.split('-');
-    return YT_MESES_PT[parseInt(p[1])-1]+'/'+p[0].slice(2);
+  var totEng=totLikes+totComent+totAcoes;
+  var txEng=totViews>0?(totEng/totViews*100):0;
+  var sortV=vids.slice().sort(function(a,b){return orgN(b['Total views'])-orgN(a['Total views']);});
+  var topV=sortV[0]||{};
+  var sortE=vids.slice().sort(function(a,b){
+    var eA=orgN(a['Total likes'])+orgN(a['Total de comentários'])+orgN(a['Total ações']);
+    var eB=orgN(b['Total likes'])+orgN(b['Total de comentários'])+orgN(b['Total ações']);
+    return eB-eA;
   });
+  var topE=sortE[0]||{};
+  var topEng=orgN(topE['Total likes'])+orgN(topE['Total de comentários'])+orgN(topE['Total ações']);
 
-  // ── Chart: Visualizações por mês ──
-  mkChart('ytChartViews','bar', mesLabels,
-    [{label:'Visualizações',data:mesKeys.map(function(k){return byMes[k].views;}),
-      backgroundColor:'rgba(155,127,244,.8)',borderRadius:5}],
-    {responsive:true,maintainAspectRatio:false,
-     plugins:{legend:{display:false},datalabels:{display:false}},
+  sid('tk_videos',  String(vids.length));  sid('tk_videosS','No período');
+  sid('tk_views',   fN(totViews));
+  sid('tk_likes',   fN(totLikes));
+  sid('tk_coments', fN(totComent));
+  sid('tk_acoes',   fN(totAcoes));
+  sid('tk_avgViews',vids.length?fN(Math.round(totViews/vids.length)):'—');
+  sid('tk_avgLikes',vids.length?fN(Math.round(totLikes/vids.length)):'—');
+  sid('tk_txeng',   txEng.toFixed(2)+'%');
+  sid('tk_txengS',  txEng>=5?'✅ Excelente (≥5%)':txEng>=2?'✅ Bom (≥2%)':'⚠️ Otimizar');
+  sid('tk_topViews',fN(orgN(topV['Total views'])));
+  sid('tk_topViewsS',(topV['Título do Vídeo']||'').slice(0,30)+'…');
+  sid('tk_topEng',  fN(topEng));
+  sid('tk_topEngS', (topE['Título do Vídeo']||'').slice(0,30)+'…');
+
+  var vc=document.getElementById('tkVideoCount'); if(vc) vc.textContent=vids.length+' vídeos';
+
+  // Chart: Tendência de views por data de publicação (line)
+  var byDate={};
+  vids.forEach(function(r){
+    var d=ttkParseDate(r['Dia da publicação'])||'';
+    if(d) byDate[d]=(byDate[d]||0)+orgN(r['Total views']);
+  });
+  var dkeys=Object.keys(byDate).sort();
+  if(dkeys.length>1){
+    mkChart('tkChartTrend','line',dkeys,
+      [{label:'Views',data:dkeys.map(function(d){return byDate[d];}),borderColor:'#e879a0',backgroundColor:'rgba(232,121,160,.15)',fill:true,tension:.35,pointRadius:5,pointBackgroundColor:'#e879a0'}],
+      {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+       scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{color:clrGrid}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+  } else {
+    mkChart('tkChartTrend','bar',dkeys.length?dkeys:['Sem data'],
+      [{label:'Views',data:dkeys.length?dkeys.map(function(d){return byDate[d];}):[totViews],backgroundColor:'rgba(232,121,160,.75)',borderRadius:6}],
+      {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+       scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{display:false}},y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
+  }
+
+  // Chart: Distribuição de engajamento (donut)
+  mkChart('tkChartDist','doughnut',
+    ['Likes','Comentários','Ações'],
+    [{data:[totLikes,totComent,totAcoes],backgroundColor:['#e879a0','#9b7ff4','#f5a623'],borderWidth:2,borderColor:'var(--bg2)'}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:clrTx,font:{size:11},boxWidth:10}}}});
+
+  // Chart: Top 10 por views (horizontal bar)
+  var top10V=sortV.slice(0,10);
+  mkChart('tkChartTopViews','bar',
+    top10V.map(function(r){return (r['Título do Vídeo']||'—').slice(0,28);}),
+    [{label:'Views',data:top10V.map(function(r){return orgN(r['Total views']);}),backgroundColor:'rgba(155,127,244,.8)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Chart: Top 10 por likes (horizontal bar)
+  var top10L=vids.slice().sort(function(a,b){return orgN(b['Total likes'])-orgN(a['Total likes']);}).slice(0,10);
+  mkChart('tkChartTopLikes','bar',
+    top10L.map(function(r){return (r['Título do Vídeo']||'—').slice(0,28);}),
+    [{label:'Likes',data:top10L.map(function(r){return orgN(r['Total likes']);}),backgroundColor:'rgba(232,121,160,.8)',borderRadius:4,borderSkipped:false}],
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}},y:{ticks:{color:clrTx,font:{size:9}},grid:{display:false}}}});
+
+  // Chart: Taxa de engajamento por vídeo (bar vertical, top 10)
+  var top10Eng=sortE.slice(0,10);
+  mkChart('tkChartEngRate','bar',
+    top10Eng.map(function(r){return (r['Título do Vídeo']||'—').slice(0,22);}),
+    [{label:'Tx. Eng. %',data:top10Eng.map(function(r){
+      var v=orgN(r['Total views']);
+      var e=orgN(r['Total likes'])+orgN(r['Total de comentários'])+orgN(r['Total ações']);
+      return v>0?+(e/v*100).toFixed(2):0;
+    }),backgroundColor:'rgba(79,142,247,.8)',borderRadius:6}],
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+     tooltip:{callbacks:{label:function(ctx){return ctx.raw+'%';}}}},
      scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
-             y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}}}});
+             y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v+'%';}},grid:{color:clrGrid}}}});
 
-  // ── Chart: Inscritos por mês ──
-  mkChart('ytChartSubs','bar', mesLabels,
-    [{label:'Inscritos',data:mesKeys.map(function(k){return byMes[k].subs;}),
-      backgroundColor:'rgba(46,204,142,.8)',borderRadius:5}],
-    {responsive:true,maintainAspectRatio:false,
-     plugins:{legend:{display:false},datalabels:{display:false}},
-     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
-             y:{ticks:{color:clrMu,font:{size:10}},grid:{color:clrGrid}}}});
-
-  // ── Chart: Tempo de exibição por mês ──
-  mkChart('ytChartWatch','bar', mesLabels,
-    [{label:'Horas',data:mesKeys.map(function(k){return +byMes[k].watch.toFixed(1);}),
-      backgroundColor:'rgba(79,142,247,.8)',borderRadius:5}],
-    {responsive:true,maintainAspectRatio:false,
-     plugins:{legend:{display:false},datalabels:{display:false}},
-     scales:{x:{ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}},
-             y:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v+'h';}},grid:{color:clrGrid}}}});
-
-  // ── Chart: Impressões + CTR por mês (eixo duplo) ──
-  mkChart('ytChartImpressions','bar', mesLabels,
-    [
-      {label:'Impressões',data:mesKeys.map(function(k){return byMes[k].imp;}),
-       backgroundColor:'rgba(245,166,35,.75)',borderRadius:5,yAxisID:'yI'},
-      {label:'CTR (%)',data:mesKeys.map(function(k){return byMes[k].ctrN>0?+(byMes[k].ctrSum/byMes[k].ctrN).toFixed(2):0;}),
-       type:'line',borderColor:'#26c6da',backgroundColor:'rgba(38,198,218,.15)',fill:true,
-       tension:.3,pointRadius:4,pointBackgroundColor:'#26c6da',yAxisID:'yCtr'}
-    ],
-    {responsive:true,maintainAspectRatio:false,
-     plugins:{legend:{display:true,position:'top',labels:{color:clrMu,font:{size:10},boxWidth:10}},datalabels:{display:false}},
-     scales:{
-       yI: {position:'left',ticks:{color:'#f5a623',font:{size:9},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}},
-       yCtr:{position:'right',ticks:{color:'#26c6da',font:{size:9},callback:function(v){return v+'%';}},grid:{display:false}},
-       x:  {ticks:{color:clrMu,font:{size:10},maxRotation:35},grid:{display:false}}
-     }});
-
-  // ── Chart: Top 10 por visualizações ──
-  var sortV = vids.slice().sort(function(a,b){return ytN(b['Visualizações'])-ytN(a['Visualizações']);});
-  var top10  = sortV.slice(0,10);
-  mkChart('ytChartTopViews','bar',
-    top10.map(function(r){return (r['Título do vídeo']||'—').slice(0,35);}),
-    [{label:'Visualizações',data:top10.map(function(r){return ytN(r['Visualizações']);}),
-      backgroundColor:'rgba(155,127,244,.85)',borderRadius:5,borderSkipped:false}],
-    {responsive:true,maintainAspectRatio:false,indexAxis:'y',
-     plugins:{legend:{display:false},datalabels:{display:false},
-       tooltip:{callbacks:{label:function(ctx){return ' '+fN(ctx.raw)+' views';}}}},
-     scales:{
-       x:{ticks:{color:clrMu,font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}},grid:{color:clrGrid}},
-       y:{ticks:{color:clrTx,font:{size:10}},grid:{display:false}}
-     }});
-
-  // ── Tabela ──
-  var vb = document.getElementById('ytVideoBody');
+  // Tabela
+  var vb=document.getElementById('tkVideoBody');
   if(vb){
-    vb.innerHTML = sortV.map(function(r){
-      var vid   = (r['Conteúdo']||'').trim();
-      var link  = vid ? 'https://www.youtube.com/watch?v='+vid : '';
-      var titulo= r['Título do vídeo']||'—';
-      var data  = ytParseDate(r['Horário de publicação do vídeo']);
-      if(data){ var dp=data.split('-'); data=dp[2]+'/'+dp[1]+'/'+dp[0]; }
-      var v  = ytN(r['Visualizações']);
-      var w  = ytN(r['Tempo de exibição (horas)']).toFixed(1);
-      var s  = ytN(r['Inscritos']);
-      var im = ytN(r['Impressões']);
-      var ct = ytN(r['Taxa de cliques de impressões (%)']);
-      var ctCor = ct>=5?'var(--green)':ct>=2?'var(--blue)':'var(--amber)';
+    vb.innerHTML=vids.slice().sort(function(a,b){return orgN(b['Total views'])-orgN(a['Total views']);}).map(function(r){
+      var v=orgN(r['Total views']),l=orgN(r['Total likes']),c=orgN(r['Total de comentários']),a=orgN(r['Total ações']);
+      var e=l+c+a, tx=v>0?(e/v*100).toFixed(2)+'%':'—';
+      var link=r['Video link']||'';
+      var titulo=(r['Título do Vídeo']||'—');
       return '<tr style="border-bottom:1px solid var(--bdr)">'
-        +'<td style="padding:7px 12px;color:var(--mu);font-size:11px;white-space:nowrap">'+data+'</td>'
-        +'<td style="padding:7px 12px;color:var(--tx);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+titulo+'">'+titulo+'</td>'
-        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:#9b7ff4">'+fN(v)+'</td>'
-        +'<td style="padding:7px 12px;text-align:right;color:#4f8ef7">'+w+'h</td>'
-        +'<td style="padding:7px 12px;text-align:right;color:#2ecc8e">'+fN(s)+'</td>'
-        +'<td style="padding:7px 12px;text-align:right;color:#f5a623">'+fN(im)+'</td>'
-        +'<td style="padding:7px 12px;text-align:right;font-weight:700;color:'+ctCor+'">'+ct.toFixed(2)+'%</td>'
-        +'<td style="padding:7px 12px;text-align:center">'
-        +(link?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:13px;text-decoration:none" title="Abrir no YouTube">▶</a>':'—')
-        +'</td></tr>';
+        +'<td style="padding:8px 10px;color:var(--mu);font-size:11px;white-space:nowrap">'+ttkParseDate(r['Dia da publicação'])+'</td>'
+        +'<td style="padding:8px 10px;color:var(--tx);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+titulo+'">'+titulo.slice(0,50)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--purple)">'+fN(v)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--pink)">'+fN(l)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--mu)">'+fN(c)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--amber)">'+fN(a)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;font-weight:600;color:var(--green)">'+fN(e)+'</td>'
+        +'<td style="padding:8px 10px;text-align:right;color:var(--blue)">'+tx+'</td>'
+        +'<td style="padding:8px 10px;text-align:center">'+(link?'<a href="'+link+'" target="_blank" style="color:var(--blue);font-size:11px">↗</a>':'—')+'</td>'
+        +'</tr>';
     }).join('');
   }
+}
+
+// ─── COMPARATIVO TIKTOK ──────────────────────────────────
+function renderTkCompare(){
+  var a1=(document.getElementById('tkCmpA1')||{}).value||'';
+  var a2=(document.getElementById('tkCmpA2')||{}).value||'';
+  var b1=(document.getElementById('tkCmpB1')||{}).value||'';
+  var b2=(document.getElementById('tkCmpB2')||{}).value||'';
+  if(!a1||!a2||!b1||!b2){
+    var el=document.getElementById('tkCompareResult');
+    if(el) el.innerHTML='<div style="color:var(--mu);font-size:12px;padding:8px">⚠️ Preencha os dois períodos.</div>';
+    return;
+  }
+  function filt(d0,d1){ return rawTiktok.filter(function(r){ return orgInRange(ttkParseDate(r['Dia da publicação']),d0,d1); }); }
+  function calc(arr){
+    var views=0,likes=0,coment=0,acoes=0;
+    arr.forEach(function(r){
+      views +=orgN(r['Total views']); likes +=orgN(r['Total likes']);
+      coment+=orgN(r['Total de comentários']); acoes+=orgN(r['Total ações']);
+    });
+    var eng=likes+coment+acoes;
+    return {vids:arr.length,views:views,likes:likes,coment:coment,acoes:acoes,eng:eng,
+            txEng:views>0?(eng/views*100):0,avgViews:arr.length?Math.round(views/arr.length):0};
+  }
+  var kA=calc(filt(a1,a2)), kB=calc(filt(b1,b2));
+  function row(label,a,b,neg,fmt){
+    fmt=fmt||function(v){return fN(v);};
+    var diff=b-a,pct=a>0?(diff/a*100):0,up=diff>=0;
+    var col=up?(neg?'var(--red)':'var(--green)'):(neg?'var(--green)':'var(--red)');
+    return '<tr style="border-bottom:1px solid var(--bdr)">'
+      +'<td style="padding:7px 10px;color:var(--tx);font-size:12px">'+label+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;color:var(--pink);font-size:12px">'+fmt(a)+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;color:var(--purple);font-size:12px">'+fmt(b)+'</td>'
+      +'<td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;color:'+col+'">'+(up?'▲':'▼')+' '+Math.abs(pct).toFixed(1)+'%</td>'
+      +'<td style="padding:7px 10px;text-align:right;font-size:11px;color:var(--mu)">'+(diff>=0?'+':'')+fN(Math.round(diff))+'</td>'
+      +'</tr>';
+  }
+  var pct1=function(v){return v.toFixed(2)+'%';};
+  var thead='<thead><tr style="border-bottom:2px solid var(--bdr)">'
+    +'<th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:11px">Métrica</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--pink);font-size:11px">A: '+a1+' → '+a2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--purple);font-size:11px">B: '+b1+' → '+b2+'</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Variação</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:var(--mu);font-size:11px">Diferença</th>'
+    +'</tr></thead>';
+  var rows=row('🎵 Vídeos',kA.vids,kB.vids,false)
+    +row('👁️ Views',kA.views,kB.views,false)
+    +row('📊 Média Views/Vídeo',kA.avgViews,kB.avgViews,false)
+    +row('❤️ Likes',kA.likes,kB.likes,false)
+    +row('💬 Comentários',kA.coment,kB.coment,false)
+    +row('⚡ Ações',kA.acoes,kB.acoes,false)
+    +row('🔥 Engajamento Total',kA.eng,kB.eng,false)
+    +row('📈 Taxa de Eng. (%)',kA.txEng,kB.txEng,false,pct1);
+  var el=document.getElementById('tkCompareResult');
+  if(el) el.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+'<tbody>'+rows+'</tbody></table>';
+}
+
+
+function loadOrganico(pg){
+  if(pg==='instagram' && !rawPostagens.length) loadInstagram();
+  if(pg==='facebook'  && !rawFacebook.length)  loadFacebook();
+  if(pg==='tiktok'    && !rawTiktok.length)    loadTiktok();
 }
 
 // Menu mobile
@@ -7787,338 +6083,47 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 })();
 
 // ── MODO TV ──────────────────────────────────────────────────────────────
-
-function buildTVAgenda(){
-  const scr = document.getElementById('tvScreen');
-  if(!scr) return;
-  scr.style.display = 'flex';
-
-  const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const hoje = new Date();
-
-  // Header padrão TV
-  const headerHtml = `
-  <div class="tvs-hd" style="flex-shrink:0">
-    <div class="tvs-brand">
-      <div class="tvs-brand-name">ECOVITA</div>
-      <div class="tvs-brand-sub">Agenda · ${nomesMes[hoje.getMonth()]} ${hoje.getFullYear()}</div>
-    </div>
-    <div class="tvs-sep"></div>
-    <div class="tvs-right">
-      <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_AGENDA_SECS}s</span>
-      <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
-      <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
-    </div>
-  </div>`;
-
-  // Renderiza 4 calendários em 2x2 usando os dados já carregados
-  const calHtml = (() => {
-    let h = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;flex:1;min-height:0;overflow:hidden">';
-    for(let m = 0; m < 4; m++){
-      const rawMes = hoje.getMonth() + m;
-      const ano    = hoje.getFullYear() + Math.floor(rawMes / 12);
-      const mes    = rawMes % 12;
-      h += buildTVCalMes(ano, mes, hoje, nomesMes);
-    }
-    h += '</div>';
-    return h;
-  })();
-
-  scr.innerHTML = `
-  <div style="display:flex;flex-direction:column;height:100%;overflow:hidden">
-    ${headerHtml}
-    <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 16px;gap:10px;overflow:hidden">
-      <!-- Legenda -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0">
-        ${Object.keys(agendaCatMap).map(cat => {
-          const c = agendaCorCategoria(cat);
-          return `<div style="display:flex;align-items:center;gap:5px;background:${c.bg};border:1px solid ${c.border};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:${c.text}">${cat}</div>`;
-        }).join('')}
-      </div>
-      ${calHtml}
-    </div>
-  </div>`;
-}
-
-function buildTVCalMes(ano, mes, hoje, nomesMes){
-  const totalDias  = new Date(ano, mes+1, 0).getDate();
-  const primeiro   = new Date(ano, mes, 1).getDay();
-  const diasMesAnt = new Date(ano, mes, 0).getDate();
-
-  let rows = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px">';
-
-  // DOW
-  ['D','S','T','Q','Q','S','S'].forEach(d => {
-    rows += `<div style="font-size:9px;font-weight:700;color:var(--mu);text-align:center;padding:3px 0;border-bottom:1px solid var(--bdr)">${d}</div>`;
-  });
-
-  // Fill anterior
-  for(let d = primeiro - 1; d >= 0; d--){
-    rows += `<div style="min-height:40px;padding:2px 3px;opacity:.3"><div style="font-size:9px;color:var(--mu)">${diasMesAnt - d}</div></div>`;
-  }
-
-  // Dias
-  for(let dia = 1; dia <= totalDias; dia++){
-    const ehHoje = dia===hoje.getDate() && mes===hoje.getMonth() && ano===hoje.getFullYear();
-    const evs    = agendaEventos.filter(e => e.dt.getFullYear()===ano && e.dt.getMonth()===mes && e.dt.getDate()===dia);
-    const numStyle = ehHoje
-      ? 'background:var(--blue);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:800'
-      : 'color:var(--mu2)';
-    let evHtml = evs.slice(0,2).map(ev => {
-      const c = agendaCorCategoria(ev.categoria);
-      return `<div style="font-size:8px;font-weight:600;border-radius:3px;padding:1px 3px;background:${c.bg};color:${c.text};border-left:2px solid ${c.border};overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;line-height:1.3;margin-bottom:1px">${ev.titulo}</div>`;
-    }).join('');
-    if(evs.length > 2) evHtml += `<div style="font-size:8px;color:var(--mu)">+${evs.length-2}</div>`;
-    rows += `<div style="min-height:40px;padding:2px 3px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr)">
-      <div style="font-size:9px;${numStyle};margin-bottom:1px">${dia}</div>
-      ${evHtml}
-    </div>`;
-  }
-
-  // Fill posterior
-  const totalCells = primeiro + totalDias;
-  const resto = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  for(let d = 1; d <= resto; d++){
-    rows += `<div style="min-height:40px;padding:2px 3px;opacity:.3"><div style="font-size:9px;color:var(--mu)">${d}</div></div>`;
-  }
-  rows += '</div>';
-
-  return `
-  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
-    <div style="padding:8px 12px;font-size:12px;font-weight:700;color:var(--tx);text-transform:capitalize;border-bottom:1px solid var(--bdr);text-align:center;background:var(--bg3)">${nomesMes[mes]} ${ano}</div>
-    <div style="flex:1;overflow:hidden">${rows}</div>
-  </div>`;
-}
-const TV_DASH_SECS   = 45; // segundos no slide do Dashboard
-const TV_CAMP_SECS   = 40; // segundos por conta de campanhas
-const TV_AGENDA_SECS = 30; // segundos no slide da Agenda
+const TV_REFRESH = 60; // segundos para re-ler os dados
 let tvActive = false, tvTimer = null, tvSec = 0;
-let tvSlide = 'dashboard'; // 'dashboard' | 'campanhas' | 'agenda'
-let tvAccIdx = 0;          // índice da conta sendo exibida
 
 function toggleTVMode(){ tvActive ? exitTVMode() : enterTVMode(); }
 
 function enterTVMode(){
-  tvActive = true; tvSec = 0; tvSlide = 'dashboard'; tvAccIdx = 0;
+  tvActive = true; tvSec = 0;
   document.body.classList.add('tv-mode');
   const btn = document.getElementById('btnTV');
   if(btn) btn.textContent = '⏹ Sair TV';
   document.documentElement.requestFullscreen?.().catch(()=>{});
+  // Garante que o dashboard está ativo e renderizado
   goPage('dashboard');
-  // Pré-carrega agenda em background para ter dados quando o slide aparecer
-  if(!agendaEventos.length) loadAgenda();
   setTimeout(()=>{ buildTVScreen(); }, 100);
   tvTimer = setInterval(tvTick, 1000);
   document.addEventListener('keydown', tvKeyEsc);
-  document.addEventListener('fullscreenchange', tvOnFullscreenChange);
 }
 
 function exitTVMode(){
-  if(!tvActive) return;
   tvActive = false;
   clearInterval(tvTimer); tvTimer = null;
   document.body.classList.remove('tv-mode');
   const btn = document.getElementById('btnTV');
   if(btn) btn.textContent = '📺 TV';
+  document.fullscreenElement && document.exitFullscreen?.();
   document.removeEventListener('keydown', tvKeyEsc);
-  document.removeEventListener('fullscreenchange', tvOnFullscreenChange);
-  if(document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
 }
 
 function tvKeyEsc(e){ if(e.key==='Escape') exitTVMode(); }
 
-// Quando o ESC sai do fullscreen via browser, detecta e finaliza o modo TV
-function tvOnFullscreenChange(){
-  if(!document.fullscreenElement && tvActive) exitTVMode();
-}
-
-function tvSlideLimit(){
-  if(tvSlide==='dashboard') return TV_DASH_SECS;
-  if(tvSlide==='agenda')    return TV_AGENDA_SECS;
-  return TV_CAMP_SECS;
-}
-
-function tvNextSlide(){
-  const accounts = window.MetaAPI?.accounts || [];
-  if(tvSlide === 'dashboard'){
-    if(accounts.length){
-      tvSlide = 'campanhas'; tvAccIdx = 0;
-      tvLoadCampTV(accounts[0]);
-    } else {
-      tvSlide = 'agenda';
-      buildTVAgenda();
-    }
-  } else if(tvSlide === 'agenda'){
-    tvSlide = 'dashboard'; tvAccIdx = 0;
-    buildTVScreen();
-  } else {
-    tvAccIdx++;
-    if(tvAccIdx < accounts.length){
-      tvLoadCampTV(accounts[tvAccIdx]);
-    } else {
-      // Após campanhas → Agenda
-      tvSlide = 'agenda'; tvAccIdx = 0;
-      buildTVAgenda();
-    }
-  }
-}
-
-async function tvLoadCampTV(account){
-  const scr = document.getElementById('tvScreen');
-  if(!scr) return;
-  // Tela de loading
-  scr.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px">
-    <div style="font-size:48px">📊</div>
-    <div style="font-size:22px;font-weight:700;color:var(--tx)">Carregando campanhas…</div>
-    <div style="font-size:14px;color:var(--mu)">${account.name||account.id}</div>
-  </div>`;
-
-  try{
-    if(window.MetaAPI){
-      // Busca por accountId (mais robusto que id interno)
-      const accounts = window.MetaAPI.accounts;
-      const idx = accounts.findIndex(a=>a.accountId===account.accountId || a.id===account.id || a.name===account.name);
-      if(idx>=0 && idx !== window.MetaAPI.activeIdx) window.MetaAPI.switchAccount(idx);
-    }
-    const period = 'this_month';
-    const camps = await window.MetaAPI.getCampaigns({datePreset:period});
-    const insArr = await Promise.all(camps.map(c=>window.MetaAPI.getCampaignInsights(c.id,period)));
-    const dailyArr = await Promise.all(camps.map(c=>window.MetaAPI.getCampaignDailyInsights(c.id,period)));
-
-    const data = camps.map((c,i)=>({
-      ...c,
-      insights:insArr[i], dailyInsights:dailyArr[i]||[],
-      results: window.MetaAPI._extractResults(insArr[i]),
-      spend:   parseFloat(insArr[i]?.spend||0),
-      ctr:     parseFloat(insArr[i]?.ctr||0),
-      objetivo:detectarObjetivo(c.name),
-      emp:     detectarEmpCampanha(c.name),
-    }));
-
-    buildTVCampanhas(data, account.name||account.id);
-  } catch(e){
-    buildTVCampanhas([], account.name||account.id, e.message);
-  }
-}
-
 function tvTick(){
   if(!tvActive) return;
   tvSec++;
-  const lim = tvSlideLimit();
   const bar = document.getElementById('tvProgBar');
-  if(bar) bar.style.width = (tvSec/lim*100)+'%';
+  if(bar) bar.style.width = (tvSec/TV_REFRESH*100)+'%';
   const lbl = document.getElementById('tvTimerLbl');
-  if(lbl) lbl.textContent = 'Próximo em '+(lim-tvSec)+'s';
-  if(tvSec >= lim){ tvSec=0; tvNextSlide(); }
+  if(lbl) lbl.textContent = 'Atualiza em '+(TV_REFRESH-tvSec)+'s';
+  if(tvSec >= TV_REFRESH){ tvSec=0; buildTVScreen(); }
 }
 
 function tvG(id){ return (document.getElementById(id)||{}).textContent||'—'; }
-
-function buildTVCampanhas(data, contaNome, erro){
-  const scr = document.getElementById('tvScreen');
-  if(!scr) return;
-
-  const accounts  = window.MetaAPI?.accounts || [];
-  const totalAcc  = accounts.length;
-  const slideInfo = totalAcc > 1 ? `Conta ${tvAccIdx+1} de ${totalAcc}` : '';
-
-  // Header reutilizável
-  const headerHtml = `
-  <div class="tvs-hd">
-    <div class="tvs-brand">
-      <div class="tvs-brand-name">ECOVITA</div>
-      <div class="tvs-brand-sub">Meta Ads · ${contaNome}</div>
-    </div>
-    <div class="tvs-sep"></div>
-    <div class="tvs-period">📅 ${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</div>
-    <div class="tvs-right">
-      <span style="font-size:11px;color:var(--mu);margin-right:8px">${slideInfo}</span>
-      <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_CAMP_SECS}s</span>
-      <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
-      <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
-    </div>
-  </div>`;
-
-  if(erro || !data.length){
-    scr.innerHTML = headerHtml + `<div style="display:flex;align-items:center;justify-content:center;flex:1;font-size:18px;color:var(--mu)">${erro||'Sem campanhas no período'}</div>`;
-    return;
-  }
-
-  // KPIs
-  const ativas   = data.filter(c=>c.status==='ACTIVE').length;
-  const totalSpend= data.reduce((s,c)=>s+c.spend,0);
-  const resWpp   = data.filter(c=>c.objetivo==='WhatsApp').reduce((s,c)=>s+c.results,0);
-  const resCad   = data.filter(c=>c.objetivo==='Cadastro').reduce((s,c)=>s+c.results,0);
-  const resAlc   = data.filter(c=>c.objetivo==='Alcance').reduce((s,c)=>s+c.results,0);
-  const resTotal = resWpp + resCad;
-  const cpl      = resTotal > 0 ? totalSpend/resTotal : 0;
-  const ctrMed   = data.length ? data.reduce((s,c)=>s+c.ctr,0)/data.length : 0;
-
-  // Gráfico diário — monta canvas inline
-  const byDate={};
-  data.forEach(c=>{
-    if(c.objetivo==='Alcance') return;
-    (c.dailyInsights||[]).forEach(d=>{
-      const dt=d.date_start||''; if(!dt) return;
-      if(!byDate[dt]) byDate[dt]={r:0};
-      const actions=d.actions||[];
-      const keys=['lead','onsite_conversion.messaging_first_reply','offsite_conversion.fb_pixel_lead','omni_complete_registration','complete_registration'];
-      byDate[dt].r += keys.reduce((s,k)=>{ const a=actions.find(x=>x.action_type===k); return s+(a?parseInt(a.value||0):0); },0);
-    });
-  });
-  const dias = Object.keys(byDate).sort();
-  const chartHtml = dias.length
-    ? `<canvas id="tvCampChart" style="width:100%;height:100%;display:block"></canvas>`
-    : `<div style="color:var(--mu);font-size:13px;text-align:center;padding:20px">Sem dados diários disponíveis</div>`;
-
-  scr.innerHTML = headerHtml + `
-  <div style="display:flex;flex-direction:column;flex:1;min-height:0;padding:10px 16px;gap:10px;overflow:hidden">
-
-    <!-- 9 KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:8px;flex-shrink:0">
-      ${[
-        ['📋','Campanhas',fN(data.length),'var(--blue)','ativas: '+ativas],
-        ['✅','Ativas',fN(ativas),'var(--green)',data.length-ativas+' pausadas'],
-        ['💰','Gasto',fBRL(totalSpend,true),'var(--amber)','no mês'],
-        ['💬','WhatsApp',fN(resWpp),'#25D366','leads'],
-        ['📝','Cadastro',fN(resCad),'var(--blue)','leads'],
-        ['📣','Alcance',fN(resAlc),'var(--purple)','resultados'],
-        ['🎯','Total (W+C)',fN(resTotal),'var(--teal)','leads'],
-        ['👆','CTR Médio',ctrMed.toFixed(2)+'%','var(--orange)',''],
-        ['💡','CPL',cpl>0?fBRL(cpl):'—','var(--amber)',cpl>0?fBRL(totalSpend,true)+'÷'+fN(resTotal):''],
-      ].map(([ic,lb,vl,cor,sb])=>`
-        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${ic} ${lb}</div>
-          <div style="font-size:20px;font-weight:900;color:${cor};line-height:1">${vl}</div>
-          <div style="font-size:10px;color:var(--mu);margin-top:3px">${sb}</div>
-        </div>`).join('')}
-    </div>
-
-    <!-- Gráfico -->
-    <div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;flex-shrink:0">📈 Leads por Dia · Cadastro + WhatsApp</div>
-      <div style="flex:1;min-height:0;position:relative">${chartHtml}</div>
-    </div>
-
-  </div>`;
-
-  // Renderiza gráfico após inserir no DOM
-  if(dias.length){
-    setTimeout(()=>{
-      const isLight = document.body.classList.contains('light');
-      const clrMu = isLight?'#6b7280':'#6b7a9e';
-      mkChart('tvCampChart','bar',
-        dias.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; }),
-        [{label:'Resultados', data:dias.map(d=>byDate[d].r), backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false}],
-        {responsive:true, maintainAspectRatio:false,
-         plugins:{legend:{display:false},datalabels:{display:true,color:'#fff',font:{size:10,weight:'700'},anchor:'center',align:'center',formatter:v=>v||''}},
-         scales:{
-           y:{ticks:{color:clrMu,font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true},
-           x:{ticks:{color:clrMu,font:{size:10},maxRotation:45},grid:{display:false}}
-         }});
-    }, 50);
-  }
-}
 
 function buildTVScreen(){
   const scr = document.getElementById('tvScreen');
@@ -8183,7 +6188,7 @@ function buildTVScreen(){
     <div class="tvs-sep"></div>
     <div class="tvs-period">${period}</div>
     <div class="tvs-right">
-      <span class="tvs-timer" id="tvTimerLbl">Próximo em ${TV_DASH_SECS}s</span>
+      <span class="tvs-timer" id="tvTimerLbl">Atualiza em ${TV_REFRESH}s</span>
       <div class="tvs-prog"><div class="tvs-prog-bar" id="tvProgBar"></div></div>
       <button class="tvs-exit-btn" onclick="exitTVMode()">✕ Sair TV</button>
     </div>

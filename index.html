@@ -8492,11 +8492,13 @@ async function carregarDoGitHub(){
           if(!r.ok) continue;
           const txt = await r.text();
           const e = parseEstrategiaTXT(txt);
-          e._emp    = e._emp || g.emp;
-          e._ano    = g.ano;
-          e._mes    = g.mes;
-          e._imgs   = imgs;
-          e._source = 'github';
+          e._emp      = e._emp || g.emp;
+          e._ano      = g.ano;
+          e._mes      = g.mes;
+          e._imgs     = imgs;
+          e._source   = 'github';
+          // Nome do arquivo TXT sem extensão como título
+          e._filename = txtPath.split('/').pop().replace(/\.txt$/i, '');
           estrategias.push(e);
         }
       } else if(imgs.length){
@@ -8523,10 +8525,12 @@ async function carregarDoGitHub(){
 }
 
 function parseEstrategiaTXT(txt){
+  // Usa flag 'm' para ^ = início de linha, e [^\n\r]* para nunca cruzar linhas
   const get = (label) => {
-    const re = new RegExp('(?:' + label + ')\\s*:?\\s*(.+)', 'i');
+    const re = new RegExp('^[ \\t]*(?:' + label + ')[ \\t]*:[ \\t]*([^\\n\\r]*)', 'im');
     const m = txt.match(re);
-    return m ? m[1].trim() : '';
+    const val = m ? m[1].trim() : '';
+    return val;
   };
   return {
     criativo:     get('Criativo'),
@@ -8668,7 +8672,7 @@ function _renderCardEst(e){
 
   return `<div class="est-card">
     <div class="est-card-hd">
-      <div class="est-emp">${e.criativo || (e._mes ? '📅 '+e._mes : 'Estratégia')}</div>
+      <div class="est-emp">${e._filename || e.criativo || (e._mes ? '📅 '+e._mes : 'Estratégia')}</div>
       ${mesAno ? `<span style="font-size:11px;color:var(--mu)">${mesAno}</span>` : ''}
       ${tipoBadge}
       ${badge}

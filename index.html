@@ -2048,8 +2048,8 @@ body.tv-mode #tvExitBtn{display:block}
           <p style="margin:4px 0 0;color:var(--mu);font-size:13px">Visualize e gerencie os criativos e estratégias de cada campanha</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" onclick="selecionarPastaCreativos()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-            📁 Selecionar Pasta Criativos
+          <button id="estBtnGH" class="btn" onclick="carregarDoGitHub()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+            ☁️ Carregar do GitHub
           </button>
           <button class="btn" onclick="abrirModalNovaEstrategia()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
             ➕ Nova Estratégia
@@ -2107,7 +2107,7 @@ body.tv-mode #tvExitBtn{display:block}
 
     <!-- Modal: Nova Estratégia -->
     <div id="estModalOverlay" class="est-modal-overlay" style="display:none" onclick="fecharModalEstrategia(event)">
-      <div class="est-modal" onclick="event.stopPropagation()">
+      <div class="est-modal">
         <div class="est-modal-hd">
           <span style="font-size:17px;font-weight:800;color:var(--tx)">Nova Estratégia</span>
           <button onclick="fecharModalEstrategia()" style="background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
@@ -8432,93 +8432,105 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
    ESTRATÉGIAS DE CAMPANHAS
 ══════════════════════════════════════════════════════ */
 
-let _estrategias = []; // dados combinados (pasta + localStorage)
+const GH_OWNER  = 'mktecovita-dotcom';
+const GH_REPO   = 'ecovita';
+const GH_BRANCH = 'main';
+const GH_RAW    = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/`;
+const GH_API    = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/`;
+
+let _estrategias = [];      // dados combinados (github + localStorage)
+let _ghCarregado  = false;  // evita recarregar desnecessariamente
 
 function loadEstrategias(){
-  // Carrega do localStorage
+  const btnGH = document.getElementById('estBtnGH');
   const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
-  _estrategias = saved.map(e=>({...e, _source:'local'}));
+  const locais = saved.map(e=>({...e, _source:'local'}));
+  // Mantém os do GitHub se já carregados
+  const ghItems = _estrategias.filter(e=>e._source==='github');
+  _estrategias = [...ghItems, ...locais];
   _popularFiltrosEst();
   renderEstrategias();
 }
 
-async function selecionarPastaCreativos(){
-  if(!window.showDirectoryPicker){
-    alert('Seu navegador não suporta File System Access API. Use Chrome 86+.');
-    return;
-  }
+async function carregarDoGitHub(){
+  const btnGH = document.getElementById('estBtnGH');
+  if(btnGH){ btnGH.disabled=true; btnGH.textContent='⏳ Carregando…'; }
   try{
-    const dirHandle = await window.showDirectoryPicker({mode:'read'});
+    // Busca árvore completa do repositório
+    const resp = await fetch(`${GH_API}git/trees/${GH_BRANCH}?recursive=1`);
+    if(!resp.ok) throw new Error('Repositório não encontrado ou sem acesso.');
+    const data = await resp.json();
+    const tree = data.tree || [];
+
+    // Filtra apenas o que está dentro de Criativos/
+    const criativos = tree.filter(n=> n.path.startsWith('Criativos/') || n.path.startsWith('criativos/'));
+
+    // Mapeia: Criativos/{Ano}/{Empreendimento}/{Mes}/{arquivo}
+    const grupos = {};
+    criativos.forEach(node=>{
+      const parts = node.path.split('/');
+      if(parts.length < 4) return;          // precisa ter pelo menos 4 níveis
+      const [_root, ano, emp, mes, ...rest] = parts;
+      if(!rest.length) return;              // é um diretório, não arquivo
+      const key = `${ano}||${emp}||${mes}`;
+      if(!grupos[key]) grupos[key] = {ano, emp, mes, txts:[], imgs:[]};
+      const fname = rest.join('/');
+      if(fname.toLowerCase().endsWith('.txt')){
+        grupos[key].txts.push(node.path);
+      } else if(/\.(png|jpg|jpeg|webp|gif)$/i.test(fname)){
+        grupos[key].imgs.push(GH_RAW + node.path);
+      }
+    });
+
+    // Busca e parseia cada TXT
     const estrategias = [];
-    // Percorre: Criativos / Ano / Empreendimento / Mês
-    for await(const [anoName, anoHandle] of dirHandle.entries()){
-      if(anoHandle.kind!=='directory') continue;
-      for await(const [empName, empHandle] of anoHandle.entries()){
-        if(empHandle.kind!=='directory') continue;
-        for await(const [mesName, mesHandle] of empHandle.entries()){
-          if(mesHandle.kind!=='directory') continue;
-          const txt = [];
-          const imgs = [];
-          for await(const [fname, fHandle] of mesHandle.entries()){
-            if(fHandle.kind!=='file') continue;
-            if(fname.toLowerCase().endsWith('.txt')){
-              const file = await fHandle.getFile();
-              const content = await file.text();
-              txt.push(content);
-            } else if(/\.(png|jpg|jpeg|webp|gif)$/i.test(fname)){
-              const file = await fHandle.getFile();
-              const b64 = await _fileToBase64(file);
-              imgs.push(b64);
-            }
-          }
-          for(const t of txt){
-            const e = parseEstrategiaTXT(t);
-            e._emp = e._emp || empName;
-            e._ano = anoName;
-            e._mes = mesName;
-            e._imgs = imgs;
-            e._source = 'pasta';
-            estrategias.push(e);
-          }
-          // Se não havia TXT mas tem imagens, cria entrada básica
-          if(!txt.length && imgs.length){
-            estrategias.push({
-              _emp: empName, _ano: anoName, _mes: mesName,
-              _imgs: imgs, _source: 'pasta',
-              criativo:'', dtInicio:'', dtFim:'', localizacao:'',
-              publico:'', faixaEtaria:'', tipoCampanha:'', plataforma:''
-            });
-          }
+    for(const g of Object.values(grupos)){
+      const imgs = g.imgs;
+      if(g.txts.length){
+        for(const txtPath of g.txts){
+          const r = await fetch(GH_RAW + txtPath);
+          if(!r.ok) continue;
+          const txt = await r.text();
+          const e = parseEstrategiaTXT(txt);
+          e._emp    = e._emp || g.emp;
+          e._ano    = g.ano;
+          e._mes    = g.mes;
+          e._imgs   = imgs;
+          e._source = 'github';
+          estrategias.push(e);
         }
+      } else if(imgs.length){
+        // Sem TXT, mas tem imagens — cria entrada básica
+        estrategias.push({
+          _emp:g.emp, _ano:g.ano, _mes:g.mes, _imgs:imgs, _source:'github',
+          criativo:'', dtInicio:'', dtFim:'', localizacao:'',
+          publico:'', faixaEtaria:'', tipoCampanha:'', plataforma:''
+        });
       }
     }
+
+    _ghCarregado = true;
     const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
     _estrategias = [...estrategias, ...saved.map(e=>({...e, _source:'local'}))];
     _popularFiltrosEst();
     renderEstrategias();
+    if(btnGH){ btnGH.disabled=false; btnGH.textContent='🔄 Atualizar GitHub'; }
   } catch(err){
-    if(err.name!=='AbortError') console.error('Pasta Criativos:', err);
+    if(btnGH){ btnGH.disabled=false; btnGH.textContent='☁️ Carregar do GitHub'; }
+    alert('Erro ao carregar do GitHub: ' + err.message);
+    console.error(err);
   }
 }
 
-function _fileToBase64(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader();
-    r.onload=()=>res(r.result);
-    r.onerror=rej;
-    r.readAsDataURL(file);
-  });
-}
-
 function parseEstrategiaTXT(txt){
-  const get=(label)=>{
-    const re = new RegExp(label+'\\s*:?\\s*(.+)', 'i');
+  const get = (label) => {
+    const re = new RegExp('(?:' + label + ')\\s*:?\\s*(.+)', 'i');
     const m = txt.match(re);
     return m ? m[1].trim() : '';
   };
   return {
     criativo:     get('Criativo'),
-    dtInicio:     get('Data de início|Data de inicio'),
+    dtInicio:     get('Data de in[íi]cio'),
     dtFim:        get('Data de fim'),
     localizacao:  get('Localiza[çc][ãa]o'),
     publico:      get('P[úu]blico de Interesse'),
@@ -8553,7 +8565,7 @@ function _popularFiltrosEst(){
       o.value = v; o.textContent = v;
       s.appendChild(o);
     });
-    s.value = cur;
+    if([...s.options].some(o=>o.value===cur)) s.value = cur;
   };
   fillSel('estFiltroMes', meses);
   fillSel('estFiltroAno', anos);
@@ -8566,7 +8578,7 @@ function renderEstrategias(){
   const emp    = document.getElementById('estFiltroEmp')?.value    || '';
   const status = document.getElementById('estFiltroStatus')?.value || '';
 
-  let lista = _estrategias.filter(e=>{
+  const lista = _estrategias.filter(e=>{
     if(mes && e._mes !== mes) return false;
     if(ano && e._ano !== ano) return false;
     if(emp && e._emp !== emp) return false;
@@ -8579,23 +8591,14 @@ function renderEstrategias(){
   const resumo    = document.getElementById('estResumo');
   if(!container) return;
 
-  // Resumo KPIs
   const totAtivo  = lista.filter(e=>_statusEstrategia(e)==='ativo').length;
   const totInativ = lista.filter(e=>_statusEstrategia(e)==='inativo').length;
   const totFutur  = lista.filter(e=>_statusEstrategia(e)==='futuro').length;
   if(resumo) resumo.innerHTML = `
-    <div class="kcard" style="flex:0 0 auto;min-width:130px">
-      <div class="kv">${lista.length}</div><div class="kl">Total</div>
-    </div>
-    <div class="kcard" style="flex:0 0 auto;min-width:130px">
-      <div class="kv" style="color:var(--green)">${totAtivo}</div><div class="kl">Ativos</div>
-    </div>
-    <div class="kcard" style="flex:0 0 auto;min-width:130px">
-      <div class="kv" style="color:var(--red)">${totInativ}</div><div class="kl">Inativos</div>
-    </div>
-    <div class="kcard" style="flex:0 0 auto;min-width:130px">
-      <div class="kv" style="color:var(--amber)">${totFutur}</div><div class="kl">Futuros</div>
-    </div>`;
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${lista.length}</div><div class="kl">Total</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--green)">${totAtivo}</div><div class="kl">Ativos</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--red)">${totInativ}</div><div class="kl">Inativos</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--amber)">${totFutur}</div><div class="kl">Futuros</div></div>`;
 
   if(!lista.length){
     container.innerHTML = '';
@@ -8618,17 +8621,17 @@ function renderEstrategias(){
         🏢 ${empNome}
         <span style="font-size:12px;font-weight:600;color:var(--mu)">(${items.length} ${items.length===1?'estratégia':'estratégias'})</span>
       </h3>
-      ${items.map((e,i)=>_renderCard(e, i)).join('')}
+      ${items.map((e,i)=>_renderCardEst(e)).join('')}
     </div>`).join('');
 }
 
-function _tags(val){
+function _tagsEst(val){
   if(!val) return '<span style="color:var(--mu);font-size:12px">—</span>';
   return val.split(',').map(v=>v.trim()).filter(Boolean)
     .map(v=>`<span class="est-tag">${v}</span>`).join('');
 }
 
-function _renderCard(e, idx){
+function _renderCardEst(e){
   const st = _statusEstrategia(e);
   const badge = st==='ativo'
     ? `<span class="est-ativo">🟢 Ativo</span>`
@@ -8640,23 +8643,28 @@ function _renderCard(e, idx){
     ? `<span class="est-tipo-chip" style="background:rgba(79,142,247,.15);color:var(--blue);border:1px solid rgba(79,142,247,.3)">${e.tipoCampanha}</span>`
     : '';
 
-  const imgsHtml = (e._imgs && e._imgs.length)
-    ? e._imgs.map((src,ii)=>`<img class="est-img-thumb" src="${src}" onclick="abrirLightbox('${src.replace(/'/g,"\\'")}')">`)
-       .join('')
+  // imgs pode ser array de URLs (github) ou base64 (local)
+  const imgs = e._imgs || [];
+  const imgsHtml = imgs.length
+    ? imgs.map(src=>{
+        const safe = src.replace(/'/g,"\\'");
+        return `<img class="est-img-thumb" src="${src}" onerror="this.style.display='none'" onclick="abrirLightboxEst('${safe}')">`;
+      }).join('')
     : `<div class="est-img-placeholder">📷 Sem imagem</div>`;
 
   const linhas = [
     ['Criativo',       e.criativo     ? `<strong>${e.criativo}</strong>` : '—'],
     ['Data de Início', e.dtInicio || '—'],
-    ['Data de Fim',    e.dtFim || '—'],
-    ['Localização',    _tags(e.localizacao)],
-    ['Público',        _tags(e.publico)],
-    ['Faixa Etária',   _tags(e.faixaEtaria)],
-    ['Tipo',           _tags(e.tipoCampanha)],
-    ['Plataforma',     _tags(e.plataforma)],
+    ['Data de Fim',    e.dtFim    || '—'],
+    ['Localização',    _tagsEst(e.localizacao)],
+    ['Público',        _tagsEst(e.publico)],
+    ['Faixa Etária',   _tagsEst(e.faixaEtaria)],
+    ['Tipo',           _tagsEst(e.tipoCampanha)],
+    ['Plataforma',     _tagsEst(e.plataforma)],
   ].map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
 
   const mesAno = [e._mes, e._ano].filter(Boolean).join(' / ');
+  const uid = e._uid || '';
 
   return `<div class="est-card">
     <div class="est-card-hd">
@@ -8664,15 +8672,15 @@ function _renderCard(e, idx){
       ${mesAno ? `<span style="font-size:11px;color:var(--mu)">${mesAno}</span>` : ''}
       ${tipoBadge}
       ${badge}
-      ${e._source==='local'?`<button onclick="_deletarEstrategia(${idx})" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 6px" title="Remover">🗑️</button>`:''}
+      ${e._source==='local'?`<button onclick="deletarEstrategiaLocal('${uid}')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 6px" title="Remover">🗑️</button>`:''}
     </div>
-    ${(e._imgs && e._imgs.length) || true ? `<div class="est-imgs">${imgsHtml}</div>` : ''}
+    <div class="est-imgs">${imgsHtml}</div>
     <table class="est-detail-table"><tbody>${linhas}</tbody></table>
   </div>`;
 }
 
-function abrirLightbox(src){
-  const lb = document.getElementById('estLightbox');
+function abrirLightboxEst(src){
+  const lb  = document.getElementById('estLightbox');
   const img = document.getElementById('estLightboxImg');
   if(lb && img){ img.src = src; lb.style.display = 'flex'; }
 }
@@ -8682,24 +8690,24 @@ function fecharLightbox(){
 }
 
 function abrirModalNovaEstrategia(){
-  const o = document.getElementById('estModalOverlay');
-  if(o) o.style.display = 'flex';
+  document.getElementById('estModalOverlay').style.display = 'flex';
 }
 function fecharModalEstrategia(ev){
-  if(ev && ev.target !== document.getElementById('estModalOverlay') && ev.type!=='click') return;
-  const o = document.getElementById('estModalOverlay');
-  if(o) o.style.display = 'none';
+  // Fecha ao clicar no overlay (fundo escuro), no botão cancelar, ou no ×
+  if(ev && ev.currentTarget !== ev.target) return; // clique dentro do modal — ignora
+  document.getElementById('estModalOverlay').style.display = 'none';
 }
 
 async function salvarNovaEstrategia(){
-  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const g  = id => (document.getElementById(id)?.value || '').trim();
   const emp = g('estNomeEmp');
-  if(!emp){ alert('Informe o empreendimento.'); return; }
+  if(!emp){ alert('Informe o nome do empreendimento.'); return; }
 
+  const uid = Date.now().toString(36);
   const entry = {
-    _emp: emp,
+    _uid: uid, _emp: emp,
     _ano: new Date().getFullYear().toString(),
-    _mes: '',
+    _mes: '', _source: 'local', _imgs: [],
     criativo:     g('estCriativo'),
     dtInicio:     g('estDtInicio'),
     dtFim:        g('estDtFim'),
@@ -8708,14 +8716,18 @@ async function salvarNovaEstrategia(){
     faixaEtaria:  g('estFaixaEtaria'),
     tipoCampanha: g('estTipoCampanha'),
     plataforma:   g('estPlataforma'),
-    _imgs: []
   };
 
-  // Imagens
+  // Converte imagens para base64
   const input = document.getElementById('estImagens');
   if(input && input.files.length){
     for(const f of input.files){
-      const b64 = await _fileToBase64(f);
+      const b64 = await new Promise((res,rej)=>{
+        const r = new FileReader();
+        r.onload = ()=>res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(f);
+      });
       entry._imgs.push(b64);
     }
   }
@@ -8724,35 +8736,29 @@ async function salvarNovaEstrategia(){
   saved.unshift(entry);
   localStorage.setItem('ecovita_estrategias', JSON.stringify(saved));
 
-  // Reset form
+  // Limpa formulário
   ['estNomeEmp','estCriativo','estDtInicio','estDtFim','estLocalizacao',
-   'estPublico','estFaixaEtaria','estTipoCampanha','estPlataforma'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.value = '';
-  });
-  document.getElementById('estImagens').value = '';
-  fecharModalEstrategia();
+   'estPublico','estFaixaEtaria','estTipoCampanha','estPlataforma']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const imgInput = document.getElementById('estImagens');
+  if(imgInput) imgInput.value = '';
+
+  document.getElementById('estModalOverlay').style.display = 'none';
   loadEstrategias();
 }
 
-function _deletarEstrategia(idx){
-  if(!confirm('Remover esta estratégia?')) return;
+function deletarEstrategiaLocal(uid){
+  if(!uid || !confirm('Remover esta estratégia?')) return;
   const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
-  // acha o item do localStorage na lista filtrada atual
-  const localItems = _estrategias.filter(e=>e._source==='local');
-  const item = localItems[idx - _estrategias.filter(e=>e._source==='pasta').length];
-  if(!item) return;
-  const i = saved.findIndex(s=>s.criativo===item.criativo && s._emp===item._emp && s.dtInicio===item.dtInicio);
-  if(i!==-1) saved.splice(i,1);
+  const idx = saved.findIndex(s=>s._uid===uid);
+  if(idx!==-1) saved.splice(idx,1);
   localStorage.setItem('ecovita_estrategias', JSON.stringify(saved));
   loadEstrategias();
 }
 
 function limparFiltrosEst(){
-  ['estFiltroMes','estFiltroAno','estFiltroEmp','estFiltroStatus'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.value = '';
-  });
+  ['estFiltroMes','estFiltroAno','estFiltroEmp','estFiltroStatus']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderEstrategias();
 }
 

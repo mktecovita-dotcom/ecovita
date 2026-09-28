@@ -439,6 +439,11 @@ body.light .theme-label{color:var(--blue)}
 .est-detail-table td{padding:9px 18px;border-bottom:1px solid var(--bdr);vertical-align:top;line-height:1.5}
 .est-detail-table tr:last-child td{border-bottom:none}
 .est-detail-table td:first-child{color:var(--mu);font-weight:600;white-space:nowrap;width:160px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.est-tbody tr{border-bottom:1px solid var(--bdr);transition:background .15s}
+.est-tbody tr:last-child{border-bottom:none}
+.est-tbody tr:hover{background:var(--bg3)}
+.est-tbody td{padding:10px 12px;vertical-align:middle;line-height:1.4}
+.est-tbody td:first-child{padding-left:18px}
 .est-tag{display:inline-block;background:var(--bg3);border:1px solid var(--bdr);border-radius:5px;padding:1px 7px;font-size:11px;margin:2px 3px 2px 0;color:var(--tx)}
 .est-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
 .est-modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5)}
@@ -8611,22 +8616,113 @@ function renderEstrategias(){
   }
   if(empty) empty.style.display = 'none';
 
-  // Agrupa por empreendimento
+  // ── Agrupa por Empreendimento → Pasta (Ano + Mês) ──
+  // Dentro de cada pasta, as imagens são compartilhadas entre as estratégias
   const byEmp = {};
   lista.forEach(e=>{
-    const k = e._emp || 'Sem empreendimento';
-    if(!byEmp[k]) byEmp[k] = [];
-    byEmp[k].push(e);
+    const empKey   = e._emp || 'Sem empreendimento';
+    const pastaKey = `${e._ano||''}||${e._mes||''}`;
+    if(!byEmp[empKey]) byEmp[empKey] = {};
+    if(!byEmp[empKey][pastaKey]) byEmp[empKey][pastaKey] = {itens:[], imgs:[], ano:e._ano, mes:e._mes};
+    byEmp[empKey][pastaKey].itens.push(e);
+    // Imagens: usa as do primeiro item que tiver (todas compartilham a mesma pasta)
+    if(!byEmp[empKey][pastaKey].imgs.length && e._imgs?.length){
+      byEmp[empKey][pastaKey].imgs = e._imgs;
+    }
   });
 
-  container.innerHTML = Object.entries(byEmp).map(([empNome, items])=>`
-    <div style="margin-bottom:28px">
-      <h3 style="font-size:15px;font-weight:800;color:var(--tx);margin:0 0 12px;display:flex;align-items:center;gap:8px">
+  container.innerHTML = Object.entries(byEmp).map(([empNome, pastas])=>`
+    <div style="margin-bottom:32px">
+      <h3 style="font-size:16px;font-weight:800;color:var(--tx);margin:0 0 14px;display:flex;align-items:center;gap:8px">
         🏢 ${empNome}
-        <span style="font-size:12px;font-weight:600;color:var(--mu)">(${items.length} ${items.length===1?'estratégia':'estratégias'})</span>
       </h3>
-      ${items.map((e,i)=>_renderCardEst(e)).join('')}
+      ${Object.entries(pastas).map(([,pasta])=>_renderGrupoPasta(empNome, pasta)).join('')}
     </div>`).join('');
+}
+
+// Renderiza um bloco por pasta: imagens compartilhadas + tabela de estratégias
+function _renderGrupoPasta(empNome, pasta){
+  const {itens, imgs, ano, mes} = pasta;
+  const mesAno = [mes, ano].filter(Boolean).join(' · ');
+
+  // Imagens compartilhadas (aparecem uma vez)
+  const imgsHtml = imgs.length
+    ? imgs.map(src=>{
+        const safe = src.replace(/'/g,"\\'");
+        return `<img class="est-img-thumb" src="${src}" onerror="this.style.display='none'" onclick="abrirLightboxEst('${safe}')">`;
+      }).join('')
+    : `<div class="est-img-placeholder">📷 Sem imagem</div>`;
+
+  // Linhas da tabela — uma por estratégia
+  const linhas = itens.map(e=>{
+    const st    = _statusEstrategia(e);
+    const badge = st==='ativo'
+      ? `<span class="est-ativo">🟢 Ativo</span>`
+      : st==='inativo'
+      ? `<span class="est-inativo">🔴 Inativo</span>`
+      : `<span class="est-futuro">🕐 Futuro</span>`;
+    const uid  = e._uid || '';
+    const del  = e._source==='local'
+      ? `<button onclick="deletarEstrategiaLocal('${uid}')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:13px;padding:0 4px" title="Remover">🗑️</button>`
+      : '';
+    return `<tr>
+      <td style="font-weight:700;color:var(--tx)">${e._filename || e.criativo || '—'}</td>
+      <td>${e.dtInicio || '—'}</td>
+      <td>${e.dtFim    || '—'}</td>
+      <td>${_tagsEst(e.tipoCampanha)}</td>
+      <td>${_tagsEst(e.plataforma)}</td>
+      <td>${badge}</td>
+      <td>${del}</td>
+    </tr>`;
+  }).join('');
+
+  // Detalhes compartilhados (localização, público, faixa) — pega do primeiro item
+  const ref = itens[0];
+  const detalhes = [
+    ['Localização',  _tagsEst(ref.localizacao)],
+    ['Público',      _tagsEst(ref.publico)],
+    ['Faixa Etária', _tagsEst(ref.faixaEtaria)],
+  ].filter(([,v])=> v && !v.includes('—')).map(([k,v])=>`
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);white-space:nowrap;min-width:80px;padding-top:3px">${k}</span>
+      <span>${v}</span>
+    </div>`).join('');
+
+  return `<div class="est-card" style="margin-bottom:16px">
+    <!-- Header da pasta -->
+    <div class="est-card-hd">
+      <div style="display:flex;align-items:center;gap:8px;flex:1">
+        <span style="font-size:13px;font-weight:700;color:var(--tx)">📅 ${mesAno || 'Sem data'}</span>
+        <span style="font-size:11px;color:var(--mu)">${itens.length} ${itens.length===1?'estratégia':'estratégias'}</span>
+      </div>
+    </div>
+
+    <!-- Imagens (compartilhadas) -->
+    <div class="est-imgs">${imgsHtml}</div>
+
+    <!-- Detalhes compartilhados -->
+    ${detalhes ? `<div style="padding:10px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3)">${detalhes}</div>` : ''}
+
+    <!-- Tabela de estratégias -->
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--bdr)">
+            <th style="padding:10px 18px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Estratégia</th>
+            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Início</th>
+            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Fim</th>
+            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Tipo</th>
+            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Plataforma</th>
+            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Status</th>
+            <th style="padding:10px 8px"></th>
+          </tr>
+        </thead>
+        <tbody class="est-tbody" style="color:var(--tx)">
+          ${linhas}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
 }
 
 function _tagsEst(val){

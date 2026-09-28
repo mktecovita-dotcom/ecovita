@@ -452,6 +452,21 @@ body.light .theme-label{color:var(--blue)}
 .est-form-input{width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px;font-family:inherit}
 .est-form-input:focus{outline:none;border-color:var(--blue)}
 .est-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+/* ── CARROSSEL ── */
+.est-carousel-wrap{position:relative;border-radius:0;overflow:hidden;background:var(--bg)}
+.est-carousel-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}
+.est-carousel-track::-webkit-scrollbar{display:none}
+.est-carousel-slide{flex:0 0 100%;scroll-snap-align:start;position:relative}
+.est-carousel-slide img{width:100%;height:300px;object-fit:cover;display:block;cursor:zoom-in}
+.est-carousel-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(0,0,0,.55);border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;line-height:1;backdrop-filter:blur(4px)}
+.est-carousel-btn:hover{background:rgba(0,0,0,.8)}
+.est-carousel-btn.prev{left:12px}
+.est-carousel-btn.next{right:12px}
+.est-carousel-dots{display:flex;justify-content:center;gap:6px;padding:10px 0 4px}
+.est-carousel-dot{width:7px;height:7px;border-radius:50%;background:var(--bdr2);cursor:pointer;transition:background .2s,transform .2s}
+.est-carousel-dot.active{background:var(--blue);transform:scale(1.3)}
+.est-carousel-label{position:absolute;bottom:10px;left:14px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;backdrop-filter:blur(4px);letter-spacing:.04em}
+.est-section-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);padding:10px 18px 6px;border-bottom:1px solid var(--bdr);background:var(--bg3)}
 
 /* ── MODO TV ────────────────────────────────────────── */
 body.tv-mode .sidebar{display:none!important}
@@ -8640,20 +8655,59 @@ function renderEstrategias(){
     </div>`).join('');
 }
 
-// Renderiza um bloco por pasta: imagens compartilhadas + tabela de estratégias
+// Renderiza um bloco por pasta: separa carrossel de estáticos
 function _renderGrupoPasta(empNome, pasta){
   const {itens, imgs, ano, mes} = pasta;
-  const mesAno = [mes, ano].filter(Boolean).join(' · ');
+  const mesAno  = [mes, ano].filter(Boolean).join(' · ');
+  const pastaId = (empNome + mes + ano).replace(/\W/g,'_') + '_' + Math.random().toString(36).slice(2,6);
 
-  // Imagens compartilhadas (aparecem uma vez)
-  const imgsHtml = imgs.length
+  // Separa itens: carrossel vs. estático
+  const isCarrossel = e => /carrossel|carousel/i.test(e._filename || e.criativo || '');
+  const carrosselItens = itens.filter(isCarrossel);
+  const staticItens    = itens.filter(e=>!isCarrossel(e));
+
+  // ── Seção de imagens estáticas (thumbnails) ──
+  const thumbsHtml = imgs.length
     ? imgs.map(src=>{
         const safe = src.replace(/'/g,"\\'");
         return `<img class="est-img-thumb" src="${src}" onerror="this.style.display='none'" onclick="abrirLightboxEst('${safe}')">`;
       }).join('')
     : `<div class="est-img-placeholder">📷 Sem imagem</div>`;
 
-  // Linhas da tabela — uma por estratégia
+  // ── Seção carrossel ──
+  let carrosselHtml = '';
+  if(carrosselItens.length && imgs.length){
+    const cid   = 'estC_' + pastaId;
+    const slides = imgs.map((src,i)=>{
+      const safe = src.replace(/'/g,"\\'");
+      return `<div class="est-carousel-slide">
+        <img src="${src}" onerror="this.style.display='none'" onclick="abrirLightboxEst('${safe}')">
+        <span class="est-carousel-label">${i+1} / ${imgs.length}</span>
+      </div>`;
+    }).join('');
+    const dots = imgs.map((_,i)=>
+      `<div class="est-carousel-dot${i===0?' active':''}" onclick="estCarouselGoTo('${cid}',${i})"></div>`
+    ).join('');
+    carrosselHtml = `
+      <div class="est-section-title">🎠 Carrossel de Criativos</div>
+      <div class="est-carousel-wrap">
+        <button class="est-carousel-btn prev" onclick="estCarouselMove('${cid}',-1)">&#8249;</button>
+        <div class="est-carousel-track" id="${cid}" onscroll="estCarouselScroll('${cid}')">
+          ${slides}
+        </div>
+        <button class="est-carousel-btn next" onclick="estCarouselMove('${cid}',1)">&#8250;</button>
+      </div>
+      <div class="est-carousel-dots" id="${cid}_dots">${dots}</div>`;
+  }
+
+  // ── Seção de thumbnails estáticos (se houver itens não-carrossel) ──
+  const thumbSection = staticItens.length
+    ? `<div class="est-section-title">🖼️ Criativos Estáticos</div>
+       <div class="est-imgs">${thumbsHtml}</div>`
+    : (carrosselItens.length ? '' : `<div class="est-imgs">${thumbsHtml}</div>`);
+
+  // ── Tabela de estratégias (todos) ──
+  const thStyle = 'padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap';
   const linhas = itens.map(e=>{
     const st    = _statusEstrategia(e);
     const badge = st==='ativo'
@@ -8661,12 +8715,13 @@ function _renderGrupoPasta(empNome, pasta){
       : st==='inativo'
       ? `<span class="est-inativo">🔴 Inativo</span>`
       : `<span class="est-futuro">🕐 Futuro</span>`;
+    const isC  = isCarrossel(e) ? `<span style="font-size:10px;background:rgba(155,127,244,.15);color:var(--purple);border:1px solid rgba(155,127,244,.3);border-radius:5px;padding:1px 6px;margin-left:6px">🎠</span>` : '';
     const uid  = e._uid || '';
     const del  = e._source==='local'
       ? `<button onclick="deletarEstrategiaLocal('${uid}')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:13px;padding:0 4px" title="Remover">🗑️</button>`
       : '';
     return `<tr>
-      <td style="font-weight:700;color:var(--tx)">${e._filename || e.criativo || '—'}</td>
+      <td style="padding:10px 18px;font-weight:700;color:var(--tx)">${e._filename || e.criativo || '—'}${isC}</td>
       <td>${e.dtInicio || '—'}</td>
       <td>${e.dtFim    || '—'}</td>
       <td>${_tagsEst(e.tipoCampanha)}</td>
@@ -8676,50 +8731,46 @@ function _renderGrupoPasta(empNome, pasta){
     </tr>`;
   }).join('');
 
-  // Detalhes compartilhados (localização, público, faixa) — pega do primeiro item
+  // ── Detalhes compartilhados ──
   const ref = itens[0];
   const detalhes = [
     ['Localização',  _tagsEst(ref.localizacao)],
     ['Público',      _tagsEst(ref.publico)],
     ['Faixa Etária', _tagsEst(ref.faixaEtaria)],
-  ].filter(([,v])=> v && !v.includes('—')).map(([k,v])=>`
+  ].filter(([,v])=> v && !v.includes('color:var(--mu)')).map(([k,v])=>`
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
       <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);white-space:nowrap;min-width:80px;padding-top:3px">${k}</span>
       <span>${v}</span>
     </div>`).join('');
 
   return `<div class="est-card" style="margin-bottom:16px">
-    <!-- Header da pasta -->
     <div class="est-card-hd">
       <div style="display:flex;align-items:center;gap:8px;flex:1">
         <span style="font-size:13px;font-weight:700;color:var(--tx)">📅 ${mesAno || 'Sem data'}</span>
         <span style="font-size:11px;color:var(--mu)">${itens.length} ${itens.length===1?'estratégia':'estratégias'}</span>
+        ${carrosselItens.length ? `<span style="font-size:11px;background:rgba(155,127,244,.15);color:var(--purple);border:1px solid rgba(155,127,244,.3);border-radius:12px;padding:2px 9px">🎠 ${carrosselItens.length} carrossel</span>` : ''}
       </div>
     </div>
 
-    <!-- Imagens (compartilhadas) -->
-    <div class="est-imgs">${imgsHtml}</div>
+    ${carrosselHtml}
+    ${thumbSection}
 
-    <!-- Detalhes compartilhados -->
     ${detalhes ? `<div style="padding:10px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3)">${detalhes}</div>` : ''}
 
-    <!-- Tabela de estratégias -->
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead>
           <tr style="border-bottom:1px solid var(--bdr)">
-            <th style="padding:10px 18px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Estratégia</th>
-            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Início</th>
-            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Fim</th>
-            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Tipo</th>
-            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Plataforma</th>
-            <th style="padding:10px 12px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Status</th>
+            <th style="padding:10px 18px;text-align:left;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Estratégia</th>
+            <th style="${thStyle}">Início</th>
+            <th style="${thStyle}">Fim</th>
+            <th style="${thStyle}">Tipo</th>
+            <th style="${thStyle}">Plataforma</th>
+            <th style="${thStyle}">Status</th>
             <th style="padding:10px 8px"></th>
           </tr>
         </thead>
-        <tbody class="est-tbody" style="color:var(--tx)">
-          ${linhas}
-        </tbody>
+        <tbody class="est-tbody" style="color:var(--tx)">${linhas}</tbody>
       </table>
     </div>
   </div>`;
@@ -8860,6 +8911,25 @@ function limparFiltrosEst(){
   ['estFiltroMes','estFiltroAno','estFiltroEmp','estFiltroStatus']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderEstrategias();
+}
+
+/* ── Carrossel helpers ── */
+function estCarouselMove(cid, dir){
+  const track = document.getElementById(cid);
+  if(!track) return;
+  track.scrollBy({ left: dir * track.offsetWidth, behavior: 'smooth' });
+}
+function estCarouselGoTo(cid, idx){
+  const track = document.getElementById(cid);
+  if(!track) return;
+  track.scrollTo({ left: idx * track.offsetWidth, behavior: 'smooth' });
+}
+function estCarouselScroll(cid){
+  const track = document.getElementById(cid);
+  if(!track) return;
+  const idx   = Math.round(track.scrollLeft / track.offsetWidth);
+  const dots  = document.querySelectorAll(`#${cid}_dots .est-carousel-dot`);
+  dots.forEach((d,i)=> d.classList.toggle('active', i===idx));
 }
 
 </script>

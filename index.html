@@ -458,7 +458,7 @@ body.light .theme-label{color:var(--blue)}
 .est-carousel-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}
 .est-carousel-track::-webkit-scrollbar{display:none}
 .est-carousel-slide{flex:0 0 100%;scroll-snap-align:start;position:relative}
-.est-carousel-slide img{width:100%;height:300px;object-fit:cover;display:block;cursor:zoom-in}
+.est-carousel-slide img{width:100%;height:220px;object-fit:cover;display:block;cursor:zoom-in;border-radius:0}
 .est-carousel-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(0,0,0,.55);border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;line-height:1;backdrop-filter:blur(4px)}
 .est-carousel-btn:hover{background:rgba(0,0,0,.8)}
 .est-carousel-btn.prev{left:12px}
@@ -8567,13 +8567,18 @@ async function carregarDoGitHub(){
             _imgs:       [],
           };
         }
-        if(nomeImg && !grupos[key]._imgNames.includes(nomeImg)){
-          grupos[key]._imgNames.push(nomeImg);
-          // Resolve URL da imagem via lookup
-          const lookupKey = sheetName.toLowerCase() + '||' + nomeImg.toLowerCase();
-          const url = _imgLookup[lookupKey] || _imgLookup[nomeImg.toLowerCase()] || '';
-          if(url) grupos[key]._imgs.push(url);
-        }
+        // Suporta múltiplas imagens na mesma célula (separadas por vírgula)
+        const nomeImgs = nomeImg
+          ? nomeImg.split(',').map(s=>s.trim()).filter(Boolean)
+          : [];
+        nomeImgs.forEach(fname=>{
+          if(!grupos[key]._imgNames.includes(fname)){
+            grupos[key]._imgNames.push(fname);
+            const lookupKey = sheetName.toLowerCase() + '||' + fname.toLowerCase();
+            const url = _imgLookup[lookupKey] || _imgLookup[fname.toLowerCase()] || '';
+            if(url) grupos[key]._imgs.push(url);
+          }
+        });
       });
 
       Object.values(grupos).forEach(g=> estrategias.push(g));

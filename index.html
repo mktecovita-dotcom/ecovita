@@ -6,6 +6,7 @@
 <title>Ecovita · Sistema de Tráfego Pago</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="app.js"></script>
 <style>
@@ -8457,89 +8458,135 @@ const GH_REPO   = 'ecovita';
 const GH_BRANCH = 'main';
 const GH_RAW    = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/`;
 const GH_API    = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/`;
+const MESES_PT  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-let _estrategias = [];      // dados combinados (github + localStorage)
-let _ghCarregado  = false;  // evita recarregar desnecessariamente
+let _estrategias = [];   // lista de campanhas {feed ou carrossel}
+let _imgLookup   = {};   // {empName||fileName → rawUrl}
 
 function loadEstrategias(){
-  const btnGH = document.getElementById('estBtnGH');
+  // Mostra os cadastrados localmente enquanto não carrega do GitHub
   const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
-  const locais = saved.map(e=>({...e, _source:'local'}));
-  // Mantém os do GitHub se já carregados
-  const ghItems = _estrategias.filter(e=>e._source==='github');
-  _estrategias = [...ghItems, ...locais];
+  const ghItems = _estrategias.filter(e=>e._source==='excel');
+  _estrategias = [...ghItems, ...saved.map(e=>({...e, _source:'local'}))];
   _popularFiltrosEst();
   renderEstrategias();
 }
 
 async function carregarDoGitHub(){
-  const btnGH = document.getElementById('estBtnGH');
-  if(btnGH){ btnGH.disabled=true; btnGH.textContent='⏳ Carregando…'; }
+  const btn = document.getElementById('estBtnGH');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando…'; }
   try{
-    // Busca árvore completa do repositório
-    const resp = await fetch(`${GH_API}git/trees/${GH_BRANCH}?recursive=1`);
-    if(!resp.ok) throw new Error('Repositório não encontrado ou sem acesso.');
-    const data = await resp.json();
-    const tree = data.tree || [];
+    // 1. Busca árvore do repo para montar lookup de imagens
+    const treeResp = await fetch(`${GH_API}git/trees/${GH_BRANCH}?recursive=1`);
+    if(!treeResp.ok) throw new Error('Erro ao acessar repositório GitHub.');
+    const treeData = await treeResp.json();
 
-    // Filtra apenas o que está dentro de Criativos/
-    const criativos = tree.filter(n=> n.path.startsWith('Criativos/') || n.path.startsWith('criativos/'));
-
-    // Mapeia: Criativos/{Ano}/{Empreendimento}/{Mes}/{arquivo}
-    const grupos = {};
-    criativos.forEach(node=>{
+    // Monta lookup: {empNorm||fileName.lower → rawUrl}
+    _imgLookup = {};
+    (treeData.tree||[]).forEach(node=>{
+      if(node.type !== 'blob') return;
       const parts = node.path.split('/');
-      if(parts.length < 4) return;          // precisa ter pelo menos 4 níveis
-      const [_root, ano, emp, mes, ...rest] = parts;
-      if(!rest.length) return;              // é um diretório, não arquivo
-      const key = `${ano}||${emp}||${mes}`;
-      if(!grupos[key]) grupos[key] = {ano, emp, mes, txts:[], imgs:[]};
-      const fname = rest.join('/');
-      if(fname.toLowerCase().endsWith('.txt')){
-        grupos[key].txts.push(node.path);
-      } else if(/\.(png|jpg|jpeg|webp|gif)$/i.test(fname)){
-        grupos[key].imgs.push(GH_RAW + node.path);
-      }
+      // Criativos / Ano / Empreendimento / Mês / arquivo
+      if(parts[0].toLowerCase() !== 'criativos' || parts.length < 5) return;
+      const emp   = parts[2];
+      const fname = parts[parts.length-1];
+      const key   = emp.toLowerCase() + '||' + fname.toLowerCase();
+      _imgLookup[key] = GH_RAW + node.path;
     });
 
-    // Busca e parseia cada TXT
-    const estrategias = [];
-    for(const g of Object.values(grupos)){
-      const imgs = g.imgs;
-      if(g.txts.length){
-        for(const txtPath of g.txts){
-          const r = await fetch(GH_RAW + txtPath);
-          if(!r.ok) continue;
-          const txt = await r.text();
-          const e = parseEstrategiaTXT(txt);
-          e._emp      = e._emp || g.emp;
-          e._ano      = g.ano;
-          e._mes      = g.mes;
-          e._imgs     = imgs;
-          e._source   = 'github';
-          // Nome do arquivo TXT sem extensão como título
-          e._filename = txtPath.split('/').pop().replace(/\.txt$/i, '');
-          estrategias.push(e);
-        }
-      } else if(imgs.length){
-        // Sem TXT, mas tem imagens — cria entrada básica
-        estrategias.push({
-          _emp:g.emp, _ano:g.ano, _mes:g.mes, _imgs:imgs, _source:'github',
-          criativo:'', dtInicio:'', dtFim:'', localizacao:'',
-          publico:'', faixaEtaria:'', tipoCampanha:'', plataforma:''
-        });
-      }
-    }
+    // 2. Busca e lê o Excel estratégias.xlsx
+    const xlsxResp = await fetch(GH_RAW + 'estratégias.xlsx');
+    if(!xlsxResp.ok) throw new Error('Arquivo estratégias.xlsx não encontrado na raiz do repositório.');
+    const xlsxBuf  = await xlsxResp.arrayBuffer();
+    const wb       = XLSX.read(xlsxBuf, {type:'array', cellDates:true});
 
-    _ghCarregado = true;
+    const estrategias = [];
+
+    // 3. Percorre cada aba (= empreendimento)
+    wb.SheetNames.forEach(sheetName=>{
+      const ws   = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      if(!rows.length) return;
+
+      // Detecta nomes de colunas (case-insensitive)
+      const cols = Object.keys(rows[0]);
+      const col  = label => cols.find(c=> new RegExp(label,'i').test(c)) || '';
+
+      const kCamp    = col('campanha');
+      const kTipo    = col('tipo');
+      const kDtIni   = col('data.in');
+      const kDtFim   = col('data.fim');
+      const kLocal   = col('localiza');
+      const kPublico = col('p[úu]blico');
+      const kFaixa   = col('faixa');
+      const kTipoCamp= col('tipo.camp');
+      const kPlat    = col('plataforma');
+      const kImg     = col('imagem');
+      const kAdvant  = col('advantage');
+      const kPosic   = col('posiciona');
+
+      // Formata data vinda do Excel (Date obj ou string)
+      const fmtDt = v => {
+        if(!v || v === '') return '';
+        if(typeof v === 'string' && /sem data/i.test(v)) return '';
+        if(v instanceof Date) return `${String(v.getDate()).padStart(2,'0')}/${String(v.getMonth()+1).padStart(2,'0')}/${v.getFullYear()}`;
+        return String(v);
+      };
+
+      // Agrupa por (Campanha + Tipo)
+      const grupos = {};
+      rows.forEach(r=>{
+        const campanha = (r[kCamp]||'').trim();
+        const tipo     = (r[kTipo]||'feed').toLowerCase().trim();
+        const nomeImg  = (r[kImg] ||'').trim();
+        if(!campanha) return;
+
+        const key = campanha + '||' + tipo;
+        if(!grupos[key]){
+          const dtIni  = r[kDtIni];
+          const dtObj  = dtIni instanceof Date ? dtIni : null;
+          const mesIdx = dtObj ? dtObj.getMonth() : -1;
+          grupos[key] = {
+            _emp:        sheetName,
+            _campanha:   campanha,
+            _tipo:       tipo,
+            _source:     'excel',
+            _mes:        mesIdx >= 0 ? MESES_PT[mesIdx] : '',
+            _ano:        dtObj ? String(dtObj.getFullYear()) : '',
+            dtInicio:    fmtDt(r[kDtIni]),
+            dtFim:       fmtDt(r[kDtFim]),
+            localizacao: (r[kLocal]  ||'').trim(),
+            publico:     (r[kPublico]||'').trim(),
+            faixaEtaria: (r[kFaixa]  ||'').trim(),
+            tipoCampanha:(r[kTipoCamp]||'').trim(),
+            plataforma:  (r[kPlat]   ||'').trim(),
+            advantagePlus:(r[kAdvant]||'').trim(),
+            posicionamentos:(r[kPosic]||'').trim(),
+            _imgNames:   [],
+            _imgs:       [],
+          };
+        }
+        if(nomeImg && !grupos[key]._imgNames.includes(nomeImg)){
+          grupos[key]._imgNames.push(nomeImg);
+          // Resolve URL da imagem via lookup
+          const lookupKey = sheetName.toLowerCase() + '||' + nomeImg.toLowerCase();
+          const url = _imgLookup[lookupKey] || _imgLookup[nomeImg.toLowerCase()] || '';
+          if(url) grupos[key]._imgs.push(url);
+        }
+      });
+
+      Object.values(grupos).forEach(g=> estrategias.push(g));
+    });
+
     const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
     _estrategias = [...estrategias, ...saved.map(e=>({...e, _source:'local'}))];
     _popularFiltrosEst();
     renderEstrategias();
-    if(btnGH){ btnGH.disabled=false; btnGH.textContent='🔄 Atualizar GitHub'; }
+    if(btn){ btn.disabled=false; btn.textContent='🔄 Atualizar'; }
   } catch(err){
-    if(btnGH){ btnGH.disabled=false; btnGH.textContent='☁️ Carregar do GitHub'; }
-    alert('Erro ao carregar do GitHub: ' + err.message);
+    if(btn){ btn.disabled=false; btn.textContent='☁️ Carregar do GitHub'; }
+    alert('Erro: ' + err.message);
     console.error(err);
   }
 }
@@ -8568,7 +8615,9 @@ function parseEstrategiaTXT(txt){
 function _statusEstrategia(e){
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const ini  = e.dtInicio ? parseDateAgenda(e.dtInicio) : null;
-  const fim  = e.dtFim    ? parseDateAgenda(e.dtFim)    : null;
+  // dtFim vazio ou "sem data" = sem término = ativo
+  const fimStr = (e.dtFim || '').toLowerCase();
+  const fim    = (!fimStr || /sem data/i.test(fimStr)) ? null : parseDateAgenda(e.dtFim);
   if(fim && fim < hoje)  return 'inativo';
   if(ini && ini > hoje)  return 'futuro';
   return 'ativo';
@@ -8631,31 +8680,128 @@ function renderEstrategias(){
   }
   if(empty) empty.style.display = 'none';
 
-  // ── Agrupa por Empreendimento → Pasta (Ano + Mês) ──
-  // Dentro de cada pasta, as imagens são compartilhadas entre as estratégias
+  // Agrupa por Empreendimento
   const byEmp = {};
   lista.forEach(e=>{
-    const empKey   = e._emp || 'Sem empreendimento';
-    const pastaKey = `${e._ano||''}||${e._mes||''}`;
-    if(!byEmp[empKey]) byEmp[empKey] = {};
-    if(!byEmp[empKey][pastaKey]) byEmp[empKey][pastaKey] = {itens:[], imgs:[], ano:e._ano, mes:e._mes};
-    byEmp[empKey][pastaKey].itens.push(e);
-    // Imagens: usa as do primeiro item que tiver (todas compartilham a mesma pasta)
-    if(!byEmp[empKey][pastaKey].imgs.length && e._imgs?.length){
-      byEmp[empKey][pastaKey].imgs = e._imgs;
-    }
+    const k = e._emp || 'Sem empreendimento';
+    if(!byEmp[k]) byEmp[k] = [];
+    byEmp[k].push(e);
   });
 
-  container.innerHTML = Object.entries(byEmp).map(([empNome, pastas])=>`
+  container.innerHTML = Object.entries(byEmp).map(([empNome, camps])=>`
     <div style="margin-bottom:32px">
       <h3 style="font-size:16px;font-weight:800;color:var(--tx);margin:0 0 14px;display:flex;align-items:center;gap:8px">
         🏢 ${empNome}
+        <span style="font-size:12px;font-weight:600;color:var(--mu)">${camps.length} ${camps.length===1?'campanha':'campanhas'}</span>
       </h3>
-      ${Object.entries(pastas).map(([,pasta])=>_renderGrupoPasta(empNome, pasta)).join('')}
+      ${camps.map(c=>_renderCampanhaCard(c)).join('')}
     </div>`).join('');
 }
 
-// Renderiza um bloco por pasta: separa carrossel de estáticos
+// Renderiza uma campanha (linha do Excel agrupada por Campanha+Tipo)
+function _renderCampanhaCard(c){
+  const st    = _statusEstrategia(c);
+  const badge = st==='ativo'
+    ? `<span class="est-ativo">🟢 Ativo</span>`
+    : st==='inativo'
+    ? `<span class="est-inativo">🔴 Inativo</span>`
+    : `<span class="est-futuro">🕐 Futuro</span>`;
+
+  const isCarrossel = c._tipo === 'carrossel';
+  const cid = 'estC_' + Math.random().toString(36).slice(2,8);
+
+  // ── Bloco de imagens ──
+  let imgBlock = '';
+  if(c._imgs && c._imgs.length){
+    if(isCarrossel){
+      const slides = c._imgs.map((src,i)=>{
+        const safe = src.replace(/'/g,"\\'");
+        return `<div class="est-carousel-slide">
+          <img src="${src}" onerror="this.style.display='none'" onclick="abrirLightboxEst('${safe}')">
+          <span class="est-carousel-label">${i+1} / ${c._imgs.length}</span>
+        </div>`;
+      }).join('');
+      const dots = c._imgs.map((_,i)=>
+        `<div class="est-carousel-dot${i===0?' active':''}" onclick="estCarouselGoTo('${cid}',${i})"></div>`
+      ).join('');
+      imgBlock = `
+        <div class="est-section-title">🎠 Carrossel · ${c._imgs.length} peças</div>
+        <div class="est-carousel-wrap">
+          <button class="est-carousel-btn prev" onclick="estCarouselMove('${cid}',-1)">&#8249;</button>
+          <div class="est-carousel-track" id="${cid}" onscroll="estCarouselScroll('${cid}')">
+            ${slides}
+          </div>
+          <button class="est-carousel-btn next" onclick="estCarouselMove('${cid}',1)">&#8250;</button>
+        </div>
+        <div class="est-carousel-dots" id="${cid}_dots">${dots}</div>`;
+    } else {
+      const thumbs = c._imgs.map(src=>{
+        const safe = src.replace(/'/g,"\\'");
+        return `<img class="est-img-thumb" src="${src}" onerror="this.style.display='none'" onclick="abrirLightboxEst('${safe}')">`;
+      }).join('');
+      imgBlock = `
+        <div class="est-section-title">🖼️ Feed · ${c._imgs.length} peças</div>
+        <div class="est-imgs">${thumbs}</div>`;
+    }
+  } else {
+    imgBlock = `<div class="est-imgs"><div class="est-img-placeholder">📷 Sem imagem</div></div>`;
+  }
+
+  // ── Detalhes ──
+  const chip = (v,color='var(--mu)')=> v
+    ? `<span style="background:var(--bg3);border:1px solid var(--bdr);border-radius:5px;padding:2px 8px;font-size:11px;color:${color}">${v}</span>`
+    : '';
+
+  const metaChips = [
+    chip(c.tipoCampanha, 'var(--blue)'),
+    chip(c.plataforma),
+    chip(c.faixaEtaria ? '👥 '+c.faixaEtaria : ''),
+    c.advantagePlus==='Ativado' ? chip('⚡ Advantage+','var(--amber)') : '',
+  ].filter(Boolean).join(' ');
+
+  const detRows = [
+    ['Localização',  c.localizacao],
+    ['Público',      c.publico],
+    ['Posicionamentos', c.posicionamentos && c.posicionamentos!=='Desativado' ? c.posicionamentos : ''],
+  ].filter(([,v])=>v).map(([k,v])=>`
+    <tr>
+      <td style="padding:8px 18px;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;width:130px;vertical-align:top">${k}</td>
+      <td style="padding:8px 12px;font-size:13px;color:var(--tx);vertical-align:top">${_tagsEst(v)}</td>
+    </tr>`).join('');
+
+  const uid = c._uid||'';
+  const delBtn = c._source==='local'
+    ? `<button onclick="deletarEstrategiaLocal('${uid}')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px" title="Remover">🗑️</button>`
+    : '';
+
+  // Nome curto da campanha para exibir
+  const nomeExib = c._campanha.length > 60 ? c._campanha.slice(0,58)+'…' : c._campanha;
+
+  return `<div class="est-card" style="margin-bottom:14px">
+    <!-- Header -->
+    <div class="est-card-hd" style="flex-wrap:wrap;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c._campanha}">${nomeExib}</div>
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:5px;align-items:center">
+          ${metaChips}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        ${c.dtInicio ? `<span style="font-size:11px;color:var(--mu)">📅 ${c.dtInicio}</span>` : ''}
+        ${badge}
+        ${delBtn}
+      </div>
+    </div>
+
+    <!-- Imagens (feed ou carrossel) -->
+    ${imgBlock}
+
+    <!-- Detalhes -->
+    ${detRows ? `<table style="width:100%;border-collapse:collapse"><tbody>${detRows}</tbody></table>` : ''}
+  </div>`;
+}
+
+// Renderiza um bloco por pasta: separa carrossel de estáticos (legacy – mantido para entradas locais)
 function _renderGrupoPasta(empNome, pasta){
   const {itens, imgs, ano, mes} = pasta;
   const mesAno  = [mes, ano].filter(Boolean).join(' · ');

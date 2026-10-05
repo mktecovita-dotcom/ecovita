@@ -453,6 +453,25 @@ body.light .theme-label{color:var(--blue)}
 .est-form-input{width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px;font-family:inherit}
 .est-form-input:focus{outline:none;border-color:var(--blue)}
 .est-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+/* ── ESTRATÉGIA CARD (v2 — visão estratégica) ── */
+.est-strat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:18px}
+.est-strat-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;transition:border-color .2s}
+.est-strat-card:hover{border-color:var(--bdr2)}
+.est-strat-hd{padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--bdr)}
+.est-strat-nome{font-size:16px;font-weight:800;color:var(--tx);margin:0 0 4px}
+.est-strat-cidade{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:5px}
+.est-strat-badges{display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3)}
+.est-strat-badge{border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+.est-strat-renda{font-size:20px;font-weight:800;white-space:nowrap}
+.est-seg-block{padding:12px 18px;border-bottom:1px solid var(--bdr)}
+.est-seg-block:last-child{border-bottom:none}
+.est-seg-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin:0 0 8px;display:flex;align-items:center;gap:5px}
+.est-seg-row{display:flex;gap:6px;margin-bottom:6px;align-items:flex-start}
+.est-seg-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mu);white-space:nowrap;min-width:88px;padding-top:3px}
+.est-seg-tags{display:flex;flex-wrap:wrap;gap:4px}
+.est-seg-tag{display:inline-block;background:var(--bg3);border:1px solid var(--bdr);border-radius:5px;padding:2px 7px;font-size:11px;color:var(--tx);line-height:1.4}
+.est-badge-ativo{background:rgba(46,204,142,.15);color:#2ecc8e;border:1px solid rgba(46,204,142,.4);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700}
+.est-badge-fin{background:rgba(107,122,158,.15);color:var(--mu);border:1px solid var(--bdr);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700}
 /* ── CARROSSEL ── */
 .est-carousel-wrap{position:relative;background:var(--bg2)}
 .est-carousel-track{display:flex;overflow-x:auto;gap:10px;padding:14px 16px;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -2064,45 +2083,33 @@ body.tv-mode #tvExitBtn{display:block}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
         <div>
           <h2 style="font-size:22px;font-weight:800;color:var(--tx);margin:0">📋 Estratégias de Campanhas</h2>
-          <p style="margin:4px 0 0;color:var(--mu);font-size:13px">Visualize e gerencie os criativos e estratégias de cada campanha</p>
+          <p style="margin:4px 0 0;color:var(--mu);font-size:13px">Visão estratégica por empreendimento — público, cidade, renda e segmentações</p>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button id="estBtnGH" class="btn" onclick="carregarDoGitHub()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-            ☁️ Carregar do GitHub
-          </button>
-          <button class="btn" onclick="abrirModalNovaEstrategia()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-            ➕ Nova Estratégia
-          </button>
-        </div>
+        <button id="estBtnGH" onclick="carregarDoGitHub()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+          ☁️ Carregar do GitHub
+        </button>
       </div>
 
       <!-- Filtros -->
       <div class="fbar" style="margin-bottom:20px">
         <div class="fg">
-          <label class="fl">Mês</label>
-          <select id="estFiltroMes" class="fs" onchange="renderEstrategias()">
+          <label class="fl">Situação</label>
+          <select id="estFiltroStatus" class="fs" onchange="renderEstrategias()">
             <option value="">Todos</option>
+            <option value="Ativo">🟢 Ativo</option>
+            <option value="Finalizado">⚫ Finalizado</option>
           </select>
         </div>
         <div class="fg">
-          <label class="fl">Ano</label>
-          <select id="estFiltroAno" class="fs" onchange="renderEstrategias()">
-            <option value="">Todos</option>
+          <label class="fl">Cidade</label>
+          <select id="estFiltroCidade" class="fs" onchange="renderEstrategias()">
+            <option value="">Todas</option>
           </select>
         </div>
         <div class="fg">
           <label class="fl">Empreendimento</label>
           <select id="estFiltroEmp" class="fs" onchange="renderEstrategias()">
             <option value="">Todos</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label class="fl">Status</label>
-          <select id="estFiltroStatus" class="fs" onchange="renderEstrategias()">
-            <option value="">Todos</option>
-            <option value="ativo">✅ Ativo</option>
-            <option value="inativo">❌ Inativo</option>
-            <option value="futuro">🕐 Futuro</option>
           </select>
         </div>
         <div class="fg" style="align-self:flex-end">
@@ -8456,17 +8463,12 @@ const GH_REPO   = 'ecovita';
 const GH_BRANCH = 'main';
 const GH_RAW    = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/`;
 const GH_API    = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/`;
-const MESES_PT  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-                   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-let _estrategias = [];   // lista de campanhas {feed ou carrossel}
-let _imgLookup   = {};   // {empName||fileName → rawUrl}
+let _estrategias = [];   // lista de empreendimentos com segmentações
 
 function loadEstrategias(){
-  // Mostra os cadastrados localmente enquanto não carrega do GitHub
-  const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
   const ghItems = _estrategias.filter(e=>e._source==='excel');
-  _estrategias = [...ghItems, ...saved.map(e=>({...e, _source:'local'}))];
+  _estrategias = ghItems.length ? ghItems : [];
   _popularFiltrosEst();
   renderEstrategias();
 }
@@ -8475,115 +8477,72 @@ async function carregarDoGitHub(){
   const btn = document.getElementById('estBtnGH');
   if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando…'; }
   try{
-    // 1. Busca árvore do repo para montar lookup de imagens
-    const treeResp = await fetch(`${GH_API}git/trees/${GH_BRANCH}?recursive=1`);
-    if(!treeResp.ok) throw new Error('Erro ao acessar repositório GitHub.');
-    const treeData = await treeResp.json();
-
-    // Monta lookup: {empNorm||fileName.lower → rawUrl}
-    _imgLookup = {};
-    (treeData.tree||[]).forEach(node=>{
-      if(node.type !== 'blob') return;
-      const parts = node.path.split('/');
-      // Criativos / Ano / Empreendimento / Mês / arquivo
-      if(parts[0].toLowerCase() !== 'criativos' || parts.length < 5) return;
-      const emp   = parts[2];
-      const fname = parts[parts.length-1];
-      const key   = emp.toLowerCase() + '||' + fname.toLowerCase();
-      _imgLookup[key] = GH_RAW + node.path;
-    });
-
-    // 2. Busca e lê o Excel estratégias.xlsx
-    const xlsxResp = await fetch(GH_RAW + 'estratégias.xlsx');
+    // Busca e lê o Excel estratégias.xlsx da raiz do repo
+    const xlsxResp = await fetch(GH_RAW + 'estrat%C3%A9gias.xlsx?' + Date.now());
     if(!xlsxResp.ok) throw new Error('Arquivo estratégias.xlsx não encontrado na raiz do repositório.');
-    const xlsxBuf  = await xlsxResp.arrayBuffer();
-    const wb       = XLSX.read(xlsxBuf, {type:'array', cellDates:true});
+    const xlsxBuf = await xlsxResp.arrayBuffer();
+    const wb      = XLSX.read(xlsxBuf, {type:'array', cellDates:true});
 
-    const estrategias = [];
+    // Lê a aba "Planilha1" (ou a primeira aba)
+    const wsName = wb.SheetNames.includes('Planilha1') ? 'Planilha1' : wb.SheetNames[0];
+    const ws     = wb.Sheets[wsName];
+    const rows   = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
+    if(!rows.length) throw new Error('Planilha vazia.');
 
-    // 3. Percorre cada aba (= empreendimento)
-    wb.SheetNames.forEach(sheetName=>{
-      const ws   = wb.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-      if(!rows.length) return;
+    // Detecta colunas por nome aproximado
+    const cols   = Object.keys(rows[0]);
+    const col    = lbl => cols.find(c=> new RegExp(lbl,'i').test(c)) || '';
+    const kSit   = col('situa');
+    const kEmp   = col('empreend');
+    const kRenda = col('renda');
+    const kCidade= col('cidade.do');
+    const kLocal = col('localiza');
+    const kPlat  = col('plataforma');
+    const kTCamp = col('tipo.de.camp');
+    const kTAnun = col('tipo.de.an[úu]n|tipos.de.an');
+    const kFaixa = col('faixa');
+    const kPubli = col('p[úu]blico.alvo|p[úu]blico-alvo');
+    const kAdvant= col('advantage');
+    const kPosic = col('posiciona');
 
-      // Detecta nomes de colunas (case-insensitive)
-      const cols = Object.keys(rows[0]);
-      const col  = label => cols.find(c=> new RegExp(label,'i').test(c)) || '';
+    // Agrupa linhas: linhas sem Situação/Empreendimento são segmentações do anterior
+    const empreendimentos = [];
+    let atual = null;
 
-      const kCamp    = col('campanha');
-      const kTipo    = col('tipo');
-      const kDtIni   = col('data.in');
-      const kDtFim   = col('data.fim');
-      const kLocal   = col('localiza');
-      const kPublico = col('p[úu]blico');
-      const kFaixa   = col('faixa');
-      const kTipoCamp= col('tipo.camp');
-      const kPlat    = col('plataforma');
-      const kImg     = col('imagem');
-      const kAdvant  = col('advantage');
-      const kPosic   = col('posiciona');
+    rows.forEach(r=>{
+      const sit = (r[kSit] || '').toString().trim();
+      const emp = (r[kEmp] || '').toString().trim();
 
-      // Formata data vinda do Excel (Date obj ou string)
-      const fmtDt = v => {
-        if(!v || v === '') return '';
-        if(typeof v === 'string' && /sem data/i.test(v)) return '';
-        if(v instanceof Date) return `${String(v.getDate()).padStart(2,'0')}/${String(v.getMonth()+1).padStart(2,'0')}/${v.getFullYear()}`;
-        return String(v);
-      };
+      if(emp && emp !== 'null'){
+        // Nova linha de empreendimento
+        atual = {
+          _source:    'excel',
+          situacao:   sit || 'Ativo',
+          nome:       emp,
+          renda:      parseFloat((r[kRenda]||'0').toString().replace(/\D/g,'')) || 0,
+          cidade:     (r[kCidade]||'').toString().trim(),
+          plataforma: (r[kPlat]  ||'').toString().trim(),
+          tipoCamp:   (r[kTCamp] ||'').toString().trim(),
+          tipoAnuncio:(r[kTAnun] ||'').toString().trim(),
+          faixa:      (r[kFaixa] ||'').toString().trim(),
+          segmentacoes: [],
+        };
+        empreendimentos.push(atual);
+      }
 
-      // Agrupa por (Campanha + Tipo)
-      const grupos = {};
-      rows.forEach(r=>{
-        const campanha = (r[kCamp]||'').trim();
-        const tipo     = (r[kTipo]||'feed').toLowerCase().trim();
-        const nomeImg  = (r[kImg] ||'').trim();
-        if(!campanha) return;
-
-        const key = campanha + '||' + tipo;
-        if(!grupos[key]){
-          const dtIni  = r[kDtIni];
-          const dtObj  = dtIni instanceof Date ? dtIni : null;
-          const mesIdx = dtObj ? dtObj.getMonth() : -1;
-          grupos[key] = {
-            _emp:        sheetName,
-            _campanha:   campanha,
-            _tipo:       tipo,
-            _source:     'excel',
-            _mes:        mesIdx >= 0 ? MESES_PT[mesIdx] : '',
-            _ano:        dtObj ? String(dtObj.getFullYear()) : '',
-            dtInicio:    fmtDt(r[kDtIni]),
-            dtFim:       fmtDt(r[kDtFim]),
-            localizacao: (r[kLocal]  ||'').trim(),
-            publico:     (r[kPublico]||'').trim(),
-            faixaEtaria: (r[kFaixa]  ||'').trim(),
-            tipoCampanha:(r[kTipoCamp]||'').trim(),
-            plataforma:  (r[kPlat]   ||'').trim(),
-            advantagePlus:(r[kAdvant]||'').trim(),
-            posicionamentos:(r[kPosic]||'').trim(),
-            _imgNames:   [],
-            _imgs:       [],
-          };
+      // Adiciona segmentação (tanto em linhas principais quanto sub-linhas)
+      if(atual){
+        const local  = (r[kLocal] ||'').toString().trim();
+        const publi  = (r[kPubli] ||'').toString().trim();
+        const advant = (r[kAdvant]||'').toString().trim();
+        const posic  = (r[kPosic] ||'').toString().trim();
+        if(local || publi){
+          atual.segmentacoes.push({ local, publi, advant, posic });
         }
-        // Suporta múltiplas imagens na mesma célula (separadas por vírgula)
-        const nomeImgs = nomeImg
-          ? nomeImg.split(',').map(s=>s.trim()).filter(Boolean)
-          : [];
-        nomeImgs.forEach(fname=>{
-          if(!grupos[key]._imgNames.includes(fname)){
-            grupos[key]._imgNames.push(fname);
-            const lookupKey = sheetName.toLowerCase() + '||' + fname.toLowerCase();
-            const url = _imgLookup[lookupKey] || _imgLookup[fname.toLowerCase()] || '';
-            if(url) grupos[key]._imgs.push(url);
-          }
-        });
-      });
-
-      Object.values(grupos).forEach(g=> estrategias.push(g));
+      }
     });
 
-    const saved = JSON.parse(localStorage.getItem('ecovita_estrategias') || '[]');
-    _estrategias = [...estrategias, ...saved.map(e=>({...e, _source:'local'}))];
+    _estrategias = empreendimentos;
     _popularFiltrosEst();
     renderEstrategias();
     if(btn){ btn.disabled=false; btn.textContent='🔄 Atualizar'; }
@@ -8627,38 +8586,34 @@ function _statusEstrategia(e){
 }
 
 function _popularFiltrosEst(){
-  const meses = [...new Set(_estrategias.map(e=>e._mes).filter(Boolean))].sort();
-  const anos  = [...new Set(_estrategias.map(e=>e._ano).filter(Boolean))].sort().reverse();
-  const emps  = [...new Set(_estrategias.map(e=>e._emp).filter(Boolean))].sort();
+  const cidades = [...new Set(_estrategias.map(e=>e.cidade).filter(Boolean))].sort();
+  const emps    = [...new Set(_estrategias.map(e=>e.nome).filter(Boolean))].sort();
 
   const fillSel = (id, vals) => {
     const s = document.getElementById(id);
     if(!s) return;
     const cur = s.value;
     s.innerHTML = '<option value="">Todos</option>';
-    vals.forEach(v=>{
-      const o = document.createElement('option');
-      o.value = v; o.textContent = v;
-      s.appendChild(o);
-    });
+    vals.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; s.appendChild(o); });
     if([...s.options].some(o=>o.value===cur)) s.value = cur;
   };
-  fillSel('estFiltroMes', meses);
-  fillSel('estFiltroAno', anos);
-  fillSel('estFiltroEmp', emps);
+  fillSel('estFiltroCidade', cidades);
+  fillSel('estFiltroEmp',    emps);
 }
 
 function renderEstrategias(){
-  const mes    = document.getElementById('estFiltroMes')?.value    || '';
-  const ano    = document.getElementById('estFiltroAno')?.value    || '';
-  const emp    = document.getElementById('estFiltroEmp')?.value    || '';
-  const status = document.getElementById('estFiltroStatus')?.value || '';
+  const statusFiltro = document.getElementById('estFiltroStatus')?.value || '';
+  const cidadeFiltro = document.getElementById('estFiltroCidade')?.value || '';
+  const empFiltro    = document.getElementById('estFiltroEmp')?.value    || '';
 
   const lista = _estrategias.filter(e=>{
-    if(mes && e._mes !== mes) return false;
-    if(ano && e._ano !== ano) return false;
-    if(emp && e._emp !== emp) return false;
-    if(status && _statusEstrategia(e) !== status) return false;
+    if(statusFiltro){
+      const sit = (e.situacao||'').toLowerCase();
+      if(statusFiltro==='ativo'     && sit!=='ativo')     return false;
+      if(statusFiltro==='finalizado'&& sit!=='finalizado') return false;
+    }
+    if(cidadeFiltro && e.cidade !== cidadeFiltro) return false;
+    if(empFiltro    && e.nome   !== empFiltro)    return false;
     return true;
   });
 
@@ -8667,14 +8622,17 @@ function renderEstrategias(){
   const resumo    = document.getElementById('estResumo');
   if(!container) return;
 
-  const totAtivo  = lista.filter(e=>_statusEstrategia(e)==='ativo').length;
-  const totInativ = lista.filter(e=>_statusEstrategia(e)==='inativo').length;
-  const totFutur  = lista.filter(e=>_statusEstrategia(e)==='futuro').length;
+  const ativos   = lista.filter(e=>(e.situacao||'').toLowerCase()==='ativo');
+  const cidades  = [...new Set(lista.map(e=>e.cidade).filter(Boolean))];
+  const rendas   = lista.map(e=>e.renda).filter(r=>r>0);
+  const rendaMed = rendas.length ? Math.round(rendas.reduce((a,b)=>a+b,0)/rendas.length) : 0;
+  const fmtR     = v => v ? 'R$ '+v.toLocaleString('pt-BR') : '—';
+
   if(resumo) resumo.innerHTML = `
-    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${lista.length}</div><div class="kl">Total</div></div>
-    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--green)">${totAtivo}</div><div class="kl">Ativos</div></div>
-    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--red)">${totInativ}</div><div class="kl">Inativos</div></div>
-    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--amber)">${totFutur}</div><div class="kl">Futuros</div></div>`;
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${lista.length}</div><div class="kl">Empreendimentos</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--green)">${ativos.length}</div><div class="kl">Ativos</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--blue)">${cidades.length}</div><div class="kl">Cidades</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--amber);font-size:16px">${fmtR(rendaMed)}</div><div class="kl">Renda média</div></div>`;
 
   if(!lista.length){
     container.innerHTML = '';
@@ -8683,25 +8641,81 @@ function renderEstrategias(){
   }
   if(empty) empty.style.display = 'none';
 
-  // Agrupa por Empreendimento
-  const byEmp = {};
-  lista.forEach(e=>{
-    const k = e._emp || 'Sem empreendimento';
-    if(!byEmp[k]) byEmp[k] = [];
-    byEmp[k].push(e);
-  });
-
-  container.innerHTML = Object.entries(byEmp).map(([empNome, camps])=>`
-    <div style="margin-bottom:32px">
-      <h3 style="font-size:16px;font-weight:800;color:var(--tx);margin:0 0 14px;display:flex;align-items:center;gap:8px">
-        🏢 ${empNome}
-        <span style="font-size:12px;font-weight:600;color:var(--mu)">${camps.length} ${camps.length===1?'campanha':'campanhas'}</span>
-      </h3>
-      ${camps.map(c=>_renderCampanhaCard(c)).join('')}
-    </div>`).join('');
+  container.innerHTML = `<div class="est-strat-grid">${lista.map(e=>_renderEstrategiaCard(e)).join('')}</div>`;
 }
 
-// Renderiza uma campanha (linha do Excel agrupada por Campanha+Tipo)
+// ── Novo card estratégico (v2 — sem imagens) ──
+function _renderEstrategiaCard(e){
+  const sit   = (e.situacao||'Ativo').trim();
+  const ativo = sit.toLowerCase() === 'ativo';
+  const badge = ativo
+    ? `<span class="est-badge-ativo">● Ativo</span>`
+    : `<span class="est-badge-fin">● ${sit}</span>`;
+
+  const fmtR = v => v ? 'R$ '+v.toLocaleString('pt-BR') : '—';
+
+  // chips de plataforma
+  const platChips = (e.plataforma||'').split(/[,;\/]/).map(p=>p.trim()).filter(Boolean)
+    .map(p=>`<span class="est-strat-badge" style="background:rgba(79,142,247,.12);color:var(--blue);border:1px solid rgba(79,142,247,.3)">${p}</span>`).join('');
+
+  // chips de tipo de campanha
+  const campChips = (e.tipoCamp||'').split(/[,;\/]/).map(t=>t.trim()).filter(Boolean)
+    .map(t=>`<span class="est-strat-badge" style="background:rgba(46,204,142,.1);color:var(--green);border:1px solid rgba(46,204,142,.3)">${t}</span>`).join('');
+
+  // chips de tipo de anúncio
+  const anunChips = (e.tipoAnuncio||'').split(/[,;\/]/).map(t=>t.trim()).filter(Boolean)
+    .map(t=>`<span class="est-strat-badge" style="background:rgba(155,127,244,.1);color:var(--purple);border:1px solid rgba(155,127,244,.3)">${t}</span>`).join('');
+
+  // faixa etária
+  const faixaChip = e.faixa
+    ? `<span class="est-strat-badge" style="background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.3)">👥 ${e.faixa}</span>`
+    : '';
+
+  // blocos de segmentação (localização + público + advantage+ + posicionamentos)
+  const segsHtml = (e.segmentacoes||[]).length ? (e.segmentacoes||[]).map((seg,i)=>{
+    const advTxt = (seg.advant||'').toLowerCase();
+    const advOn  = advTxt && advTxt!=='não'&&advTxt!=='nao'&&advTxt!=='desativado'&&advTxt!=='off'&&advTxt!=='false'&&advTxt!=='0';
+    return `<div class="est-seg-block">
+      <div class="est-seg-title">⚙️ Segmentação ${(e.segmentacoes||[]).length>1 ? i+1 : ''}</div>
+      ${seg.local ? `<div class="est-seg-row">
+        <span class="est-seg-label">Localização</span>
+        <div class="est-seg-tags">${_tagsEst(seg.local)}</div>
+      </div>` : ''}
+      ${seg.publi ? `<div class="est-seg-row">
+        <span class="est-seg-label">Público</span>
+        <div class="est-seg-tags">${_tagsEst(seg.publi)}</div>
+      </div>` : ''}
+      ${seg.advant ? `<div class="est-seg-row">
+        <span class="est-seg-label">Advantage+</span>
+        <div class="est-seg-tags"><span class="est-seg-tag" style="${advOn?'color:var(--amber)':''}">${seg.advant}</span></div>
+      </div>` : ''}
+      ${seg.posic && seg.posic.toLowerCase()!=='desativado' ? `<div class="est-seg-row">
+        <span class="est-seg-label">Posicionamentos</span>
+        <div class="est-seg-tags">${_tagsEst(seg.posic)}</div>
+      </div>` : ''}
+    </div>`;
+  }).join('') : `<div class="est-seg-block" style="color:var(--mu);font-size:12px;padding:14px 18px">Sem segmentação cadastrada</div>`;
+
+  return `<div class="est-strat-card">
+    <div class="est-strat-hd">
+      <div style="flex:1;min-width:0">
+        <div class="est-strat-nome">${e.nome}</div>
+        <div class="est-strat-cidade">📍 ${e.cidade||'—'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+        ${badge}
+        <div class="est-strat-renda" style="color:var(--amber)">${fmtR(e.renda)}</div>
+        <div style="font-size:10px;color:var(--mu)">Renda familiar</div>
+      </div>
+    </div>
+    <div class="est-strat-badges">
+      ${platChips}${campChips}${anunChips}${faixaChip}
+    </div>
+    ${segsHtml}
+  </div>`;
+}
+
+// ── Legacy (mantido para compatibilidade) ──
 function _renderCampanhaCard(c){
   const st    = _statusEstrategia(c);
   const badge = st==='ativo'
@@ -9069,7 +9083,7 @@ function deletarEstrategiaLocal(uid){
 }
 
 function limparFiltrosEst(){
-  ['estFiltroMes','estFiltroAno','estFiltroEmp','estFiltroStatus']
+  ['estFiltroStatus','estFiltroCidade','estFiltroEmp']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderEstrategias();
 }

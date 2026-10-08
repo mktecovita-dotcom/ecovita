@@ -8519,7 +8519,7 @@ async function carregarDoGitHub(){
           _source:    'excel',
           situacao:   sit || 'Ativo',
           nome:       emp,
-          renda:      parseFloat((r[kRenda]||'0').toString().replace(/\D/g,'')) || 0,
+          renda:      (()=>{ let s=(r[kRenda]||'0').toString().replace(/[R$\s]/g,'').trim(); if(s.includes(',')) s=s.replace(/\./g,'').replace(',','.'); else s=s.replace(/\./g,''); return parseFloat(s)||0; })(),
           cidade:     (r[kCidade]||'').toString().trim(),
           plataforma: (r[kPlat]  ||'').toString().trim(),
           tipoCamp:   (r[kTCamp] ||'').toString().trim(),

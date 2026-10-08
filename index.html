@@ -8519,7 +8519,7 @@ async function carregarDoGitHub(){
           _source:    'excel',
           situacao:   sit || 'Ativo',
           nome:       emp,
-          renda:      (()=>{ let s=(r[kRenda]||'0').toString().replace(/[R$\s]/g,'').trim(); if(s.includes(',')) s=s.replace(/\./g,'').replace(',','.'); else s=s.replace(/\./g,''); return parseFloat(s)||0; })(),
+          renda:      (()=>{ let s=(r[kRenda]||'0').toString().replace(/[R$\s]/g,'').trim(); const hasDot=s.includes('.'),hasCom=s.includes(','); if(hasDot&&hasCom){ if(s.lastIndexOf(',')>s.lastIndexOf('.')) s=s.replace(/\./g,'').replace(',','.'); else s=s.replace(/,/g,''); } else if(hasCom) s=s.replace(',','.'); return parseFloat(s)||0; })(),
           cidade:     (r[kCidade]||'').toString().trim(),
           plataforma: (r[kPlat]  ||'').toString().trim(),
           tipoCamp:   (r[kTCamp] ||'').toString().trim(),
@@ -8676,7 +8676,7 @@ function _renderEstrategiaCard(e){
     const advTxt = (seg.advant||'').toLowerCase();
     const advOn  = advTxt && advTxt!=='não'&&advTxt!=='nao'&&advTxt!=='desativado'&&advTxt!=='off'&&advTxt!=='false'&&advTxt!=='0';
     return `<div class="est-seg-block">
-      <div class="est-seg-title">⚙️ Segmentação ${(e.segmentacoes||[]).length>1 ? i+1 : ''}</div>
+      <div class="est-seg-title">⚙️ Campanha ${(e.segmentacoes||[]).length>1 ? i+1 : ''}</div>
       ${seg.local ? `<div class="est-seg-row">
         <span class="est-seg-label">Localização</span>
         <div class="est-seg-tags">${_tagsEst(seg.local)}</div>

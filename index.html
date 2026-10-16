@@ -1032,6 +1032,47 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
 
+      <!-- ══ CONJUNTOS DE ANÚNCIO (Meta Graph API) ══ -->
+      <div id="conjuntosSection" style="margin-top:28px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="font-size:14px;font-weight:800;color:var(--tx)">🎯 Conjuntos de Anúncio · Visão Estratégica</div>
+          <button class="btn btn-primary" onclick="loadConjuntos()" id="btnLoadConj" style="font-size:11px;padding:5px 14px">↻ Carregar todos</button>
+          <button class="btn" onclick="toggleTokenInput()" style="font-size:11px;padding:5px 14px">🔑 Token Meta</button>
+          <select id="conjFiltroStatus" onchange="renderConjuntos()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
+            <option value="">Todos status</option>
+            <option value="ACTIVE">Apenas ativos</option>
+            <option value="PAUSED">Apenas pausados</option>
+          </select>
+          <select id="conjFiltroObj" onchange="renderConjuntos()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
+            <option value="">Todos objetivos</option>
+            <option value="LEAD_GENERATION">Cadastro</option>
+            <option value="CONVERSATIONS">WhatsApp</option>
+            <option value="REACH">Alcance</option>
+            <option value="QUALITY_LEAD">Lead Qualificado</option>
+          </select>
+          <select id="conjFiltroConta" onchange="renderConjuntos()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
+            <option value="">Todas as contas</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu);cursor:pointer">
+            <input type="checkbox" id="conjSoComDados" checked onchange="renderConjuntos()"> Só com dados
+          </label>
+          <span id="conjInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
+        </div>
+        <div id="conjTokenBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 18px;margin-bottom:14px">
+          <div style="font-size:12px;color:var(--mu);margin-bottom:8px">Cole seu <strong style="color:var(--tx)">Meta Access Token</strong> — obtenha no <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color:var(--blue)">Graph API Explorer</a> com permissões <em>ads_read</em></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="conjTokenInput" type="password" placeholder="EAAxxxxxxxxx..." style="flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:6px 12px;color:var(--tx);font-size:12px;outline:none">
+            <button class="btn btn-primary" onclick="salvarTokenConj()" style="font-size:12px">Salvar</button>
+            <button class="btn" onclick="limparTokenConj()" style="font-size:12px;color:var(--red)">Limpar</button>
+          </div>
+          <div id="conjTokenStatus" style="font-size:11px;color:var(--mu);margin-top:6px"></div>
+        </div>
+        <div id="conjKpis" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px"></div>
+        <div id="conjAlertas" style="margin-bottom:14px"></div>
+        <div id="conjRanking" style="margin-bottom:14px"></div>
+        <div id="conjCards"></div>
+      </div>
+
       <!-- Box IA -->
       <div id="campAIContainer" style="display:none;margin-top:8px">
         <div class="ia-box">
@@ -3769,6 +3810,236 @@ async function analisarCampanhasIA(){
     el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px">${e.message}</div>`;
   }
   window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════
+// CONJUNTOS DE ANÚNCIO — Meta Graph API (browser-side)
+// ═══════════════════════════════════════════════════════
+const CONJ_ACCOUNTS = [
+  { id:'791608213948396',  name:'Cidade Alegre' },
+  { id:'1053452736427713', name:'Nova Quinta' },
+  { id:'1184575230323791', name:'Altos da Serra (Botucatu)' },
+  { id:'805786318461618',  name:'Parque Aviação (Pirassununga)' },
+  { id:'856937463579861',  name:'Institucional (Multi)' },
+];
+let _conjData = [];
+const CONJ_TOKEN_KEY = 'ecovita_meta_token';
+
+function getTokenConj(){ return localStorage.getItem(CONJ_TOKEN_KEY)||''; }
+function salvarTokenConj(){
+  const v=(document.getElementById('conjTokenInput')?.value||'').trim();
+  if(!v){alert('Cole o token antes de salvar.');return;}
+  localStorage.setItem(CONJ_TOKEN_KEY,v);
+  const s=document.getElementById('conjTokenStatus');
+  if(s) s.textContent='✅ Token salvo com sucesso.';
+  document.getElementById('conjTokenInput').value='';
+}
+function limparTokenConj(){
+  localStorage.removeItem(CONJ_TOKEN_KEY);
+  const s=document.getElementById('conjTokenStatus');
+  if(s) s.textContent='🗑️ Token removido.';
+}
+function toggleTokenInput(){
+  const b=document.getElementById('conjTokenBox');
+  if(b) b.style.display=b.style.display==='none'?'block':'none';
+  const t=document.getElementById('conjTokenInput');
+  const saved=getTokenConj();
+  if(t && saved) t.placeholder='Token salvo (cole novo para substituir)';
+}
+
+function _conjParseResultados(insights, goal){
+  const data=insights?.data?.[0];
+  if(!data) return {results:0,cpr:null};
+  const actions=data.actions||[];
+  const cpa=data.cost_per_action_type||[];
+  const fv=(arr,...keys)=>{for(const k of keys){const f=arr.find(a=>a.action_type===k);if(f)return parseFloat(f.value)||0;}return 0;};
+  let results=0,cpr=null;
+  const g=(goal||'').toUpperCase();
+  if(g==='LEAD_GENERATION'||g==='QUALITY_LEAD'){
+    results=fv(actions,'leadgen.other','lead','onsite_conversion.lead_grouped');
+    const c=fv(cpa,'leadgen.other','lead','onsite_conversion.lead_grouped');
+    if(c) cpr=c;
+  } else if(g==='CONVERSATIONS'){
+    results=fv(actions,'onsite_conversion.messaging_conversation_started_7d','onsite_conversion.messaging_conversation_started');
+    const c=fv(cpa,'onsite_conversion.messaging_conversation_started_7d','onsite_conversion.messaging_conversation_started');
+    if(c) cpr=c;
+  } else if(g==='REACH'){
+    results=parseInt(data.reach)||0;
+    const spend=parseFloat(data.spend)||0;
+    cpr=results>0?spend/results*1000:null;
+  } else if(g==='LINK_CLICKS'){
+    results=fv(actions,'link_click');
+    const c=fv(cpa,'link_click');
+    if(c) cpr=c;
+  }
+  if(!cpr&&results>0){const spend=parseFloat(data.spend)||0;cpr=spend/results;}
+  return {results,cpr:cpr||null};
+}
+
+async function _fetchContaAdsets(account,token,datePreset){
+  const fields=[
+    'name','effective_status','campaign_name','optimization_goal',
+    `insights.date_preset(${datePreset}){spend,impressions,reach,frequency,ctr,cpc,actions,cost_per_action_type}`
+  ].join(',');
+  const url=`https://graph.facebook.com/v21.0/act_${account.id}/adsets?fields=${encodeURIComponent(fields)}&limit=200&access_token=${token}`;
+  const resp=await fetch(url);
+  const json=await resp.json();
+  if(json.error) throw new Error(json.error.message);
+  return (json.data||[]).map(as=>{
+    const ins=as.insights?.data?.[0]||null;
+    const {results,cpr}=_conjParseResultados(as.insights,as.optimization_goal);
+    return {
+      _account:account, id:as.id, name:as.name,
+      status:as.effective_status, campaign:as.campaign_name,
+      goal:as.optimization_goal,
+      spend:parseFloat(ins?.spend)||0,
+      impressions:parseInt(ins?.impressions)||0,
+      reach:parseInt(ins?.reach)||0,
+      frequency:parseFloat(ins?.frequency)||0,
+      ctr:parseFloat((ins?.ctr||'0').replace(',','.'))||0,
+      cpc:parseFloat(ins?.cpc)||0,
+      results, cpr,
+    };
+  });
+}
+
+async function loadConjuntos(){
+  const token=getTokenConj();
+  if(!token){
+    document.getElementById('conjTokenBox').style.display='block';
+    alert('Configure o Token Meta antes de carregar.');
+    return;
+  }
+  const btn=document.getElementById('btnLoadConj');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Carregando...';}
+  const info=document.getElementById('conjInfo');
+  if(info) info.textContent='Buscando conjuntos...';
+  const period=document.getElementById('fCampPeriod')?.value||'last_30d';
+  const results=await Promise.allSettled(CONJ_ACCOUNTS.map(acc=>_fetchContaAdsets(acc,token,period)));
+  _conjData=[];
+  const erros=[];
+  results.forEach((r,i)=>{
+    if(r.status==='fulfilled') _conjData.push(...r.value);
+    else erros.push(`${CONJ_ACCOUNTS[i].name}: ${r.reason?.message||'erro'}`);
+  });
+  const sel=document.getElementById('conjFiltroConta');
+  if(sel){
+    sel.innerHTML='<option value="">Todas as contas</option>';
+    CONJ_ACCOUNTS.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.name;sel.appendChild(o);});
+  }
+  const ok=results.filter(r=>r.status==='fulfilled').length;
+  if(btn){btn.disabled=false;btn.textContent='↻ Carregar todos';}
+  if(info) info.textContent=`${_conjData.length} conjuntos · ${ok}/${CONJ_ACCOUNTS.length} contas carregadas`;
+  if(erros.length) console.warn('[Conjuntos] Erros:',erros);
+  renderConjuntos();
+}
+
+function renderConjuntos(){
+  if(!_conjData.length) return;
+  const fB=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const statusF=document.getElementById('conjFiltroStatus')?.value||'';
+  const objF=document.getElementById('conjFiltroObj')?.value||'';
+  const contaF=document.getElementById('conjFiltroConta')?.value||'';
+  const soComDados=document.getElementById('conjSoComDados')?.checked??true;
+  const lista=_conjData.filter(as=>{
+    if(statusF && as.status!==statusF) return false;
+    if(objF    && as.goal!==objF)      return false;
+    if(contaF  && as._account.id!==contaF) return false;
+    if(soComDados && as.spend===0)         return false;
+    return true;
+  });
+
+  // ── KPIs ──
+  const totalG=lista.reduce((s,a)=>s+a.spend,0);
+  const totalR=lista.reduce((s,a)=>s+a.results,0);
+  const ativos=lista.filter(a=>a.status==='ACTIVE').length;
+  const cprMed=totalR>0?totalG/totalR:0;
+  const freqAlta=lista.filter(a=>a.frequency>=5).length;
+  document.getElementById('conjKpis').innerHTML=`
+    <div class="kpi blue"  style="margin:0"><div class="kpi-label">Conjuntos</div><div class="kpi-val blue">${lista.length}</div></div>
+    <div class="kpi green" style="margin:0"><div class="kpi-label">Ativos</div><div class="kpi-val green">${ativos}</div></div>
+    <div class="kpi amber" style="margin:0"><div class="kpi-label">Gasto Total</div><div class="kpi-val amber" style="font-size:16px">${fB(totalG)}</div></div>
+    <div class="kpi teal"  style="margin:0"><div class="kpi-label">Resultados</div><div class="kpi-val teal">${totalR.toLocaleString('pt-BR')}</div></div>
+    <div class="kpi ${cprMed>50?'red':cprMed>25?'amber':'green'}" style="margin:0"><div class="kpi-label">CPR Médio</div><div class="kpi-val">${cprMed>0?fB(cprMed):'—'}</div></div>
+    <div class="kpi ${freqAlta>0?'red':'mu'}" style="margin:0"><div class="kpi-label">⚠️ Freq. Alta (>5)</div><div class="kpi-val ${freqAlta>0?'red':''}">${freqAlta}</div></div>`;
+
+  // ── Alertas ──
+  const alertas=[];
+  lista.forEach(as=>{
+    if(as.frequency>=10) alertas.push({nivel:'crit',msg:`🔴 <strong>${as.name.slice(0,55)}</strong> <span style="color:var(--mu)">(${as._account.name})</span> — Frequência <strong style="color:var(--red)">${as.frequency.toFixed(1)}x</strong> · Público saturado — pause ou renove o criativo`});
+    else if(as.frequency>=5) alertas.push({nivel:'warn',msg:`🟡 <strong>${as.name.slice(0,55)}</strong> <span style="color:var(--mu)">(${as._account.name})</span> — Frequência <strong style="color:var(--amber)">${as.frequency.toFixed(1)}x</strong> · Monitorar de perto`});
+    if(as.goal!=='REACH'&&as.cpr&&as.cpr>80) alertas.push({nivel:'crit',msg:`🔴 <strong>${as.name.slice(0,55)}</strong> <span style="color:var(--mu)">(${as._account.name})</span> — CPR <strong style="color:var(--red)">${fB(as.cpr)}</strong> · Muito alto — revise segmentação ou criativo`});
+    else if(as.goal!=='REACH'&&as.cpr&&as.cpr>40) alertas.push({nivel:'warn',msg:`🟡 <strong>${as.name.slice(0,55)}</strong> <span style="color:var(--mu)">(${as._account.name})</span> — CPR <strong style="color:var(--amber)">${fB(as.cpr)}</strong> · Acima da média`});
+  });
+  const alertasEl=document.getElementById('conjAlertas');
+  alertasEl.innerHTML=alertas.length?`
+    <div class="card" style="border-left:3px solid var(--red);padding:14px 18px">
+      <div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">⚠️ Alertas Estratégicos · ${alertas.length} ocorrência${alertas.length>1?'s':''}</div>
+      ${alertas.map(a=>`<div style="padding:7px 0;border-bottom:1px solid var(--bdr);font-size:12px;line-height:1.5">${a.msg}</div>`).join('')}
+    </div>`:'';
+
+  // ── Ranking Top 10 menor CPR ──
+  const comCPR=lista.filter(a=>a.cpr&&a.goal!=='REACH'&&a.results>0).sort((a,b)=>a.cpr-b.cpr).slice(0,10);
+  const rankEl=document.getElementById('conjRanking');
+  const GOAL_LABEL={'LEAD_GENERATION':'Cadastro','CONVERSATIONS':'WhatsApp','QUALITY_LEAD':'Lead Qual.','REACH':'Alcance','LINK_CLICKS':'Cliques'};
+  const GOAL_COLOR={'LEAD_GENERATION':'var(--blue)','CONVERSATIONS':'var(--green)','QUALITY_LEAD':'var(--teal)','REACH':'var(--purple)','LINK_CLICKS':'var(--mu)'};
+  if(comCPR.length){
+    const rows=comCPR.map((as,i)=>{
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+      const fc=as.frequency>=10?'var(--red)':as.frequency>=5?'var(--amber)':'var(--green)';
+      const cc=as.cpr>50?'var(--red)':as.cpr>25?'var(--amber)':'var(--green)';
+      return `<tr style="border-bottom:1px solid var(--bdr)">
+        <td style="padding:8px 12px;font-size:13px">${medal}</td>
+        <td style="padding:8px 4px;max-width:260px"><div style="font-size:12px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px" title="${as.name}">${as.name}</div><div style="font-size:10px;color:var(--mu)">${as._account.name}</div></td>
+        <td style="padding:8px 8px"><span style="font-size:10px;padding:2px 7px;border-radius:5px;background:${GOAL_COLOR[as.goal]||'var(--mu)'}22;color:${GOAL_COLOR[as.goal]||'var(--mu)'};">${GOAL_LABEL[as.goal]||as.goal}</span></td>
+        <td style="padding:8px 10px;font-size:13px;font-weight:800;color:${cc}">${fB(as.cpr)}</td>
+        <td style="padding:8px 10px;font-size:12px;color:var(--tx)">${as.results.toLocaleString('pt-BR')}</td>
+        <td style="padding:8px 10px;font-size:12px;color:var(--mu)">${fB(as.spend)}</td>
+        <td style="padding:8px 10px;font-size:12px;font-weight:700;color:${fc}">${as.frequency.toFixed(1)}x</td>
+        <td style="padding:8px 10px"><span style="padding:2px 8px;border-radius:20px;font-size:10px;background:${as.status==='ACTIVE'?'rgba(46,204,142,.15)':'rgba(107,122,158,.15)'};color:${as.status==='ACTIVE'?'var(--green)':'var(--mu)'}">${as.status==='ACTIVE'?'● Ativo':'● Pausado'}</span></td>
+      </tr>`;
+    }).join('');
+    rankEl.innerHTML=`<div class="card"><div style="font-size:12px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🏆 Top 10 Conjuntos · Menor CPR (exceto Alcance)</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:1px solid var(--bdr2)">${['#','Conjunto de Anúncio','Objetivo','CPR','Resultados','Gasto','Frequência','Status'].map(h=>`<th style="padding:6px ${h==='Conjunto de Anúncio'?'4':'10'}px;text-align:left;font-size:10px;color:var(--mu);text-transform:uppercase;white-space:nowrap">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  } else { rankEl.innerHTML=''; }
+
+  // ── Cards por conta ──
+  const cardsEl=document.getElementById('conjCards');
+  const byAccount={};
+  lista.forEach(as=>{
+    const k=as._account.id;
+    if(!byAccount[k]) byAccount[k]={account:as._account,adsets:[]};
+    byAccount[k].adsets.push(as);
+  });
+  Object.values(byAccount).forEach(acc=>{
+    acc.adsets.sort((a,b)=>{
+      if(a.cpr&&b.cpr) return a.cpr-b.cpr;
+      if(a.cpr) return -1; if(b.cpr) return 1;
+      return b.spend-a.spend;
+    });
+  });
+  cardsEl.innerHTML=Object.values(byAccount).map(acc=>{
+    const tG=acc.adsets.reduce((s,a)=>s+a.spend,0);
+    const tR=acc.adsets.reduce((s,a)=>s+a.results,0);
+    const rows=acc.adsets.map(as=>{
+      const fc=as.frequency>=10?'var(--red)':as.frequency>=5?'var(--amber)':'var(--green)';
+      const cc=!as.cpr?'var(--mu)':as.cpr>50?'var(--red)':as.cpr>25?'var(--amber)':'var(--green)';
+      const freqI=as.frequency>=10?'🔴 ':as.frequency>=5?'🟡 ':'';
+      const cprI=as.cpr?(as.cpr>50?'🔴 ':as.cpr>25?'🟡 ':'✅ '):'';
+      const gc=GOAL_COLOR[as.goal]||'var(--mu)';
+      return `<tr style="border-bottom:1px solid var(--bdr);transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+        <td style="padding:9px 12px;max-width:300px"><div style="font-size:12px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${as.name}">${as.name}</div><div style="font-size:10px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${as.campaign||''}</div></td>
+        <td style="padding:9px 8px;white-space:nowrap"><span style="font-size:10px;padding:2px 7px;border-radius:5px;background:${gc}22;color:${gc};border:1px solid ${gc}44">${GOAL_LABEL[as.goal]||as.goal||'—'}</span></td>
+        <td style="padding:9px 8px;font-size:12px;color:var(--mu);white-space:nowrap">${fB(as.spend)}</td>
+        <td style="padding:9px 8px;font-size:12px;font-weight:800;color:${cc};white-space:nowrap">${as.cpr?cprI+fB(as.cpr):'—'}</td>
+        <td style="padding:9px 8px;font-size:12px;color:var(--tx)">${as.results>0?as.results.toLocaleString('pt-BR'):'—'}</td>
+        <td style="padding:9px 8px;font-size:12px;color:var(--tx)">${as.impressions>0?as.impressions.toLocaleString('pt-BR'):'—'}</td>
+        <td style="padding:9px 8px;font-size:12px;color:var(--tx)">${as.ctr>0?as.ctr.toFixed(2)+'%':'—'}</td>
+        <td style="padding:9px 8px;font-size:12px;font-weight:700;color:${fc};white-space:nowrap">${as.frequency>0?freqI+as.frequency.toFixed(1)+'x':'—'}</td>
+        <td style="padding:9px 8px;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:10px;background:${as.status==='ACTIVE'?'rgba(46,204,142,.15)':'rgba(107,122,158,.15)'};color:${as.status==='ACTIVE'?'var(--green)':'var(--mu)'}">${as.status==='ACTIVE'?'● Ativo':'● Pausado'}</span></td>
+      </tr>`;
+    }).join('');
+    return `<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><div style="font-size:15px;font-weight:800;color:var(--tx)">🏢 ${acc.account.name}</div><span style="font-size:11px;color:var(--mu)">${acc.adsets.length} conjuntos</span><span style="font-size:12px;font-weight:700;color:var(--amber)">${fB(tG)}</span>${tR>0?`<span style="font-size:12px;color:var(--green)">✅ ${tR.toLocaleString('pt-BR')} resultados</span>`:''}</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid var(--bdr2)">${['Conjunto de Anúncio','Objetivo','Gasto','CPR','Resultados','Impressões','CTR','Frequência','Status'].map(h=>`<th style="padding:6px ${h==='Conjunto de Anúncio'?'12':'8'}px;text-align:left;font-size:10px;color:var(--mu);text-transform:uppercase;white-space:nowrap">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════

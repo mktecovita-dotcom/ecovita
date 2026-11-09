@@ -7975,12 +7975,16 @@ function tvNextSlide(){
       tvSlide = 'campanhas'; tvAccIdx = 0;
       tvLoadCampTV(accounts[0]);
     } else {
+      buildTVScreen();
+    }
   } else {
     tvAccIdx++;
     if(tvAccIdx < accounts.length){
       tvLoadCampTV(accounts[tvAccIdx]);
+    } else {
       tvSlide = 'dashboard'; tvAccIdx = 0;
       buildTVScreen();
+    }
   }
 }
 

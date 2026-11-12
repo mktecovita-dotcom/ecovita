@@ -406,6 +406,21 @@ body.light .theme-thumb{transform:translateX(20px);background:var(--blue)}
 .theme-label{font-size:12px;color:var(--mu);font-weight:500;transition:color .2s}
 body.light .theme-label{color:var(--blue)}
 
+/* ── ORIGEM DAS VENDAS ──────────────────────────────── */
+.ov-table{width:100%;border-collapse:collapse}
+.ov-table th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);background:var(--bg3);border-bottom:1px solid var(--bdr)}
+.ov-table td{padding:10px 14px;font-size:12px;color:var(--tx);border-bottom:1px solid var(--bdr)}
+.ov-table tr:last-child td{border-bottom:none}
+.ov-table tr:hover td{background:rgba(255,255,255,.025)}
+.ov-table td.ov-emp{font-weight:700;color:var(--tx)}
+.ov-table td.ov-camp{color:var(--mu);font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.ov-badge-green{background:rgba(46,204,142,.15);color:#2ecc8e;border:1px solid rgba(46,204,142,.3)}
+.ov-badge-blue{background:rgba(79,142,247,.15);color:#4f8ef7;border:1px solid rgba(79,142,247,.3)}
+.ov-num{font-size:18px;font-weight:900;color:var(--tx)}
+.ov-empty{padding:32px;text-align:center;color:var(--mu);font-size:13px}
+.ov-total-row td{background:var(--bg3)!important;font-weight:700}
+
 /* ── ESTRATÉGIAS DE CAMPANHAS ───────────────────────── */
 .est-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;margin-bottom:16px;transition:border-color .2s}
 .est-card:hover{border-color:var(--bdr2)}
@@ -936,51 +951,23 @@ body.tv-mode #tvExitBtn{display:block}
         <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 10px">⚙️ Contas</button>
       </div>
 
-      <!-- Filtros -->
-      <div class="fbar">
-        <span class="fl">Objetivo:</span>
-        <select id="fCampObj" onchange="filterCampanhasAPI()">
-          <option value="">Todos</option>
-          <option value="Alcance">Alcance</option>
-          <option value="Cadastro">Cadastro</option>
-          <option value="WhatsApp">WhatsApp</option>
-        </select>
-        <span class="fl">Status:</span>
-        <select id="fCampSt" onchange="filterCampanhasAPI()">
-          <option value="">Todos</option>
-          <option value="ACTIVE">Ativas</option>
-          <option value="PAUSED">Pausadas</option>
-        </select>
-        <span class="fl">Período:</span>
-        <select id="fCampPeriod" onchange="loadCampanhasAPI()">
-          <option value="this_month">Este mês</option>
-          <option value="last_month">Mês passado</option>
-          <option value="last_30d">Últimos 30 dias</option>
-          <option value="last_90d">Últimos 90 dias</option>
-          <option value="this_quarter">Este trimestre</option>
-          <option value="maximum">Máximo histórico</option>
-        </select>
-        <span class="fl">Empreendimento:</span>
-        <select id="fCampEmp" onchange="var d=document.getElementById('fCampEmpDiario');if(d)d.value=this.value;filterCampanhasAPI();" style="min-width:180px">
-          <option value="">Todos</option>
-        </select>
-        <button class="btn btn-primary" id="btnLoadCamp" onclick="loadCampanhasAPI()">↻ Carregar</button>
-        <button class="btn btn-ai" id="btnAnalisarCamp" style="display:none" onclick="analisarCampanhasIA()">🤖 Analisar com IA</button>
-        <span id="infoCamp" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
-      </div>
-
-      <!-- KPIs -->
-      <div class="kpi-grid" style="grid-template-columns:repeat(9,1fr);margin-bottom:14px;gap:8px">
-        <div class="kpi blue"  style="margin:0"><div class="kpi-label">Total Campanhas</div><div class="kpi-val blue"   id="ck1">—</div><div class="kpi-sub" id="ck1s"></div></div>
-        <div class="kpi green" style="margin:0"><div class="kpi-label">Ativas</div><div class="kpi-val green"  id="ck2">—</div><div class="kpi-sub" id="ck2s"></div></div>
-        <div class="kpi amber" style="margin:0"><div class="kpi-label">Gasto no Período</div><div class="kpi-val amber"  id="ck3">—</div><div class="kpi-sub" id="ck3s"></div></div>
-        <div class="kpi green" style="margin:0"><div class="kpi-label">Res. WhatsApp</div><div class="kpi-val green"  id="ckWpp">—</div><div class="kpi-sub" id="ckWpps"></div></div>
-        <div class="kpi blue"  style="margin:0"><div class="kpi-label">Res. Cadastro</div><div class="kpi-val blue"   id="ckCad">—</div><div class="kpi-sub" id="ckCads"></div></div>
-        <div class="kpi purple" style="margin:0"><div class="kpi-label">Res. Alcance</div><div class="kpi-val purple" id="ckAlc">—</div><div class="kpi-sub" id="ckAlcs"></div></div>
-        <div class="kpi teal"  style="margin:0"><div class="kpi-label">Res. Total (W+C)</div><div class="kpi-val teal"   id="ck4">—</div><div class="kpi-sub" id="ck4s"></div></div>
-        <div class="kpi teal"  style="margin:0"><div class="kpi-label">CTR Médio</div><div class="kpi-val teal"   id="ck5">—</div><div class="kpi-sub" id="ck5s"></div></div>
-        <div class="kpi amber" style="margin:0;border-top-color:var(--amber)"><div class="kpi-label">CPL</div><div class="kpi-val amber"  id="ckCpl2">—</div><div class="kpi-sub" id="ckCpl2s"></div></div>
-      </div>
+      <!-- Stubs ocultos para compatibilidade JS -->
+      <select id="fCampObj" style="display:none"></select>
+      <select id="fCampSt" style="display:none"></select>
+      <select id="fCampPeriod" style="display:none"></select>
+      <select id="fCampEmp" style="display:none"></select>
+      <button id="btnLoadCamp" style="display:none"></button>
+      <button id="btnAnalisarCamp" style="display:none"></button>
+      <span id="infoCamp" style="display:none"></span>
+      <span id="ck1" style="display:none"></span><span id="ck1s" style="display:none"></span>
+      <span id="ck2" style="display:none"></span><span id="ck2s" style="display:none"></span>
+      <span id="ck3" style="display:none"></span><span id="ck3s" style="display:none"></span>
+      <span id="ckWpp" style="display:none"></span><span id="ckWpps" style="display:none"></span>
+      <span id="ckCad" style="display:none"></span><span id="ckCads" style="display:none"></span>
+      <span id="ckAlc" style="display:none"></span><span id="ckAlcs" style="display:none"></span>
+      <span id="ck4" style="display:none"></span><span id="ck4s" style="display:none"></span>
+      <span id="ck5" style="display:none"></span><span id="ck5s" style="display:none"></span>
+      <span id="ckCpl2" style="display:none"></span><span id="ckCpl2s" style="display:none"></span>
 
       <!-- Stubs para compatibilidade com JS existente -->
       <div id="campCards" style="display:none"></div>
@@ -1029,6 +1016,33 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
 
       <div id="campAIContainer" style="display:none"></div>
+
+      <!-- ══ ORIGEM DAS VENDAS POR CAMPANHA ══ -->
+      <div id="origemVendasSection" style="margin-top:28px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:3px;height:22px;background:var(--green);border-radius:2px"></div>
+          <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--tx)">Origem das Vendas por Campanha</h3>
+          <span id="origemVendasInfo" style="font-size:11px;color:var(--mu);margin-left:4px"></span>
+        </div>
+        <div id="origemVendasGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:0;overflow:hidden">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3);display:flex;align-items:center;gap:8px">
+              <span style="font-size:15px">📋</span>
+              <span id="formVendasTitle" style="font-size:14px;font-weight:800;color:var(--tx)">Vendas de Formulário Meta</span>
+              <span style="font-size:11px;color:var(--mu);margin-left:4px">Rastreadas até campanha, conjunto e criativo</span>
+            </div>
+            <div id="formVendasBody" style="padding:0"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:0;overflow:hidden">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3);display:flex;align-items:center;gap:8px">
+              <span style="font-size:15px">💬</span>
+              <span id="wppVendasTitle" style="font-size:14px;font-weight:800;color:var(--tx)">Vendas do ChatBot (WhatsApp)</span>
+              <span style="font-size:11px;color:var(--mu);margin-left:4px">Conjunto e criativo não chegam ao CRM</span>
+            </div>
+            <div id="wppVendasBody" style="padding:0"></div>
+          </div>
+        </div>
+      </div>
 
     </div>
 
@@ -2481,7 +2495,7 @@ function goPage(pg){
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;
-  if(pg==='campanhas') initCampanhasPage();
+  if(pg==='campanhas'){ initCampanhasPage(); renderOrigemVendas(); }
   if(pg==='investimento') loadInvestimento();
   if(pg==='instagram') loadOrganico('instagram');
   if(pg==='facebook')  loadOrganico('facebook');
@@ -2769,6 +2783,8 @@ function parseLeads(rows){
     const reimpactado = isOnline(p) && !!dataUltima && !sameDay(dataCadastro, dataUltima)
                         && !LIMPEZA_DATAS.includes(dataUltimaRawDia);
 
+    // Colunas Q(16), R(17), S(18), T(19) — campanha/conjunto/criativo do Meta (via CVCRM)
+    const vals = Object.values(r);
     return {
       situacao       : (r['Situação']||'').trim(),
       emp            : normalizeEmpCRM(r['Primeiro Empreendimento']||''),
@@ -2779,6 +2795,10 @@ function parseLeads(rows){
       reimpactado,
       dataCadastro,
       dataUltima,
+      _campanha  : (vals[16]||'').trim(),
+      _conjunto  : (vals[17]||'').trim(),
+      _criativo  : (vals[18]||'').trim(),
+      _colT      : (vals[19]||'').trim(),
     };
   });
 }
@@ -5716,6 +5736,7 @@ async function loadAll(){
     if(!dadosRoas.length)throw new Error('Planilha ROI/ROAS sem dados. Verifique o acesso público.');
     popularFiltros();
     renderDashboard();
+    renderOrigemVendas();
     // Badge: campanhas com status active E que têm gasto registrado
     const ativas=campsMeta.filter(c=>c.status==='active'&&c.valor>0).length;
     sid('tbBadge',`${ativas} campanha${ativas!==1?'s':''} ativa${ativas!==1?'s':''}`);
@@ -7532,6 +7553,108 @@ function tkHidePreview(){
 
 /* renderTkCompare — removido, comparação automática agora está em renderTiktok() */
 
+
+// ─── ORIGEM DAS VENDAS POR CAMPANHA ──────────────────────────────────────────
+
+function renderOrigemVendas(){
+  const formBody = document.getElementById('formVendasBody');
+  const wppBody  = document.getElementById('wppVendasBody');
+  const formTitle= document.getElementById('formVendasTitle');
+  const wppTitle = document.getElementById('wppVendasTitle');
+  const info     = document.getElementById('origemVendasInfo');
+  if(!formBody || !wppBody) return;
+  if(!leadsCV || !leadsCV.length){
+    formBody.innerHTML = '<div class="ov-empty">Aguardando dados do CVCRM…</div>';
+    wppBody.innerHTML  = '<div class="ov-empty">Aguardando dados do CVCRM…</div>';
+    return;
+  }
+
+  // Situações que representam uma venda fechada
+  const SIT_VENDA = ['Venda Realizada','Com Reserva','Venda','Reserva'];
+  const isVenda = s => SIT_VENDA.some(v => s.toLowerCase().includes(v.toLowerCase().replace(' ','')));
+
+  const vendas = leadsCV.filter(l => isVenda(l.situacao));
+
+  // Form Meta = primeira origem facebook/instagram
+  const isForm = o => /facebook|instagram|form|meta/i.test(o);
+  // WhatsApp = chatbot/whatsapp
+  const isWpp  = o => /chatbot|whatsapp|chat|wpp/i.test(o);
+
+  const vendaForm = vendas.filter(l => isForm(l.primeiraOrigem));
+  const vendaWpp  = vendas.filter(l => isWpp(l.primeiraOrigem));
+
+  // ─── TABELA FORMULÁRIO ───────────────────────────────────
+  if(formTitle) formTitle.textContent = `Vendas de Formulário Meta · ${vendaForm.length}`;
+
+  if(!vendaForm.length){
+    formBody.innerHTML = '<div class="ov-empty">Nenhuma venda de formulário encontrada</div>';
+  } else {
+    // Agrupa por emp + campanha + conjunto + criativo
+    const map = new Map();
+    vendaForm.forEach(l => {
+      const key = [l.emp, l._campanha, l._conjunto, l._criativo].join('||');
+      map.set(key, (map.get(key)||0) + 1);
+    });
+    // Ordena por emp
+    const rows = [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+    const hasCamp = rows.some(([k])=>k.split('||')[1]);
+
+    let html = '<table class="ov-table"><thead><tr>';
+    html += '<th>Empreendimento</th>';
+    if(hasCamp){
+      html += '<th>Campanha</th><th>Conjunto</th><th>Criativo</th>';
+    }
+    html += '<th style="text-align:center">Vendas</th></tr></thead><tbody>';
+
+    rows.forEach(([key, cnt]) => {
+      const [emp, camp, conj, cri] = key.split('||');
+      html += `<tr>
+        <td class="ov-emp">${emp||'—'}</td>`;
+      if(hasCamp){
+        html += `<td class="ov-camp" title="${camp||''}">${camp||'—'}</td>
+        <td class="ov-camp" title="${conj||''}">${conj||'—'}</td>
+        <td class="ov-camp" title="${cri||''}">${cri||'—'}</td>`;
+      }
+      html += `<td style="text-align:center"><span class="ov-badge ov-badge-blue">${cnt}</span></td>
+      </tr>`;
+    });
+    // Total row
+    html += `<tr class="ov-total-row">
+      <td colspan="${hasCamp?4:1}" style="font-size:12px;font-weight:700;color:var(--tx)">Total</td>
+      <td style="text-align:center"><span class="ov-num">${vendaForm.length}</span></td>
+    </tr>`;
+    html += '</tbody></table>';
+    formBody.innerHTML = html;
+  }
+
+  // ─── TABELA WHATSAPP ─────────────────────────────────────
+  if(wppTitle) wppTitle.textContent = `Vendas do ChatBot (WhatsApp) · ${vendaWpp.length}`;
+
+  if(!vendaWpp.length){
+    wppBody.innerHTML = '<div class="ov-empty">Nenhuma venda de WhatsApp encontrada</div>';
+  } else {
+    // Agrupa por empreendimento
+    const empMap = {};
+    vendaWpp.forEach(l => { empMap[l.emp] = (empMap[l.emp]||0) + 1; });
+    const empRows = Object.entries(empMap).sort((a,b)=>b[1]-a[1]);
+
+    let html = '<table class="ov-table"><thead><tr><th>Empreendimento</th><th style="text-align:center">Vendas</th></tr></thead><tbody>';
+    empRows.forEach(([emp, cnt]) => {
+      html += `<tr>
+        <td class="ov-emp">${emp||'—'}</td>
+        <td style="text-align:center"><span class="ov-badge ov-badge-green">${cnt}</span></td>
+      </tr>`;
+    });
+    html += `<tr class="ov-total-row">
+      <td style="font-size:12px;font-weight:700;color:var(--tx)">Total</td>
+      <td style="text-align:center"><span class="ov-num">${vendaWpp.length}</span></td>
+    </tr>`;
+    html += '</tbody></table>';
+    wppBody.innerHTML = html;
+  }
+
+  if(info) info.textContent = `· ${vendas.length} vendas no total (${vendaForm.length} Formulário + ${vendaWpp.length} WhatsApp)`;
+}
 
 // ─── PRECIFICAÇÃO DE CAMPANHA — CALCULADORA ───────────────
 

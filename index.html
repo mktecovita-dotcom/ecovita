@@ -974,8 +974,15 @@ body.tv-mode #tvExitBtn{display:block}
       <canvas id="campChartDiario" style="display:none"></canvas>
       <canvas id="campChartAlcance" style="display:none"></canvas>
 
+      <!-- ══ TABS CAMPANHAS ══ -->
+      <div style="margin-top:28px">
+        <div style="display:flex;gap:0;border-bottom:2px solid var(--bdr);margin-bottom:20px">
+          <button id="tabBtnConj" onclick="campTab('conj')" style="padding:9px 20px;font-size:13px;font-weight:700;background:none;border:none;border-bottom:2px solid var(--blue);margin-bottom:-2px;color:var(--blue);cursor:pointer;transition:all .2s">🎯 Conjuntos de Anúncio</button>
+          <button id="tabBtnOV"   onclick="campTab('ov')"   style="padding:9px 20px;font-size:13px;font-weight:700;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--mu);cursor:pointer;transition:all .2s">📊 Origem das Vendas</button>
+        </div>
+
       <!-- ══ CONJUNTOS DE ANÚNCIO (Meta Graph API) ══ -->
-      <div id="conjuntosSection" style="margin-top:28px">
+      <div id="conjuntosSection">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <div style="font-size:14px;font-weight:800;color:var(--tx)">🎯 Conjuntos de Anúncio · Visão Estratégica</div>
           <button class="btn btn-primary" onclick="loadConjuntos()" id="btnLoadConj" style="font-size:11px;padding:5px 14px">↻ Carregar todos</button>
@@ -992,7 +999,10 @@ body.tv-mode #tvExitBtn{display:block}
             <option value="REACH">Alcance</option>
             <option value="QUALITY_LEAD">Lead Qualificado</option>
           </select>
-          <select id="conjFiltroConta" onchange="renderConjuntos()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx)">
+          <select id="conjFiltroEmp" onchange="renderConjuntos()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx);min-width:160px">
+            <option value="">Todos empreend.</option>
+          </select>
+          <select id="conjFiltroConta" onchange="renderConjuntos()" style="display:none">
             <option value="">Todas as contas</option>
           </select>
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu);cursor:pointer">
@@ -1013,12 +1023,12 @@ body.tv-mode #tvExitBtn{display:block}
         <div id="conjAlertas" style="margin-bottom:14px"></div>
         <div id="conjRanking" style="margin-bottom:14px"></div>
         <div id="conjCards"></div>
-      </div>
+      </div><!-- /conjuntosSection -->
 
       <div id="campAIContainer" style="display:none"></div>
 
       <!-- ══ ORIGEM DAS VENDAS POR CAMPANHA ══ -->
-      <div id="origemVendasSection" style="margin-top:28px">
+      <div id="origemVendasSection" style="display:none">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
           <div style="width:3px;height:22px;background:var(--green);border-radius:2px;flex-shrink:0"></div>
           <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--tx)">Origem das Vendas por Campanha</h3>
@@ -1053,9 +1063,10 @@ body.tv-mode #tvExitBtn{display:block}
             <div id="wppVendasBody" style="padding:0"></div>
           </div>
         </div>
-      </div>
+      </div><!-- /origemVendasSection -->
+      </div><!-- /tabs container -->
 
-    </div>
+    </div><!-- /page-campanhas -->
 
     <!-- ══════════════ PAGE: INVESTIMENTO ══════════════ -->
     <div class="page" id="page-investimento">
@@ -3869,6 +3880,10 @@ async function loadConjuntos(){
     sel.innerHTML='<option value="">Todas as contas</option>';
     CONJ_ACCOUNTS.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.name;sel.appendChild(o);});
   }
+  const selEmp=document.getElementById('conjFiltroEmp');
+  if(selEmp && selEmp.options.length<=1){
+    CONJ_ACCOUNTS.forEach(a=>{const o=document.createElement('option');o.value=a.name;o.textContent=a.name;selEmp.appendChild(o);});
+  }
   const ok=results.filter(r=>r.status==='fulfilled').length;
   if(btn){btn.disabled=false;btn.textContent='↻ Carregar todos';}
   if(info) info.textContent=`${_conjData.length} conjuntos · ${ok}/${CONJ_ACCOUNTS.length} contas carregadas`;
@@ -3882,11 +3897,13 @@ function renderConjuntos(){
   const statusF=document.getElementById('conjFiltroStatus')?.value||'';
   const objF=document.getElementById('conjFiltroObj')?.value||'';
   const contaF=document.getElementById('conjFiltroConta')?.value||'';
+  const empF  =document.getElementById('conjFiltroEmp')?.value||'';
   const soComDados=document.getElementById('conjSoComDados')?.checked??true;
   const lista=_conjData.filter(as=>{
     if(statusF && as.status!==statusF) return false;
     if(objF    && as.goal!==objF)      return false;
     if(contaF  && as._account.id!==contaF) return false;
+    if(empF    && as._account.name!==empF) return false;
     if(soComDados && as.spend===0)         return false;
     return true;
   });
@@ -7697,6 +7714,25 @@ function renderOrigemVendas(){
     ? ` · ${ovDe ? ovDe.toLocaleDateString('pt-BR') : 'início'} → ${ovAte ? ovAte.toLocaleDateString('pt-BR') : 'hoje'}`
     : ' · Toda a base';
   if(info) info.textContent = `${vendas.length} vendas no total (${vendaForm.length} Formulário + ${vendaWpp.length} WhatsApp)${labelPeriodo}`;
+}
+
+function campTab(tab){
+  const conj=document.getElementById('conjuntosSection');
+  const ov  =document.getElementById('origemVendasSection');
+  const btnC=document.getElementById('tabBtnConj');
+  const btnO=document.getElementById('tabBtnOV');
+  if(tab==='conj'){
+    if(conj) conj.style.display='block';
+    if(ov)   ov.style.display='none';
+    if(btnC){btnC.style.color='var(--blue)';btnC.style.borderBottomColor='var(--blue)';}
+    if(btnO){btnO.style.color='var(--mu)';  btnO.style.borderBottomColor='transparent';}
+  } else {
+    if(conj) conj.style.display='none';
+    if(ov)   ov.style.display='block';
+    if(btnO){btnO.style.color='var(--blue)';btnO.style.borderBottomColor='var(--blue)';}
+    if(btnC){btnC.style.color='var(--mu)';  btnC.style.borderBottomColor='transparent';}
+    renderOrigemVendas();
+  }
 }
 
 function ovLimparFiltro(){

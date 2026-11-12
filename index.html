@@ -1019,10 +1019,21 @@ body.tv-mode #tvExitBtn{display:block}
 
       <!-- ══ ORIGEM DAS VENDAS POR CAMPANHA ══ -->
       <div id="origemVendasSection" style="margin-top:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-          <div style="width:3px;height:22px;background:var(--green);border-radius:2px"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <div style="width:3px;height:22px;background:var(--green);border-radius:2px;flex-shrink:0"></div>
           <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--tx)">Origem das Vendas por Campanha</h3>
-          <span id="origemVendasInfo" style="font-size:11px;color:var(--mu);margin-left:4px"></span>
+          <div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--mu)">Empreend.:</span>
+            <select id="ovEmp" onchange="renderOrigemVendas()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx);outline:none;min-width:160px">
+              <option value="">Todos</option>
+            </select>
+            <span style="font-size:11px;color:var(--mu)">De:</span>
+            <input type="date" id="ovDe" onchange="renderOrigemVendas()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx);outline:none">
+            <span style="font-size:11px;color:var(--mu)">Até:</span>
+            <input type="date" id="ovAte" onchange="renderOrigemVendas()" style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx);outline:none">
+            <button onclick="ovLimparFiltro()" style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--mu);cursor:pointer">✕ Limpar</button>
+          </div>
+          <span id="origemVendasInfo" style="font-size:11px;color:var(--mu);width:100%;padding-left:13px"></span>
         </div>
         <div id="origemVendasGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:0;overflow:hidden">
@@ -7569,11 +7580,39 @@ function renderOrigemVendas(){
     return;
   }
 
+  // Filtros
+  const ovDeVal  = document.getElementById('ovDe')?.value;
+  const ovAteVal = document.getElementById('ovAte')?.value;
+  const ovDe  = ovDeVal  ? new Date(ovDeVal  + 'T00:00:00') : null;
+  const ovAte = ovAteVal ? new Date(ovAteVal + 'T23:59:59') : null;
+  const ovEmpVal = (document.getElementById('ovEmp')?.value || '').trim();
+
   // Situações que representam uma venda fechada
   const SIT_VENDA = ['Venda Realizada','Com Reserva','Venda','Reserva'];
   const isVenda = s => SIT_VENDA.some(v => s.toLowerCase().includes(v.toLowerCase().replace(' ','')));
 
-  const vendas = leadsCV.filter(l => isVenda(l.situacao));
+  let vendas = leadsCV.filter(l => isVenda(l.situacao));
+
+  // Popular select de empreendimentos (na primeira chamada ou quando vazio)
+  const ovEmpSel = document.getElementById('ovEmp');
+  if(ovEmpSel && ovEmpSel.options.length <= 1){
+    const emps = [...new Set(vendas.map(l => l.emp).filter(Boolean))].sort();
+    emps.forEach(e => { const o = new Option(e, e); ovEmpSel.appendChild(o); });
+  }
+
+  // Aplica filtro de empreendimento
+  if(ovEmpVal) vendas = vendas.filter(l => l.emp === ovEmpVal);
+
+  // Aplica filtro de data (usa dataCadastro)
+  if(ovDe || ovAte){
+    vendas = vendas.filter(l => {
+      const d = l.dataCadastro;
+      if(!d) return false;
+      if(ovDe  && d < ovDe)  return false;
+      if(ovAte && d > ovAte) return false;
+      return true;
+    });
+  }
 
   // Form Meta = primeira origem facebook/instagram
   const isForm = o => /facebook|instagram|form|meta/i.test(o);
@@ -7653,7 +7692,21 @@ function renderOrigemVendas(){
     wppBody.innerHTML = html;
   }
 
-  if(info) info.textContent = `· ${vendas.length} vendas no total (${vendaForm.length} Formulário + ${vendaWpp.length} WhatsApp)`;
+  // Label período
+  const labelPeriodo = (ovDe || ovAte)
+    ? ` · ${ovDe ? ovDe.toLocaleDateString('pt-BR') : 'início'} → ${ovAte ? ovAte.toLocaleDateString('pt-BR') : 'hoje'}`
+    : ' · Toda a base';
+  if(info) info.textContent = `${vendas.length} vendas no total (${vendaForm.length} Formulário + ${vendaWpp.length} WhatsApp)${labelPeriodo}`;
+}
+
+function ovLimparFiltro(){
+  const de  = document.getElementById('ovDe');
+  const ate = document.getElementById('ovAte');
+  const emp = document.getElementById('ovEmp');
+  if(de)  de.value  = '';
+  if(ate) ate.value = '';
+  if(emp) emp.value = '';
+  renderOrigemVendas();
 }
 
 // ─── PRECIFICAÇÃO DE CAMPANHA — CALCULADORA ───────────────

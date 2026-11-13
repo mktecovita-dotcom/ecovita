@@ -612,9 +612,7 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="nav-item" onclick="goPage('campanhas')">
         <span class="nav-icon">📣</span> Campanhas Meta
       </div>
-      <div class="nav-item" onclick="goPage('meta')">
-        <span class="nav-icon">🎨</span> Criativos Meta
-      </div>
+
       <div class="nav-item" onclick="goPage('gads')">
         <span class="nav-icon">🔍</span> Google Ads
       </div>
@@ -1336,7 +1334,7 @@ body.tv-mode #tvExitBtn{display:block}
           1. Acesse <b>console.anthropic.com → API Keys</b><br>
           2. Clique em <b>"Create Key"</b>, nomeie e copie<br>
           3. A key começa com <code style="background:rgba(155,127,244,.12);color:var(--purple);padding:1px 5px;border-radius:4px">sk-ant-api03-…</code><br>
-          4. Ela é usada nas páginas <b>Análise por IA</b> e <b>Criativos Meta</b>
+          4. Ela é usada na página <b>Análise por IA</b>
         </div>
       </div>
 
@@ -2326,85 +2324,7 @@ body.tv-mode #tvExitBtn{display:block}
     </div><!-- /page-mercado -->
 
 
-    <!-- ══════════════ PAGE: CRIATIVOS META API ══════════════ -->
-    <div class="page" id="page-meta">
-
-      <!-- Barra de conta ativa + status -->
-      <div id="metaConnBar" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">
-        <span id="metaConnDot" style="width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0"></span>
-        <span id="metaConnLabel" style="color:var(--mu)">Nenhuma conta configurada</span>
-        <button class="btn" onclick="goPage('config')" style="font-size:11px;padding:4px 12px;margin-left:auto">⚙️ Gerenciar Contas</button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="fbar">
-        <span class="fl">Conta:</span>
-        <select id="fMetaAccount" onchange="onMetaAccountSelect()" style="min-width:180px;max-width:260px">
-          <option value="">— Selecione uma conta —</option>
-        </select>
-        <span class="fl">Campanha:</span>
-        <select id="fMetaCamp" onchange="onMetaCampaignSelect()" style="min-width:200px;max-width:320px">
-          <option value="">— Todas as campanhas —</option>
-        </select>
-        <span class="fl">Período:</span>
-        <select id="fMetaPeriod">
-          <option value="this_month">Este mês</option>
-          <option value="last_month">Mês passado</option>
-          <option value="last_30d">Últimos 30 dias</option>
-          <option value="last_90d">Últimos 90 dias</option>
-          <option value="this_quarter">Este trimestre</option>
-          <option value="maximum">Máximo</option>
-        </select>
-        <button class="btn btn-primary" id="btnLoadMeta" onclick="loadMetaCampaigns()">↻ Carregar Campanhas</button>
-        <button class="btn btn-ai" id="btnAnalyzeAll" style="display:none" onclick="analyzeAllMetaCampaigns()">🤖 Analisar Conta</button>
-        <span id="metaLoadInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
-      </div>
-
-      <!-- KPIs da campanha selecionada -->
-      <div id="metaKpiRow" style="display:none;margin-bottom:16px">
-        <div class="kpi-grid kpi-4">
-          <div class="kpi blue"><div class="kpi-label">Gasto no Período</div><div class="kpi-val blue" id="mk1">—</div><div class="kpi-sub" id="mk1s"></div></div>
-          <div class="kpi green"><div class="kpi-label">Resultados (Top 5)</div><div class="kpi-val green" id="mk2">—</div><div class="kpi-sub" id="mk2s"></div></div>
-          <div class="kpi amber"><div class="kpi-label">CTR Campanha</div><div class="kpi-val amber" id="mk3">—</div><div class="kpi-sub" id="mk3s"></div></div>
-          <div class="kpi purple"><div class="kpi-label">Custo / Resultado</div><div class="kpi-val purple" id="mk4">—</div><div class="kpi-sub" id="mk4s"></div></div>
-        </div>
-      </div>
-
-      <!-- Container de criativos -->
-      <div id="metaCreativesContainer">
-        <div class="meta-empty">
-          <div class="meta-empty-icon">🎨</div>
-          <div class="meta-empty-title">Nenhuma campanha carregada</div>
-          <div class="meta-empty-sub">Configure a API em ⚙️ Config. de API e clique em "Carregar Campanhas"</div>
-        </div>
-      </div>
-
-      <!-- Box IA dos criativos -->
-      <div id="metaAIContainer" style="display:none;margin-top:4px">
-        <div class="ia-box">
-          <div class="ia-header">
-            <div class="ia-icon">🤖</div>
-            <div>
-              <div class="ia-title">Análise IA dos Criativos</div>
-              <div class="ia-sub">Claude analisa os top 5 e gera recomendações específicas</div>
-            </div>
-            <button class="btn btn-ai" onclick="analyzeMetaCreatives()" style="margin-left:auto;flex-shrink:0">✦ Analisar Criativos</button>
-          </div>
-          <div id="metaAIResult">
-            <div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">
-              Selecione uma campanha e clique em "Analisar Criativos" para receber insights do Claude.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista de todas as campanhas -->
-      <div id="metaAllCampsContainer" style="display:none;margin-top:8px">
-        <div class="sec">Todas as Campanhas da Conta</div>
-        <div id="metaAllCampsList"></div>
-      </div>
-
-    </div><!-- /page-meta -->
+    <!-- page-meta removida (criativos integrados em Campanhas Meta) -->
 
   </div><!-- /content -->
 </div><!-- /app -->
@@ -2514,7 +2434,7 @@ const PAGE_TITLES={
   investimento:'Investimento',gads:'Google Ads',
   melhorias:'O que Melhorar',ia:'Análise por IA',
   mercado:'Pesquisa de Mercado',
-  config:'Configurações de API',meta:'Criativos Meta API',
+  config:'Configurações de API',
   instagram:'Instagram Orgânico',facebook:'Facebook Orgânico',tiktok:'TikTok Orgânico'
 };
 function goPage(pg){

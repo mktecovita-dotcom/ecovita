@@ -1005,6 +1005,7 @@ body.tv-mode #tvExitBtn{display:block}
           <select id="conjFiltroConta" onchange="renderConjuntos()" style="display:none">
             <option value="">Todas as contas</option>
           </select>
+          <input type="text" id="conjFiltroBusca" oninput="renderConjuntos()" placeholder="🔍 Buscar por nome..." style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px;color:var(--tx);min-width:180px;outline:none">
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu);cursor:pointer">
             <input type="checkbox" id="conjSoComDados" checked onchange="renderConjuntos()"> Só com dados
           </label>
@@ -3898,12 +3899,14 @@ function renderConjuntos(){
   const objF=document.getElementById('conjFiltroObj')?.value||'';
   const contaF=document.getElementById('conjFiltroConta')?.value||'';
   const empF  =document.getElementById('conjFiltroEmp')?.value||'';
+  const buscaF=(document.getElementById('conjFiltroBusca')?.value||'').toLowerCase().trim();
   const soComDados=document.getElementById('conjSoComDados')?.checked??true;
   const lista=_conjData.filter(as=>{
     if(statusF && as.status!==statusF) return false;
     if(objF    && as.goal!==objF)      return false;
     if(contaF  && as._account.id!==contaF) return false;
     if(empF    && as._account.name!==empF) return false;
+    if(buscaF  && !as.name.toLowerCase().includes(buscaF)) return false;
     if(soComDados && as.spend===0)         return false;
     return true;
   });

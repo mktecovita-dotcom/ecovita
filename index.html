@@ -2522,7 +2522,7 @@ function goPage(pg){
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+pg));
   document.querySelectorAll('.nav-item').forEach(el=>{
     const txt=el.textContent.trim().toLowerCase();
-    const map={dashboard:'dashboard',funil:'funil',campanhas:'campan',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
+    const map={dashboard:'dashboard',funil:'funil',campanhas:'campanhas meta',estrategias:'estratégias',meta:'criativ',gads:'google',investimento:'invest',instagram:'instagr',facebook:'faceboo',tiktok:'tiktok',melhorias:'melhor',ia:'análise',mercado:'mercado',config:'config'};
     el.classList.toggle('active',txt.includes(map[pg]||pg));
   });
   document.getElementById('tbTitle').textContent=PAGE_TITLES[pg]||pg;

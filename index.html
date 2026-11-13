@@ -4055,7 +4055,7 @@ async function loadConjCreatives(adsetId, panel){
   const insightsParam = (deVal && ateVal)
     ? `insights.time_range(${JSON.stringify({since:deVal,until:ateVal})}){spend,impressions,ctr,cpc,actions,cost_per_action_type}`
     : `insights.date_preset(last_30d){spend,impressions,ctr,cpc,actions,cost_per_action_type}`;
-  const fields = `name,effective_status,creative{thumbnail_url,title,body},${insightsParam}`;
+  const fields = `name,effective_status,creative{thumbnail_url,image_url,video_id,object_story_spec},${insightsParam}`;
   try{
     const url = `https://graph.facebook.com/v21.0/${adsetId}/ads?fields=${encodeURIComponent(fields)}&limit=10&access_token=${token}`;
     const resp = await fetch(url);
@@ -4080,24 +4080,47 @@ function renderConjCreativeCards(ads, panel){
     const actions = ins?.actions || [];
     const results = actions.filter(a=>['lead','onsite_conversion.messaging_conversation_started_7d','omni_lead'].includes(a.action_type)).reduce((s,a)=>s+parseInt(a.value||0),0);
     const cpr     = results > 0 ? spend / results : 0;
-    const thumb   = ad.creative?.thumbnail_url;
+    // Qualidade alta: prefere image_url (imagem full-res), cai para thumbnail_url
+    const isVideo = !!(ad.creative?.video_id || ad.creative?.object_story_spec?.video_data);
+    const imgSrc  = ad.creative?.image_url || ad.creative?.thumbnail_url;
     const isActive= ad.effective_status === 'ACTIVE';
     const rankBg  = i===0?'rgba(245,166,35,.25)':i===1?'rgba(180,180,180,.2)':i===2?'rgba(205,127,50,.22)':'rgba(79,142,247,.12)';
     const rankCl  = i===0?'#f5a623':i===1?'#bbb':i===2?'#cd7f32':'#4f8ef7';
+    const scoreColor = ctr>=2&&cpr>0&&cpr<50?'var(--green)':ctr>=1?'var(--amber)':'var(--red)';
+    const adName  = (ad.name||'Ad #'+(i+1)).replace(/\s*[–\-—]\s*(Pao|fmd|Dia|Ad|Set).*/i,'').trim();
+
+    const thumbHtml = imgSrc
+      ? `<img class="creative-thumb" src="${imgSrc}" loading="lazy"
+           style="image-rendering:auto;object-fit:cover"
+           onerror="this.outerHTML='<div class=\\'creative-thumb-ph\\'>🖼️</div>'">`
+      : `<div class="creative-thumb-ph">🖼️</div>`;
+
+    const playOverlay = isVideo ? `
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.7)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><polygon points="6,4 20,12 6,20"/></svg>
+        </div>
+      </div>` : '';
+
     return `<div class="creative-card" style="cursor:default">
-      ${thumb ? `<img class="creative-thumb" src="${thumb}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="creative-thumb-ph" style="display:none">🖼️</div>` : `<div class="creative-thumb-ph">🖼️</div>`}
-      <div class="creative-rank" style="background:${rankBg};color:${rankCl}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
-      <div class="creative-st" style="background:${isActive?'rgba(46,204,142,.8)':'rgba(107,122,158,.8)'};color:#fff">${isActive?'Ativo':'Pausado'}</div>
+      <div class="creative-score-bar" style="background:${scoreColor}"></div>
+      <div style="position:relative">
+        ${thumbHtml}
+        ${playOverlay}
+        <div class="creative-rank" style="background:${rankBg};color:${rankCl}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
+        <div class="creative-st" style="background:${isActive?'rgba(46,204,142,.22)':'rgba(240,101,101,.22)'};color:${isActive?'var(--green)':'var(--red)'}">${isActive?'● Ativo':'● Pausado'}</div>
+        ${isVideo?`<div style="position:absolute;bottom:8px;left:8px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.6);color:#fff;backdrop-filter:blur(4px)">▶ VÍDEO</div>`:''}
+      </div>
       <div class="creative-info">
-        <div class="creative-name" title="${ad.name||''}">${ad.name||'Sem nome'}</div>
+        <div class="creative-name" title="${ad.name||''}">${adName}</div>
         <div class="creative-metrics">
-          <div class="cm"><div class="cm-v" style="color:var(--amber)">${fB(spend)}</div><div class="cm-l">Gasto</div></div>
-          <div class="cm"><div class="cm-v" style="color:var(--blue)">${results>0?results.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Resultados</div></div>
-          <div class="cm"><div class="cm-v" style="color:var(--green)">${ctr>0?ctr.toFixed(2)+'%':'—'}</div><div class="cm-l">CTR</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--amber)">${spend>0?fB(spend):'—'}</div><div class="cm-l">Gasto</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--green)">${results>0?results.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Resultados</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--blue)">${ctr>0?ctr.toFixed(2)+'%':'—'}</div><div class="cm-l">CTR</div></div>
           <div class="cm"><div class="cm-v" style="color:var(--mu)">${impr>0?impr.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Impressões</div></div>
         </div>
         <div class="creative-foot">
-          <span>CPC: ${cpc>0?fB(cpc):'—'}</span>
+          <span>${cpc>0?'CPC '+fB(cpc):'—'}</span>
           <span class="creative-foot-cpr" style="color:${cpr>50?'var(--red)':cpr>25?'var(--amber)':'var(--green)'}">${cpr>0?'CPR '+fB(cpr):'—'}</span>
         </div>
       </div>

@@ -1009,7 +1009,15 @@ body.tv-mode #tvExitBtn{display:block}
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu);cursor:pointer">
             <input type="checkbox" id="conjSoComDados" checked onchange="renderConjuntos()"> Só com dados
           </label>
-          <span id="conjInfo" style="font-size:11px;color:var(--mu);margin-left:auto"></span>
+          <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+            <span style="font-size:11px;color:var(--mu)">Período:</span>
+            <input type="date" id="conjDe"  style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:3px 8px;color:var(--tx);outline:none">
+            <span style="font-size:11px;color:var(--mu)">até</span>
+            <input type="date" id="conjAte" style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:3px 8px;color:var(--tx);outline:none">
+            <button onclick="loadConjuntos()" style="font-size:11px;padding:3px 10px;background:var(--blue);color:#fff;border:none;border-radius:7px;cursor:pointer">↻ Aplicar</button>
+            <button onclick="conjLimparData()" style="font-size:11px;padding:3px 8px;background:var(--bg3);color:var(--mu);border:1px solid var(--bdr);border-radius:7px;cursor:pointer">✕</button>
+          </div>
+          <span id="conjInfo" style="font-size:11px;color:var(--mu)"></span>
         </div>
         <div id="conjTokenBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 18px;margin-bottom:14px">
           <div style="font-size:12px;color:var(--mu);margin-bottom:8px">Cole seu <strong style="color:var(--tx)">Meta Access Token</strong> — obtenha no <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color:var(--blue)">Graph API Explorer</a> com permissões <em>ads_read</em></div>
@@ -3830,10 +3838,13 @@ function _conjParseResultados(insights, goal){
   return {results,cpr:cpr||null};
 }
 
-async function _fetchContaAdsets(account,token,datePreset){
+async function _fetchContaAdsets(account,token,datePreset,timeRange){
+  const insightsParam = timeRange
+    ? `insights.time_range(${JSON.stringify(timeRange)}){spend,impressions,reach,frequency,ctr,cpc,actions,cost_per_action_type}`
+    : `insights.date_preset(${datePreset}){spend,impressions,reach,frequency,ctr,cpc,actions,cost_per_action_type}`;
   const fields=[
     'name','effective_status','campaign_name','optimization_goal',
-    `insights.date_preset(${datePreset}){spend,impressions,reach,frequency,ctr,cpc,actions,cost_per_action_type}`
+    insightsParam
   ].join(',');
   const url=`https://graph.facebook.com/v21.0/act_${account.id}/adsets?fields=${encodeURIComponent(fields)}&limit=200&access_token=${token}`;
   const resp=await fetch(url);
@@ -3869,8 +3880,12 @@ async function loadConjuntos(){
   const info=document.getElementById('conjInfo');
   if(info) info.textContent='Buscando conjuntos...';
   const period=document.getElementById('fCampPeriod')?.value||'last_30d';
-  const results=await Promise.allSettled(CONJ_ACCOUNTS.map(acc=>_fetchContaAdsets(acc,token,period)));
+  const deVal = document.getElementById('conjDe')?.value;
+  const ateVal= document.getElementById('conjAte')?.value;
+  const timeRange = (deVal && ateVal) ? {since:deVal, until:ateVal} : null;
+  const results=await Promise.allSettled(CONJ_ACCOUNTS.map(acc=>_fetchContaAdsets(acc,token,period,timeRange)));
   _conjData=[];
+  _conjCrtLoaded.clear();
   const erros=[];
   results.forEach((r,i)=>{
     if(r.status==='fulfilled') _conjData.push(...r.value);
@@ -3998,10 +4013,97 @@ function renderConjuntos(){
         <td style="padding:9px 8px;font-size:12px;color:var(--tx)">${as.ctr>0?as.ctr.toFixed(2)+'%':'—'}</td>
         <td style="padding:9px 8px;font-size:12px;font-weight:700;color:${fc};white-space:nowrap">${as.frequency>0?freqI+as.frequency.toFixed(1)+'x':'—'}</td>
         <td style="padding:9px 8px;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:10px;background:${as.status==='ACTIVE'?'rgba(46,204,142,.15)':'rgba(107,122,158,.15)'};color:${as.status==='ACTIVE'?'var(--green)':'var(--mu)'}">${as.status==='ACTIVE'?'● Ativo':'● Pausado'}</span></td>
-      </tr>`;
+        <td style="padding:9px 8px"><button onclick="toggleConjCreatives('${as.id}')" id="btnCrt_${as.id}" style="font-size:10px;padding:2px 8px;background:var(--bg4);border:1px solid var(--bdr);border-radius:6px;color:var(--mu);cursor:pointer">🎨 Criativos</button></td>
+      </tr>
+      <tr id="crtRow_${as.id}" style="display:none"><td colspan="10" style="padding:0 12px 12px"><div id="crtPanel_${as.id}" style="background:var(--bg3);border-radius:8px;padding:12px"><span style="font-size:12px;color:var(--mu)">Clique em Criativos para carregar…</span></div></td></tr>`;
     }).join('');
-    return `<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><div style="font-size:15px;font-weight:800;color:var(--tx)">🏢 ${acc.account.name}</div><span style="font-size:11px;color:var(--mu)">${acc.adsets.length} conjuntos</span><span style="font-size:12px;font-weight:700;color:var(--amber)">${fB(tG)}</span>${tR>0?`<span style="font-size:12px;color:var(--green)">✅ ${tR.toLocaleString('pt-BR')} resultados</span>`:''}</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid var(--bdr2)">${['Conjunto de Anúncio','Objetivo','Gasto','CPR','Resultados','Impressões','CTR','Frequência','Status'].map(h=>`<th style="padding:6px ${h==='Conjunto de Anúncio'?'12':'8'}px;text-align:left;font-size:10px;color:var(--mu);text-transform:uppercase;white-space:nowrap">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    return `<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><div style="font-size:15px;font-weight:800;color:var(--tx)">🏢 ${acc.account.name}</div><span style="font-size:11px;color:var(--mu)">${acc.adsets.length} conjuntos</span><span style="font-size:12px;font-weight:700;color:var(--amber)">${fB(tG)}</span>${tR>0?`<span style="font-size:12px;color:var(--green)">✅ ${tR.toLocaleString('pt-BR')} resultados</span>`:''}</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid var(--bdr2)">${['Conjunto de Anúncio','Objetivo','Gasto','CPR','Resultados','Impressões','CTR','Frequência','Status',''].map(h=>`<th style="padding:6px ${h==='Conjunto de Anúncio'?'12':'8'}px;text-align:left;font-size:10px;color:var(--mu);text-transform:uppercase;white-space:nowrap">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
   }).join('');
+}
+
+// ── Criativos por conjunto ───────────────────────────────
+const _conjCrtLoaded = new Set();
+
+function conjLimparData(){
+  const de  = document.getElementById('conjDe');
+  const ate = document.getElementById('conjAte');
+  if(de)  de.value  = '';
+  if(ate) ate.value = '';
+  loadConjuntos();
+}
+
+async function toggleConjCreatives(adsetId){
+  const row   = document.getElementById('crtRow_'   + adsetId);
+  const panel = document.getElementById('crtPanel_' + adsetId);
+  const btn   = document.getElementById('btnCrt_'   + adsetId);
+  if(!row || !panel) return;
+  const isOpen = row.style.display !== 'none';
+  if(isOpen){ row.style.display='none'; btn.style.color='var(--mu)'; return; }
+  row.style.display = 'table-row';
+  btn.style.color = 'var(--blue)';
+  if(_conjCrtLoaded.has(adsetId)) return; // já carregado
+  panel.innerHTML = '<span style="font-size:12px;color:var(--mu)">⏳ Buscando criativos…</span>';
+  await loadConjCreatives(adsetId, panel);
+  _conjCrtLoaded.add(adsetId);
+}
+
+async function loadConjCreatives(adsetId, panel){
+  const token = getTokenConj();
+  if(!token){ panel.innerHTML='<span style="color:var(--red);font-size:12px">Token Meta não configurado.</span>'; return; }
+  const deVal  = document.getElementById('conjDe')?.value;
+  const ateVal = document.getElementById('conjAte')?.value;
+  const insightsParam = (deVal && ateVal)
+    ? `insights.time_range(${JSON.stringify({since:deVal,until:ateVal})}){spend,impressions,ctr,cpc,actions,cost_per_action_type}`
+    : `insights.date_preset(last_30d){spend,impressions,ctr,cpc,actions,cost_per_action_type}`;
+  const fields = `name,effective_status,creative{thumbnail_url,title,body},${insightsParam}`;
+  try{
+    const url = `https://graph.facebook.com/v21.0/${adsetId}/ads?fields=${encodeURIComponent(fields)}&limit=10&access_token=${token}`;
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if(json.error) throw new Error(json.error.message);
+    const ads = json.data || [];
+    if(!ads.length){ panel.innerHTML='<span style="font-size:12px;color:var(--mu)">📭 Nenhum anúncio encontrado neste conjunto.</span>'; return; }
+    renderConjCreativeCards(ads, panel);
+  } catch(e){
+    panel.innerHTML = `<span style="font-size:12px;color:var(--red)">❌ ${e.message}</span>`;
+  }
+}
+
+function renderConjCreativeCards(ads, panel){
+  const fB = v => 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const cards = ads.map((ad,i) => {
+    const ins     = ad.insights?.data?.[0] || null;
+    const spend   = parseFloat(ins?.spend||0);
+    const impr    = parseInt(ins?.impressions||0);
+    const ctr     = parseFloat((ins?.ctr||'0').replace(',','.'));
+    const cpc     = parseFloat(ins?.cpc||0);
+    const actions = ins?.actions || [];
+    const results = actions.filter(a=>['lead','onsite_conversion.messaging_conversation_started_7d','omni_lead'].includes(a.action_type)).reduce((s,a)=>s+parseInt(a.value||0),0);
+    const cpr     = results > 0 ? spend / results : 0;
+    const thumb   = ad.creative?.thumbnail_url;
+    const isActive= ad.effective_status === 'ACTIVE';
+    const rankBg  = i===0?'rgba(245,166,35,.25)':i===1?'rgba(180,180,180,.2)':i===2?'rgba(205,127,50,.22)':'rgba(79,142,247,.12)';
+    const rankCl  = i===0?'#f5a623':i===1?'#bbb':i===2?'#cd7f32':'#4f8ef7';
+    return `<div class="creative-card" style="cursor:default">
+      ${thumb ? `<img class="creative-thumb" src="${thumb}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="creative-thumb-ph" style="display:none">🖼️</div>` : `<div class="creative-thumb-ph">🖼️</div>`}
+      <div class="creative-rank" style="background:${rankBg};color:${rankCl}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
+      <div class="creative-st" style="background:${isActive?'rgba(46,204,142,.8)':'rgba(107,122,158,.8)'};color:#fff">${isActive?'Ativo':'Pausado'}</div>
+      <div class="creative-info">
+        <div class="creative-name" title="${ad.name||''}">${ad.name||'Sem nome'}</div>
+        <div class="creative-metrics">
+          <div class="cm"><div class="cm-v" style="color:var(--amber)">${fB(spend)}</div><div class="cm-l">Gasto</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--blue)">${results>0?results.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Resultados</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--green)">${ctr>0?ctr.toFixed(2)+'%':'—'}</div><div class="cm-l">CTR</div></div>
+          <div class="cm"><div class="cm-v" style="color:var(--mu)">${impr>0?impr.toLocaleString('pt-BR'):'—'}</div><div class="cm-l">Impressões</div></div>
+        </div>
+        <div class="creative-foot">
+          <span>CPC: ${cpc>0?fB(cpc):'—'}</span>
+          <span class="creative-foot-cpr" style="color:${cpr>50?'var(--red)':cpr>25?'var(--amber)':'var(--green)'}">${cpr>0?'CPR '+fB(cpr):'—'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  panel.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🎨 Criativos · ${ads.length} anúncio${ads.length>1?'s':''}</div><div class="creative-grid">${cards}</div>`;
 }
 
 // ═══════════════════════════════════════════════════════

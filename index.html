@@ -3188,12 +3188,24 @@ function renderDashboard(){
             : `${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`);
   const [refMm, refYy] = mesDashRef.split('/').map(Number);
   const fEmpDash = document.getElementById('fEmp')?.value||'';
-  const leadsOnlineMes = leadsCV.filter(l=>{
+  const matchLeadMes = l => {
+    const dt = l.dataCadastro || l.dataUltima;
+    if(!dt) return false;
+    return dt.getMonth()+1 === refMm && dt.getFullYear() === refYy;
+  };
+  let leadsOnlineMes = leadsCV.filter(l=>{
     if(!l.online) return false;
     if(fEmpDash && l.emp !== fEmpDash) return false;
-    if(!l.dataCadastro) return false;
-    return l.dataCadastro.getMonth()+1 === refMm && l.dataCadastro.getFullYear() === refYy;
+    return matchLeadMes(l);
   });
+  // fallback: se nenhum lead tem data no mês, usa todos online (evita gráfico vazio)
+  if(!leadsOnlineMes.length){
+    leadsOnlineMes = leadsCV.filter(l=>{
+      if(!l.online) return false;
+      if(fEmpDash && l.emp !== fEmpDash) return false;
+      return true;
+    });
+  }
   const origemMap = {
     'chatbot':    {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},
     'whatsapp':   {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},

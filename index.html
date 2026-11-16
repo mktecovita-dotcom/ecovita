@@ -745,7 +745,7 @@ body.tv-mode #tvExitBtn{display:block}
 
       <div id="tvS1charts" class="grid g53">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento por mês</div></div>
+          <div class="card-hd"><div class="card-title">Investimento por mês · <span id="lblAnoInvest" style="color:var(--blue)"></span></div></div>
           <div class="legend">
             <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
             <div class="leg"><div class="lsq" style="background:var(--green)"></div>Receita</div>
@@ -753,7 +753,7 @@ body.tv-mode #tvExitBtn{display:block}
           <div class="cw" style="height:210px"><canvas id="cMensal"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">ROAS por mês</div></div>
+          <div class="card-hd"><div class="card-title">ROAS por mês · <span id="lblAnoRoas" style="color:var(--amber)"></span></div></div>
           <div class="cw" style="height:230px"><canvas id="cRoas"></canvas></div>
         </div>
       </div>
@@ -3004,18 +3004,37 @@ function renderDashboard(){
   const fmtD = dt => dt ? dt.toLocaleDateString('pt-BR') : '';
   sid('infoGeral', `${fmtD(de)||'início'} → ${fmtD(ate)||'hoje'} · ${d.length} reg · ${fN(totalON)} leads ON`);
 
-  // ── Meses fixados: jan do ano atual até mês atual ──
-  const hoje       = new Date();
-  const anoAtual   = hoje.getFullYear();
-  const mesAtualN  = hoje.getMonth() + 1; // 1-12
-  // Gera array de 'MM/YYYY' do ano atual até o mês atual
+  // ── Meses do gráfico: sempre o ano inteiro (do filtro ou atual) ──
+  const hoje      = new Date();
+  const anoAtual  = hoje.getFullYear();
+  const mesAtualN = hoje.getMonth() + 1; // 1-12
+
+  // Determina o ano a exibir nos gráficos a partir das datas do filtro
+  const {de: deF, ate: ateF} = getFiltroDatas();
+  const anoGrafico = deF ? deF.getFullYear() : (ateF ? ateF.getFullYear() : anoAtual);
+  const isAnoAtual = anoGrafico === anoAtual;
+  const ultimoMes  = isAnoAtual ? mesAtualN : 12; // ano atual → até mês corrente; outro ano → até dezembro
+
   const mesesAno = [];
-  for(let m=1; m<=mesAtualN; m++){
-    mesesAno.push(`${String(m).padStart(2,'0')}/${anoAtual}`);
+  for(let m=1; m<=ultimoMes; m++){
+    mesesAno.push(`${String(m).padStart(2,'0')}/${anoGrafico}`);
   }
-  // Para invest/receita/ROAS usa mesesAno fixo; dados do 'd' filtrado por data
-  const getMesData = (mes, campo) => d.filter(r=>r.mes===mes).reduce((s,r)=>s+r[campo],0);
-  const getMesRoas = mes => { const rows=d.filter(r=>r.mes===mes&&r.roas>0&&r.roas<5000); return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0; };
+
+  // Dataset para os gráficos: filtra só por empreendimento e ano — IGNORA filtro de mês
+  const empF = document.getElementById('fEmp')?.value||'';
+  const dAnual = dadosRoas.filter(r=>{
+    if(empF && r.emp!==empF) return false;
+    const dt = parseDateRoas(r.mes);
+    if(!dt) return false;
+    return dt.getFullYear() === anoGrafico;
+  });
+
+  const getMesData = (mes, campo) => dAnual.filter(r=>r.mes===mes).reduce((s,r)=>s+r[campo],0);
+  const getMesRoas = mes => { const rows=dAnual.filter(r=>r.mes===mes&&r.roas>0&&r.roas<5000); return rows.length?rows.reduce((s,r)=>s+r.roas,0)/rows.length:0; };
+
+  // Atualiza labels dos títulos com o ano
+  sid('lblAnoInvest', anoGrafico);
+  sid('lblAnoRoas',   anoGrafico);
 
   // ── Chart Investimento por mês — barras com valor visível no topo ──
   dc('cMensal');

@@ -777,7 +777,7 @@ body.tv-mode #tvExitBtn{display:block}
               <option value="">Mês atual</option>
             </select>
           </div>
-          <div id="objCampList" style="height:220px;position:relative"></div>
+          <div class="cw" style="height:220px"><canvas id="cObjPizza"></canvas></div>
         </div>
       </div>
 
@@ -3236,11 +3236,6 @@ function renderDashboard(){
   const valsPizza = OBJS_PIZZA.map(obj =>
     campsMes2.filter(c => (c.objetivo||'').toLowerCase() === obj.toLowerCase()).reduce((s,c)=>s+c.valor,0)
   );
-  // injeta canvas se ainda não existe
-  const objCampEl = document.getElementById('objCampList');
-  if(objCampEl && !objCampEl.querySelector('canvas')){
-    objCampEl.innerHTML = '<canvas id="cObjPizza"></canvas>';
-  }
   dc('cObjPizza');
   const ctxPizza = document.getElementById('cObjPizza')?.getContext('2d');
   if(ctxPizza){

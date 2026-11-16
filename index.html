@@ -761,17 +761,20 @@ body.tv-mode #tvExitBtn{display:block}
       <!-- Investimento vs Leads Meta -->
       <div class="grid g2" style="margin-bottom:12px">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento vs Leads Meta — por mês</div></div>
-          <div class="legend">
-            <div class="leg"><div class="lsq" style="background:var(--blue)"></div>Investimento</div>
-            <div class="leg"><div class="lsq" style="background:var(--purple)"></div>Leads Meta</div>
+          <div class="card-hd" style="flex-wrap:wrap;gap:6px">
+            <div class="card-title">Investimento vs Leads Meta · <span id="lblAnoInvLeads" style="color:var(--blue)"></span></div>
+            <div id="legInvLeads" style="display:flex;flex-wrap:wrap;gap:8px;margin-left:auto"></div>
           </div>
-          <div class="cw" style="height:200px"><canvas id="cInvLeads"></canvas></div>
+          <div class="cw" style="height:220px"><canvas id="cInvLeads"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">Investimento por objetivo</div></div>
-          <div class="legend" id="legObj"></div>
-          <div class="cw" style="height:200px"><canvas id="cObj"></canvas></div>
+          <div class="card-hd" style="flex-wrap:wrap;gap:6px">
+            <div class="card-title">Gasto por Campanha</div>
+            <select id="fObjMes" onchange="renderDashboard()" style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:3px 8px;color:var(--tx);margin-left:auto">
+              <option value="">Mês atual</option>
+            </select>
+          </div>
+          <div id="objCampList" style="overflow-y:auto;max-height:220px;padding-top:4px"></div>
         </div>
       </div>
 
@@ -2859,6 +2862,23 @@ function popularFiltros(){
   fill('fInvObj',objs);  fill('fInvEmp',cemps);
   fill('fMelObj',objs);
 
+  // Popular fObjMes com os meses disponíveis em campsMeta (via dataTermino)
+  const selObjMes = document.getElementById('fObjMes');
+  if(selObjMes && selObjMes.options.length <= 1){
+    const mesesCamp = [...new Set(campsMeta
+      .filter(c=>c.dataTermino)
+      .map(c=>{
+        const dt=c.dataTermino;
+        return `${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+      })
+    )].sort().reverse();
+    mesesCamp.forEach(m=>{
+      const [mm,yy]=m.split('/');
+      const ns=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      selObjMes.appendChild(new Option(`${ns[parseInt(mm)]} ${yy}`, m));
+    });
+  }
+
   // Define mês atual nos campos de data (De = dia 1 do mês, Até = hoje)
   const hoje = new Date();
   const anoAtual = hoje.getFullYear();
@@ -3122,25 +3142,55 @@ function renderDashboard(){
     </div>`;
   }).join('')||'<div style="font-size:12px;color:var(--mu);padding:8px 0">Nenhum lead online no período selecionado</div>';
 
-  // ── Chart Invest vs Leads Meta (eixo duplo) — usa mesesAno fixo ──
+  // ── Chart Invest vs Leads Meta — stacked por empreendimento (anual) ──
+  sid('lblAnoInvLeads', anoGrafico);
   dc('cInvLeads');
   const ctxIL = document.getElementById('cInvLeads')?.getContext('2d');
-  if(ctxIL){ charts.cInvLeads = new Chart(ctxIL, {
-    type:'bar',
-    data:{ labels: mesesAno.map(fmtMes), datasets:[
-      { label:'Investimento', data: mesesAno.map(m=>getMesData(m,'investTotal')),
-        backgroundColor:'rgba(79,142,247,.8)', borderRadius:6, borderSkipped:false, yAxisID:'yInv' },
-      { label:'Leads Meta', data: mesesAno.map(m=>getMesData(m,'leadsMeta')),
-        type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.12)',
-        fill:true, tension:.4, pointRadius:5, pointBackgroundColor:C.purple, borderWidth:2.5, yAxisID:'yLeads' }
-    ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{
-        yInv:  { position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
-        yLeads:{ position:'right', grid:{display:false},                  ticks:{color:C.purple, font:{size:10}} },
-        x:     { grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu, font:{size:11}} }
-      }}
-  });}
+  if(ctxIL){
+    const EMP_COLORS = [C.blue,'rgba(46,204,142,.8)','rgba(155,127,244,.8)','rgba(245,166,35,.8)',
+      'rgba(240,101,101,.8)','rgba(38,198,218,.8)','rgba(251,146,60,.8)','rgba(232,121,249,.8)'];
+    let ilDatasets;
+    if(empF){
+      // Filtrado por emp: barra simples + linha de leads
+      ilDatasets = [
+        { label:'Investimento', data:mesesAno.map(m=>getMesData(m,'investTotal')),
+          backgroundColor:'rgba(79,142,247,.8)', borderRadius:4, borderSkipped:false, yAxisID:'yInv', order:2 },
+        { label:'Leads Meta', data:mesesAno.map(m=>getMesData(m,'leadsMeta')),
+          type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.1)',
+          fill:true, tension:.4, pointRadius:4, pointBackgroundColor:C.purple, borderWidth:2, yAxisID:'yLeads', order:1 }
+      ];
+      document.getElementById('legInvLeads').innerHTML =
+        `<div class="leg"><div class="lsq" style="background:rgba(79,142,247,.8)"></div>Investimento</div>
+         <div class="leg"><div class="lsq" style="background:${C.purple}"></div>Leads Meta</div>`;
+    } else {
+      // Sem filtro de emp: stacked por empreendimento
+      const empsAnuais = [...new Set(dAnual.map(r=>r.emp))].sort();
+      ilDatasets = empsAnuais.map((emp,i)=>({
+        label: emp,
+        data: mesesAno.map(m=>dAnual.filter(r=>r.emp===emp&&r.mes===m).reduce((s,r)=>s+r.investTotal,0)),
+        backgroundColor: EMP_COLORS[i%EMP_COLORS.length],
+        borderRadius:3, borderSkipped:false, yAxisID:'yInv', stack:'inv', order:2
+      }));
+      // Linha de leads total (soma todos emps)
+      ilDatasets.push({ label:'Leads Meta', data:mesesAno.map(m=>dAnual.filter(r=>r.mes===m).reduce((s,r)=>s+r.leadsMeta,0)),
+        type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.08)',
+        fill:true, tension:.4, pointRadius:4, pointBackgroundColor:C.purple, borderWidth:2, yAxisID:'yLeads', order:1 });
+      document.getElementById('legInvLeads').innerHTML =
+        empsAnuais.map((e,i)=>`<div class="leg"><div class="lsq" style="background:${EMP_COLORS[i%EMP_COLORS.length]}"></div>${e}</div>`).join('')+
+        `<div class="leg"><div class="lsq" style="background:${C.purple}"></div>Leads Meta</div>`;
+    }
+    charts.cInvLeads = new Chart(ctxIL,{
+      type:'bar',
+      data:{ labels:mesesAno.map(fmtMes), datasets:ilDatasets },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{
+          yInv:  { position:'left',  stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
+          yLeads:{ position:'right', grid:{display:false}, ticks:{color:C.purple,font:{size:10}} },
+          x:     { stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.mu,font:{size:11}} }
+        }}
+    });
+  }
 
   // ── Chart Leads por Origem Online (chatbot / facebook / instagram / website) ──
   const origemMap = {
@@ -3179,30 +3229,48 @@ function renderDashboard(){
       plugins:{ legend:{ display:true, position:'bottom', labels:{color:'#8b9ab0',font:{size:12},boxWidth:12,padding:10} } } }
   });
 
-  // ── Chart Investimento por objetivo — filtrado pelo período selecionado ──
-  // Usa 'd' (dadosRoas filtrado) para distribuir o investimento proporcional por objetivo
-  const invTotal = d.reduce((s,r)=>s+r.investTotal,0);
-  const propObj  = {}; campsMeta.forEach(c=>{ propObj[c.objetivo]=(propObj[c.objetivo]||0)+c.valor; });
-  const totalMeta = campsMeta.reduce((s,c)=>s+c.valor,0);
-  const objMapFilt = {};
-  campsMeta.forEach(c=>{
-    const prop = totalMeta>0 ? (propObj[c.objetivo]||0)/totalMeta : 0;
-    // Distribui o investimento filtrado na mesma proporção das campanhas
+  // ── Gasto por Campanha — mês selecionado (padrão: mês atual) ──
+  const fObjMesVal = document.getElementById('fObjMes')?.value || '';
+  const hoje2 = new Date();
+  const mesCampAtual = `${String(hoje2.getMonth()+1).padStart(2,'0')}/${hoje2.getFullYear()}`;
+  const mesCampFiltro = fObjMesVal || mesCampAtual;
+  const [mcMm, mcYy] = mesCampFiltro.split('/');
+  const campsMes = campsMeta.filter(c=>{
+    if(!c.dataTermino) return false;
+    const dt = c.dataTermino;
+    return dt.getMonth()+1 === parseInt(mcMm) && dt.getFullYear() === parseInt(mcYy);
   });
-  // Abordagem direta: usa proporcionalidade do Meta aplicada sobre invest filtrado
-  const objKeys = [...new Set(campsMeta.map(c=>c.objetivo).filter(Boolean))];
-  const objVals = objKeys.map(obj=>{
-    const soma = campsMeta.filter(c=>c.objetivo===obj).reduce((s,c)=>s+c.valor,0);
-    const prop = totalMeta>0 ? soma/totalMeta : 0;
-    return invTotal * prop;
-  });
-  const oCores = objKeys.map(l=>OBJ_C[l]||C.orange);
-  document.getElementById('legObj').innerHTML = objKeys.map((l,i)=>
-    `<div class="leg"><div class="lsq" style="background:${oCores[i]}"></div>${l}: ${fBRL(objVals[i],true)}</div>`
-  ).join('');
-  dc('cObj');
-  const ctxO=document.getElementById('cObj')?.getContext('2d');
-  if(ctxO) charts.cObj=new Chart(ctxO,{type:'doughnut',data:{labels:objKeys,datasets:[{data:objVals,backgroundColor:oCores,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+  const campEmpF = document.getElementById('fEmp')?.value||'';
+  const campsExib = campsMes
+    .filter(c=>!campEmpF||(c.emp&&c.emp===campEmpF))
+    .filter(c=>c.valor>0)
+    .sort((a,b)=>b.valor-a.valor)
+    .slice(0,15);
+  const totalCamps = campsExib.reduce((s,c)=>s+c.valor,0);
+  const objCampEl = document.getElementById('objCampList');
+  if(objCampEl){
+    if(!campsExib.length){
+      objCampEl.innerHTML='<div style="font-size:12px;color:var(--mu);padding:16px 0;text-align:center">Sem campanhas com gasto neste mês</div>';
+    } else {
+      const maxV = campsExib[0].valor;
+      objCampEl.innerHTML = campsExib.map(c=>{
+        const gc = OBJ_C[c.objetivo]||C.blue;
+        const pct = Math.round(c.valor/maxV*100);
+        const nomeCurto = (c.nome||'').replace(/\s*[-–—]\s*(fmd|Dia|Pao|v\d+|pouso|interesses|imoveis|segmentacao|prospeccao|cadastro|whatsapp|meta|ads).*/i,'').trim().slice(0,45);
+        return `<div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+            <span style="font-size:11px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%" title="${c.nome}">${nomeCurto}</span>
+            <span style="font-size:11px;font-weight:700;color:${gc};white-space:nowrap;margin-left:8px">${fBRL(c.valor,true)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px"><div style="width:${pct}%;height:100%;background:${gc};border-radius:3px"></div></div>
+            <span style="font-size:9px;color:var(--mu);white-space:nowrap">${(c.valor/totalCamps*100).toFixed(0)}%</span>
+          </div>
+          ${c.emp?`<span style="font-size:9px;color:var(--mu)">${c.emp}${c.objetivo?' · '+c.objetivo:''}</span>`:''}
+        </div>`;
+      }).join('');
+    }
+  }
 
   // Leads Meta vs CRM — usa dadosRoas completo (todo o período carregado)
   const gAll={};dadosRoas.forEach(r=>{if(!gAll[r.emp])gAll[r.emp]={m:0,c:0};gAll[r.emp].m+=r.leadsMeta;gAll[r.emp].c+=r.leadsCrm;});

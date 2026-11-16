@@ -3193,19 +3193,11 @@ function renderDashboard(){
     if(!dt) return false;
     return dt.getMonth()+1 === refMm && dt.getFullYear() === refYy;
   };
-  let leadsOnlineMes = leadsCV.filter(l=>{
+  const leadsOnlineMes = leadsCV.filter(l=>{
     if(!l.online) return false;
     if(fEmpDash && l.emp !== fEmpDash) return false;
     return matchLeadMes(l);
   });
-  // fallback: se nenhum lead tem data no mês, usa todos online (evita gráfico vazio)
-  if(!leadsOnlineMes.length){
-    leadsOnlineMes = leadsCV.filter(l=>{
-      if(!l.online) return false;
-      if(fEmpDash && l.emp !== fEmpDash) return false;
-      return true;
-    });
-  }
   const origemMap = {
     'chatbot':    {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},
     'whatsapp':   {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},

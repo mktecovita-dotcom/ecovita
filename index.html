@@ -3180,7 +3180,20 @@ function renderDashboard(){
       }}
   });}
 
-  // ── Chart Leads por Origem Online (chatbot / facebook / instagram / website) ──
+  // ── Chart Leads por Origem Online — filtrado por mês e empreendimento ──
+  // Determina mês de referência a partir dos filtros de data
+  const mesDashRef = deF
+    ? `${String(deF.getMonth()+1).padStart(2,'0')}/${deF.getFullYear()}`
+    : (ateF ? `${String(ateF.getMonth()+1).padStart(2,'0')}/${ateF.getFullYear()}`
+            : `${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`);
+  const [refMm, refYy] = mesDashRef.split('/').map(Number);
+  const fEmpDash = document.getElementById('fEmp')?.value||'';
+  const leadsOnlineMes = leadsCV.filter(l=>{
+    if(!l.online) return false;
+    if(fEmpDash && l.emp !== fEmpDash) return false;
+    if(!l.dataCadastro) return false;
+    return l.dataCadastro.getMonth()+1 === refMm && l.dataCadastro.getFullYear() === refYy;
+  });
   const origemMap = {
     'chatbot':    {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},
     'whatsapp':   {label:'Chatbot',   cor:'rgba(52,211,153,.85)'},
@@ -3192,7 +3205,7 @@ function renderDashboard(){
     'organic':    {label:'Website',   cor:'rgba(251,146,60,.85)'},
   };
   const origemCount = {'Chatbot':0,'Facebook':0,'Instagram':0,'Website':0};
-  leadsCV.filter(l=>l.online).forEach(l=>{
+  leadsOnlineMes.forEach(l=>{
     const o = (l.primeiraOrigem||'').toLowerCase();
     let found = false;
     for(const [key, cfg] of Object.entries(origemMap)){
@@ -3269,8 +3282,16 @@ function renderDashboard(){
     });
   }
 
-  // Leads Meta vs CRM — usa dadosRoas completo (todo o período carregado)
-  const gAll={};dadosRoas.forEach(r=>{if(!gAll[r.emp])gAll[r.emp]={m:0,c:0};gAll[r.emp].m+=r.leadsMeta;gAll[r.emp].c+=r.leadsCrm;});
+  // Leads Meta vs CRM — filtrado pelo mês e empreendimento do menu superior
+  const mesDashStr = `${String(refMm).padStart(2,'0')}/${refYy}`;
+  const dLeadsMes = dadosRoas.filter(r=>{
+    const dt = parseDateRoas(r.mes);
+    if(!dt) return false;
+    if(dt.getMonth()+1 !== refMm || dt.getFullYear() !== refYy) return false;
+    if(fEmpDash && r.emp !== fEmpDash) return false;
+    return true;
+  });
+  const gAll={};dLeadsMes.forEach(r=>{if(!gAll[r.emp])gAll[r.emp]={m:0,c:0};gAll[r.emp].m+=r.leadsMeta;gAll[r.emp].c+=r.leadsCrm;});
   const empsL=Object.keys(gAll).filter(e=>gAll[e].m>0||gAll[e].c>0).sort((a,b)=>(gAll[b].m+gAll[b].c)-(gAll[a].m+gAll[a].c)).slice(0,10);
   const hpxL=Math.max(empsL.length*32+60,180);
   document.getElementById('cLeads').parentElement.style.height=hpxL+'px';

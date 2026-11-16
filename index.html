@@ -3234,7 +3234,11 @@ function renderDashboard(){
   const OBJS_PIZZA = ['Alcance','Cadastro','WhatsApp'];
   const CORES_PIZZA = [C.purple, C.blue, C.green];
   const valsPizza = OBJS_PIZZA.map(obj =>
-    campsMes2.filter(c => (c.objetivo||'').toLowerCase() === obj.toLowerCase()).reduce((s,c)=>s+c.valor,0)
+    campsMes2.filter(c => {
+      const nome = (c.nome||'').toLowerCase();
+      const obj2 = (c.objetivo||'').toLowerCase();
+      return nome.includes(obj.toLowerCase()) || obj2.includes(obj.toLowerCase());
+    }).reduce((s,c)=>s+c.valor,0)
   );
   dc('cObjPizza');
   const ctxPizza = document.getElementById('cObjPizza')?.getContext('2d');

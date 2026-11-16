@@ -777,7 +777,7 @@ body.tv-mode #tvExitBtn{display:block}
               <option value="">Mês atual</option>
             </select>
           </div>
-          <div id="objCampList" style="overflow-y:auto;max-height:220px;padding-top:4px"></div>
+          <div id="objCampList" style="height:220px;position:relative"></div>
         </div>
       </div>
 
@@ -3145,20 +3145,34 @@ function renderDashboard(){
     </div>`;
   }).join('')||'<div style="font-size:12px;color:var(--mu);padding:8px 0">Nenhum lead online no período selecionado</div>';
 
-  // ── Chart Invest vs Leads Meta (eixo duplo) — anual ──
+  // ── Chart Invest vs Leads Meta (eixo duplo) — anual, gasto real campsMeta ──
   sid('lblAnoInvLeads', anoGrafico);
+  // Calcula gasto real Meta por mês a partir de campsMeta (Sheet 2)
+  const getMetaSpendMes = mes => {
+    const [mm, yy] = mes.split('/');
+    return campsMeta.filter(c => {
+      if(!c.dataTermino) return false;
+      if(c.dataTermino.getMonth()+1 !== parseInt(mm)) return false;
+      if(c.dataTermino.getFullYear() !== parseInt(yy)) return false;
+      if(empF && c.emp !== empF) return false;
+      return true;
+    }).reduce((s,c)=>s+c.valor, 0);
+  };
   dc('cInvLeads');
   const ctxIL = document.getElementById('cInvLeads')?.getContext('2d');
   if(ctxIL){ charts.cInvLeads = new Chart(ctxIL, {
     type:'bar',
     data:{ labels: mesesAno.map(fmtMes), datasets:[
-      { label:'Investimento', data: mesesAno.map(m=>getMesData(m,'investTotal')),
+      { label:'Gasto Meta', data: mesesAno.map(m=>getMetaSpendMes(m)),
         backgroundColor:'rgba(79,142,247,.8)', borderRadius:6, borderSkipped:false, yAxisID:'yInv', order:2 },
       { label:'Leads Meta', data: mesesAno.map(m=>getMesData(m,'leadsMeta')),
         type:'line', borderColor:C.purple, backgroundColor:'rgba(155,127,244,.1)',
         fill:true, tension:.4, pointRadius:5, pointBackgroundColor:C.purple, borderWidth:2.5, yAxisID:'yLeads', order:1 }
     ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{
+      legend:{display:false},
+      tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+(ctx.dataset.yAxisID==='yInv' ? fBRL(ctx.raw,true) : fN(ctx.raw)+' leads') } }
+    },
       scales:{
         yInv:  { position:'left',  grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:C.blue,   font:{size:10}, callback:v=>'R$'+(v/1000).toFixed(0)+'k'} },
         yLeads:{ position:'right', grid:{display:false},                  ticks:{color:C.purple, font:{size:10}} },
@@ -3203,47 +3217,57 @@ function renderDashboard(){
       plugins:{ legend:{ display:true, position:'bottom', labels:{color:'#8b9ab0',font:{size:12},boxWidth:12,padding:10} } } }
   });
 
-  // ── Gasto por Campanha — mês selecionado (padrão: mês atual) ──
+  // ── Gasto por Objetivo — pizza (Alcance / Cadastro / WhatsApp) ──
   const fObjMesVal = document.getElementById('fObjMes')?.value || '';
   const hoje2 = new Date();
   const mesCampAtual = `${String(hoje2.getMonth()+1).padStart(2,'0')}/${hoje2.getFullYear()}`;
   const mesCampFiltro = fObjMesVal || mesCampAtual;
   const [mcMm, mcYy] = mesCampFiltro.split('/');
-  const campsMes = campsMeta.filter(c=>{
+  const campEmpF = document.getElementById('fEmp')?.value||'';
+  const campsMes2 = campsMeta.filter(c=>{
     if(!c.dataTermino) return false;
     const dt = c.dataTermino;
-    return dt.getMonth()+1 === parseInt(mcMm) && dt.getFullYear() === parseInt(mcYy);
+    if(dt.getMonth()+1 !== parseInt(mcMm) || dt.getFullYear() !== parseInt(mcYy)) return false;
+    if(campEmpF && c.emp !== campEmpF) return false;
+    return c.valor > 0;
   });
-  const campEmpF = document.getElementById('fEmp')?.value||'';
-  const campsExib = campsMes
-    .filter(c=>!campEmpF||(c.emp&&c.emp===campEmpF))
-    .filter(c=>c.valor>0)
-    .sort((a,b)=>b.valor-a.valor)
-    .slice(0,15);
-  const totalCamps = campsExib.reduce((s,c)=>s+c.valor,0);
+  const OBJS_PIZZA = ['Alcance','Cadastro','WhatsApp'];
+  const CORES_PIZZA = [C.purple, C.blue, C.green];
+  const valsPizza = OBJS_PIZZA.map(obj =>
+    campsMes2.filter(c => (c.objetivo||'').toLowerCase() === obj.toLowerCase()).reduce((s,c)=>s+c.valor,0)
+  );
+  // injeta canvas se ainda não existe
   const objCampEl = document.getElementById('objCampList');
-  if(objCampEl){
-    if(!campsExib.length){
-      objCampEl.innerHTML='<div style="font-size:12px;color:var(--mu);padding:16px 0;text-align:center">Sem campanhas com gasto neste mês</div>';
-    } else {
-      const maxV = campsExib[0].valor;
-      objCampEl.innerHTML = campsExib.map(c=>{
-        const gc = OBJ_C[c.objetivo]||C.blue;
-        const pct = Math.round(c.valor/maxV*100);
-        const nomeCurto = (c.nome||'').replace(/\s*[-–—]\s*(fmd|Dia|Pao|v\d+|pouso|interesses|imoveis|segmentacao|prospeccao|cadastro|whatsapp|meta|ads).*/i,'').trim().slice(0,45);
-        return `<div style="margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-            <span style="font-size:11px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%" title="${c.nome}">${nomeCurto}</span>
-            <span style="font-size:11px;font-weight:700;color:${gc};white-space:nowrap;margin-left:8px">${fBRL(c.valor,true)}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px"><div style="width:${pct}%;height:100%;background:${gc};border-radius:3px"></div></div>
-            <span style="font-size:9px;color:var(--mu);white-space:nowrap">${(c.valor/totalCamps*100).toFixed(0)}%</span>
-          </div>
-          ${c.emp?`<span style="font-size:9px;color:var(--mu)">${c.emp}${c.objetivo?' · '+c.objetivo:''}</span>`:''}
-        </div>`;
-      }).join('');
-    }
+  if(objCampEl && !objCampEl.querySelector('canvas')){
+    objCampEl.innerHTML = '<canvas id="cObjPizza"></canvas>';
+  }
+  dc('cObjPizza');
+  const ctxPizza = document.getElementById('cObjPizza')?.getContext('2d');
+  if(ctxPizza){
+    const totalPizza = valsPizza.reduce((s,v)=>s+v,0);
+    charts.cObjPizza = new Chart(ctxPizza, {
+      type:'doughnut',
+      data:{ labels: OBJS_PIZZA, datasets:[{
+        data: valsPizza,
+        backgroundColor: CORES_PIZZA.map(c=>c+'cc'),
+        borderColor: CORES_PIZZA,
+        borderWidth: 2,
+        hoverOffset: 8
+      }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        cutout:'60%',
+        plugins:{
+          legend:{ position:'bottom', labels:{ color:C.mu, font:{size:11}, padding:12, boxWidth:12 } },
+          tooltip:{ callbacks:{
+            label: ctx => {
+              const v = ctx.raw;
+              const pct = totalPizza ? (v/totalPizza*100).toFixed(1) : 0;
+              return ` ${fBRL(v,true)} (${pct}%)`;
+            }
+          }}
+        }
+      }
+    });
   }
 
   // Leads Meta vs CRM — usa dadosRoas completo (todo o período carregado)

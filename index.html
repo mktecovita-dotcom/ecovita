@@ -2085,52 +2085,71 @@ body.tv-mode #tvExitBtn{display:block}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
         <div>
           <h2 style="font-size:22px;font-weight:800;color:var(--tx);margin:0">📋 Estratégias de Campanhas</h2>
-          <p style="margin:4px 0 0;color:var(--mu);font-size:13px">Visão estratégica por empreendimento — público, cidade, renda e segmentações</p>
+          <p style="margin:4px 0 0;color:var(--mu);font-size:13px">Targeting, orçamento e histórico de alterações por conta Meta</p>
         </div>
-        <button id="estBtnGH" onclick="carregarDoGitHub()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-          ☁️ Carregar do GitHub
-        </button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="fbar" style="margin-bottom:20px">
-        <div class="fg">
-          <label class="fl">Situação</label>
-          <select id="estFiltroStatus" class="fs" onchange="renderEstrategias()">
-            <option value="">Todos</option>
-            <option value="Ativo">🟢 Ativo</option>
-            <option value="Finalizado">⚫ Finalizado</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label class="fl">Cidade</label>
-          <select id="estFiltroCidade" class="fs" onchange="renderEstrategias()">
-            <option value="">Todas</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label class="fl">Empreendimento</label>
-          <select id="estFiltroEmp" class="fs" onchange="renderEstrategias()">
-            <option value="">Todos</option>
-          </select>
-        </div>
-        <div class="fg" style="align-self:flex-end">
-          <button onclick="limparFiltrosEst()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer">Limpar</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="estBtnAPI" onclick="carregarEstrategiasAPI()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+            📡 Carregar da API Meta
+          </button>
+          <button id="estBtnGH" onclick="carregarDoGitHub()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+            ☁️ GitHub (legado)
+          </button>
         </div>
       </div>
 
-      <!-- Contadores -->
-      <div id="estResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px"></div>
+      <!-- KPIs API -->
+      <div id="estAPIResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px"></div>
 
-      <!-- Grid de cards -->
-      <div id="estCards"></div>
-
-      <!-- Estado vazio -->
-      <div id="estEmpty" style="display:none;text-align:center;padding:60px 20px;color:var(--mu)">
-        <div style="font-size:48px;margin-bottom:12px">📂</div>
-        <p style="font-size:16px;font-weight:600;margin:0 0 6px">Nenhuma estratégia encontrada</p>
-        <p style="font-size:13px;margin:0">Selecione a pasta Criativos ou cadastre uma nova estratégia</p>
+      <!-- Cards da API -->
+      <div id="estAPICards" style="margin-bottom:32px">
+        <div style="text-align:center;padding:48px 20px;color:var(--mu)">
+          <div style="font-size:40px;margin-bottom:12px">📡</div>
+          <p style="font-size:15px;font-weight:600;margin:0 0 6px">Dados da Meta API</p>
+          <p style="font-size:13px;margin:0 0 16px">Clique em "Carregar da API Meta" para buscar targeting, orçamentos e histórico de alterações em tempo real</p>
+          <button onclick="carregarEstrategiasAPI()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">📡 Carregar agora</button>
+        </div>
       </div>
+
+      <!-- Separador legado -->
+      <div id="estLegadoSec" style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
+          Estratégias manuais (GitHub)
+        </div>
+        <!-- Filtros legado -->
+        <div class="fbar" style="margin-bottom:16px">
+          <div class="fg">
+            <label class="fl">Situação</label>
+            <select id="estFiltroStatus" class="fs" onchange="renderEstrategias()">
+              <option value="">Todos</option>
+              <option value="Ativo">🟢 Ativo</option>
+              <option value="Finalizado">⚫ Finalizado</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Cidade</label>
+            <select id="estFiltroCidade" class="fs" onchange="renderEstrategias()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Empreendimento</label>
+            <select id="estFiltroEmp" class="fs" onchange="renderEstrategias()">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="fg" style="align-self:flex-end">
+            <button onclick="limparFiltrosEst()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer">Limpar</button>
+          </div>
+        </div>
+        <div id="estResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+        <div id="estCards"></div>
+        <div id="estEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--mu)">
+          <div style="font-size:40px;margin-bottom:10px">📂</div>
+          <p style="font-size:14px;font-weight:600;margin:0 0 4px">Nenhuma estratégia manual encontrada</p>
+          <p style="font-size:12px;margin:0">Use o botão "GitHub (legado)" para carregar a planilha de estratégias</p>
+        </div>
+      </div>
+
     </div><!-- /page-estrategias -->
 
     <!-- Modal: Nova Estratégia -->
@@ -8679,6 +8698,255 @@ function loadEstrategias(){
   _estrategias = ghItems.length ? ghItems : [];
   _popularFiltrosEst();
   renderEstrategias();
+}
+
+// ══════════════════════════════════════════════════════
+// ESTRATÉGIAS VIA META API
+// ══════════════════════════════════════════════════════
+let _estAPIData = []; // dados brutos da API por conta
+
+async function carregarEstrategiasAPI(){
+  const token = getTokenConj();
+  if(!token){
+    document.getElementById('conjTokenBox').style.display='block';
+    alert('Configure o Token Meta antes de carregar.');
+    return;
+  }
+  const btn = document.getElementById('estBtnAPI');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Carregando da API…'; }
+  const container = document.getElementById('estAPICards');
+  if(container) container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--mu);font-size:14px">⏳ Buscando dados da Meta API…</div>';
+
+  try{
+    const results = await Promise.allSettled(
+      CONJ_ACCOUNTS.map(acc => _fetchEstrategiasConta(acc, token))
+    );
+    _estAPIData = [];
+    results.forEach((r,i)=>{
+      if(r.status==='fulfilled') _estAPIData.push({ account: CONJ_ACCOUNTS[i], ...r.value });
+      else console.warn(CONJ_ACCOUNTS[i].name, r.reason?.message);
+    });
+    renderEstrategiasAPI();
+    if(btn){ btn.disabled=false; btn.textContent='🔄 Atualizar da API'; }
+  } catch(err){
+    if(btn){ btn.disabled=false; btn.textContent='📡 Carregar da API Meta'; }
+    if(container) container.innerHTML = `<div style="color:var(--red);padding:20px">${err.message}</div>`;
+  }
+}
+
+async function _fetchEstrategiasConta(account, token){
+  const base = `https://graph.facebook.com/v21.0/act_${account.id}`;
+
+  // 1. Campanhas com adsets e targeting
+  const campFields = [
+    'name','status','effective_status','objective','daily_budget','lifetime_budget',
+    'adsets{name,status,effective_status,daily_budget,lifetime_budget,optimization_goal,targeting}'
+  ].join(',');
+  const campUrl = `${base}/campaigns?fields=${encodeURIComponent(campFields)}&limit=50&access_token=${token}`;
+  const campResp = await fetch(campUrl);
+  const campJson = await campResp.json();
+  if(campJson.error) throw new Error(campJson.error.message);
+  const campaigns = campJson.data || [];
+
+  // 2. Activity log (últimas 20 ações)
+  const actUrl = `${base}/activities?fields=event_type,event_time,extra_data,actor_name&limit=20&access_token=${token}`;
+  const actResp = await fetch(actUrl);
+  const actJson = await actResp.json();
+  const activities = (actJson.data || []).filter(a => a.event_type !== 'unknown');
+
+  return { campaigns, activities };
+}
+
+function _fmtBudget(daily, lifetime){
+  if(daily)    return 'R$ ' + (parseFloat(daily)/100).toLocaleString('pt-BR',{maximumFractionDigits:0}) + '/dia';
+  if(lifetime) return 'R$ ' + (parseFloat(lifetime)/100).toLocaleString('pt-BR',{maximumFractionDigits:0}) + ' total';
+  return '—';
+}
+
+function _parseTargeting(t){
+  if(!t) return {};
+  // Faixa etária
+  const faixa = (t.age_min || t.age_max)
+    ? `${t.age_min||18}–${t.age_max||65}` : '';
+  // Localizações
+  const locs = [];
+  (t.geo_locations?.cities||[]).forEach(c=>locs.push(c.name));
+  (t.geo_locations?.regions||[]).forEach(r=>locs.push(r.name));
+  (t.geo_locations?.countries||[]).forEach(c=>locs.push(c));
+  // Plataformas e posicionamentos
+  const plats = (t.publisher_platforms||[]).join(', ');
+  const posics = [
+    ...(t.facebook_positions||[]).map(p=>'FB: '+p),
+    ...(t.instagram_positions||[]).map(p=>'IG: '+p),
+  ].join(', ');
+  // Advantage+ audience
+  const adv = t.targeting_expansion?.expansion_types?.length > 0 ? 'Ativado' : (t.targeting_automation?.advantage_audience === 1 ? 'Ativado' : '');
+  // Públicos / interesses
+  const publis = [];
+  (t.flexible_spec||[]).forEach(fs=>{
+    (fs.interests||[]).forEach(i=>publis.push(i.name));
+    (fs.behaviors||[]).forEach(b=>publis.push(b.name));
+    (fs.custom_audiences||[]).forEach(ca=>publis.push(ca.name));
+  });
+  (t.custom_audiences||[]).forEach(ca=>publis.push(ca.name));
+  return { faixa, locs, plats, posics, adv, publis };
+}
+
+function _objLabel(camp){
+  const nome = (camp.name||'').toLowerCase();
+  const obj  = (camp.objective||'').toLowerCase();
+  if(nome.includes('alcance') || obj.includes('reach')) return 'Alcance';
+  if(nome.includes('cadastro')|| obj.includes('lead') || obj.includes('outcome_lead')) return 'Cadastro';
+  if(nome.includes('whatsapp')|| obj.includes('messages') || obj.includes('outcome_traffic')) return 'WhatsApp';
+  return camp.objective || 'Outro';
+}
+
+const OBJ_STYLE = {
+  'Alcance':   { cor: 'var(--purple)', bg: 'rgba(155,127,244,.1)', border: 'rgba(155,127,244,.3)' },
+  'Cadastro':  { cor: 'var(--blue)',   bg: 'rgba(79,142,247,.1)',  border: 'rgba(79,142,247,.3)'  },
+  'WhatsApp':  { cor: 'var(--green)',  bg: 'rgba(46,204,142,.1)',  border: 'rgba(46,204,142,.3)'  },
+  'Outro':     { cor: 'var(--mu)',     bg: 'rgba(107,122,158,.1)', border: 'rgba(107,122,158,.3)' },
+};
+
+function renderEstrategiasAPI(){
+  const container = document.getElementById('estAPICards');
+  if(!container) return;
+  if(!_estAPIData.length){
+    container.innerHTML = '<div style="color:var(--mu);padding:20px;text-align:center">Nenhum dado carregado. Clique em "Carregar da API Meta".</div>';
+    return;
+  }
+
+  // KPIs globais
+  const totalCamps   = _estAPIData.reduce((s,a)=>s+a.campaigns.length,0);
+  const ativas       = _estAPIData.reduce((s,a)=>s+a.campaigns.filter(c=>c.effective_status==='ACTIVE').length,0);
+  const totalAdsets  = _estAPIData.reduce((s,a)=>s+a.campaigns.reduce((ss,c)=>ss+(c.adsets?.data?.length||0),0),0);
+  const resumoEl = document.getElementById('estAPIResumo');
+  if(resumoEl) resumoEl.innerHTML = `
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${_estAPIData.length}</div><div class="kl">Contas</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${totalCamps}</div><div class="kl">Campanhas</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--green)">${ativas}</div><div class="kl">Ativas</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--blue)">${totalAdsets}</div><div class="kl">Conjuntos</div></div>`;
+
+  container.innerHTML = _estAPIData.map(acc => _renderEstAPICard(acc)).join('');
+}
+
+function _renderEstAPICard(acc){
+  const { account, campaigns, activities } = acc;
+
+  // Agrupa campanhas por objetivo
+  const grupos = {};
+  campaigns.forEach(camp=>{
+    const lbl = _objLabel(camp);
+    if(!grupos[lbl]) grupos[lbl] = [];
+    grupos[lbl].push(camp);
+  });
+
+  // Gasto real do mês via campsMeta (Sheet 2)
+  const hoje = new Date();
+  const mesAtual = `${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+  const gastoMes = campsMeta.filter(c=>{
+    if(!c.dataTermino) return false;
+    const dt = c.dataTermino;
+    return dt.getMonth()+1 === hoje.getMonth()+1 && dt.getFullYear() === hoje.getFullYear()
+           && (c.emp === account.name || (c.nome||'').includes(account.name.split(' ')[0]));
+  }).reduce((s,c)=>s+c.valor,0);
+
+  // Seção de campanhas por objetivo
+  const gruposHtml = Object.entries(grupos).map(([obj, camps])=>{
+    const style = OBJ_STYLE[obj] || OBJ_STYLE['Outro'];
+    const ativasG = camps.filter(c=>c.effective_status==='ACTIVE').length;
+
+    const campsHtml = camps.map(camp=>{
+      const adsets = camp.adsets?.data || [];
+      const budget = _fmtBudget(camp.daily_budget, camp.lifetime_budget);
+      const campAtiva = camp.effective_status === 'ACTIVE';
+
+      const adsetsHtml = adsets.map(as=>{
+        const tg = _parseTargeting(as.targeting);
+        const asBudget = _fmtBudget(as.daily_budget, as.lifetime_budget);
+        const asAtivo = as.effective_status === 'ACTIVE';
+
+        const rows = [
+          tg.faixa   ? `<div class="est-seg-row"><span class="est-seg-label">Faixa etária</span><div class="est-seg-tags"><span class="est-seg-tag">👥 ${tg.faixa}</span></div></div>` : '',
+          tg.locs.length ? `<div class="est-seg-row"><span class="est-seg-label">Localização</span><div class="est-seg-tags">${tg.locs.map(l=>`<span class="est-seg-tag">📍 ${l}</span>`).join('')}</div></div>` : '',
+          tg.publis.length ? `<div class="est-seg-row"><span class="est-seg-label">Público</span><div class="est-seg-tags">${tg.publis.slice(0,6).map(p=>`<span class="est-seg-tag">${p}</span>`).join('')}${tg.publis.length>6?`<span class="est-seg-tag" style="color:var(--mu)">+${tg.publis.length-6}</span>`:''}</div></div>` : '',
+          tg.adv     ? `<div class="est-seg-row"><span class="est-seg-label">Advantage+</span><div class="est-seg-tags"><span class="est-seg-tag" style="color:var(--amber)">⚡ ${tg.adv}</span></div></div>` : '',
+          tg.plats   ? `<div class="est-seg-row"><span class="est-seg-label">Plataformas</span><div class="est-seg-tags"><span class="est-seg-tag">${tg.plats}</span></div></div>` : '',
+          tg.posics  ? `<div class="est-seg-row"><span class="est-seg-label">Posicionamentos</span><div class="est-seg-tags"><span class="est-seg-tag" style="font-size:10px">${tg.posics}</span></div></div>` : '',
+          asBudget !== '—' ? `<div class="est-seg-row"><span class="est-seg-label">Orçamento</span><div class="est-seg-tags"><span class="est-seg-tag" style="color:var(--amber)">${asBudget}</span></div></div>` : '',
+        ].filter(Boolean).join('');
+
+        return `<div class="est-seg-block" style="margin-bottom:6px">
+          <div class="est-seg-title" style="display:flex;align-items:center;gap:8px">
+            <span>${as.name}</span>
+            <span style="font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;background:${asAtivo?'rgba(46,204,142,.15)':'rgba(107,122,158,.15)'};color:${asAtivo?'var(--green)':'var(--mu)'}">${asAtivo?'● Ativo':'● Pausado'}</span>
+          </div>
+          ${rows || '<div style="font-size:11px;color:var(--mu);padding:4px 0">Sem targeting detalhado</div>'}
+        </div>`;
+      }).join('');
+
+      return `<div style="margin-bottom:10px;border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
+        <div style="padding:10px 14px;background:var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span style="font-size:12px;font-weight:700;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${camp.name}">${camp.name}</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            ${budget !== '—' ? `<span style="font-size:11px;color:var(--amber)">${budget}</span>` : ''}
+            <span style="font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;background:${campAtiva?'rgba(46,204,142,.15)':'rgba(107,122,158,.15)'};color:${campAtiva?'var(--green)':'var(--mu)'}">${campAtiva?'● Ativa':'● Pausada'}</span>
+          </div>
+        </div>
+        ${adsets.length ? `<div style="padding:10px 14px">${adsetsHtml}</div>` : '<div style="padding:10px 14px;font-size:11px;color:var(--mu)">Sem conjuntos</div>'}
+      </div>`;
+    }).join('');
+
+    return `<div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:800;color:${style.cor}">${obj}</span>
+        <span style="font-size:11px;color:var(--mu)">${camps.length} campanha${camps.length>1?'s':''} · ${ativasG} ativa${ativasG!==1?'s':''}</span>
+      </div>
+      ${campsHtml}
+    </div>`;
+  }).join('');
+
+  // Histórico de alterações
+  const fmtDate = ts => {
+    const d = new Date(ts);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
+  const actHtml = activities.length ? activities.slice(0,8).map(a=>{
+    const extra = a.extra_data ? (() => { try{ const x=JSON.parse(a.extra_data); return x.new_value ? ` → <strong>${x.new_value}</strong>` : ''; } catch(e){ return ''; } })() : '';
+    return `<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)">
+      <span style="font-size:10px;color:var(--mu);white-space:nowrap;flex-shrink:0">${fmtDate(a.event_time)}</span>
+      <span style="font-size:11px;color:var(--tx)">${a.event_type.replace(/_/g,' ')}${extra}</span>
+      ${a.actor_name ? `<span style="font-size:10px;color:var(--mu);margin-left:auto;white-space:nowrap">${a.actor_name}</span>` : ''}
+    </div>`;
+  }).join('') : '<div style="font-size:11px;color:var(--mu);padding:8px 0">Sem histórico disponível</div>';
+
+  const totalCampsAcc = campaigns.length;
+  const ativasAcc = campaigns.filter(c=>c.effective_status==='ACTIVE').length;
+
+  return `<div class="est-strat-card" style="margin-bottom:20px">
+    <!-- Header da conta -->
+    <div class="est-strat-hd">
+      <div style="flex:1">
+        <div class="est-strat-nome">${account.name}</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:3px">${totalCampsAcc} campanhas · ${ativasAcc} ativas</div>
+      </div>
+      ${gastoMes > 0 ? `<div style="text-align:right;flex-shrink:0">
+        <div style="font-size:17px;font-weight:800;color:var(--amber)">${fBRL(gastoMes,true)}</div>
+        <div style="font-size:10px;color:var(--mu)">Gasto no mês</div>
+      </div>` : ''}
+    </div>
+
+    <!-- Campanhas por objetivo -->
+    <div style="padding:16px">
+      ${gruposHtml || '<div style="color:var(--mu);font-size:12px">Sem campanhas nesta conta</div>'}
+    </div>
+
+    <!-- Histórico de alterações -->
+    <div style="border-top:1px solid var(--bdr);padding:14px 16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:8px">🕐 Histórico de Alterações</div>
+      ${actHtml}
+    </div>
+  </div>`;
 }
 
 async function carregarDoGitHub(){

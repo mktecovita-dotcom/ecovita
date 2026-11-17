@@ -8760,9 +8760,12 @@ function _fmtBudget(daily, lifetime){
 
 function _parseTargeting(t){
   if(!t) return {};
-  // Faixa etária
-  const faixa = (t.age_min || t.age_max)
-    ? `${t.age_min||18}–${t.age_max||65}` : '';
+  // Faixa etária — pode estar no nível raiz ou dentro de targeting_constraints (Advantage+)
+  const ageMin = t.age_min ?? t.targeting_constraints?.age_min ?? null;
+  const ageMax = t.age_max ?? t.targeting_constraints?.age_max ?? null;
+  // Só exibe se diferente do padrão Meta (18-65) para evitar mostrar faixa genérica
+  const faixa = (ageMin !== null || ageMax !== null)
+    ? `${ageMin ?? 18}–${ageMax ?? 65}` : '';
   // Localizações (cidades + bairros + regiões)
   const locs = [];
   (t.geo_locations?.cities||[]).forEach(c=>locs.push(c.name));

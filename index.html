@@ -2087,20 +2087,15 @@ body.tv-mode #tvExitBtn{display:block}
           <h2 style="font-size:22px;font-weight:800;color:var(--tx);margin:0">📋 Estratégias de Campanhas</h2>
           <p style="margin:4px 0 0;color:var(--mu);font-size:13px">Targeting, orçamento e histórico de alterações por conta Meta</p>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button id="estBtnAPI" onclick="carregarEstrategiasAPI()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-            📡 Carregar da API Meta
-          </button>
-          <button id="estBtnGH" onclick="carregarDoGitHub()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-            ☁️ GitHub (legado)
-          </button>
-        </div>
+        <button id="estBtnAPI" onclick="carregarEstrategiasAPI()" style="background:var(--blue);border:none;color:#fff;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+          📡 Carregar da API Meta
+        </button>
       </div>
 
       <!-- KPIs API -->
       <div id="estAPIResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
 
-      <!-- Filtro por empreendimento (API) -->
+      <!-- Filtros API -->
       <div class="fbar" id="estAPIFiltroBar" style="margin-bottom:16px;display:none">
         <div class="fg">
           <label class="fl">Empreendimento</label>
@@ -2108,6 +2103,7 @@ body.tv-mode #tvExitBtn{display:block}
             <option value="">Todos</option>
           </select>
         </div>
+        <input type="text" id="estAPIBusca" oninput="renderEstrategiasAPI()" placeholder="🔍 Buscar campanha ou conjunto..." style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:6px 12px;color:var(--tx);min-width:220px;outline:none;align-self:flex-end">
       </div>
 
       <!-- Cards da API -->
@@ -2120,44 +2116,14 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
 
-      <!-- Separador legado -->
-      <div id="estLegadoSec" style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
-          Estratégias manuais (GitHub)
-        </div>
-        <!-- Filtros legado -->
-        <div class="fbar" style="margin-bottom:16px">
-          <div class="fg">
-            <label class="fl">Situação</label>
-            <select id="estFiltroStatus" class="fs" onchange="renderEstrategias()">
-              <option value="">Todos</option>
-              <option value="Ativo">🟢 Ativo</option>
-              <option value="Finalizado">⚫ Finalizado</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label class="fl">Cidade</label>
-            <select id="estFiltroCidade" class="fs" onchange="renderEstrategias()">
-              <option value="">Todas</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label class="fl">Empreendimento</label>
-            <select id="estFiltroEmp" class="fs" onchange="renderEstrategias()">
-              <option value="">Todos</option>
-            </select>
-          </div>
-          <div class="fg" style="align-self:flex-end">
-            <button onclick="limparFiltrosEst()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer">Limpar</button>
-          </div>
-        </div>
-        <div id="estResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <!-- elementos legado ocultos (mantidos para não quebrar JS existente) -->
+      <div style="display:none">
+        <select id="estFiltroStatus"></select>
+        <select id="estFiltroCidade"></select>
+        <select id="estFiltroEmp"></select>
+        <div id="estResumo"></div>
         <div id="estCards"></div>
-        <div id="estEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--mu)">
-          <div style="font-size:40px;margin-bottom:10px">📂</div>
-          <p style="font-size:14px;font-weight:600;margin:0 0 4px">Nenhuma estratégia manual encontrada</p>
-          <p style="font-size:12px;margin:0">Use o botão "GitHub (legado)" para carregar a planilha de estratégias</p>
-        </div>
+        <div id="estEmpty"></div>
       </div>
 
     </div><!-- /page-estrategias -->
@@ -8715,6 +8681,25 @@ function loadEstrategias(){
 // ══════════════════════════════════════════════════════
 let _estAPIData = []; // dados brutos da API por conta
 
+// Renda familiar fixa por empreendimento
+const EST_RENDA = {
+  'Cidade Alegre':    3200,
+  'Nova Quinta':      6500,
+  'Jardim dos Ipês':  3200,
+  'Piemonte':         15000,
+  'Altos da Serra':   3500,
+  'Monte Verde':      2900,
+  'Parque Aviação':   2500,
+  'Raízes Di Verona': 3100,
+  'Orquídeas':        4000,
+  'Olga Nasser':      3000,
+};
+function _getRendaEmp(nome){
+  // busca por substring para tolerar variações ex: "Altos da Serra (Botucatu)"
+  const key = Object.keys(EST_RENDA).find(k => nome.toLowerCase().includes(k.toLowerCase()));
+  return key ? EST_RENDA[key] : 0;
+}
+
 async function carregarEstrategiasAPI(){
   const token = getTokenConj();
   if(!token){
@@ -8840,9 +8825,26 @@ function renderEstrategiasAPI(){
     });
   }
   const empFiltroId = filtroSel?.value || '';
-  const listaFiltrada = empFiltroId
+  const buscaF = (document.getElementById('estAPIBusca')?.value||'').toLowerCase().trim();
+  let listaFiltrada = empFiltroId
     ? _estAPIData.filter(a => a.account.id === empFiltroId)
     : _estAPIData;
+  // Filtro de busca: filtra campanhas/adsets dentro de cada conta
+  if(buscaF){
+    listaFiltrada = listaFiltrada.map(acc=>{
+      const camps = acc.campaigns.filter(c=>{
+        if((c.name||'').toLowerCase().includes(buscaF)) return true;
+        return (c.adsets?.data||[]).some(as=>(as.name||'').toLowerCase().includes(buscaF));
+      }).map(c=>({
+        ...c,
+        adsets: { data: (c.adsets?.data||[]).filter(as=>
+          (c.name||'').toLowerCase().includes(buscaF) ||
+          (as.name||'').toLowerCase().includes(buscaF)
+        )}
+      }));
+      return { ...acc, campaigns: camps };
+    }).filter(acc => acc.campaigns.length > 0);
+  }
 
   // KPIs globais (da lista filtrada)
   const totalCamps  = listaFiltrada.reduce((s,a)=>s+a.campaigns.length,0);
@@ -8950,6 +8952,8 @@ function _renderEstAPICard(acc){
 
   const totalCampsAcc = campaigns.length;
   const ativasAcc = campaigns.filter(c=>c.effective_status==='ACTIVE').length;
+  const renda = _getRendaEmp(account.name);
+  const fmtRenda = v => v ? 'R$ ' + v.toLocaleString('pt-BR') : '—';
 
   return `<div class="est-strat-card" style="margin-bottom:20px">
     <!-- Header da conta -->
@@ -8958,10 +8962,16 @@ function _renderEstAPICard(acc){
         <div class="est-strat-nome">${account.name}</div>
         <div style="font-size:11px;color:var(--mu);margin-top:3px">${totalCampsAcc} campanhas · ${ativasAcc} ativas</div>
       </div>
-      ${gastoMes > 0 ? `<div style="text-align:right;flex-shrink:0">
-        <div style="font-size:17px;font-weight:800;color:var(--amber)">${fBRL(gastoMes,true)}</div>
-        <div style="font-size:10px;color:var(--mu)">Gasto no mês</div>
-      </div>` : ''}
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-shrink:0">
+        ${renda ? `<div style="text-align:right">
+          <div style="font-size:15px;font-weight:800;color:var(--amber)">${fmtRenda(renda)}</div>
+          <div style="font-size:10px;color:var(--mu)">Renda familiar</div>
+        </div>` : ''}
+        ${gastoMes > 0 ? `<div style="text-align:right">
+          <div style="font-size:15px;font-weight:800;color:var(--blue)">${fBRL(gastoMes,true)}</div>
+          <div style="font-size:10px;color:var(--mu)">Gasto no mês</div>
+        </div>` : ''}
+      </div>
     </div>
 
     <!-- Campanhas por objetivo -->

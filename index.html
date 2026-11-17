@@ -2103,6 +2103,14 @@ body.tv-mode #tvExitBtn{display:block}
             <option value="">Todos</option>
           </select>
         </div>
+        <div class="fg">
+          <label class="fl">Status</label>
+          <select id="estAPIFiltroStatus" class="fs" onchange="renderEstrategiasAPI()">
+            <option value="">Todos</option>
+            <option value="ACTIVE">🟢 Ativo</option>
+            <option value="PAUSED">⚫ Pausado</option>
+          </select>
+        </div>
         <input type="text" id="estAPIBusca" oninput="renderEstrategiasAPI()" placeholder="🔍 Buscar campanha ou conjunto..." style="font-size:12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:6px 12px;color:var(--tx);min-width:220px;outline:none;align-self:flex-end">
       </div>
 
@@ -8827,24 +8835,32 @@ function renderEstrategiasAPI(){
       filtroSel.appendChild(o);
     });
   }
-  const empFiltroId = filtroSel?.value || '';
-  const buscaF = (document.getElementById('estAPIBusca')?.value||'').toLowerCase().trim();
+  const empFiltroId  = filtroSel?.value || '';
+  const statusFiltro = document.getElementById('estAPIFiltroStatus')?.value || '';
+  const buscaF       = (document.getElementById('estAPIBusca')?.value||'').toLowerCase().trim();
+
   let listaFiltrada = empFiltroId
     ? _estAPIData.filter(a => a.account.id === empFiltroId)
     : _estAPIData;
-  // Filtro de busca: filtra campanhas/adsets dentro de cada conta
-  if(buscaF){
+
+  // Filtro de status e busca dentro de cada conta
+  if(statusFiltro || buscaF){
     listaFiltrada = listaFiltrada.map(acc=>{
-      const camps = acc.campaigns.filter(c=>{
-        if((c.name||'').toLowerCase().includes(buscaF)) return true;
-        return (c.adsets?.data||[]).some(as=>(as.name||'').toLowerCase().includes(buscaF));
-      }).map(c=>({
-        ...c,
-        adsets: { data: (c.adsets?.data||[]).filter(as=>
-          (c.name||'').toLowerCase().includes(buscaF) ||
-          (as.name||'').toLowerCase().includes(buscaF)
-        )}
-      }));
+      const camps = acc.campaigns
+        .filter(c => !statusFiltro || c.effective_status === statusFiltro)
+        .filter(c=>{
+          if(!buscaF) return true;
+          if((c.name||'').toLowerCase().includes(buscaF)) return true;
+          return (c.adsets?.data||[]).some(as=>(as.name||'').toLowerCase().includes(buscaF));
+        })
+        .map(c=>({
+          ...c,
+          adsets: { data: (c.adsets?.data||[]).filter(as=>
+            !buscaF ||
+            (c.name||'').toLowerCase().includes(buscaF) ||
+            (as.name||'').toLowerCase().includes(buscaF)
+          )}
+        }));
       return { ...acc, campaigns: camps };
     }).filter(acc => acc.campaigns.length > 0);
   }

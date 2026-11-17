@@ -2098,7 +2098,17 @@ body.tv-mode #tvExitBtn{display:block}
       </div>
 
       <!-- KPIs API -->
-      <div id="estAPIResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px"></div>
+      <div id="estAPIResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+      <!-- Filtro por empreendimento (API) -->
+      <div class="fbar" id="estAPIFiltroBar" style="margin-bottom:16px;display:none">
+        <div class="fg">
+          <label class="fl">Empreendimento</label>
+          <select id="estAPIFiltroEmp" class="fs" onchange="renderEstrategiasAPI()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
 
       <!-- Cards da API -->
       <div id="estAPICards" style="margin-bottom:32px">
@@ -8768,9 +8778,10 @@ function _parseTargeting(t){
   // Faixa etária
   const faixa = (t.age_min || t.age_max)
     ? `${t.age_min||18}–${t.age_max||65}` : '';
-  // Localizações
+  // Localizações (cidades + bairros + regiões)
   const locs = [];
   (t.geo_locations?.cities||[]).forEach(c=>locs.push(c.name));
+  (t.geo_locations?.neighborhoods||[]).forEach(n=>locs.push('🏘️ '+n.name));
   (t.geo_locations?.regions||[]).forEach(r=>locs.push(r.name));
   (t.geo_locations?.countries||[]).forEach(c=>locs.push(c));
   // Plataformas e posicionamentos
@@ -8816,18 +8827,35 @@ function renderEstrategiasAPI(){
     return;
   }
 
-  // KPIs globais
-  const totalCamps   = _estAPIData.reduce((s,a)=>s+a.campaigns.length,0);
-  const ativas       = _estAPIData.reduce((s,a)=>s+a.campaigns.filter(c=>c.effective_status==='ACTIVE').length,0);
-  const totalAdsets  = _estAPIData.reduce((s,a)=>s+a.campaigns.reduce((ss,c)=>ss+(c.adsets?.data?.length||0),0),0);
+  // Popular filtro de empreendimento na primeira carga
+  const filtroBar = document.getElementById('estAPIFiltroBar');
+  const filtroSel = document.getElementById('estAPIFiltroEmp');
+  if(filtroBar) filtroBar.style.display = 'flex';
+  if(filtroSel && filtroSel.options.length <= 1){
+    _estAPIData.forEach(a=>{
+      const o = document.createElement('option');
+      o.value = a.account.id;
+      o.textContent = a.account.name;
+      filtroSel.appendChild(o);
+    });
+  }
+  const empFiltroId = filtroSel?.value || '';
+  const listaFiltrada = empFiltroId
+    ? _estAPIData.filter(a => a.account.id === empFiltroId)
+    : _estAPIData;
+
+  // KPIs globais (da lista filtrada)
+  const totalCamps  = listaFiltrada.reduce((s,a)=>s+a.campaigns.length,0);
+  const ativas      = listaFiltrada.reduce((s,a)=>s+a.campaigns.filter(c=>c.effective_status==='ACTIVE').length,0);
+  const totalAdsets = listaFiltrada.reduce((s,a)=>s+a.campaigns.reduce((ss,c)=>ss+(c.adsets?.data?.length||0),0),0);
   const resumoEl = document.getElementById('estAPIResumo');
   if(resumoEl) resumoEl.innerHTML = `
-    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${_estAPIData.length}</div><div class="kl">Contas</div></div>
+    <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${listaFiltrada.length}</div><div class="kl">Contas</div></div>
     <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv">${totalCamps}</div><div class="kl">Campanhas</div></div>
     <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--green)">${ativas}</div><div class="kl">Ativas</div></div>
     <div class="kcard" style="flex:0 0 auto;min-width:130px"><div class="kv" style="color:var(--blue)">${totalAdsets}</div><div class="kl">Conjuntos</div></div>`;
 
-  container.innerHTML = _estAPIData.map(acc => _renderEstAPICard(acc)).join('');
+  container.innerHTML = listaFiltrada.map(acc => _renderEstAPICard(acc)).join('');
 }
 
 function _renderEstAPICard(acc){
@@ -8869,7 +8897,7 @@ function _renderEstAPICard(acc){
         const rows = [
           tg.faixa   ? `<div class="est-seg-row"><span class="est-seg-label">Faixa etária</span><div class="est-seg-tags"><span class="est-seg-tag">👥 ${tg.faixa}</span></div></div>` : '',
           tg.locs.length ? `<div class="est-seg-row"><span class="est-seg-label">Localização</span><div class="est-seg-tags">${tg.locs.map(l=>`<span class="est-seg-tag">📍 ${l}</span>`).join('')}</div></div>` : '',
-          tg.publis.length ? `<div class="est-seg-row"><span class="est-seg-label">Público</span><div class="est-seg-tags">${tg.publis.slice(0,6).map(p=>`<span class="est-seg-tag">${p}</span>`).join('')}${tg.publis.length>6?`<span class="est-seg-tag" style="color:var(--mu)">+${tg.publis.length-6}</span>`:''}</div></div>` : '',
+          tg.publis.length ? `<div class="est-seg-row"><span class="est-seg-label">Público</span><div class="est-seg-tags">${tg.publis.map(p=>`<span class="est-seg-tag">${p}</span>`).join('')}</div></div>` : '',
           tg.adv     ? `<div class="est-seg-row"><span class="est-seg-label">Advantage+</span><div class="est-seg-tags"><span class="est-seg-tag" style="color:var(--amber)">⚡ ${tg.adv}</span></div></div>` : '',
           tg.plats   ? `<div class="est-seg-row"><span class="est-seg-label">Plataformas</span><div class="est-seg-tags"><span class="est-seg-tag">${tg.plats}</span></div></div>` : '',
           tg.posics  ? `<div class="est-seg-row"><span class="est-seg-label">Posicionamentos</span><div class="est-seg-tags"><span class="est-seg-tag" style="font-size:10px">${tg.posics}</span></div></div>` : '',

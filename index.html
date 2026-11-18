@@ -4543,6 +4543,10 @@ function renderFunil(){
     if(!c.dataTermino) return false;
     if(c.dataTermino < deD || c.dataTermino > ateD) return false;
     if(empF && c.emp !== empF) return false;
+    // Exclui campanhas de Alcance — não geram leads qualificados
+    const nomeLC = (c.nome||'').toLowerCase();
+    const objLC  = (c.objetivo||'').toLowerCase();
+    if(nomeLC.includes('alcance') || objLC.includes('reach') || objLC==='alcance') return false;
     return true;
   });
   const leadsMeta = campsPeriodo.reduce((s,c)=>s+c.resultados, 0);
@@ -4600,7 +4604,8 @@ function renderFunil(){
   const body = document.getElementById('fnFunilBody');
   body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:4px 0">` +
   stages.map((s,i)=>{
-    const pct = refBase===0 ? 100 : Math.max(10, Math.round((s.n / stages[0].n || 1)*100));
+    const maxN = stages[0].n || 1;
+    const pct = s.n === 0 ? 1 : Math.max(2, Math.round(s.n / maxN * 100));
     const prevN = i > 0 ? stages[i-1].n : null;
     const pctPrev = prevN != null && prevN > 0 ? ((s.n/prevN)*100).toFixed(1) : null;
     const pctBadge = pctPrev != null

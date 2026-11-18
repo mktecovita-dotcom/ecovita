@@ -837,12 +837,13 @@ body.tv-mode #tvExitBtn{display:block}
       <div class="card" style="margin-bottom:18px;padding:16px 20px">
         <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
 
-          <!-- Mês -->
-          <div class="fg">
-            <label class="fl">Mês</label>
-            <select id="fnMes" class="fs" onchange="renderFunil()">
-              <option value="">Mês atual</option>
-            </select>
+          <!-- Período -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="fl">De:</span>
+            <input type="date" id="fnDe" onchange="renderFunil()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <span class="fl">Até:</span>
+            <input type="date" id="fnAte" onchange="renderFunil()" style="background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--tx)">
+            <button onclick="fnLimparDatas()" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--mu);border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer">✕</button>
           </div>
 
           <!-- Origem -->
@@ -4449,6 +4450,14 @@ function fnPopularFiltros(){
   }
 }
 
+function fnLimparDatas(){
+  const inp1 = document.getElementById('fnDe');
+  const inp2 = document.getElementById('fnAte');
+  if(inp1) inp1.value = '';
+  if(inp2) inp2.value = '';
+  renderFunil();
+}
+
 function fnToggleOrigDrop(){
   const d=document.getElementById('fnOrigDrop');
   d.style.display=d.style.display==='block'?'none':'block';
@@ -4506,31 +4515,38 @@ function renderFunil(){
   fnPopularFiltros();
 
   const hoje    = new Date();
-  const mesAtual= `${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
-  const mesSel  = document.getElementById('fnMes')?.value || mesAtual;
   const origemF = document.getElementById('fnOrigem')?.value || '';
   const empF    = document.getElementById('fnEmp')?.value || '';
-  const [mm, yy]= mesSel.split('/').map(Number);
 
-  // Label do mês
-  const ns=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  sid('fnTituloMes', `${ns[mm]} ${yy}`);
+  // Datas De/Até — padrão: 1º ao último dia do mês atual
+  const deVal  = document.getElementById('fnDe')?.value;
+  const ateVal = document.getElementById('fnAte')?.value;
+  const deD    = deVal  ? new Date(deVal +'T00:00:00') : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const ateD   = ateVal ? new Date(ateVal+'T23:59:59') : new Date(hoje.getFullYear(), hoje.getMonth()+1, 0, 23, 59, 59);
 
-  // ── 1. Leads Meta (resultados no Meta Ads do mês) ──
-  const leadsMeta = campsMeta.filter(c=>{
+  // Preenche os inputs se estiverem vazios (padrão = mês atual)
+  if(!deVal){
+    const inp = document.getElementById('fnDe');
+    if(inp) inp.value = `${deD.getFullYear()}-${String(deD.getMonth()+1).padStart(2,'0')}-01`;
+  }
+  if(!ateVal){
+    const inp = document.getElementById('fnAte');
+    if(inp) inp.value = `${ateD.getFullYear()}-${String(ateD.getMonth()+1).padStart(2,'0')}-${String(ateD.getDate()).padStart(2,'0')}`;
+  }
+
+  // Label do período no título
+  const fmtD = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  sid('fnTituloMes', `${fmtD(deD)} → ${fmtD(ateD)}`);
+
+  // ── 1. Leads Meta (resultados no Meta Ads no período) ──
+  const campsPeriodo = campsMeta.filter(c=>{
     if(!c.dataTermino) return false;
-    if(c.dataTermino.getMonth()+1 !== mm || c.dataTermino.getFullYear() !== yy) return false;
+    if(c.dataTermino < deD || c.dataTermino > ateD) return false;
     if(empF && c.emp !== empF) return false;
     return true;
-  }).reduce((s,c)=>s+c.resultados, 0);
-
-  // Gasto Meta para CPL
-  const gastoMeta = campsMeta.filter(c=>{
-    if(!c.dataTermino) return false;
-    if(c.dataTermino.getMonth()+1 !== mm || c.dataTermino.getFullYear() !== yy) return false;
-    if(empF && c.emp !== empF) return false;
-    return true;
-  }).reduce((s,c)=>s+c.valor, 0);
+  });
+  const leadsMeta = campsPeriodo.reduce((s,c)=>s+c.resultados, 0);
+  const gastoMeta = campsPeriodo.reduce((s,c)=>s+c.valor, 0);
 
   // ── 2. Leads CRM — online, entrada no mês ──
   const SIT_ATEND  = ['Em Atendimento','Visita Agendada','Visita Realizada','Simulação','Análise de Crédito (Pré-Cadastro)','Visita Cancelada','Aguardando Corretor'];
@@ -4544,7 +4560,7 @@ function renderFunil(){
   const matchMes = l => {
     const dt = l.dataCadastro || l.dataUltima;
     if(!dt) return false;
-    return dt.getMonth()+1 === mm && dt.getFullYear() === yy;
+    return dt >= deD && dt <= ateD;
   };
 
   const baseCRM = leadsCV.filter(l =>
@@ -4612,10 +4628,7 @@ function renderFunil(){
   const empMap = {};
 
   // Agrupa campsMeta por emp
-  campsMeta.filter(c=>{
-    if(!c.dataTermino) return false;
-    return c.dataTermino.getMonth()+1===mm && c.dataTermino.getFullYear()===yy && (!empF||c.emp===empF);
-  }).forEach(c=>{
+  campsPeriodo.forEach(c=>{
     const e = c.emp || 'Outros';
     if(!empMap[e]) empMap[e]={meta:0,gasto:0,crm:0,atend:0,reserva:0,venda:0};
     empMap[e].meta  += c.resultados;
@@ -4648,7 +4661,7 @@ function renderFunil(){
   }).join('') || `<tr><td colspan="8" style="padding:16px;color:var(--mu);text-align:center">Sem dados para o período selecionado</td></tr>`;
 
   document.getElementById('fnTblCount').textContent = rows.length + ' empreendimento' + (rows.length!==1?'s':'');
-  sid('fnSubtitle', `${ns[mm]} ${yy}${origemF ? ' · '+origemF : ''}${empF ? ' · '+empF : ''}`);
+  sid('fnSubtitle', `${origemF ? origemF+' · ' : ''}${empF ? empF : ''}`);
 }
 
 // ═══════════════════════════════════════════════════════

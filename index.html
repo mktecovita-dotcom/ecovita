@@ -4557,6 +4557,19 @@ function renderFunil(){
   const SIT_RESERVA= ['Com Reserva'];
   const SIT_VENDA  = ['Venda Realizada'];
 
+  // Vendas do período pela Planilha 1 (qtdVendas por mês/empreendimento)
+  const mesInRange = mes => {
+    const [mm, yy] = mes.split('/').map(Number);
+    const dMes = new Date(yy, mm-1, 1);
+    const fMes = new Date(yy, mm, 0, 23, 59, 59);
+    return dMes <= ateD && fMes >= deD;
+  };
+  const roasPeriodo = dadosRoas.filter(r => mesInRange(r.mes) && (!empF || r.emp === empF));
+  const vendidoRoas = roasPeriodo.reduce((s,r) => s + r.qtdVendas, 0);
+  // Vendas por empreendimento (Planilha 1)
+  const vendasPorEmp = {};
+  roasPeriodo.forEach(r => { vendasPorEmp[r.emp] = (vendasPorEmp[r.emp]||0) + r.qtdVendas; });
+
   const matchOrigem = l => {
     if(!origemF) return true;
     return (l.primeiraOrigem||'').toLowerCase().includes(origemF);
@@ -4598,7 +4611,7 @@ function renderFunil(){
     { lbl:'Leads CRM',       sub:'Primeira origem online · mesmo mês',                            n: totalCRM,              color:'#9b7ff4', icon:'🎯' },
     { lbl:'Em Atendimento',  sub: fPct(atendimento,totalCRM)+' dos leads CRM',                    n: atendimento,           color:'#f5a623', icon:'🤝' },
     { lbl:'Com Reserva',     sub: fPct(reserva,atendimento)+' do atendimento',                    n: reserva,               color:'#26c6da', icon:'📋' },
-    { lbl:'Venda Realizada', sub: fPct(vendido,totalCRM)+' dos leads CRM',                        n: vendido,               color:'#2ecc8e', icon:'🏆' },
+    { lbl:'Venda Realizada', sub: 'Vendas fechadas no período · Planilha ROI',                     n: vendidoRoas,           color:'#2ecc8e', icon:'🏆' },
   ];
 
   const body = document.getElementById('fnFunilBody');
@@ -4608,8 +4621,15 @@ function renderFunil(){
     const pct = s.n === 0 ? 1 : Math.max(2, Math.round(s.n / maxN * 100));
     const prevN = i > 0 ? stages[i-1].n : null;
     const pctPrev = prevN != null && prevN > 0 ? ((s.n/prevN)*100).toFixed(1) : null;
+    const narrow = pct < 30;
+    const txtMain  = narrow ? '#111'              : '#fff';
+    const txtSub   = narrow ? 'rgba(0,0,0,.55)'  : 'rgba(255,255,255,.75)';
+    const txtVal   = narrow ? '#111'              : '#fff';
+    const txtMuted = narrow ? 'rgba(0,0,0,.45)'  : 'rgba(255,255,255,.65)';
+    const badgeBg  = narrow ? 'rgba(0,0,0,.12)'  : 'rgba(0,0,0,.25)';
+    const badgeClr = narrow ? '#111'              : 'rgba(255,255,255,.9)';
     const pctBadge = pctPrev != null
-      ? `<span style="font-size:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:2px 9px;color:rgba(255,255,255,.9);white-space:nowrap">${pctPrev}% da etapa anterior</span>` : '';
+      ? `<span style="font-size:10px;background:${badgeBg};border-radius:10px;padding:2px 9px;color:${badgeClr};white-space:nowrap">${pctPrev}% da etapa anterior</span>` : '';
     const connector = i < stages.length-1
       ? `<div style="width:2px;height:12px;background:var(--bdr);margin:0 auto"></div>` : '';
     return `
@@ -4620,9 +4640,9 @@ function renderFunil(){
         <div style="display:flex;align-items:center;gap:12px">
           <span style="font-size:22px">${s.icon}</span>
           <div>
-            <div style="font-size:10px;color:rgba(255,255,255,.75);font-weight:700;text-transform:uppercase;letter-spacing:.8px">${s.lbl}</div>
-            <div style="font-size:30px;font-weight:900;color:#fff;line-height:1">${fN(s.n)}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.65)">${s.sub}</div>
+            <div style="font-size:10px;color:${txtSub};font-weight:700;text-transform:uppercase;letter-spacing:.8px">${s.lbl}</div>
+            <div style="font-size:30px;font-weight:900;color:${txtVal};line-height:1">${fN(s.n)}</div>
+            <div style="font-size:10px;color:${txtMuted}">${s.sub}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">${pctBadge}</div>
@@ -4648,6 +4668,11 @@ function renderFunil(){
     if([...SIT_ATEND,...SIT_RESERVA,...SIT_VENDA].includes(l.situacao)) empMap[e].atend++;
     if([...SIT_RESERVA,...SIT_VENDA].includes(l.situacao)) empMap[e].reserva++;
     if(SIT_VENDA.includes(l.situacao)) empMap[e].venda++;
+  });
+  // Sobrepõe vendas da Planilha 1 (mais preciso)
+  Object.entries(vendasPorEmp).forEach(([e, v]) => {
+    if(!empMap[e]) empMap[e]={meta:0,gasto:0,crm:0,atend:0,reserva:0,venda:0};
+    empMap[e].venda = v;
   });
 
   const rows = Object.entries(empMap).sort((a,b)=>b[1].crm-a[1].crm);

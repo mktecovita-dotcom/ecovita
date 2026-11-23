@@ -869,7 +869,31 @@ body.tv-mode #tvExitBtn{display:block}
         </div>
       </div>
 
-      <!-- KPIs -->
+      <!-- KPIs Totais do Mês -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px">
+        <div class="kpi green" style="border-top:3px solid var(--green)">
+          <div class="kpi-label">🏆 Vendas Totais do Mês</div>
+          <div class="kpi-val" id="fnVT">—</div>
+          <div class="kpi-sub" id="fnVTs">Todas as vendas · Planilha ROI</div>
+        </div>
+        <div class="kpi" style="border-top:3px solid var(--amber)">
+          <div class="kpi-label">💰 Investimento Meta</div>
+          <div class="kpi-val" id="fnGastoT" style="color:var(--amber)">—</div>
+          <div class="kpi-sub" id="fnGastoTs">Gasto no período</div>
+        </div>
+        <div class="kpi blue">
+          <div class="kpi-label">📊 CPV (Custo por Venda)</div>
+          <div class="kpi-val" id="fnCPV">—</div>
+          <div class="kpi-sub" id="fnCPVs">Investimento ÷ Vendas totais</div>
+        </div>
+      </div>
+
+      <!-- Separador -->
+      <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:14px 0 10px;padding-left:4px">
+        🔽 Coorte do mês — leads que entraram e avançaram no mesmo período
+      </div>
+
+      <!-- KPIs Funil de Coorte -->
       <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:18px">
         <div class="kpi blue">
           <div class="kpi-label">Leads Meta</div>
@@ -892,7 +916,7 @@ body.tv-mode #tvExitBtn{display:block}
           <div class="kpi-sub" id="fnK4s">—</div>
         </div>
         <div class="kpi green">
-          <div class="kpi-label">Venda Realizada</div>
+          <div class="kpi-label">Venda (mesmo mês)</div>
           <div class="kpi-val" id="fnK5">—</div>
           <div class="kpi-sub" id="fnK5s">—</div>
         </div>
@@ -4592,7 +4616,16 @@ function renderFunil(){
   const fPct = (n,d) => d>0 ? ((n/d)*100).toFixed(1)+'%' : '—';
   const cpl  = leadsMeta > 0 ? gastoMeta/leadsMeta : 0;
 
-  // KPIs
+  // KPIs Totais do Mês (Planilha 1)
+  const cpv = vendidoRoas > 0 ? gastoMeta / vendidoRoas : 0;
+  sid('fnVT',     fN(vendidoRoas));
+  sid('fnVTs',    roasPeriodo.length > 0 ? roasPeriodo.map(r=>r.emp).filter((v,i,a)=>a.indexOf(v)===i).slice(0,3).join(', ')+(roasPeriodo.length>3?'…':'') : 'Todas as vendas · Planilha ROI');
+  sid('fnGastoT', fBRL(gastoMeta, true));
+  sid('fnGastoTs','Gasto no período');
+  sid('fnCPV',    cpv > 0 ? fBRL(cpv, true) : '—');
+  sid('fnCPVs',   'Investimento ÷ Vendas totais');
+
+  // KPIs Funil Coorte
   sid('fnK1', fN(Math.round(leadsMeta)));
   sid('fnK1s', cpl > 0 ? 'CPL: '+fBRL(cpl,true) : 'Resultados no Meta Ads');
   sid('fnK2', fN(totalCRM));
@@ -4611,7 +4644,7 @@ function renderFunil(){
     { lbl:'Leads CRM',       sub:'Primeira origem online · mesmo mês',                            n: totalCRM,              color:'#9b7ff4', icon:'🎯' },
     { lbl:'Em Atendimento',  sub: fPct(atendimento,totalCRM)+' dos leads CRM',                    n: atendimento,           color:'#f5a623', icon:'🤝' },
     { lbl:'Com Reserva',     sub: fPct(reserva,atendimento)+' do atendimento',                    n: reserva,               color:'#26c6da', icon:'📋' },
-    { lbl:'Venda Realizada', sub: 'Vendas fechadas no período · Planilha ROI',                     n: vendidoRoas,           color:'#2ecc8e', icon:'🏆' },
+    { lbl:'Venda (mesmo mês)', sub: fPct(vendido,totalCRM)+' dos leads CRM · coorte',               n: vendido,               color:'#2ecc8e', icon:'🏆' },
   ];
 
   const body = document.getElementById('fnFunilBody');
